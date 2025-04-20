@@ -11,7 +11,6 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
 
     new Hook(["sqlite3"], function (exports: any) {
       if (!exports || !exports.Database) {
-        console.warn("[Patch sqlite3] Could not locate Database class to patch.");
         return exports;
       }
 
@@ -77,11 +76,8 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
         }
       });
 
-      console.log("[Patch sqlite3] All Database methods patched.");
       return exports;
     });
-  } else {
-    console.log("[node-observer] SQLite3 already patched, skipping");
   }
 
   function logQuery(

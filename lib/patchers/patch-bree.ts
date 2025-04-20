@@ -169,7 +169,6 @@ if (!(global as any)[BREE_PATCHED_SYMBOL]) {
         }
       };
     });
-    console.log(`[Patch bree] Patched method: ${method}`);
   });
   
   // Helper function to patch methods on individual job objects
@@ -383,12 +382,8 @@ if (!(global as any)[BREE_PATCHED_SYMBOL]) {
       
       return result;
     };
-    console.log(`[Patch bree] Patched init method`);
   }
-  console.log("[node-observer] bree successfully patched");
   return exports;
   });
-  } else {
-    console.log("[node-observer] bree already patched, skipping");
   }
 }

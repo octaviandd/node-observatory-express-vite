@@ -108,7 +108,5 @@ if (process.env.NODE_OBSERVATORY_ERRORS) {
     uncaughtPatcher();
     unhandledRejectionPatcher();
 
-  } else {
-    console.log("[node-observer] Exceptions already patched, skipping");
   }
 }

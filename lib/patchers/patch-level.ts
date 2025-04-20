@@ -20,7 +20,6 @@ if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATOR
     new Hook(["level"], function (exports: any, name, basedir) {
       // The level package exports a function that creates a database instance
       if (!exports.Level || typeof exports.Level !== "function") {
-        console.warn("[Patch level] Could not locate Level function to patch.");
         return exports;
       }
 
@@ -194,20 +193,13 @@ if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATOR
                   }
                 };
               });
-              console.log(`[Patch level] ${method} method patched`);
             }
           });
 
           return db;
         };
       });
-
-      console.log("[Patch level] Database methods patched.");
-
-      // Return the patched level module
       return exports;
     });
-  } else {
-    console.log("[node-observer] Level already patched, skipping");
   }
 }

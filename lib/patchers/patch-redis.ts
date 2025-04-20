@@ -21,16 +21,10 @@ if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATOR
             return client;
           };
         });
-        console.log("[Patch redis] createClient patched.");
-      } else {
-        console.warn("[Patch redis] Could not patch createClient (not found).");
       }
 
-      console.log("[node-observer] Redis successfully patched");
       return exports;
     });
-  } else {
-    console.log("[node-observer] Redis already patched, skipping");
   }
 
   /**
@@ -134,7 +128,6 @@ if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATOR
             };
           }
         );
-        console.log(`[Patch redis] Patched method: ${command}`);
       }
     });
   }

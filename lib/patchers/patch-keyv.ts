@@ -61,7 +61,6 @@ const patchMethod = (prototype: any, method: string) => {
       }
     };
   });
-  console.log(`[Patch keyv] Patched method: ${method}`);
 };
 
 if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATORY_CACHE).includes("keyv")) {
@@ -72,17 +71,13 @@ if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATOR
 
     new Hook(["keyv"], (exports: any) => {
       if (!exports.Keyv || typeof exports.Keyv !== "function") {
-        console.warn("[Patch keyv] Could not locate Keyv class to patch.");
         return exports;
       }
 
       ["set", "get", "delete", "has"].forEach((method) =>
         patchMethod(exports.Keyv.prototype, method)
       );
-      console.log("[Patch keyv] Database methods patched.");
       return exports;
     });
-  } else {
-    console.log("[node-observer] Keyv already patched, skipping");
   }
 }

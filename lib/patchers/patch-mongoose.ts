@@ -20,7 +20,6 @@ if (process.env.NODE_OBSERVATORY_MODELS && JSON.parse(process.env.NODE_OBSERVATO
     new Hook(["mongoose"], function (exports: any, name, basedir) {
       // `exports` is the Mongoose module.
       if (!exports || typeof exports.Model !== "function") {
-        console.warn("[Patch Mongoose] Could not locate Model class to patch.");
         return exports;
       }
 
@@ -91,12 +90,8 @@ if (process.env.NODE_OBSERVATORY_MODELS && JSON.parse(process.env.NODE_OBSERVATO
           });
         }
       });
-
-      console.log("[Patch Mongoose] All model methods patched.");
       return exports;
     });
-  } else {
-    console.log("[node-observer] Mongoose already patched, skipping");
   }
 
   /**

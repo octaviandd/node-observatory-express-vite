@@ -24,9 +24,6 @@ if (!(global as any)[IOREDIS_PATCHED_SYMBOL]) {
     // We want to patch the prototype of that class to intercept commands (e.g., get, set, etc.).
 
     if (!exports || !(exports as any).prototype) {
-      console.warn(
-        "[Patch ioredis] Could not locate exports.prototype to patch."
-      );
       return exports;
     }
 
@@ -109,15 +106,9 @@ if (!(global as any)[IOREDIS_PATCHED_SYMBOL]) {
             }
           };
         });
-        console.log(`[Patch ioredis] Patched method: ${command}`);
       }
     });
-
-     console.log("[node-observer] ioredis successfully patched");
     return exports;
   });
-
-  } else {
-    console.log("[node-observer] ioredis already patched, skipping");
   }
 }

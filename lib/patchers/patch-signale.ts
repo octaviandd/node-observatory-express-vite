@@ -14,7 +14,6 @@ if (process.env.NODE_OBSERVATORY_LOGGING && JSON.parse(process.env.NODE_OBSERVAT
     new Hook(["signale"], function (exports: any, name, basedir) {
 
       if (!exports || typeof exports !== "object") {
-        console.warn("[Patch signale] Could not locate Signale class to patch.");
         return exports;
       }
 
@@ -37,10 +36,7 @@ if (process.env.NODE_OBSERVATORY_LOGGING && JSON.parse(process.env.NODE_OBSERVAT
         };
       });
 
-      console.log("[Patch signale] Methods patched.");
       return exports;
     });
-  } else {
-    console.log("[node-observer] Signale already patched, skipping");
   }
 }

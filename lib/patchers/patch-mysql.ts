@@ -33,7 +33,6 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
           };
         }
       );
-      console.log("[Patch mysql] createConnection patched.");
 
       // 2) Patch createPool
       shimmer.wrap(exports as any, "createPool", function (originalCreatePool) {
@@ -43,11 +42,8 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
           return pool;
         };
       });
-      console.log("[Patch mysql] createPool patched.");
       return exports;
     });
-  } else {
-    console.log("[node-observer] MySQL already patched, skipping");
   }
 
   /**
@@ -98,7 +94,6 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
         return originalQuery.call(this, sqlOrOptions, values, callback);
       };
     });
-    console.log(`[Patch mysql] ${contextName}.query patched.`);
   }
 
   /**
@@ -140,7 +135,6 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
         return originalQuery.call(this, sqlOrOptions, values, callback);
       };
     });
-    console.log(`[Patch mysql] ${contextName}.query patched.`);
   }
 
   /**

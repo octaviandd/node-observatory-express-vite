@@ -31,12 +31,6 @@ if (!(global as any)[LOG4JS_PATCHED_SYMBOL]) {
             if (typeof loggerInstance[method] === "function") {
               shimmer.wrap(loggerInstance, method, function (originalMethod) {
                 return function patchedMethod(this: any, ...args: any[]) {
-                  // Instrument or log the calls as you wish
-                  console.log(
-                    `[Patch] Log4js ${method.toUpperCase()} called with args:`,
-                    args
-                  );
-
                   const callerInfo = getCallerInfo(__filename);
 
                   watchers.logging.addContent({
@@ -56,12 +50,8 @@ if (!(global as any)[LOG4JS_PATCHED_SYMBOL]) {
         return loggerInstance;
       };
     });
-
-    console.log("[node-observer] Log4js successfully patched");
     return exports;
   });
-} else {
-    console.log("[node-observer] Log4js already patched, skipping");
-  }
+}
 }
 

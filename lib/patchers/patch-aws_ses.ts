@@ -19,7 +19,6 @@ if (!(global as any)[AWS_SES_PATCHED_SYMBOL]) {
    */
   new Hook(["@aws-sdk/client-ses"], function (exports: any, name, basedir) {
     if (!exports || typeof exports.SESClient !== "function") {
-      console.warn("[Patch SESClient] Could not locate SESClient class to patch.");
       return exports;
     }
 
@@ -30,7 +29,6 @@ if (!(global as any)[AWS_SES_PATCHED_SYMBOL]) {
     if (originalPrototype && typeof originalPrototype.send === "function") {
       shimmer.wrap(originalPrototype, "send", function (originalSend) {
         return async function patchedSend(this: any, command: any, ...sendArgs: any[]) {
-          console.log("Sending email with AWS SES");
           const startTime = performance.now();
           const callerInfo = getCallerInfo(__filename);
 
@@ -86,7 +84,6 @@ if (!(global as any)[AWS_SES_PATCHED_SYMBOL]) {
       });
     }
 
-    console.log("[Patch SESClient] Send method patched successfully.");
     return exports;
   });
 
@@ -96,7 +93,6 @@ if (!(global as any)[AWS_SES_PATCHED_SYMBOL]) {
   new Hook(["@aws-sdk"], function (exports: any, name, basedir) {
     // Handle case where user imports from @aws-sdk directly
     if (!exports) {
-      console.warn("[Patch AWS SDK] Could not locate AWS SDK to patch.");
       return exports;
     }
 
@@ -116,7 +112,6 @@ if (!(global as any)[AWS_SES_PATCHED_SYMBOL]) {
           if (typeof originalPrototype.send === "function") {
             shimmer.wrap(originalPrototype, "send", function (originalSend) {
               return async function patchedSend(this: any, command: any, ...sendArgs: any[]) {
-                console.log("Sending email with AWS SES (from main SDK)");
                 const startTime = performance.now();
                 const callerInfo = getCallerInfo(__filename);
 
@@ -171,7 +166,6 @@ if (!(global as any)[AWS_SES_PATCHED_SYMBOL]) {
               };
             });
             
-            console.log("[Patch AWS SDK] SES send method patched successfully.");
           }
         }
         
@@ -179,10 +173,7 @@ if (!(global as any)[AWS_SES_PATCHED_SYMBOL]) {
       }
     });
 
-    console.log("[Patch AWS SDK] AWS SDK patched for SES functionality.");
     return exports;
   });
-  } else {
-    console.log("[node-observer] AWS SES already patched, skipping");
   }
 }

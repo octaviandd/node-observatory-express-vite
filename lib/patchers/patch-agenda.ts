@@ -206,15 +206,8 @@ if (process.env.NODE_OBSERVATORY_JOBS && JSON.parse(process.env.NODE_OBSERVATORY
             };
           });
         }
-      } else {
-        console.warn("[Patch Agenda] exports.prototype not found.");
       }
-
-      // Return the patched module
-      console.log("[node-observer] Agenda successfully patched");
       return exports;
     });
-  } else {
-    console.log("[node-observer] Agenda already patched, skipping");
   }
 }

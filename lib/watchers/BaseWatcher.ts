@@ -3,7 +3,6 @@ import { StoreDriver } from "../../types";
 import Watcher, { WatcherEntry, WatcherFilters } from "./Watcher";
 import { v4 as uuidv4 } from "uuid";
 import { requestLocalStorage, jobLocalStorage, scheduleLocalStorage } from './../patchers/store';
-import { Connection } from "mysql2";
 import { Connection as PromiseConnection } from "mysql2/promise";
 
 export abstract class BaseWatcher implements Watcher {
@@ -142,7 +141,6 @@ export abstract class BaseWatcher implements Watcher {
       this.migrateToDatabase();
       return res.status(200).json({ message: "Data refreshed" });
     } catch (error) {
-      console.error(error);
       return res.status(500).json({ error });
     }
   }
@@ -150,7 +148,6 @@ export abstract class BaseWatcher implements Watcher {
   protected async migrateToDatabase() {
     this.refreshInterval = setInterval(async () => {
        if (this.isMigrating) {
-        console.error(`Migration already in progress for ${this.type}, skipping`);
         return;
        }
 
@@ -160,8 +157,6 @@ export abstract class BaseWatcher implements Watcher {
       const allKeys = [];
       const pattern = `observatory_entries:${this.type}:*`;
       const scanCount = 500;
-
-      console.log(`Starting Redis SCAN for pattern: ${pattern}`); // Add logging
 
       try {
         do {
@@ -177,11 +172,9 @@ export abstract class BaseWatcher implements Watcher {
             allKeys.push(...keysInBatch);
           }
         } while (cursor !== '0');
-          console.log(`SCAN complete for ${this.type}. Found ${allKeys.length} keys.`); // Add logging
           
           if (!allKeys || !allKeys.length) {
             this.isMigrating = false;
-            console.log(`No keys found for ${this.type}. Skipping migration.`); // Add logging
             return;
           }
 
@@ -228,7 +221,6 @@ export abstract class BaseWatcher implements Watcher {
         });
 
         if (parsedValues.length > 0) {
-          console.log(`Attempting to insert ${parsedValues.length} entries into DB for ${this.type}`);
           try {
             switch (this.storeDriver) {
               case "mysql2":
@@ -263,7 +255,6 @@ export abstract class BaseWatcher implements Watcher {
         console.error("Error in Redis watcher", scanError);
       } finally {
         this.isMigrating = false;
-        console.log(`Migration cycle finished for ${this.type}.`);
       }
     }, this.refreshIntervalDuration);
   }

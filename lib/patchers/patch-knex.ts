@@ -27,9 +27,6 @@ if ((process.env.NODE_OBSERVATORY_QUERIES && JSON.parse(process.env.NODE_OBSERVA
         !(exports as any).Client ||
         !(exports as any).Client.prototype
       ) {
-        console.warn(
-          "[Patch knex] Could not find Client prototype. Patch may not work."
-        );
         return exports;
       }
 
@@ -92,7 +89,6 @@ if ((process.env.NODE_OBSERVATORY_QUERIES && JSON.parse(process.env.NODE_OBSERVA
             };
           }
         );
-        console.log("[Patch knex] Client.prototype._query patched successfully.");
       } else if (typeof (exports as any).Client.prototype.query === "function") {
         // If `_query` doesn't exist, try patching `.query()` instead
         shimmer.wrap(
@@ -118,15 +114,10 @@ if ((process.env.NODE_OBSERVATORY_QUERIES && JSON.parse(process.env.NODE_OBSERVA
             };
           }
         );
-        console.log("[Patch knex] Client.prototype.query patched successfully.");
-      } else {
-        console.warn("[Patch knex] No suitable query method found to patch.");
       }
 
       // Return the patched Knex module
       return exports;
     });
-  } else {
-    console.log("[node-observer] Knex already patched, skipping");
   }
 }

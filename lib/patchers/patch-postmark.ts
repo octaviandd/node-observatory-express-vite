@@ -17,9 +17,6 @@ if (process.env.NODE_OBSERVATORY_MAILER && JSON.parse(process.env.NODE_OBSERVATO
     new Hook(["postmark"], function (exports: any, name, basedir) {
       // `exports` is the object returned by require("postmark").
       if (!exports || typeof exports.ServerClient !== "function") {
-        console.warn(
-          "[Patch postmark] Could not locate ServerClient class to patch."
-        );
         return exports;
       }
 
@@ -143,10 +140,7 @@ if (process.env.NODE_OBSERVATORY_MAILER && JSON.parse(process.env.NODE_OBSERVATO
         };
       });
 
-      console.log("[Patch postmark] Client and send methods patched.");
       return exports;
     });
-  } else {
-    console.log("[node-observer] Postmark already patched, skipping");
   }
 }

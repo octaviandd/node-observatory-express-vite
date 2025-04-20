@@ -14,7 +14,6 @@ if (process.env.NODE_OBSERVATORY_LOGGING && JSON.parse(process.env.NODE_OBSERVAT
    
     new Hook(["roarr"], function (exports: any, name, basedir) {
       if (!exports || typeof exports !== "object") {
-        console.warn("[Patch roarr] Could not locate roarr to patch.");
         return exports;
       }
 
@@ -40,8 +39,6 @@ if (process.env.NODE_OBSERVATORY_LOGGING && JSON.parse(process.env.NODE_OBSERVAT
             return originalMethod.apply(this, args);
           };
         });
-
-        console.log(`[Patch roarr] ${method.toUpperCase()} method patched.`);
       });
 
       // The direct logging via roarr('hit') is not working
@@ -73,11 +70,7 @@ if (process.env.NODE_OBSERVATORY_LOGGING && JSON.parse(process.env.NODE_OBSERVAT
         };
       });
 
-      console.log("[Patch roarr] Methods patched.");
       return exports;
     });
-
-  } else {
-    console.log("[node-observer] Roarr already patched, skipping");
   }
 }

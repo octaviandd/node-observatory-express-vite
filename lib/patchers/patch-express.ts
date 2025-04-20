@@ -25,16 +25,12 @@ const MAX_PAYLOAD_SIZE = 1024 * 50; // 50KB
 if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
     (global as any)[EXPRESS_PATCHED_SYMBOL] = true;
 
-    console.log("[node-observer] Attempting to patch Express...");
-
     new Hook(["express"], function (exports: any, name, basedir) {
         // Pre-checks for essential Express exports
         if (!exports?.application?.handle) {
-            console.error("[node-observer] Express 'application.handle' not found. Patching failed.");
             return exports;
         }
         if (!exports?.response) {
-            console.error("[node-observer] Express 'response' (prototype) not found. Cannot patch response methods.");
             return exports;
         }
 
@@ -208,8 +204,6 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
                             // Send to your logging system
                             if (watchers?.requests) {
                                 watchers.requests.addContent(logContent);
-                            } else {
-                                console.warn("[node-observer] 'watchers.requests' not available for logging.");
                             }
                         }
 
@@ -252,8 +246,6 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
 
                              if (watchers?.requests) {
                                 watchers.requests.addContent(errorLogContent);
-                             } else {
-                                 console.warn("[node-observer] 'watchers.requests' not available for error logging.");
                              }
                         }
                         // Crucially, let Express handle the error flow
@@ -308,8 +300,6 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
                                     // Note: Cache hit/miss status usually requires patching the view engine itself
                                 }
                              });
-                        } else if (logViewEnabled) {
-                             console.warn("[node-observer] 'watchers.view' not available for logging view:", viewName);
                         }
 
                         // Execute original callback or proceed with response flow
@@ -329,8 +319,6 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
                     return originalRender.call(this, view, actualOptions, wrappedCallback);
                 };
             });
-        } else {
-            console.warn("[node-observer] Express 'response.render' not found. Skipping view patch.");
         }
         // --- Patch 3: Response Sending (On Prototype) ---
         // Patches response.send to capture size if res.write wasn't used first
@@ -360,15 +348,7 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
                     return originalSend.call(this, body);
                 };
             });
-        } else {
-            console.warn("[node-observer] Express 'response.send' not found. Skipping patch.");
         }
-
-
-        console.log("[node-observer] Express instrumentation applied successfully.");
         return exports; // IMPORTANT: Return exports to allow Express to load normally
     });
-
-} else {
-    console.log("[node-observer] Express already patched, skipping.");
 }

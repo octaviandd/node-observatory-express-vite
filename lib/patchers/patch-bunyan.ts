@@ -40,7 +40,6 @@ if (!(global as any)[BUNYAN_PATCHED_SYMBOL]) {
             };
           });
         }
-        console.log(`[bunyan] patched method: ${method}`);
       });
 
       // Patch child method for nested loggers
@@ -69,11 +68,8 @@ if (!(global as any)[BUNYAN_PATCHED_SYMBOL]) {
       };
     });
 
-    console.log("[node-observer] Bunyan successfully patched");
     return exports;
   });
-  } else {
-    console.log("[node-observer] Bunyan already patched, skipping");
   }
 }
 

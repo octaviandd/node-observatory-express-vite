@@ -16,7 +16,6 @@ if (process.env.NODE_OBSERVATORY_HTTP && JSON.parse(process.env.NODE_OBSERVATORY
 
     new Hook(["undici"], function (exports: any, name, basedir) {
       if (!exports || typeof exports.request !== "function") {
-        console.warn("[Patch undici] Could not locate request function to patch.");
         return exports;
       }
 
@@ -310,7 +309,6 @@ if (process.env.NODE_OBSERVATORY_HTTP && JSON.parse(process.env.NODE_OBSERVATORY
                         // Call the original method
                         return originalMethod.apply(target);
                       } catch (error) {
-                        console.error('[Patch undici] Error in fetch body method:', error);
                         return originalMethod.apply(target);
                       }
                     };
@@ -341,16 +339,9 @@ if (process.env.NODE_OBSERVATORY_HTTP && JSON.parse(process.env.NODE_OBSERVATORY
             }
           };
         });
-
-        console.log("[Patch undici] Fetch API patched.");
-      } else {
-        console.log("[Patch undici] Fetch API not found, skipping patch.");
       }
 
-      console.log("[Patch undici] Request handling patched.");
       return exports;
     });
-  } else {
-    console.log("[node-observer] Undici already patched, skipping");
   }
 }

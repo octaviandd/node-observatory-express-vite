@@ -168,7 +168,6 @@ function patchHttpMethod(module: typeof http | typeof https, methodName: 'reques
           request = original.apply(this, (args as any));
         } catch (error: any) {
           // Handle synchronous errors (like invalid URL format)
-          console.error('Error creating request:', error);
           loggingObject.error = {
             name: error.name,
             message: error.message,

@@ -124,7 +124,6 @@ if (process.env.NODE_OBSERVATORY_SCHEDULER && JSON.parse(process.env.NODE_OBSERV
               );
             }
           
-            console.log("[Patch node-cron] schedule method patched.");
             return scheduledTask;
           };
         }
@@ -151,14 +150,10 @@ if (process.env.NODE_OBSERVATORY_SCHEDULER && JSON.parse(process.env.NODE_OBSERV
               return originalFn.apply(this, args);
             };
           });
-          console.log(`[Patch node-cron] '${method}' method patched.`);
         }
       });
 
-      console.log("[node-observer] Node-cron successfully patched");
       return exports;
     });
-  } else {
-    console.log("[node-observer] Node-cron already patched, skipping");
   }
 }

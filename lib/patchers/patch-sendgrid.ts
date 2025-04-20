@@ -65,7 +65,6 @@ if (process.env.NODE_OBSERVATORY_MAILER && JSON.parse(process.env.NODE_OBSERVATO
             }
           };
         });
-        console.log("[Patch @sendgrid/mail] 'send' method patched.");
       }
 
       // 2. Patch the `sendMultiple` function (shortcut for multiple emails)
@@ -126,13 +125,9 @@ if (process.env.NODE_OBSERVATORY_MAILER && JSON.parse(process.env.NODE_OBSERVATO
             }
           };
         });
-        console.log("[Patch @sendgrid/mail] 'sendMultiple' method patched.");
       }
 
-      console.log("[node-observer] SendGrid successfully patched");
       return exports;
     });
-  } else {
-    console.log("[node-observer] SendGrid already patched, skipping");
   }
 }

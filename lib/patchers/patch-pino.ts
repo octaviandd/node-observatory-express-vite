@@ -72,10 +72,7 @@ if (process.env.NODE_OBSERVATORY_LOGGING && JSON.parse(process.env.NODE_OBSERVAT
       // Copy over any properties from the original pino
       Object.assign(patchedPino, originalPino);
 
-      console.log("[node-observer] Pino successfully patched");
       return patchedPino;
     });
-  } else {
-    console.log("[node-observer] Pino already patched, skipping");
   }
 }

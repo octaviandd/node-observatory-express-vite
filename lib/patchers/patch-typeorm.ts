@@ -15,7 +15,6 @@ if (process.env.NODE_OBSERVATORY_MODELS && JSON.parse(process.env.NODE_OBSERVATO
     new Hook(["typeorm"], function (exports: any, name, basedir) {
       // `exports` is the TypeORM module.
       if (!exports || typeof exports.Repository !== "function") {
-        console.warn("[Patch typeorm] Could not locate Repository class to patch.");
         return exports;
       }
 
@@ -105,11 +104,8 @@ if (process.env.NODE_OBSERVATORY_MODELS && JSON.parse(process.env.NODE_OBSERVATO
         };
       });
 
-      console.log("[Patch typeorm] All repository and BaseEntity methods patched.");
       return exports;
     });
-  } else {
-    console.log("[node-observer] TypeORM already patched, skipping");
   }
 
   /**

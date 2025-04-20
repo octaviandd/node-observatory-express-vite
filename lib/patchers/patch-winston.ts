@@ -87,10 +87,7 @@ if (process.env.NODE_OBSERVATORY_LOGGING && JSON.parse(process.env.NODE_OBSERVAT
         );
       }
 
-      console.log("[node-observer] Winston successfully patched");
       return exports;
     });
-  } else {
-    console.log("[node-observer] Winston already patched, skipping");
   }
 }

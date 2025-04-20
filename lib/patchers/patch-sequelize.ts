@@ -13,7 +13,6 @@ if ((process.env.NODE_OBSERVATORY_MODELS && JSON.parse(process.env.NODE_OBSERVAT
 
     new Hook(["sequelize"], function (exports: any, name, basedir) {
       if (!exports || typeof exports !== "function") {
-        console.warn("[Patch Sequelize] Could not locate Sequelize class to patch.");
         return exports;
       }
 
@@ -61,11 +60,8 @@ if ((process.env.NODE_OBSERVATORY_MODELS && JSON.parse(process.env.NODE_OBSERVAT
         });
       });
 
-      console.log("[Patch Sequelize] Query and Model methods patched.");
       return exports;
     });
-  } else {
-    console.log("[node-observer] Sequelize already patched, skipping");
   }
 }
 

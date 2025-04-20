@@ -196,7 +196,6 @@ function patchAxiosInstance(instance: any) {
         return result;
       };
     });
-    console.log("[Patch axios] instance.request method patched.");
   }
 
   // Patch instance.<method> (get, post, put, etc.)
@@ -233,7 +232,6 @@ function patchAxiosInstance(instance: any) {
             return result;
           };
         });
-        console.log(`[Patch axios] instance.${method} method patched.`);
       }
     }
   );
@@ -287,7 +285,6 @@ if (!(global as any)[AXIOS_PATCHED_SYMBOL]) {
           return result;
         };
       });
-      console.log("[Patch axios] axios.request method patched.");
     }
 
     //
@@ -326,7 +323,6 @@ if (!(global as any)[AXIOS_PATCHED_SYMBOL]) {
               return result;
             };
           });
-          console.log(`[Patch axios] axios.${method} method patched.`);
         }
       }
     );
@@ -339,18 +335,14 @@ if (!(global as any)[AXIOS_PATCHED_SYMBOL]) {
         return function patchedCreate(this: any, ...args: any[]) {
           const instance = originalCreate.apply(this, args);
           patchAxiosInstance(instance);
-          console.log("[Patch axios] axios.create method patched.");
           return instance;
         };
       });
     }
 
     // Return the patched module so that subsequent require("axios") calls use it
-    console.log("[node-observer] Axios successfully patched");
     return exports;
   });
 
-  } else {
-    console.log("[node-observer] Axios already patched, skipping");
   }
 }

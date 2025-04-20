@@ -164,7 +164,6 @@ if (process.env.NODE_OBSERVATORY_SCHEDULER && JSON.parse(process.env.NODE_OBSERV
               }
             }
 
-            console.log("[Patch node-schedule] scheduleJob method patched.");
             return job;
           };
         }
@@ -190,14 +189,10 @@ if (process.env.NODE_OBSERVATORY_SCHEDULER && JSON.parse(process.env.NODE_OBSERV
               return originalFn.apply(this, args);
             };
           });
-          console.log(`[Patch node-schedule] '${method}' method patched.`);
         }
       });
 
-      console.log("[node-observer] Node-schedule successfully patched");
       return exports;
     });
-  } else {
-    console.log("[node-observer] Node-schedule already patched, skipping");
   }
 }

@@ -25,7 +25,6 @@ if (process.env.NODE_OBSERVATORY_LOGGING && JSON.parse(process.env.NODE_OBSERVAT
         typeof exports !== "object" ||
         typeof exports.getLogger !== "function"
       ) {
-        console.warn("[Patch loglevel] Could not locate loglevel to patch.");
         return exports;
       }
 
@@ -82,12 +81,7 @@ if (process.env.NODE_OBSERVATORY_LOGGING && JSON.parse(process.env.NODE_OBSERVAT
           return logger;
         };
       });
-
-      console.log("[node-observer] Loglevel successfully patched");
       return exports;
     });
-
-  } else {
-    console.log("[node-observer] Loglevel already patched, skipping");
   }
 }

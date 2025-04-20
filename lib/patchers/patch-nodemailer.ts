@@ -81,10 +81,7 @@ if (process.env.NODE_OBSERVATORY_MAILER && JSON.parse(process.env.NODE_OBSERVATO
         };
       });
 
-      console.log("[node-observer] Nodemailer successfully patched");
       return exports;
     });
-  } else {
-    console.log("[node-observer] Nodemailer already patched, skipping");
   }
 }

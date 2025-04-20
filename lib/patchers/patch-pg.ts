@@ -21,7 +21,6 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
 
     new Hook(["pg"], function (exports: any, name, basedir) {
       if (!exports || typeof exports.Client !== "function") {
-        console.warn("[Patch pg] Could not locate Client class to patch.");
         return exports;
       }
 
@@ -99,11 +98,8 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
         });
       }
 
-      console.log("[Patch pg] All query methods patched.");
       return exports;
     });
-  } else {
-    console.log("[node-observer] PostgreSQL already patched, skipping");
   }
 
   /**

@@ -133,10 +133,7 @@ if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATOR
           });
         }
       });
-      console.log("[node-observer] node-cache successfully patched");
       return exports;
     });
-  } else {
-    console.log("[node-observer] node-cache already patched, skipping");
   }
 }

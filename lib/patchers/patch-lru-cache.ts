@@ -23,15 +23,9 @@ if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATOR
       const LRUCacheClass = (exports as any).LRUCache || exports;
 
       if (!LRUCacheClass || !LRUCacheClass.prototype) {
-        console.warn(
-          "[Patch lru-cache] Could not locate LRUCache.prototype to patch."
-        );
         return exports;
       }
 
-      console.log("[Patch lru-cache] Patching LRUCache methods...");
-
-      // Iterate over the methods defined in constants
       Object.keys(LRUCacheCommandArgsMapping).forEach((method) => {
         if (typeof LRUCacheClass.prototype[method] === "function") {
           shimmer.wrap(LRUCacheClass.prototype, method, function (originalFn) {
@@ -92,14 +86,9 @@ if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATOR
               }
             };
           });
-          console.log(`[Patch lru-cache] Patched method: ${method}`);
         }
       });
-
-      console.log("[node-observer] LRUCache successfully patched");
       return exports;
     });
-  } else {
-    console.log("[node-observer] LRUCache already patched, skipping");
   }
 }

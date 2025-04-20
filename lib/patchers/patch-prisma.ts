@@ -51,7 +51,6 @@ function patchPrismaModels(prisma: any) {
                 line: callerInfo.line,
               })
 
-              console.log(`[Patch] ${modelName}.${method} succeeded after ${duration}ms`);
               return result;
             } catch (error: any) {
               const duration = (performance.now() - start).toFixed(2);
@@ -67,7 +66,6 @@ function patchPrismaModels(prisma: any) {
                 line: callerInfo.line,
               })
 
-              console.error(`[Patch] ${modelName}.${method} failed after ${duration}ms`, error);
               throw error;
             }
           };
@@ -83,7 +81,6 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
 
     new Hook(['@prisma/client'], (exports: any, name, basedir) => {
       if (!exports || !exports.PrismaClient) {
-        console.warn('[Patch Prisma] PrismaClient not found in exports.');
         return exports;
       }
 
@@ -99,10 +96,7 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
       Object.setPrototypeOf(PatchedPrismaClient, OriginalPrismaClient);
 
       exports.PrismaClient = PatchedPrismaClient;
-      console.log('[Patch Prisma] PrismaClient patched.');
       return exports;
     });
-  } else {
-    console.log("[node-observer] Prisma already patched, skipping");
   }
 }

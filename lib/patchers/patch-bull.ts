@@ -176,11 +176,8 @@ if (process.env.NODE_OBSERVATORY_JOBS && JSON.parse(process.env.NODE_OBSERVATORY
         }
       });
 
-      console.log("[node-observer] Bull successfully patched");
       return exports;
     });
-  } else {
-    console.log("[node-observer] Bull already patched, skipping");
   }
 }
 

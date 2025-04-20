@@ -29,7 +29,6 @@ if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATOR
     new Hook(["memjs"], function (exports: any, name, basedir) {
       // `exports` is the MemJS client module.
       if (!exports || typeof exports.Client !== "function") {
-        console.warn("[Patch memjs] Could not locate Client class to patch.");
         return exports;
       }
 
@@ -142,11 +141,7 @@ if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATOR
           });
         }
       });
-
-      console.log("[node-observer] Memjs successfully patched");
       return exports;
     });
-  } else {
-    console.log("[node-observer] Memjs already patched, skipping");
   }
 }

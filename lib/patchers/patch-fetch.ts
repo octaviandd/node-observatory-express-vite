@@ -83,7 +83,6 @@ if (!(global as any)[FETCH_PATCHED_SYMBOL]) {
                   // Call the original method
                   return originalMethod.apply(target);
                 } catch (error) {
-                  console.error('[Patch fetch] Error in fetch body method:', error);
                   return originalMethod.apply(target);
                 }
               };
@@ -113,7 +112,5 @@ if (!(global as any)[FETCH_PATCHED_SYMBOL]) {
       }
     };
   }
-} else {
-    console.log("[node-observer] Fetch API already patched, skipping");
-  }
+}
 }

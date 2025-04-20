@@ -39,7 +39,6 @@ if (process.env.NODE_OBSERVATORY_NOTIFICATIONS && JSON.parse(process.env.NODE_OB
      */
     new Hook(["ably"], function (exports: any, name, basedir) {
       if (!exports || (typeof exports.Realtime !== "function" && typeof exports.Rest !== "function")) {
-        console.warn("[Patch ably] Could not locate Realtime or Rest class to patch.");
         return exports;
       }
 
@@ -95,11 +94,9 @@ if (process.env.NODE_OBSERVATORY_NOTIFICATIONS && JSON.parse(process.env.NODE_OB
         });
       }
 
-      console.log("[Patch ably] Realtime and Rest clients patched.");
       return exports;
     });
   } else {
-    console.log("[node-observer] Ably already patched, skipping");
   }
 }
 
@@ -158,7 +155,6 @@ function patchObject(obj: any, methods: readonly string[], context: any = {}) {
         return wrapMethod(original, method, context);
       });
       obj[`_${method}Patched`] = true;
-      console.log(`[Patch ably] Patched ${context.mode} channel '${context.channel}' method: ${method}`);
     }
   }
 }

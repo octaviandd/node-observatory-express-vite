@@ -148,7 +148,6 @@ if (process.env.NODE_OBSERVATORY_NOTIFICATIONS && JSON.parse(process.env.NODE_OB
               };
             }
           );
-          console.log("[Patch pusher] pusher.prototype.trigger patched");
         }
 
         // Patch pusher.triggerBatch with similar error handling
@@ -300,15 +299,10 @@ if (process.env.NODE_OBSERVATORY_NOTIFICATIONS && JSON.parse(process.env.NODE_OB
               };
             }
           );
-          console.log("[Patch pusher] pusher.prototype.triggerBatch patched");
         }
-      } else {
-        console.warn("[Patch pusher] Could not locate pusher.prototype to patch.");
       }
-      console.log("[node-observer] Pusher successfully patched");
+
       return exports;
     });
-  } else {
-    console.log("[node-observer] Pusher already patched, skipping");
   }
 }

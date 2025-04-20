@@ -16,7 +16,6 @@ if (process.env.NODE_OBSERVATORY_MAILER && JSON.parse(process.env.NODE_OBSERVATO
 
     new Hook(["mailgun.js"], function (exports: any, name, basedir) {
       if (!exports || typeof exports.default !== "function") {
-        console.warn("[Patch mailgun] Could not locate Mailgun class to patch.");
         return exports;
       }
 
@@ -84,11 +83,7 @@ if (process.env.NODE_OBSERVATORY_MAILER && JSON.parse(process.env.NODE_OBSERVATO
           return mailgun;
         };
       });
-
-      console.log("[Patch mailgun] Client and messages methods patched.");
       return exports;
     });
-  } else {
-    console.log("[node-observer] Mailgun already patched, skipping");
   }
 }
