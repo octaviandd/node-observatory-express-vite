@@ -17,13 +17,13 @@ export default function MainLayout() {
   const location = useLocation();
   const isPreviewRoute = /\/(mail|exception|log|notification|job|cache|query|model|request|schedule|http|view)\/[^\/]+$/.test(location.pathname);
 
-  const handleRefresh = () => {
-    fetch(`/api/data/${location.pathname}/refresh`)
-      .then(res => res.json())
-      .then(data => {
-        // console.log(data);
-      });
-  };
+  // const handleRefresh = () => {
+  //   fetch(`/api/data/${location.pathname}/refresh`)
+  //     .then(res => res.json())
+  //     .then(data => {
+  //       console.log(data);
+  //     });
+  // };
 
   return (
     <SidebarProvider>
@@ -33,14 +33,14 @@ export default function MainLayout() {
         {!isPreviewRoute && (
           <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12  pr-10">
             <div className="flex items-center gap-2 ml-auto">
-              <Button
+              {/* <Button
                 variant="ghost"
                 size="icon"
                 onClick={handleRefresh}
                 className="h-9 w-9"
               >
                 <RefreshCcw className="h-4 w-4 text-muted-foreground" />
-              </Button>
+              </Button> */}
               <PeriodSelector />
             </div>
           </header>

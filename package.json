@@ -1,8 +1,8 @@
 {
-  "name": "nodejs-observatory",
+  "name": "node-observatory",
   "version": "1.0.0",
   "license": "proprietary",
-  "private": true,
+  "private": false,
   "description": "A Nodejs application that provides live monitoring of your application",
   "main": "dist/server.js",
   "types": "dist/types.d.ts",
@@ -12,6 +12,10 @@
     "README.md"
   ],
   "scripts": {
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json}\"",
+    "lint": "eslint --fix .",
+    "deps-check": "depcheck",
+    "cleanup": "npm run format && npm run lint && npm run deps-check",
     "prepublishOnly": "npm test && npm run lint",
     "build": "npm run clean && tsc",
     "start": "node dist/server.js",
