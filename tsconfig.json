@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "outDir": "dist", // Compiled files will go to the "dist" directory
+    "strict": true,
+    "strictNullChecks": true,
+    "esModuleInterop": true,
+    "noImplicitAny": true,
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "strictPropertyInitialization": false,
+    "emitDecoratorMetadata": true,
+    "skipLibCheck": true,
+    "paths": {
+      // This is solely to stop a bug with @types/node as of 12/15/2023
+      "undici-types": ["./node_modules/undici-types/index.d.ts"]
+    }
+  },
+  "include": ["**/*.ts"], // Include all .ts files
+  "exclude": ["node_modules", "client", "tests/**/*.test.ts"] // Exclude the client directory and test files
+}

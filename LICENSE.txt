@@ -1,0 +1,3 @@
+Copyright (c) 2024 Nodejs Observatory. All Rights Reserved.
+This software is licensed under the terms of Octavian David. Unauthorized use, redistribution, or modification is prohibited.
+For commercial use, contact octaviandd@yahoo.com.
