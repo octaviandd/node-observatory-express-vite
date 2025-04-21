@@ -86,9 +86,9 @@ export async function setupLogger(
   connection: Connection | PromiseConnection,
   redisClient: ReturnType<typeof createClient>,
 ): Promise<void> {
-  // @ts-expect-error
   connection = connection.hasOwnProperty("Promise")
     ? connection
+  // @ts-expect-error
     : connection.promise();
   await setupMigrations(driver, connection as PromiseConnection);
   const {
