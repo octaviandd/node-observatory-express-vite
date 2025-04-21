@@ -3,8 +3,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { useState, memo } from "react";
+import { CacheInstanceResponse, ExceptionInstanceResponse, HttpClientInstanceResponse, JobInstanceResponse, LogInstanceResponse, MailInstanceResponse, ModelInstanceResponse, NotificationInstanceResponse, QueryInstanceResponse, RequestInstanceResponse, ViewInstanceResponse } from "../../../../../types";
 
-export const RequestPreviewTabs = memo(({ data }: { data: any }) => {
+export const RequestPreviewTabs = memo(({ data }: {
+  data: {
+    request: RequestInstanceResponse
+    notifications: NotificationInstanceResponse[] | [],
+    mails: MailInstanceResponse[] | [],
+    logs: LogInstanceResponse[] | [],
+    queries: QueryInstanceResponse[] | [],
+    https: HttpClientInstanceResponse[] | [],
+    jobs: JobInstanceResponse[] | [],
+    caches: CacheInstanceResponse[] | [],
+    exceptions: ExceptionInstanceResponse[] | [],
+    views: ViewInstanceResponse[] | [],
+    models: ModelInstanceResponse[] | [],
+} }) => {
   const [activeTab, setActiveTab] = useState("raw");
 
   return (

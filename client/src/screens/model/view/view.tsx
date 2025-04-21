@@ -1,6 +1,6 @@
 /** @format */
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -31,7 +31,7 @@ export default function ModelPreview() {
 
   const getItem = async () => {
     try {
-      setData((prev: any) => ({ ...prev, loading: true }));
+      setData((prev) => ({ ...prev, loading: true }));
       const response = await fetch(`/observatory-api/data/models/${params.id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch model data');
@@ -43,10 +43,10 @@ export default function ModelPreview() {
         throw new Error('Model data not found');
       }
 
-      setData((prev: any) => ({ ...prev, model: model[0], loading: false, error: null, source: request ? request[0] : job ? job[0] : schedule ? schedule[0] : null }));
+      setData((prev) => ({ ...prev, model: model[0], loading: false, error: null, source: request ? request[0] : job ? job[0] : schedule ? schedule[0] : null }));
     } catch (error) {
       console.error('Error fetching model data:', error);
-      setData((prev: any) => ({
+      setData((prev) => ({
         ...prev,
         loading: false,
         error: error instanceof Error ? error.message : 'An error occurred'

@@ -252,6 +252,16 @@ declare global {
     }
   }
 }
+
+export interface SidePanelState {
+  requestId?: string;
+  jobId?: string;
+  scheduleId?: string;
+  modelId?: string;
+  isOpen: boolean;
+}
+
+
 export interface ExceptionContent {
   type: "exception";
   message: string;
@@ -273,6 +283,9 @@ export interface ViewContent {
   cacheInfo: {
     cacheEnabled: boolean;
   };
+  data: string,
+  line: string,
+  file: string,
   duration: number;
   size: number;
   status: "completed" | "failed";
@@ -457,6 +470,8 @@ export interface RequestContent {
   requestSize: number;
   session: Record<string, any>;
   package: "express";
+  file: string,
+  line: string
 }
 
 export interface HttpClientContent {
@@ -485,6 +500,9 @@ export interface HttpClientContent {
   statusMessage?: string;
   aborted?: boolean;
   fullUrl?: string;
+  line: string
+  file: string
+  package: string
 }
 
 export interface ClientResponse {
@@ -560,6 +578,8 @@ export interface NotificationInstanceResponse extends ClientResponse {
 
 export interface QueryInstanceResponse extends ClientResponse {
   content: QueryContent;
+  average: number,
+  p95: number
 }
 
 export interface ModelInstanceResponse extends ClientResponse {
@@ -568,6 +588,8 @@ export interface ModelInstanceResponse extends ClientResponse {
 
 export interface HttpClientGroupResponse extends BaseGroupResponse {
   route: string;
+  average: number,
+  p95: number,
   count_200: number;
   count_400: number;
   count_500: number;
@@ -585,6 +607,8 @@ export interface RequestGroupResponse extends BaseGroupResponse {
   count_200: number;
   count_400: number;
   count_500: number;
+  average: number,
+  p95: number
 }
 
 export interface LogGroupResponse extends BaseGroupResponse {
@@ -618,6 +642,8 @@ export interface QueryGroupResponse extends BaseGroupResponse {
   endpoint: string;
   completed: number;
   failed: number;
+  p95: number,
+  average: number
 }
 
 export interface ViewGroupResponse extends BaseGroupResponse {

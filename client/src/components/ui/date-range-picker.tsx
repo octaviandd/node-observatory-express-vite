@@ -1,5 +1,4 @@
-import { useState, useEffect, useContext } from "react"
-import { addDays, format } from "date-fns"
+import { useState, useEffect } from "react"
 import { Calendar as CalendarIcon } from "lucide-react"
 
 import { cn } from "@/utils.js"
@@ -10,7 +9,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { StoreContext } from "@/store"
 
 export function DatePickerWithRange({
   className,
@@ -19,8 +17,7 @@ export function DatePickerWithRange({
   className?: string;
   setPeriod: (period: "1h" | "24h" | "7d" | "14d" | "30d" | "custom", custom?: string) => void;
   }) {
-  const { state, dispatch } = useContext(StoreContext);
-  const [date, setDate] = useState<any>({
+  const [date, setDate] = useState<{from: Date | undefined, to: Date | undefined}>({
     from: undefined,
     to: undefined,
   })
@@ -41,7 +38,6 @@ export function DatePickerWithRange({
             className={cn(
               "justify-start text-left font-normal",
               !date && "text-muted-foreground",
-              state.period === "custom" && "bg-muted"
             )}
           >
             <CalendarIcon />
@@ -49,10 +45,10 @@ export function DatePickerWithRange({
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
-            initialFocus
             mode="range"
             defaultMonth={date?.from}
             selected={date}
+            //@ts-expect-error expecteddd
             onSelect={setDate}
             numberOfMonths={2}
           />

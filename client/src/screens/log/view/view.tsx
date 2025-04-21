@@ -1,6 +1,6 @@
 /** @format */
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { LogCrumbs } from "./crumbs";
 import { LogInstanceResponse, JobInstanceResponse, RequestInstanceResponse, ScheduleInstanceResponse } from "../../../../../types";
@@ -58,16 +58,6 @@ export default function LogView() {
       </Alert>
     );
   }
-
-  const LOG_LEVELS = [
-    { dataKey: "info", variant: "secondary" },
-    { dataKey: "warn", variant: "warning" },
-    { dataKey: "error", variant: "error" },
-    { dataKey: "debug", variant: "debug" },
-    { dataKey: "trace", variant: "trace" },
-    { dataKey: "fatal", variant: "error" },
-    { dataKey: "log", variant: "log" },
-  ] as const;
 
   return (
     <div className="flex flex-col gap-6">

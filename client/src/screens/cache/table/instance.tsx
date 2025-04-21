@@ -14,14 +14,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/utils.js";
 import { CacheInstanceResponse } from "../../../../../types";
+import { memo, ReactNode } from "react";
 
 type Props = {
   data: CacheInstanceResponse[];
-  handleSidePanel: (modelId: string, requestId: string, jobId: string, scheduleId: string) => void;
-  children: React.ReactNode;
+  setSidePanelData: ({ isOpen, modelId, requestId, jobId, scheduleId }: { isOpen: boolean, modelId: string, requestId: string, jobId: string, scheduleId: string}) => void;
+  children: ReactNode;
 };
 
-export default function InstanceTable({ data, handleSidePanel, children }: Props) {
+export const InstanceTable = memo((props: Props) => {
+  const { data, setSidePanelData, children } = props;
+  
   const getStatusVariant = (hits: number, writes: number, misses: number) => {
     if (hits > 0) {
       if (writes > 0) return 'secondary';
@@ -81,7 +84,7 @@ export default function InstanceTable({ data, handleSidePanel, children }: Props
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => handleSidePanel(cache.uuid, cache.request_id ?? '', cache.job_id ?? '', cache.schedule_id ?? '')}
+                    onClick={() => setSidePanelData({ isOpen: true, modelId: cache.uuid ?? '', requestId: cache.request_id ?? '', jobId: cache.job_id ?? '', scheduleId: cache.schedule_id ?? ''})}
                   >
                     <Link2 className="h-4 w-4 text-muted-foreground" />
                   </Button>
@@ -101,4 +104,4 @@ export default function InstanceTable({ data, handleSidePanel, children }: Props
       {children}
     </div>
   );
-}
+});

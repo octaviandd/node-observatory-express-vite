@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { BarChart, Bar, ResponsiveContainer, Tooltip } from "recharts"
 
 type Props = {
-  data: any[]
+  data: object[]
   barData: {
     dataKey: string
     stackId: string
@@ -51,7 +51,6 @@ export const CountGraph = ({ data, barData, period, currentDate }: Props) => {
                             </span>
                           </div>
                         ))}
-                        {/* @ts-ignore */}
                       </div>
                     )
                   }

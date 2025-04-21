@@ -12,17 +12,17 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import React from "react";
+import { memo } from "react";
 import { formatDate, formatDuration } from "@/utils.js";
 import { NotificationInstanceResponse } from "../../../../../types";
 
 type Props = {
   data: NotificationInstanceResponse[];
-  handleSidePanel: (uuid: string, requestId: string, jobId: string, scheduleId: string) => void;
+  setSidePanelData: ({ isOpen, modelId, requestId, jobId, scheduleId }: { isOpen: boolean, modelId: string, requestId: string, jobId: string, scheduleId: string}) => void;
   children: React.ReactNode;
 };
 
-export const InstanceTable = React.memo(({ data, handleSidePanel, children }: Props) => {
+export const InstanceTable = memo(({ data, setSidePanelData, children }: Props) => {
   return (
     <div className="rounded-md border">
       <Table>
@@ -62,7 +62,7 @@ export const InstanceTable = React.memo(({ data, handleSidePanel, children }: Pr
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => handleSidePanel(notification.uuid, notification.request_id ?? '', notification.job_id ?? '', notification.schedule_id ?? '')}
+                    onClick={() => setSidePanelData({ isOpen: true, modelId: notification.uuid ?? '', requestId:notification.request_id ?? '', jobId:notification.job_id ?? '', scheduleId:notification.schedule_id ?? ''})}
                   >
                     <Link2 className="h-4 w-4 text-muted-foreground" />
                   </Button>

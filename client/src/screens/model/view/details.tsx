@@ -1,4 +1,3 @@
-import React from 'react'
 import { ModelInstanceResponse } from '../../../../../types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatDuration, timeAgo } from '@/utils.js'

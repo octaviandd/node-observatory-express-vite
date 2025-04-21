@@ -1,7 +1,7 @@
 /** @format */
 
 import { ExternalLink, FileCode, Link2 } from "lucide-react";
-import React from "react";
+import { memo, ReactNode } from "react";
 import { Link } from "react-router";
 import {
   Table,
@@ -18,11 +18,11 @@ import { ViewInstanceResponse } from "../../../../../types";
 
 type Props = {
   data: ViewInstanceResponse[];
-  children: React.ReactNode;
-  handleSidePanel: (uuid: string, requestId: string, jobId: string, scheduleId: string) => void;
+  children: ReactNode;
+  setSidePanelData: (uuid: string, requestId: string, jobId: string, scheduleId: string) => void;
 };
 
-export const InstanceTable = React.memo(({ data, children, handleSidePanel }: Props) => {
+export const InstanceTable = memo(({ data, children, setSidePanelData }: Props) => {
   return (
     <div className="rounded-md border">
       <Table>
@@ -37,7 +37,7 @@ export const InstanceTable = React.memo(({ data, children, handleSidePanel }: Pr
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((view: any) => (
+          {data.map((view: ViewInstanceResponse) => (
             <TableRow key={view.uuid} className={view.content.status === "failed" ? "bg-red-800/20" : ""}>
               <TableCell className="font-medium text-muted-foreground">
                 {formatDate(view.created_at)}
@@ -66,7 +66,7 @@ export const InstanceTable = React.memo(({ data, children, handleSidePanel }: Pr
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => handleSidePanel(view.uuid, view.request_id ?? '', view.job_id ?? '', view.schedule_id ?? '')}
+                    onClick={() => setSidePanelData(view.uuid, view.request_id ?? '', view.job_id ?? '', view.schedule_id ?? '')}
                   >
                     <Link2 className="h-4 w-4 text-muted-foreground" />
                   </Button>

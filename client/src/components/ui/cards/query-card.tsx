@@ -1,12 +1,9 @@
 /** @format */
 
+import { QueryInstanceResponse } from "../../../../../types"
 import { BaseCard } from "./base-card"
 
-type Props = {
-  item: any
-}
-
-export default function QueryCard({ item }: Props) {
+export default function QueryCard({ item }: {item: QueryInstanceResponse}) {
   return (
     <BaseCard
       date={item.created_at}

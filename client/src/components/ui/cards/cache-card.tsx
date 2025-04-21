@@ -1,12 +1,9 @@
 /** @format */
 
+import { CacheInstanceResponse } from "../../../../../types"
 import { BaseCard } from "./base-card"
 
-type Props = {
-  item: any
-}
-
-export default function CacheCard({ item }: Props) {
+export default function CacheCard({ item }: {item: CacheInstanceResponse}) {
   return (
     <BaseCard
       date={item.created_at}

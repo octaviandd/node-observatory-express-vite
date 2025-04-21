@@ -12,16 +12,16 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import React from "react";
+import {memo, ReactNode} from "react";
 import { formatCount, formatDuration } from "@/utils.js";
 import { HttpClientGroupResponse } from "../../../../../types";
 
 type Props = {
   data: HttpClientGroupResponse[];
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
-export const GroupTable = React.memo(({ data, children }: Props) => {
+export const GroupTable = memo(({ data, children }: Props) => {
   return (
     <div className="rounded-md border">
       <Table>
@@ -34,12 +34,12 @@ export const GroupTable = React.memo(({ data, children }: Props) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((request: any) => (
-            <TableRow key={request.url}>
+          {data.map((request: HttpClientGroupResponse) => (
+            <TableRow key={request.route}>
               <TableCell className="flex items-center gap-2 h-[53px]">
                 <Globe className="h-4 w-4 text-muted-foreground" />
                 <span className="truncate max-w-[400px] text-black dark:text-white">
-                  {request.url}
+                  {request.route}
                 </span>
               </TableCell>
               <TableCell>
@@ -64,11 +64,11 @@ export const GroupTable = React.memo(({ data, children }: Props) => {
               </TableCell>
               <TableCell>
                 <p className={request.average && request.average > 999 ? "text-yellow-600" : "text-black dark:text-white"}>
-                  {formatDuration(parseFloat(request.average))}
+                  {formatDuration(request.average)}
                 </p>
               </TableCell>
               <TableCell>
-                <Link to={`${encodeURIComponent(request.url)}`}>
+                <Link to={`${encodeURIComponent(request.route)}`}>
                   <Button variant="outline" size="icon">
                     <ExternalLink className="h-4 w-4 text-muted-foreground" />
                   </Button>

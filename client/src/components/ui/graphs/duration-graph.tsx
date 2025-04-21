@@ -9,13 +9,13 @@ import {
 } from "recharts"
 
 type Props = {
-  data: any[]
+  data: { avgDuration: number, p95: number, label: string }[]
   period: string
   currentDate: string
 }
 
 export const DurationGraph = ({ data, period, currentDate }: Props) => {
-  const formattedData = data.map((entry: any, index: number) => ({
+  const formattedData = data.map((entry, index: number) => ({
     name: index,
     "Average Duration": entry.avgDuration,
     "95th Percentile": entry.p95,

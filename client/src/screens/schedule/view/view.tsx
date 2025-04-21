@@ -1,9 +1,5 @@
 /** @format */
 
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router";
-import { timeAgo } from "@/utils.js";
-
 export default function SchedulePreview() {
   // const params = useParams();
   // const [job, setJob] = useState<ScheduleResponse | null>(null);

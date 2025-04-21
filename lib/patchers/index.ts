@@ -6,7 +6,7 @@ import "./patch-bunyan";
 import "./patch-pino";
 import "./patch-log4js";
 import "./patch-loglevel";
-import "./patch-roarr";
+// import "./patch-roarr";
 import "./patch-signale";
 
 // JOBS

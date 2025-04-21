@@ -10,18 +10,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import React from "react";
+import { memo, ReactNode } from "react";
 import { Link } from "react-router";
 import { formatDate } from "@/utils.js";
 import { ExceptionInstanceResponse } from "../../../../../types";
 
 type Props = {
   data: ExceptionInstanceResponse[];
-  handleSidePanel: (uuid: string, requestId: string, jobId: string, queryId: string) => void;
-  children: React.ReactNode;
+  setSidePanelData: ({ isOpen, modelId, requestId, jobId, scheduleId }: { isOpen: boolean, modelId: string, requestId: string, jobId: string, scheduleId: string}) => void;
+  children: ReactNode;
 };
 
-export const InstanceTable = React.memo(({ data, handleSidePanel, children }: Props) => {
+export const InstanceTable = memo(({ data, setSidePanelData, children }: Props) => {
   return (
     <div className="rounded-md border">
       <Table>
@@ -49,7 +49,7 @@ export const InstanceTable = React.memo(({ data, handleSidePanel, children }: Pr
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => handleSidePanel(exception.uuid, exception.request_id ?? '', exception.job_id ?? '', exception.schedule_id ?? '')}
+                    onClick={() => setSidePanelData({ isOpen: true, modelId: exception.uuid ?? '', requestId: exception.request_id ?? '', jobId: exception.job_id ?? '', scheduleId: exception.schedule_id ?? ''})}
                   >
                     <LinkIcon className="h-4 w-4 text-muted-foreground" />
                   </Button>

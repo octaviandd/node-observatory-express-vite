@@ -5,7 +5,6 @@ import { ExternalLinkIcon } from 'lucide-react'
 import { Card, CardHeader } from '@/components/ui/card'
 import { CardContent } from '@/components/ui/card'
 import { ChevronRight } from 'lucide-react'
-import React from 'react'
 import { Link } from 'react-router'
 import { JobInstanceResponse, ScheduleInstanceResponse, RequestInstanceResponse, RequestContent } from '../../../../../types'
 

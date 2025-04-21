@@ -1,21 +1,18 @@
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react'
+import{ useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { StoreContext } from "@/store";
 import { useParams } from 'react-router';
 
 type Props = {
   key: string;
-  InstanceTable: any;
-  GroupTable: any;
   defaultInstanceStatusType: string;
-  defaultGroupFilter: string;
 }
 
-export const useIndexTableData = ({key, InstanceTable,GroupTable, defaultInstanceStatusType}: Props) => {
+export const useIndexTableData =<TInstance, TGroup> ({key, defaultInstanceStatusType }: Props) => {
   const { state } = useContext(StoreContext);
   const modelKey = useParams<{ key: string }>().key || "";
 
-  const [instanceData, setInstanceData] = useState<any[]>([]);
-  const [groupData, setGroupData] = useState<any[]>([]);
+  const [instanceData, setInstanceData] = useState<TInstance[]>([]);
+  const [groupData, setGroupData] = useState<TGroup[]>([]);
 
   const [instanceDataCount, setInstanceDataCount] = useState<string>("0");
   const [groupDataCount, setGroupDataCount] = useState<string>("0");
@@ -28,7 +25,7 @@ export const useIndexTableData = ({key, InstanceTable,GroupTable, defaultInstanc
 
   const [inputValue, setInputValue] = useState("");
   const [noMoreItems, setNoMoreItems] = useState(false);
-  const [sidePanelData, setSidePanelData] = useState({
+  const [sidePanelData, setSidePanelData] = useState<{isOpen: boolean, modelId?: string, requestId?: string, scheduleId?: string, jobId?: string}>({
     isOpen: false,
     modelId: "",
     requestId: "",
@@ -44,7 +41,8 @@ export const useIndexTableData = ({key, InstanceTable,GroupTable, defaultInstanc
   }, [modelKey]);
 
   useEffect(() => {
-    index === "instance" ? getDataByInstance() : getDataByGroup();
+    if (index === "instance") getDataByInstance()
+    else getDataByGroup();
   }, [index, state.period, instanceStatusType, inputValue, modelKey]);
 
   const getDataByGroup = async (addedNewItems = false) => {
@@ -53,7 +51,7 @@ export const useIndexTableData = ({key, InstanceTable,GroupTable, defaultInstanc
     const url = `/observatory-api/data/${key}?table=true&offset=${offsetRef.current}&index=${index}&period=${state.period
       }${inputValue ? `&q=${inputValue}` : ""}${instanceStatusType ? `&status=${instanceStatusType.split(",").map((status: string) => status.toLowerCase()).join(",")}` : ""}`;
 
-    fetchData(url, addedNewItems, setGroupData, setGroupDataCount);
+    fetchData<'group'>(url, addedNewItems, setGroupData, setGroupDataCount);
   };
 
   const getDataByInstance = async (addedNewItems = false) => {
@@ -63,27 +61,29 @@ export const useIndexTableData = ({key, InstanceTable,GroupTable, defaultInstanc
       }${inputValue ? `&q=${inputValue}` : ""}${modelKey ? `&key=${modelKey}` : ""
       }&status=${instanceStatusType.toLowerCase()}`;
 
-    fetchData(url, addedNewItems, setInstanceData, setInstanceDataCount);
+    fetchData<'instance'>(url, addedNewItems, setInstanceData, setInstanceDataCount);
   };
 
-   const fetchData = async (
+   const fetchData = async <T extends 'group' | 'instance'> (
     url: string,
     addedNewItems: boolean,
-    setData: Function,
-    setCount: Function
+    setData: React.Dispatch<T extends 'group' ? React.SetStateAction<TGroup[]> : React.SetStateAction<TInstance[]>>,
+    setCount: React.Dispatch<React.SetStateAction<string>>
    ) => {
-     try {
+    try {
       setLoading(true);
       const response = await fetch(url);
       const { results, count } = await response.json();
 
       setNoMoreItems(results.length < 20);
 
+
       setData(
         addedNewItems
-          ? [...(index === "instance" ? instanceData : groupData), ...results]
+          ? [...(index === "instance" ? (instanceData as TInstance[]) : (groupData as TGroup[])), ...results]
           : results
       );
+
       setCount(count);
     } catch (error) {
       console.error(error);
@@ -91,8 +91,9 @@ export const useIndexTableData = ({key, InstanceTable,GroupTable, defaultInstanc
       setLoading(false);
      }
    };
+  
 
-  const Table = index === "instance" ? InstanceTable : GroupTable;
+  
   const loadData =
     index === "instance"
       ? () => getDataByInstance(true)
@@ -112,19 +113,10 @@ export const useIndexTableData = ({key, InstanceTable,GroupTable, defaultInstanc
           : null;
   }, [index, instanceDataCount, groupDataCount, noMoreItems]);
 
-  const handleSidePanel = (modelId = "", requestId = "", jobId = "", scheduleId = "") =>
-    setSidePanelData({
-      isOpen: !sidePanelData.isOpen,
-      modelId: modelId || sidePanelData.modelId,
-      requestId: requestId || sidePanelData.requestId,
-      jobId: jobId || sidePanelData.jobId,
-      scheduleId: scheduleId || sidePanelData.scheduleId,
-    });
-
   return (
     {
-      instanceData,
-      groupData,
+      instanceData: instanceData as TInstance[],
+      groupData: groupData as TGroup[],
       instanceDataCount,
       groupDataCount,
       index,
@@ -132,13 +124,11 @@ export const useIndexTableData = ({key, InstanceTable,GroupTable, defaultInstanc
       inputValue,
       sidePanelData,
       message,
-      Table,
       modelKey,
       loading,
       offsetRef,
       setInputValue,
       loadData,
-      handleSidePanel,
       setSidePanelData,
       setInstanceStatusType,
       setIndex,

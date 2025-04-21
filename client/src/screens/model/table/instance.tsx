@@ -1,7 +1,7 @@
 /** @format */
 
 import { ExternalLink, Link2, Cuboid } from "lucide-react";
-import React from "react";
+import {memo, ReactNode} from "react";
 import { Link } from "react-router";
 import {
   Table,
@@ -18,11 +18,11 @@ import { ModelInstanceResponse } from "../../../../../types";
 
 type Props = {
   data: ModelInstanceResponse[];
-  children: React.ReactNode;
-  handleSidePanel: (uuid: string, requestId: string, jobId: string, scheduleId: string) => void;
+  children: ReactNode;
+  setSidePanelData: ({ isOpen, modelId, requestId, jobId, scheduleId }: { isOpen: boolean, modelId: string, requestId: string, jobId: string, scheduleId: string}) => void;
 };
 
-export const InstanceTable = React.memo(({ data, children, handleSidePanel }: Props) => {
+export const InstanceTable = memo(({ data, children, setSidePanelData }: Props) => {
   return (
     <div className="rounded-md border">
       <Table>
@@ -64,7 +64,7 @@ export const InstanceTable = React.memo(({ data, children, handleSidePanel }: Pr
                     size="icon"
                     onClick={(e) => {
                       e.preventDefault();
-                      handleSidePanel(model.uuid, model.request_id ?? '', model.job_id ?? '', model.schedule_id ?? '')
+                      setSidePanelData({ isOpen: true, modelId:model.uuid ?? '', requestId:model.request_id ?? '', jobId:model.job_id ?? '', scheduleId:model.schedule_id ?? ''})
                     }}
                   >
                     <Link2 className="h-4 w-4 text-muted-foreground" />

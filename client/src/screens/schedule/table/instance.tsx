@@ -9,17 +9,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import React from "react";
+import {memo, ReactNode} from "react";
 import { formatDate, formatDuration } from "@/utils.js";
 import { ScheduleInstanceResponse } from "../../../../../types";
 
 type Props = {
   data: ScheduleInstanceResponse[];
-  handleSidePanel: (uuid: string, requestId: string, jobId: string, scheduleId: string) => void;
-  children: React.ReactNode;
+  setSidePanelData: ({ isOpen, modelId, requestId, jobId, scheduleId }: { isOpen: boolean, modelId: string, requestId: string, jobId: string, scheduleId: string}) => void;
+  children: ReactNode;
 };
 
-export const InstanceTable = React.memo(({ data, handleSidePanel, children }: Props) => {
+export const InstanceTable = memo(({ data, children }: Props) => {
   const getStatusVariant = (status: string) => {
     if (status === "completed") return "secondary";
     if (status === "failed") return "destructive";
@@ -62,7 +62,7 @@ export const InstanceTable = React.memo(({ data, handleSidePanel, children }: Pr
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => handleSidePanel(schedule.uuid, schedule.request_id ?? '', schedule.job_id ?? '', schedule.schedule_id ?? '')}
+                    onClick={() => setSidePanelData(schedule.uuid, schedule.request_id ?? '', schedule.job_id ?? '', schedule.schedule_id ?? '')}
                   >
                     <Link2 className="h-4 w-4 text-muted-foreground" />
                   </Button>

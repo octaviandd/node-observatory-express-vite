@@ -9,7 +9,6 @@ import { formatDate } from "@/utils.js"
 
 export const BaseCard = ({
   date,
-  metadata,
   content,
   file,
   line,
@@ -18,8 +17,8 @@ export const BaseCard = ({
   language = "json"
 }: {
   date: string
-  metadata?: string
-  content: any
+  metadata?: string | number
+  content: object | string
   file: string
   line: string
   package?: string

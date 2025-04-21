@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useIndexTableData } from "@/hooks/useIndexTableData";
-import { memo } from "react";
+import { Dispatch, memo, SetStateAction } from "react";
+import { SidePanelState } from "../../../../../types";
 
 export default function RequestIndexTable() {
   const { instanceData,
@@ -20,26 +21,22 @@ export default function RequestIndexTable() {
     instanceStatusType,
     inputValue,
     sidePanelData,
-    Table,
     modelKey,
     message,
-    handleSidePanel,
     setSidePanelData,
     setInstanceStatusType,
-    setIndex,
     setInputValue,
     loadData,
   } = useIndexTableData({
     key: "requests",
-    InstanceTable,
-    GroupTable,
     defaultInstanceStatusType: "all",
-    defaultGroupFilter: "all"
   })
+
+  const Table = index === 'instance' ? InstanceTable : GroupTable
 
   return (
     <div className="relative">
-      <SidePanelOpener sidePanelData={sidePanelData} setSidePanelData={setSidePanelData} handleSidePanel={handleSidePanel} />
+      <SidePanelOpener sidePanelData={sidePanelData} setSidePanelData={setSidePanelData} />
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <ArrowUpDown className="h-5 w-5 text-muted-foreground" />
@@ -59,12 +56,12 @@ export default function RequestIndexTable() {
             </div>
           )}
         </div>
-        <Toggles modelKey={modelKey} instanceStatusType={instanceStatusType} index={index} setInstanceStatusType={setInstanceStatusType} setIndex={setIndex} />
+        <Toggles modelKey={modelKey} instanceStatusType={instanceStatusType} setInstanceStatusType={setInstanceStatusType} />
       </div>
-      <Table
-        data={index === "instance" ? instanceData : groupData}
-        handleSidePanel={handleSidePanel}
-      >
+      <h1>here</h1>
+      {JSON.stringify(sidePanelData)}
+      {/* @ts-expect-error dumb ts*/}
+      <Table data={index === "instance" ? instanceData : groupData} setSidePanelData={setSidePanelData}>
         <div className="flex justify-center my-2">
           {message ? (
             <Button variant="outline" className="text-muted-foreground" disabled>
@@ -81,11 +78,11 @@ export default function RequestIndexTable() {
   );
 }
 
-const Toggles = memo(({ modelKey, instanceStatusType, index, setInstanceStatusType, setIndex }: { modelKey: string, instanceStatusType: string, index: string, setInstanceStatusType: (value: string) => void, setIndex: (value: "instance" | "group") => void }) => {
+const Toggles = memo(({ modelKey, instanceStatusType, setInstanceStatusType }: { modelKey: string, instanceStatusType: string, setInstanceStatusType: (value: string) => void }) => {
   return (
     <div className="flex items-center gap-4">
       {modelKey ? (
-        <ToggleGroup type="single" value={instanceStatusType} onValueChange={(value) => value && setInstanceStatusType(value as any)}>
+        <ToggleGroup type="single" value={instanceStatusType} onValueChange={(value) => value && setInstanceStatusType(value)}>
           <span className="text-sm text-muted-foreground border rounded-md px-2 py-1">SHOW</span>
           {["all", "2xx", "4xx", "5xx"].map((status) => (
             <ToggleGroupItem key={status} value={status} aria-label={status} className="text-black cursor-pointer dark:text-white">
@@ -100,7 +97,8 @@ const Toggles = memo(({ modelKey, instanceStatusType, index, setInstanceStatusTy
   )
 })
 
-const SidePanelOpener = memo(({ sidePanelData, setSidePanelData, handleSidePanel }: { sidePanelData: any, setSidePanelData: (value: any) => void, handleSidePanel: (value: any) => void }) => {
+const SidePanelOpener = memo(({ sidePanelData, setSidePanelData }:
+  { sidePanelData: SidePanelState, setSidePanelData: Dispatch<SetStateAction<{ isOpen: boolean; modelId?: string | undefined; requestId?: string | undefined; jobId?: string | undefined; scheduleId?: string | undefined; }>> }) => {
   return (
     <>
     {sidePanelData.isOpen &&
@@ -108,14 +106,14 @@ const SidePanelOpener = memo(({ sidePanelData, setSidePanelData, handleSidePanel
           <div
             className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50"
             onClick={() =>
-              setSidePanelData({ ...sidePanelData, isOpen: false, requestId: "", jobId: "", scheduleId: "", modelId: "" })
+              setSidePanelData({ isOpen: false, requestId: "", jobId: "", scheduleId: "", modelId: "" })
             }
           ></div>,
           document.body
         )}
       {sidePanelData.isOpen && (
         <SidePanel
-          handleSidePanel={handleSidePanel}
+          setSidePanelData={setSidePanelData}
           requestId={sidePanelData.requestId}
           jobId={sidePanelData.jobId}
           scheduleId={sidePanelData.scheduleId}

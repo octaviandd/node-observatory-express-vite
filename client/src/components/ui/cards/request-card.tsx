@@ -1,17 +1,14 @@
 /** @format */
+import { RequestInstanceResponse } from "../../../../../types";
 import { BaseCard } from "./base-card"
 
-type Props = {
-  item: any;
-};
-
-export default function RequestCard({ item }: Props) {
+export default function RequestCard({ item }: {item: RequestInstanceResponse}) {
   const duration = Number(item.content.duration)
   const formattedDuration = duration > 999
     ? `${(duration / 1000).toFixed(2)}s`
     : `${duration}ms`
 
-  let content = {
+  const content = {
     method: item.content.method,
     route: item.content.route,
     statusCode: item.content.statusCode,

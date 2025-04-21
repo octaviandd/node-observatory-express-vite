@@ -16,31 +16,30 @@ import {
   Database,
   SquareActivity,
 } from "lucide-react";
-import React from "react";
+import { useState, useContext, useEffect } from "react";
 import { formatDuration, formatCount } from "@/utils";
+import { QueryGroupResponse, RequestGroupResponse } from "../../../../types";
 
 export default function Dashboard() {
   const { data: requests, currentDate, period } = useIndexData({ type: "requests" });
   const { data: exceptions } = useIndexData({ type: "exceptions" });
   const { data: jobs } = useIndexData({ type: "jobs" });
-  const { state } = React.useContext(StoreContext);
-  const [groupedRequests, setGroupedRequests] = React.useState<any[]>([]);
-  const [groupedQueries, setGroupedQueries] = React.useState<any[]>([]);
+  const { state } = useContext(StoreContext);
+  const [groupedRequests, setGroupedRequests] = useState<RequestGroupResponse[]>([]);
+  const [groupedQueries, setGroupedQueries] = useState<QueryGroupResponse[]>([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetch(`/observatory-api/data/requests?table=true&offset=0&index=group&period=${state.period}`)
       .then(res => res.json())
       .then(data => {
-        // console.log(data)
         setGroupedRequests(data.results);
       })
   }, [state.period])
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetch(`/observatory-api/data/queries?table=true&offset=0&index=group&period=${state.period}`)
       .then(res => res.json())
       .then(data => {
-        // console.log(data)
         setGroupedQueries(data.results);
       })
   }, [state.period])
@@ -241,7 +240,7 @@ export default function Dashboard() {
                         >
                           <div className="flex flex-col gap-2">
                             <span className="text-sm text-muted-foreground">
-                              {request.content.route}
+                              {request.route}
                             </span>
                           </div>
                           <span className="text-sm text-yellow-600">
@@ -285,11 +284,11 @@ export default function Dashboard() {
                         >
                           <div className="flex flex-col gap-2">
                             <span className="text-sm text-muted-foreground">
-                              {query.content.endpoint}
+                              {query.endpoint}
                             </span>
                           </div>
                           <span className="text-sm text-yellow-600">
-                            {formatDuration(query.content.average)}
+                            {formatDuration(query.average)}
                           </span>
                         </div>
                       ))}

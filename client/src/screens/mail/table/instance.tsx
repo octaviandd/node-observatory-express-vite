@@ -12,17 +12,17 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import React from "react";
+import {memo, ReactNode} from "react";
 import { formatDuration, formatDate } from "@/utils.js";
 import { MailInstanceResponse } from "../../../../../types";
 
 type Props = {
   data: MailInstanceResponse[];
-  children: React.ReactNode;
-  handleSidePanel: (uuid: string, requestId: string, jobId: string, scheduleId: string) => void;
+  children: ReactNode;
+  setSidePanelData: ({ isOpen, modelId, requestId, jobId, scheduleId }: { isOpen: boolean, modelId: string, requestId: string, jobId: string, scheduleId: string}) => void;
 };
 
-export const InstanceTable = React.memo(({ data, children, handleSidePanel }: Props) => {
+export const InstanceTable = memo(({ data, children, setSidePanelData }: Props) => {
   return (
     <div className="rounded-md border">
       <Table>
@@ -62,7 +62,7 @@ export const InstanceTable = React.memo(({ data, children, handleSidePanel }: Pr
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => handleSidePanel(mail.uuid, mail.request_id ?? '', mail.job_id ?? '', mail.schedule_id ?? '')}
+                    onClick={() => setSidePanelData({ isOpen: true, modelId: mail.uuid ?? '', requestId: mail.request_id ?? '', jobId: mail.job_id ?? '', scheduleId: mail.schedule_id ?? ''})}
                   >
                     <Link2 className="h-4 w-4 text-muted-foreground" />
                   </Button>

@@ -1,5 +1,4 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import React from 'react'
 import { RequestInstanceResponse, JobInstanceResponse, ScheduleInstanceResponse, RequestContent, JobContent, ScheduleContent } from '../../../../../types'
 import { Button } from '@/components/ui/button'
 import { Link } from 'react-router'

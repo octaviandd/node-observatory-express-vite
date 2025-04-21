@@ -13,8 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatCount, formatDuration } from "@/utils.js";
 import { CacheGroupResponse } from "../../../../../types";
+import { memo, ReactNode } from "react";
 
-export default function GroupTable({ data, children }: { data: CacheGroupResponse[], children: React.ReactNode }) {
+export const GroupTable = memo(({ data, children }: { data: CacheGroupResponse[]; children: ReactNode }) => {
   return (
     <div className="rounded-md border">
       <Table>
@@ -73,4 +74,4 @@ export default function GroupTable({ data, children }: { data: CacheGroupRespons
       {children}
     </div>
   );
-}
+})

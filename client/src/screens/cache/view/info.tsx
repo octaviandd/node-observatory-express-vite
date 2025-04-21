@@ -5,7 +5,6 @@ import { CacheInstanceResponse } from "../../../../../types";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { timeAgo } from "@/utils.js";
-import { formatDuration } from "@/utils.js";
 
 export const CachePreviewInfo = React.memo(({ cache }: { cache: CacheInstanceResponse }) => {
   return (

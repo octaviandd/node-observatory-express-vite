@@ -2,6 +2,7 @@
 import React from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { CacheInstanceResponse, ExceptionInstanceResponse, HttpClientInstanceResponse, JobInstanceResponse, ModelInstanceResponse, QueryInstanceResponse, ViewInstanceResponse } from "../../../../../types";
 
 export const RequestPreviewDetails = React.memo(
   ({
@@ -13,19 +14,19 @@ export const RequestPreviewDetails = React.memo(
     views,
     models,
   }: {
-    queries: any[];
-    jobs: any[];
-    caches: any[];
-    https: any[];
-    exceptions: any[];
-    views: any[];
-    models: any[];
+    queries: QueryInstanceResponse[];
+    jobs: JobInstanceResponse[];
+    caches: CacheInstanceResponse[];
+    https: HttpClientInstanceResponse[];
+    exceptions: ExceptionInstanceResponse[];
+    views: ViewInstanceResponse[];
+    models: ModelInstanceResponse[];
   }) => {
-    const filterByType = (data: any[], type: string) =>
-      data.filter((item: any) => item.type === type);
-    const sumOf = (items: any[], pluck: (item: any) => number) =>
+    const filterByType = <T extends {type: string}> (data: T[], type: string) =>
+      data.filter((item: T) => item.type === type);
+    const sumOf = <T extends object> (items: T[], pluck: (item: T) => number) =>
       items.reduce((acc, item) => acc + pluck(item), 0);
-    const averageOf = (items: any[], pluck: (item: any) => number) =>
+    const averageOf =<T extends object> (items: T[], pluck: (item: T) => number) =>
       !items.length ? 0 : sumOf(items, pluck) / items.length;
 
     const queryItems = filterByType(queries, "query");

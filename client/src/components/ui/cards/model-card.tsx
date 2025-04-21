@@ -1,11 +1,8 @@
 /** @format */
+import { ModelInstanceResponse } from "../../../../../types";
 import { BaseCard } from "./base-card"
 
-type Props = {
-  item: any;
-};
-
-export default function ModelCard({ item }: Props) {
+export default function ModelCard({ item }: {item: ModelInstanceResponse}) {
   const duration = Number(item.content.duration)
   const formattedDuration = duration > 999 
     ? `${(duration / 1000).toFixed(2)}s` 
@@ -18,7 +15,7 @@ export default function ModelCard({ item }: Props) {
       content={item.content}
       file={item.content.file}
       line={item.content.line}
-      package={item.content.library}
+      package={item.content.package}
     />
   );
 }

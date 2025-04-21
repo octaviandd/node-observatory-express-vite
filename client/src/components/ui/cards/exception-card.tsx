@@ -1,11 +1,8 @@
 /** @format */
+import { ExceptionInstanceResponse } from "../../../../../types"
 import { BaseCard } from "./base-card"
 
-type Props = {
-  item: any
-}
-
-export default function ExceptionCard({ item }: Props) {
+export default function ExceptionCard({ item }: {item: ExceptionInstanceResponse}) {
   return (
     <BaseCard
       date={item.created_at}

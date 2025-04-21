@@ -1,7 +1,6 @@
 /** @format */
 
 import { FileCode } from "lucide-react";
-import React from "react";
 import SidePanel from "../../../components/ui/side-panel";
 import { createPortal } from "react-dom";
 import { InstanceTable } from "./instance";
@@ -20,21 +19,18 @@ export default function ViewsIndexTable() {
     instanceStatusType,
     inputValue,
     sidePanelData,
-    Table,
     modelKey,
     message,
-    handleSidePanel,
     setSidePanelData,
     setInstanceStatusType,
     setInputValue,
     loadData,
   } = useIndexTableData({
     key: "views",
-    InstanceTable,
-    GroupTable,
     defaultInstanceStatusType: "all",
-    defaultGroupFilter: "all"
   })
+
+  const Table = index === 'instance' ? InstanceTable : GroupTable
 
   return (
     <div className="relative">
@@ -50,7 +46,7 @@ export default function ViewsIndexTable() {
         )}
       {sidePanelData.isOpen && (
         <SidePanel
-          handleSidePanel={handleSidePanel}
+          setSidePanelData={setSidePanelData}
           requestId={sidePanelData.requestId}
           jobId={sidePanelData.jobId}
           scheduleId={sidePanelData.scheduleId}
@@ -102,10 +98,8 @@ export default function ViewsIndexTable() {
           null
         )}
       </div>
-      <Table
-        data={index === "instance" ? instanceData : groupData}
-        handleSidePanel={handleSidePanel}
-      >
+      {/* @ts-expect-error dumb ts*/}
+      <Table data={index === "instance" ? instanceData : groupData} setSidePanelData={setSidePanelData}>
         <div className="my-6">
           <div className="flex items-center justify-center">
             {message ? (

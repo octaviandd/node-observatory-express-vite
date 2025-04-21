@@ -12,17 +12,17 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import React from "react";
+import { memo, ReactNode } from "react";
 import { formatDate, formatDuration } from "@/utils.js";
 import { RequestInstanceResponse } from "../../../../../types";
 
 type Props = {
   data: RequestInstanceResponse[];
-  handleSidePanel: (requestId: string, jobId: string, scheduleId: string) => void;
-  children: React.ReactNode;
+  setSidePanelData: ({ isOpen, modelId, requestId, jobId, scheduleId }: { isOpen: boolean, modelId: string, requestId: string, jobId: string, scheduleId: string}) => void;
+  children: ReactNode;
 };
 
-export const InstanceTable = React.memo(({ data, handleSidePanel, children }: Props) => {
+export const InstanceTable = memo(({ data, setSidePanelData, children }: Props) => {
   const getStatusVariant = (status: number) => {
     if (String(status).startsWith("2") || String(status).startsWith("3")) return "secondary";
     if (String(status).startsWith("4")) return "warning";
@@ -69,7 +69,7 @@ export const InstanceTable = React.memo(({ data, handleSidePanel, children }: Pr
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => handleSidePanel(request.request_id ?? '', request.job_id ?? '', request.schedule_id ?? '')}
+                    onClick={() => setSidePanelData({ isOpen: true, modelId: request.request_id ?? '', requestId: request.request_id ?? '', jobId: request.job_id ?? '', scheduleId: request.schedule_id ?? ''})}
                   >
                     <LinkIcon className="h-4 w-4 text-muted-foreground" />
                   </Button>

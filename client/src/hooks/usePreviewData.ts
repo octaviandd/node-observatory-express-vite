@@ -1,23 +1,24 @@
 /** @format */
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router";
+import { CacheInstanceResponse, HttpClientInstanceResponse, JobInstanceResponse, LogInstanceResponse, MailInstanceResponse, NotificationInstanceResponse, QueryInstanceResponse, RequestInstanceResponse } from "../../../types";
 
 type DataState = {
-  request: any | null;
-  notifications: any[];
-  mails: any[];
-  logs: any[];
-  queries: any[];
-  https: any[];
-  jobs: any[];
-  caches: any[];
+  request: RequestInstanceResponse | null;
+  notifications: NotificationInstanceResponse[];
+  mails: MailInstanceResponse[];
+  logs: LogInstanceResponse[];
+  queries: QueryInstanceResponse[];
+  https: HttpClientInstanceResponse[];
+  jobs: JobInstanceResponse[];
+  caches: CacheInstanceResponse[];
 };
 
 export const usePreviewData = () => {
   const params = useParams();
   const [data, setData] = useState<DataState>({
-    request: [],
+    request: null,
     notifications: [],
     mails: [],
     logs: [],

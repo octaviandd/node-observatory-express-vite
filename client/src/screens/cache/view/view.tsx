@@ -1,6 +1,6 @@
 /** @format */
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router";
 import { CacheCrumbs } from "./crumbs";
 import { CachePreviewInfo } from "./info";

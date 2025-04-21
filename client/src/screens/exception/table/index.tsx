@@ -19,21 +19,18 @@ export default function ExceptionsIndexTable() {
     instanceStatusType,
     inputValue,
     sidePanelData,
-    Table,
     modelKey,
     message,
-    handleSidePanel,
     setSidePanelData,
     setInstanceStatusType,
     setInputValue,
     loadData,
   } = useIndexTableData({
     key: "exceptions",
-    InstanceTable,
-    GroupTable,
     defaultInstanceStatusType: "all",
-    defaultGroupFilter: "all"
   })
+
+  const Table = index === 'instance' ? InstanceTable : GroupTable
 
   return (
     <div className="relative">
@@ -42,14 +39,14 @@ export default function ExceptionsIndexTable() {
           <div
             className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-xs z-50"
             onClick={() =>
-              setSidePanelData({ ...sidePanelData, isOpen: false, requestId: "", jobId: "", scheduleId: "", modelId: "" })
+              setSidePanelData({ isOpen: false, requestId: "", jobId: "", scheduleId: "", modelId: "" })
             }
           ></div>,
           document.body
         )}
       {sidePanelData.isOpen && (
         <SidePanel
-          handleSidePanel={handleSidePanel}
+          setSidePanelData={setSidePanelData}
           requestId={sidePanelData.requestId}
           jobId={sidePanelData.jobId}
           scheduleId={sidePanelData.scheduleId}
@@ -99,10 +96,8 @@ export default function ExceptionsIndexTable() {
           null
         )}
       </div>
-      <Table
-        data={index === "instance" ? instanceData : groupData}
-        handleSidePanel={handleSidePanel}
-      >
+       {/* @ts-expect-error dumb ts*/}
+      <Table data={index === "instance" ? instanceData : groupData} setSidePanelData={setSidePanelData}>
         <div className="flex justify-center my-2">
           {message ? (
             <Button variant="outline" className="text-muted-foreground" disabled>

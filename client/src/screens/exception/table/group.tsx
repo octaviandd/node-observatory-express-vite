@@ -1,5 +1,5 @@
 /** @format */
-import { AlertTriangle, Bug, ExternalLink } from "lucide-react";
+import { Bug, ExternalLink } from "lucide-react";
 import { Link } from "react-router";
 import {
   Table,
@@ -11,11 +11,11 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import React from "react";
+import { memo, ReactNode} from "react";
 import { formatCount } from "@/utils.js";
 import { ExceptionGroupResponse } from "../../../../../types";
 
-export const GroupTable = React.memo(({ data, children }: { data: ExceptionGroupResponse[], children: React.ReactNode }) => {
+export const GroupTable = memo(({ data, children }: { data: ExceptionGroupResponse[], children: ReactNode }) => {
   return (
     <div className="rounded-md border">
       <Table>

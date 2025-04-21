@@ -1,6 +1,6 @@
 /** @format */
 
-import { AlertOctagon, ArrowUpDown, CheckCircle, ExternalLink, Mail } from "lucide-react";
+import { AlertOctagon, CheckCircle, ExternalLink, Mail } from "lucide-react";
 import { Link } from "react-router";
 import {
   Table,
@@ -12,14 +12,14 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import React from "react";
+import {memo, ReactNode} from "react";
 import { formatCount, formatDuration } from "@/utils.js";
 import { MailGroupResponse } from "../../../../../types";
 
-export const GroupTable = React.memo(({ data, children }: { data: MailGroupResponse[], children: React.ReactNode }) => {
+export const GroupTable = memo(({ data, children }: { data: MailGroupResponse[], children: ReactNode }) => {
   return (
     <div className="rounded-md border">
-      <Table>
+    <Table>
         <TableHeader>
           <TableRow>
             <TableHead className="w-[70%]">Details</TableHead>

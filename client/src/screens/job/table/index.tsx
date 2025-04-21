@@ -11,7 +11,8 @@ import { useIndexTableData } from "@/hooks/useIndexTableData";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 export default function JobsIndexTable() {
-  const { instanceData,
+  const {
+    instanceData,
     groupData,
     instanceDataCount,
     groupDataCount,
@@ -19,20 +20,17 @@ export default function JobsIndexTable() {
     instanceStatusType,
     inputValue,
     sidePanelData,
-    Table,
     message,
-    handleSidePanel,
     setSidePanelData,
     setInstanceStatusType,
     setInputValue,
     loadData,
   } = useIndexTableData({
     key: "jobs",
-    InstanceTable,
-    GroupTable,
     defaultInstanceStatusType: "all",
-    defaultGroupFilter: "all"
   })
+
+  const Table = index === 'instance' ? InstanceTable : GroupTable
 
   return (
     <div className="relative">
@@ -41,14 +39,14 @@ export default function JobsIndexTable() {
           <div
             className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50"
             onClick={() =>
-              setSidePanelData({ ...sidePanelData, isOpen: false, jobId: "", scheduleId: "", requestId: "", modelId: "" })
+              setSidePanelData({ ...sidePanelData, isOpen: false})
             }
           ></div>,
           document.body
         )}
       {sidePanelData.isOpen && (
         <SidePanel
-          handleSidePanel={handleSidePanel}
+          setSidePanelData={setSidePanelData}
           jobId={sidePanelData.jobId}
           scheduleId={sidePanelData.scheduleId}
           requestId={sidePanelData.requestId}
@@ -77,7 +75,7 @@ export default function JobsIndexTable() {
         </div>
         <div className="flex items-center gap-4">
           {index === "instance" ? (
-            <ToggleGroup type="single" value={instanceStatusType} onValueChange={(value) => value && setInstanceStatusType(value as any)}>
+            <ToggleGroup type="single" value={instanceStatusType} onValueChange={(value) => value && setInstanceStatusType(value)}>
               <span className="text-sm text-muted-foreground border rounded-md px-2 py-1">SHOW</span>
               {["all", "completed", "released", "failed"].map((status) => (
                 <ToggleGroupItem
@@ -95,10 +93,8 @@ export default function JobsIndexTable() {
           )}
         </div>
       </div>
-      <Table
-        data={index === "instance" ? instanceData : groupData}
-        handleSidePanel={handleSidePanel}
-      >
+      {/* @ts-expect-error dumb ts*/}
+      <Table data={index === "instance" ? instanceData : groupData} setSidePanelData={setSidePanelData}>
         <div className="my-6">
           <div className="flex items-center justify-center">
             {message ? (

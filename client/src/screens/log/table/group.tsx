@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import React from "react";
+import {memo, ReactNode} from "react";
 import { LogGroupResponse } from "../../../../../types";
 
 const LOG_LEVELS = [
@@ -25,7 +25,7 @@ const LOG_LEVELS = [
   { dataKey: "log", variant: "log" },
 ] as const;
 
-export const GroupTable = React.memo(({ data, children }: { data: LogGroupResponse[], children: React.ReactNode }) => {
+export const GroupTable = memo(({ data, children }: { data: LogGroupResponse[], children: ReactNode }) => {
   return (
     <div className="rounded-md border">
       <Table>

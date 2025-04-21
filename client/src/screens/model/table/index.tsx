@@ -11,7 +11,8 @@ import { useIndexTableData } from "@/hooks/useIndexTableData";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 export default function ModelsIndexTable() {
-  const { instanceData,
+  const {
+    instanceData,
     groupData,
     instanceDataCount,
     groupDataCount,
@@ -19,21 +20,18 @@ export default function ModelsIndexTable() {
     instanceStatusType,
     inputValue,
     sidePanelData,
-    Table,
     modelKey,
     message,
-    handleSidePanel,
     setSidePanelData,
     setInstanceStatusType,
     setInputValue,
     loadData,
   } = useIndexTableData({
     key: "models",
-    InstanceTable,
-    GroupTable,
     defaultInstanceStatusType: "all",
-    defaultGroupFilter: "all"
   })
+
+  const Table = index === 'instance' ? InstanceTable : GroupTable
 
   return (
     <div className="relative">
@@ -49,7 +47,7 @@ export default function ModelsIndexTable() {
         )}
       {sidePanelData.isOpen && (
         <SidePanel
-          handleSidePanel={handleSidePanel}
+          setSidePanelData={setSidePanelData}
           requestId={sidePanelData.requestId}
           jobId={sidePanelData.jobId}
           scheduleId={sidePanelData.scheduleId}
@@ -99,10 +97,8 @@ export default function ModelsIndexTable() {
           null
         )}
       </div>
-      <Table
-        data={index === "instance" ? instanceData : groupData}
-        handleSidePanel={handleSidePanel}
-      >
+      {/* @ts-expect-error dumb ts*/}
+      <Table data={index === "instance" ? instanceData : groupData} setSidePanelData={setSidePanelData}>
         <div className="my-6">
           <div className="flex items-center justify-center">
             {message ? (

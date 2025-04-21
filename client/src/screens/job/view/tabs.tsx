@@ -1,4 +1,3 @@
-import React from 'react'
 import { CacheInstanceResponse, ExceptionInstanceResponse, JobInstanceResponse, MailInstanceResponse, ModelInstanceResponse, NotificationInstanceResponse, QueryInstanceResponse, HttpClientInstanceResponse, LogInstanceResponse } from '../../../../../types'
 import { CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";

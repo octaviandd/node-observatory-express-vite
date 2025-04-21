@@ -1,15 +1,12 @@
 /** @format */
+import { MailInstanceResponse } from "../../../../../types";
 import { BaseCard } from "./base-card";
 
-type Props = {
-  item: any;
-};
-
-export default function MailCard({ item }: Props) {
+export default function MailCard({ item }: {item: MailInstanceResponse}) {
   return (
     <BaseCard
       date={item.created_at}
-      metadata={item.content.package ?? "nodemailer"}
+      metadata={item.content.package}
       content={{
         from: item.content.from,
         to: item.content.to

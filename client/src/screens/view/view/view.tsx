@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { ViewCrumbs } from './crumbs';
 import { RequestInstanceResponse, ViewInstanceResponse } from '../../../../../types';
@@ -15,12 +15,12 @@ export default function ViewPreview() {
   const [data, setData] = useState<{
     view: ViewInstanceResponse;
     source: RequestInstanceResponse | null;
-    error: any;
+    error: string;
     loading: boolean;
   }>({
     view: {} as ViewInstanceResponse,
     source: null,
-    error: null,
+    error: '',
     loading: true,
   });
 
@@ -34,14 +34,14 @@ export default function ViewPreview() {
       const response = await fetch(`/observatory-api/data/views/${params.id}`);
       const { request, view } = await response.json();
 
-      setData({
+      setData((prev) => ({
+        ...prev,
         view: view ? view[0] : null,
         source: request ? request[0] : null,
-        error: null,
         loading: false,
-      });
+      }));
     } catch (error) {
-      setData((prev) => ({ ...prev, error: error, loading: false }));
+      setData((prev) => ({ ...prev, error: error instanceof Error ? error.message : 'Unknown Error', loading: false }));
     }
   };
 

@@ -1,11 +1,8 @@
 /** @format */
+import { HttpClientInstanceResponse } from "../../../../../types";
 import { BaseCard } from "./base-card"
 
-type Props = {
-  item: any;
-};
-
-export default function HttpCard({ item }: Props) {
+export default function HttpCard({ item }: {item: HttpClientInstanceResponse}) {
   const duration = Number(item.content.duration)
   const formattedDuration = duration > 999 
     ? `${(duration / 1000).toFixed(2)}s` 
@@ -15,10 +12,10 @@ export default function HttpCard({ item }: Props) {
     <BaseCard
       date={item.created_at}
       metadata={formattedDuration}
-      content={item.content.request}
+      content={{ href: item.content.href, pathname: item.content.pathname, route: item.content.route }}
       file={item.content.file}
       line={item.content.line}
-      package={item.content.library}
+      package={item.content.package}
     />
   );
 }

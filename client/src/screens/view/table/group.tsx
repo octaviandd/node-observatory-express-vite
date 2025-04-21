@@ -1,7 +1,7 @@
 /** @format */
 
 import { ExternalLink, FileCode } from "lucide-react";
-import React from "react";
+import {memo, ReactNode} from "react";
 import { Link } from "react-router";
 import {
   Table,
@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { getSize, formatDuration } from "@/utils.js";
 import { ViewGroupResponse } from "../../../../../types";
 
-export const GroupTable = React.memo(({ data, children }: { data: ViewGroupResponse[], children: React.ReactNode }) => {
+export const GroupTable = memo(({ data, children }: { data: ViewGroupResponse[], children: ReactNode }) => {
   return (
     <div className="rounded-md border">
       <Table>

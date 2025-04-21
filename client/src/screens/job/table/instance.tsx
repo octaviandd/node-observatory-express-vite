@@ -13,16 +13,16 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { JobInstanceResponse } from "../../../../../types";
-import React from "react";
 import { formatDate, formatDuration } from "@/utils.js";
+import { ReactNode, memo } from "react";
 
 type Props = {
   data: JobInstanceResponse[];
-  children: React.ReactNode;
-  handleSidePanel: (modelId: string, requestId: string, jobId: string, scheduleId: string) => void;
+  children: ReactNode;
+  setSidePanelData: ({ isOpen, modelId, requestId, jobId, scheduleId }: { isOpen: boolean, modelId: string, requestId: string, jobId: string, scheduleId: string}) => void;
 };
 
-export const InstanceTable = React.memo(({ data, children, handleSidePanel }: Props) => {
+export const InstanceTable = memo(({ data, children, setSidePanelData }: Props) => {
   const getStatusVariant = (status: string) => {
     if (status === "completed") return "secondary";
     if (status === "released") return "warning";
@@ -74,7 +74,7 @@ export const InstanceTable = React.memo(({ data, children, handleSidePanel }: Pr
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => handleSidePanel(job.uuid, job.request_id ?? '', job.job_id ?? '', job.schedule_id ?? '')}
+                    onClick={() => setSidePanelData({ isOpen: true, modelId: job.uuid ?? '', requestId: job.request_id ?? '', jobId: job.job_id ?? '', scheduleId: job.schedule_id ?? ''})}
                   >
                     <Link2 className="h-4 w-4 text-muted-foreground" />
                   </Button>

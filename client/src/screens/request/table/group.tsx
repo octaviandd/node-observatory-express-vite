@@ -11,12 +11,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import React from "react";
+import { memo, ReactNode } from "react";
 import { formatCount, formatDuration } from "@/utils.js";
 import { RequestGroupResponse } from "../../../../../types";
 
 
-export const GroupTable = React.memo(({ data, children }: { data: RequestGroupResponse[], children: React.ReactNode }) => {
+export const GroupTable = memo(({ data, children }: { data: RequestGroupResponse[], children: ReactNode }) => {
   return (
     <div className="rounded-md border">
       <Table>
@@ -30,12 +30,12 @@ export const GroupTable = React.memo(({ data, children }: { data: RequestGroupRe
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((request: any) => (
+          {data.map((request: RequestGroupResponse) => (
             <TableRow key={request.route}>
               <TableCell className="flex items-center gap-2 h-[53px]">
                 <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
                 <span className="truncate max-w-[400px] text-black dark:text-white">
-                  {request.route ?? request._id}
+                  {request.route}
                 </span>
               </TableCell>
               <TableCell>

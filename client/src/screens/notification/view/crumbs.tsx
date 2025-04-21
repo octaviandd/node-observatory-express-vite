@@ -1,13 +1,13 @@
 /** @format */
 
-import React from "react";
+import { memo } from "react";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from "@/components/ui/breadcrumb";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronRight } from "lucide-react";
 import { NotificationInstanceResponse } from "../../../../../types";
 
-export const NotificationCrumbs = React.memo(({ notification }: { notification: NotificationInstanceResponse }) => {
+export const NotificationCrumbs = memo(({ notification }: { notification: NotificationInstanceResponse }) => {
   const getStatusColor = (status: string) => {
     if (status === "completed") return "secondary";
     if (status === "failed") return "destructive";

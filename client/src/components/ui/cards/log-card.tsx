@@ -1,11 +1,8 @@
 /** @format */
+import { LogInstanceResponse } from "../../../../../types";
 import { BaseCard } from "./base-card";
 
-type Props = {
-  item: any;
-};
-
-export default function LogCard({ item }: Props) {
+export default function LogCard({ item }: {item: LogInstanceResponse}) {
   return (
     <BaseCard
       date={item.created_at}

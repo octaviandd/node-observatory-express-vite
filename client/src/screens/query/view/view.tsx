@@ -1,6 +1,6 @@
 /** @format */
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -30,13 +30,13 @@ export default function QueryPreview() {
   }, [params.id]);
 
   const getItem = async () => {
-    setData((prev: any) => ({
+    setData((prev) => ({
       ...prev,
       loading: true,
       error: null,
     }));
     try {
-      setData((prev: any) => ({ ...prev, loading: true, error: null }));
+      setData((prev) => ({ ...prev, loading: true, error: null }));
       const response = await fetch(`/observatory-api/data/queries/${params.id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch query data');
@@ -48,7 +48,7 @@ export default function QueryPreview() {
         throw new Error('Query data not found');
       }
 
-      setData((prev: any) => ({
+      setData((prev) => ({
         ...prev,
         query: query[0],
         loading: false,
@@ -57,7 +57,7 @@ export default function QueryPreview() {
       }));
     } catch (error) {
       console.error('Error fetching query data:', error);
-      setData((prev: any) => ({
+      setData((prev) => ({
         ...prev,
         loading: false,
         error: error instanceof Error ? error.message : 'An error occurred'

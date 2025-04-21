@@ -1,6 +1,6 @@
 /** @format */
 
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { StoreContext } from "@/store";
 import { timePeriod } from "@/utils";
 import { useParams } from "react-router";
@@ -14,9 +14,9 @@ export const useIndexData = ({
   const params = useParams();
   const param = params.key || "";
   const [data, setData] = useState<{
-    results: any[];
-    countFormattedData: any;
-    durationFormattedData: any;
+    results: object[];
+    countFormattedData: object[];
+    durationFormattedData: { avgDuration: number, p95: number, label: string }[];
     count: number;
     indexCountOne: number;
     indexCountTwo: number;

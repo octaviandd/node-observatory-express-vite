@@ -1,6 +1,5 @@
 /** @format */
 
-import React from "react";
 import { Globe } from "lucide-react";
 import { createPortal } from "react-dom";
 import SidePanel from "../../../components/ui/side-panel";
@@ -10,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useIndexTableData } from "@/hooks/useIndexTableData";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+
 export default function HttpIndexTable() {
   const { instanceData,
     groupData,
@@ -19,21 +19,18 @@ export default function HttpIndexTable() {
     instanceStatusType,
     inputValue,
     sidePanelData,
-    Table,
     modelKey,
     message,
-    handleSidePanel,
     setSidePanelData,
     setInstanceStatusType,
     setInputValue,
     loadData,
   } = useIndexTableData({
     key: "https",
-    InstanceTable,
-    GroupTable,
     defaultInstanceStatusType: "all",
-    defaultGroupFilter: "all"
   })
+
+  const Table = index === 'instance' ? InstanceTable : GroupTable
 
   return (
     <div className="relative">
@@ -49,7 +46,7 @@ export default function HttpIndexTable() {
         )}
       {sidePanelData.isOpen && (
         <SidePanel
-          handleSidePanel={handleSidePanel}
+          setSidePanelData={setSidePanelData}
           requestId={sidePanelData.requestId}
           jobId={sidePanelData.jobId}
           scheduleId={sidePanelData.scheduleId}
@@ -77,7 +74,7 @@ export default function HttpIndexTable() {
           />
         </div>
         {modelKey ? (
-          <ToggleGroup type="single" value={instanceStatusType} onValueChange={(value) => value && setInstanceStatusType(value as any)}>
+          <ToggleGroup type="single" value={instanceStatusType} onValueChange={(value) => value && setInstanceStatusType(value)}>
             <span className="text-sm text-muted-foreground border rounded-md px-2 py-1">SHOW</span>
             {["all", "2xx", "4xx", "5xx"].map((status) => (
               <ToggleGroupItem key={status} value={status} aria-label={status} className="text-black cursor-pointer dark:text-white">
@@ -89,10 +86,8 @@ export default function HttpIndexTable() {
           null
         )}
       </div>
-      <Table
-        data={index === "instance" ? instanceData : groupData}
-        handleSidePanel={handleSidePanel}
-      >
+      {/* @ts-expect-error dumb ts*/}
+      <Table data={index === "instance" ? instanceData : groupData} setSidePanelData={setSidePanelData}>
         <div className="my-6">
           <div className="flex items-center justify-center">
             {message ? (

@@ -6,7 +6,7 @@ import {
 import { Outlet, useLocation } from "react-router"
 import { useContext, useEffect, useState } from "react";
 import { StoreContext } from "@/store";
-import { Moon, RefreshCcw, Sun } from "lucide-react"
+import { Moon, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -15,7 +15,7 @@ type TimePeriod = "1h" | "24h" | "7d" | "14d" | "30d";
 
 export default function MainLayout() {
   const location = useLocation();
-  const isPreviewRoute = /\/(mail|exception|log|notification|job|cache|query|model|request|schedule|http|view)\/[^\/]+$/.test(location.pathname);
+  const isPreviewRoute = /\/(mail|exception|log|notification|job|cache|query|model|request|schedule|http|view)\/[^/]+$/.test(location.pathname);
 
   // const handleRefresh = () => {
   //   fetch(`/api/data/${location.pathname}/refresh`)
@@ -31,7 +31,7 @@ export default function MainLayout() {
 
       <SidebarInset>
         {!isPreviewRoute && (
-          <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12  pr-10">
+          <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 pr-10">
             <div className="flex items-center gap-2 ml-auto">
               {/* <Button
                 variant="ghost"

@@ -14,14 +14,15 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatDate, formatDuration } from "@/utils.js";
 import { QueryInstanceResponse } from "../../../../../types";
+import { memo, ReactNode } from "react";
 
 type Props = {
   data: QueryInstanceResponse[];
-  handleSidePanel: (modelId: string, requestId: string, jobId: string, scheduleId: string) => void;
-  children: React.ReactNode;
+  setSidePanelData: ({ isOpen, modelId, requestId, jobId, scheduleId }: { isOpen: boolean, modelId: string, requestId: string, jobId: string, scheduleId: string}) => void;
+  children: ReactNode;
 };
 
-export const InstanceTable = ({ data, handleSidePanel, children }: Props) => {
+export const InstanceTable = memo(({ data, setSidePanelData, children }: Props) => {
   return (
     <div className="rounded-md border">
       <Table>
@@ -61,7 +62,7 @@ export const InstanceTable = ({ data, handleSidePanel, children }: Props) => {
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => handleSidePanel(query.uuid, query.request_id ?? '', query.job_id ?? '', query.schedule_id ?? '')}
+                    onClick={() => setSidePanelData({ isOpen: true, modelId:query.uuid ?? '', requestId:query.request_id ?? '', jobId:query.job_id ?? '', scheduleId:query.schedule_id ?? ''})}
                   >
                     <Link2 className="h-4 w-4 text-muted-foreground" />
                   </Button>
@@ -79,4 +80,4 @@ export const InstanceTable = ({ data, handleSidePanel, children }: Props) => {
       {children}
     </div>
   );
-}
+});

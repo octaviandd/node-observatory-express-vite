@@ -1,6 +1,6 @@
 /** @format */
 
-import { AlertCircle, AlertOctagon, ArrowUpDown, CheckCircle, ExternalLink, Layers } from "lucide-react";
+import { AlertCircle, AlertOctagon, CheckCircle, ExternalLink, Layers } from "lucide-react";
 import { Link } from "react-router";
 import {
   Table,
@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import React from "react";
+import { memo } from "react";
 import { formatCount, formatDuration } from "@/utils.js";
 import { JobGroupResponse } from "../../../../../types";
 
@@ -21,11 +21,11 @@ type Props = {
   children: React.ReactNode;
 };
 
-export const GroupTable = React.memo(({ data, children }: Props) => {
+export const GroupTable = memo(({ data, children }: Props) => {
   return (
     <div className="rounded-md border">
       <Table>
-        <TableHeader>
+      <TableHeader>
           <TableRow>
             <TableHead className="w-[50%]">Details</TableHead>
             <TableHead>Events</TableHead>

@@ -1,13 +1,13 @@
 /** @format */
 
-import React from "react";
+import { memo } from "react";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from "@/components/ui/breadcrumb";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronRight } from "lucide-react";
 import { QueryInstanceResponse } from "../../../../../types";
 
-export const QueryCrumbs = React.memo(({ query }: { query: QueryInstanceResponse }) => {
+export const QueryCrumbs = memo(({ query }: { query: QueryInstanceResponse }) => {
   const getStatusColor = (sqlType: string) => {
     if (sqlType === "SELECT") return "secondary";
     if (sqlType === "INSERT") return "secondary";

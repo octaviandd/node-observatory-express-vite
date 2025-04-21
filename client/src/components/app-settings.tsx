@@ -2,31 +2,26 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Sliders } from "lucide-react";
-import { SidebarMenuButton } from "@/components/ui/sidebar";
 
 export function AppSettings() {
   const [refreshRate, setRefreshRate] = useState("60");
   const [ignoredRoutes, setIgnoredRoutes] = useState("/health, /metrics, /api/internal/*");
   
-  const [mailProviders, setMailProviders] = useState([
-    "nodemailer",
-    "@aws-sdk/client-ses",
-    "mailgun.js"
-  ]);
+  // const [mailProviders, setMailProviders] = useState([
+  //   "nodemailer",
+  //   "@aws-sdk/client-ses",
+  //   "mailgun.js"
+  // ]);
   
-  const [databaseORMs, setDatabaseORMs] = useState([
-    "mongoose",
-    "prisma"
-  ]);
-  
+  // const [databaseORMs, setDatabaseORMs] = useState([
+  //   "mongoose",
+  //   "prisma"
+  // ]);
+
   const [watchers, setWatchers] = useState({
     requests: true,
     queries: true,
@@ -43,16 +38,16 @@ export function AppSettings() {
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
+      {/* <DialogTrigger asChild>
         <SidebarMenuButton>
           <Sliders className="w-4 h-4" />
           <span>Application Settings</span>
         </SidebarMenuButton>
-      </DialogTrigger>
+      </DialogTrigger> */}
       <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
+        {/* <DialogHeader>
           <DialogTitle>Application Settings</DialogTitle>
-        </DialogHeader>
+        </DialogHeader> */}
         
         <Tabs defaultValue="general">
           <TabsList className="grid w-full grid-cols-3">
@@ -114,11 +109,11 @@ export function AppSettings() {
                 <div className="space-y-1">
                   <label className="text-xs font-medium block text-muted-foreground">Mail Providers</label>
                   <div className="flex flex-wrap gap-1">
-                    {mailProviders.map((provider, index) => (
+                    {/* {mailProviders.map((provider, index) => (
                       <span key={index} className="bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 text-xs rounded px-2 py-1">
                         {provider}
                       </span>
-                    ))}
+                    ))} */}
                     <span className="bg-muted text-muted-foreground text-xs rounded px-2 py-1 cursor-pointer">
                       + Add
                     </span>
@@ -128,11 +123,11 @@ export function AppSettings() {
                 <div className="space-y-1">
                   <label className="text-xs font-medium block text-muted-foreground">Database ORM</label>
                   <div className="flex flex-wrap gap-1">
-                    {databaseORMs.map((orm, index) => (
+                    {/* {databaseORMs.map((orm, index) => (
                       <span key={index} className="bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-xs rounded px-2 py-1">
                         {orm}
                       </span>
-                    ))}
+                    ))} */}
                     <span className="bg-muted text-muted-foreground text-xs rounded px-2 py-1 cursor-pointer">
                       + Add
                     </span>

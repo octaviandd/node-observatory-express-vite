@@ -1,11 +1,8 @@
 /** @format */
+import { ViewInstanceResponse } from "../../../../../types"
 import { BaseCard } from "./base-card"
 
-type Props = {
-  view: any
-}
-
-export default function ViewCard({ view }: Props) {
+export default function ViewCard({ view }: {view: ViewInstanceResponse}) {
   const duration = Number(view.content.duration)
   const formattedDuration = duration > 999 
     ? `${(duration / 1000).toFixed(2)}s` 

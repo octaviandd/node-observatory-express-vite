@@ -8,25 +8,24 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { CalendarCheck } from "lucide-react";
 
 export default function ScheduledIndexTable() {
-  const { instanceData,
+  const {
+    instanceData,
     groupData,
     instanceDataCount,
     groupDataCount,
     index,
     instanceStatusType,
-    Table,
     modelKey,
     message,
-    handleSidePanel,
+    setSidePanelData,
     setInstanceStatusType,
     loadData,
   } = useIndexTableData({
     key: "schedules",
-    InstanceTable,
-    GroupTable,
     defaultInstanceStatusType: "all",
-    defaultGroupFilter: "all"
   })
+
+  const Table = index === 'instance' ? InstanceTable : GroupTable
 
   return (
     <div className="relative">
@@ -42,7 +41,7 @@ export default function ScheduledIndexTable() {
         )}
       {sidePanelData.isOpen && (
         <SidePanel
-          handleSidePanel={handleSidePanel}
+          setSidePanelData={setSidePanelData}
           requestId={sidePanelData.requestId}
           jobId={sidePanelData.jobId}
           scheduleId={sidePanelData.scheduleId}
@@ -79,10 +78,8 @@ export default function ScheduledIndexTable() {
           null
         )}
       </div>
-      <Table
-        data={index === "instance" ? instanceData : groupData}
-        handleSidePanel={handleSidePanel}
-      >
+      {/* @ts-expect-error dumb ts*/}
+      <Table data={index === "instance" ? instanceData : groupData} setSidePanelData={setSidePanelData}>
         <div className="my-6">
           <div className="flex items-center justify-center">
             {message ? (

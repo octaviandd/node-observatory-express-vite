@@ -11,11 +11,24 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RequestPreviewTabs } from "./tabs";
+import { CacheInstanceResponse, ExceptionInstanceResponse, HttpClientInstanceResponse, JobInstanceResponse, LogInstanceResponse, MailInstanceResponse, ModelInstanceResponse, NotificationInstanceResponse, QueryInstanceResponse, RequestInstanceResponse, ViewInstanceResponse } from "../../../../../types";
 
 export default function RequestPreview() {
   const params = useParams();
-  const [data, setData] = useState<any>({
-    request: {},
+  const [data, setData] = useState<{
+    request: RequestInstanceResponse | null
+    notifications: NotificationInstanceResponse[] | [],
+    mails: MailInstanceResponse[] | [],
+    logs: LogInstanceResponse[] | [],
+    queries: QueryInstanceResponse[] | [],
+    https: HttpClientInstanceResponse[] | [],
+    jobs: JobInstanceResponse[] | [],
+    caches: CacheInstanceResponse[] | [],
+    exceptions: ExceptionInstanceResponse[] | [],
+    views: ViewInstanceResponse[] | [],
+    models: ModelInstanceResponse[] | [],
+  }>({
+    request: null,
     notifications: [],
     mails: [],
     logs: [],
@@ -94,11 +107,12 @@ export default function RequestPreview() {
 
   return (
     <div className="flex flex-col gap-y-6">
-      <RequestCrumbs request={data.request} />
+      {data.request && <RequestCrumbs request={data.request} />}
+      
 
       <Card>
         <CardContent className="grid grid-cols-2 gap-x-10 p-5">
-          <RequestPreviewInfo request={data.request} />
+          {data.request && <RequestPreviewInfo request={data.request} />}
           <RequestPreviewDetails
             queries={data.queries}
             caches={data.caches}
@@ -108,7 +122,7 @@ export default function RequestPreview() {
             views={data.views}
             models={data.models}
           />
-          <RequestPreviewUser request={data.request} />
+          {data.request && <RequestPreviewUser request={data.request} />}
           <RequestPreviewNotifications
             mails={data.mails}
             notifications={data.notifications}
@@ -117,7 +131,7 @@ export default function RequestPreview() {
         </CardContent>
       </Card>
 
-      <RequestPreviewTabs data={data} />
+      {data.request && <RequestPreviewTabs data={{...data, request: data.request}} />}
     </div>
   );
 }

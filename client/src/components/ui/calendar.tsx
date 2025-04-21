@@ -58,7 +58,7 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        // @ts-ignore
+        // @ts-expect-error Icon bad
         IconLeft: ({ className, ...props }: { className?: string }) => (
           <ChevronLeft className={cn("h-4 w-4", className)} {...props} />
         ),

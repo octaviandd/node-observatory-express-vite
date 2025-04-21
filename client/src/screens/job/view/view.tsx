@@ -1,6 +1,6 @@
 /** @format */
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { JobPreviewCrumbs } from "./crumbs";
 import { JobPreviewDetails } from "./details";
@@ -13,7 +13,7 @@ import Source from "./source";
 
 export default function JobPreview() {
   const params = useParams();
-  const [job, setJob] = useState<any>(null);
+  const [job, setJob] = useState<JobInstanceResponse | null>(null);
   const [data, setData] = useState<{
     job: JobInstanceResponse;
     notifications: NotificationInstanceResponse[];
@@ -60,8 +60,6 @@ export default function JobPreview() {
       const data = await response.json();
       const { query, http, job, cache, notification, mail, log, exception, request, model, schedule } = data;
 
-      console.log(data)
-
       if (!job?.[0]) {
         throw new Error('Job data not found');
       }
@@ -107,7 +105,7 @@ export default function JobPreview() {
         <CardContent className="p-6">
           <div className="flex items-center gap-x-4">
             <span className="text-sm text-muted-foreground uppercase">Details</span>
-            <span>{job.duration}</span>
+            {job && <span>{job.content.duration}</span>}
           </div>
         </CardContent>
       </Card>
