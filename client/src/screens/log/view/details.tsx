@@ -1,9 +1,13 @@
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { timeAgo } from '@/utils.js'
-import { LogInstanceResponse } from '../../../../../types'
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { timeAgo } from "@/utils.js";
+import { LogInstanceResponse } from "../../../../../types";
 
-export default function Details({ data }: { data: { log: LogInstanceResponse } }) {
+export default function Details({
+  data,
+}: {
+  data: { log: LogInstanceResponse };
+}) {
   const LOG_LEVELS = [
     { dataKey: "info", variant: "secondary" },
     { dataKey: "warn", variant: "warning" },
@@ -41,7 +45,23 @@ export default function Details({ data }: { data: { log: LogInstanceResponse } }
             <div className="col-span-3 text-muted-foreground">Level</div>
             <div className="col-span-9">
               <Badge
-                variant={LOG_LEVELS.find((level) => level.dataKey === data.log.content.level)?.variant as "secondary" | "warning" | "error" | "debug" | "trace" | "log" | "default" | "destructive" | "outline" | "success" | null | undefined}
+                variant={
+                  LOG_LEVELS.find(
+                    (level) => level.dataKey === data.log.content.level,
+                  )?.variant as
+                    | "secondary"
+                    | "warning"
+                    | "error"
+                    | "debug"
+                    | "trace"
+                    | "log"
+                    | "default"
+                    | "destructive"
+                    | "outline"
+                    | "success"
+                    | null
+                    | undefined
+                }
               >
                 {data.log.content.level.toUpperCase()}
               </Badge>
@@ -61,5 +81,5 @@ export default function Details({ data }: { data: { log: LogInstanceResponse } }
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

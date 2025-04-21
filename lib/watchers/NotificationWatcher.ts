@@ -13,12 +13,18 @@ interface NotificationFilters extends WatcherFilters {
 class NotificationWatcher extends BaseWatcher {
   readonly type = "notification";
 
-  constructor(storeDriver: StoreDriver, storeConnection: any, redisClient: any) {
+  constructor(
+    storeDriver: StoreDriver,
+    storeConnection: any,
+    redisClient: any,
+  ) {
     super(storeDriver, storeConnection, redisClient);
   }
 
   private getStatusSQL(status: string) {
-    return status === "all" ? "" : `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = '${status}'`;
+    return status === "all"
+      ? ""
+      : `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = '${status}'`;
   }
 
   /**
@@ -28,7 +34,7 @@ class NotificationWatcher extends BaseWatcher {
   protected async handleViewSQL(id: string): Promise<any> {
     let [results]: [any[], any] = await this.storeConnection.query(
       "SELECT * FROM observatory_entries WHERE uuid = ?",
-      [id]
+      [id],
     );
 
     let item = results[0];
@@ -51,19 +57,23 @@ class NotificationWatcher extends BaseWatcher {
       params.push(item.job_id);
     }
 
-    let jobCondition = ''
+    let jobCondition = "";
 
-    if(item.job_id) {
-      jobCondition = "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')";
+    if (item.job_id) {
+      jobCondition =
+        "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')";
     }
 
-    if(!item.request_id && !item.schedule_id && !item.job_id) {
+    if (!item.request_id && !item.schedule_id && !item.job_id) {
       return this.groupItemsByType(results);
     }
 
     const [relatedItems]: [any[], any] = await this.storeConnection.query(
-      "SELECT * FROM observatory_entries WHERE " + conditions.join(" OR ") + " AND type != ? " + jobCondition,
-      [...params, this.type]
+      "SELECT * FROM observatory_entries WHERE " +
+        conditions.join(" OR ") +
+        " AND type != ? " +
+        jobCondition,
+      [...params, this.type],
     );
 
     return this.groupItemsByType(relatedItems.concat(results));
@@ -73,27 +83,35 @@ class NotificationWatcher extends BaseWatcher {
    * Related Data Methods
    * --------------------------------------------------------------------------
    */
-   protected async handleRelatedDataSQL(modelId: string, requestId: string, jobId: string, scheduleId: string): Promise<any> {
-    let query = 'SELECT * FROM observatory_entries WHERE type != ?';
+  protected async handleRelatedDataSQL(
+    modelId: string,
+    requestId: string,
+    jobId: string,
+    scheduleId: string,
+  ): Promise<any> {
+    let query = "SELECT * FROM observatory_entries WHERE type != ?";
 
-    if(requestId) {
+    if (requestId) {
       query += ` AND request_id = '${requestId}'`;
     }
 
     if (jobId) {
-      let jobFilter = "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')";
+      let jobFilter =
+        "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')";
       query += ` AND job_id = '${jobId}' ${jobFilter}`;
     }
 
-    if(scheduleId) {
+    if (scheduleId) {
       query += ` AND schedule_id = '${scheduleId}'`;
     }
 
-    if(!requestId && !jobId && !scheduleId) {
-      return {}
+    if (!requestId && !jobId && !scheduleId) {
+      return {};
     }
 
-    const [results]: [any[], any] = await this.storeConnection.query(query, [this.type]);
+    const [results]: [any[], any] = await this.storeConnection.query(query, [
+      this.type,
+    ]);
     return this.groupItemsByType(results);
   }
 
@@ -101,7 +119,9 @@ class NotificationWatcher extends BaseWatcher {
    * Instance Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async getIndexTableDataByInstanceSQL(filters: NotificationFilters): Promise<any> {
+  protected async getIndexTableDataByInstanceSQL(
+    filters: NotificationFilters,
+  ): Promise<any> {
     const { limit, offset, channel, query, status } = filters;
     const channelSql = channel ? this.getEqualitySQL(channel, "channel") : "";
     const querySql = query ? this.getInclusionSQL(query, "channel") : "";
@@ -112,14 +132,14 @@ class NotificationWatcher extends BaseWatcher {
        WHERE type = 'notification' ${channelSql} ${querySql} ${statusSql} 
        AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) != 'pending'
        ORDER BY created_at DESC 
-       LIMIT ${limit} OFFSET ${offset}`
+       LIMIT ${limit} OFFSET ${offset}`,
     );
 
     const [countResult] = await this.storeConnection.query(
       `SELECT COUNT(*) as total   
        FROM observatory_entries 
        WHERE type = 'notification' ${channelSql} ${querySql} ${statusSql}
-       AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) != 'pending'`
+       AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) != 'pending'`,
     );
 
     return { results, count: this.formatValue(countResult[0].total, true) };
@@ -129,7 +149,9 @@ class NotificationWatcher extends BaseWatcher {
    * Group Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async getIndexTableDataByGroupSQL(filters: NotificationFilters): Promise<any> {
+  protected async getIndexTableDataByGroupSQL(
+    filters: NotificationFilters,
+  ): Promise<any> {
     const { period, channel, query, offset, limit } = filters;
     const timeSql = period ? this.getPeriodSQL(period) : "";
     const channelSql = channel ? this.getEqualitySQL(channel, "channel") : "";
@@ -164,11 +186,11 @@ class NotificationWatcher extends BaseWatcher {
         GROUP BY JSON_UNQUOTE(JSON_EXTRACT(content, '$.channel'))
         ORDER BY MAX(created_at) DESC
         LIMIT ? OFFSET ?`,
-      [limit, offset]
+      [limit, offset],
     )) as [any];
 
     const [countResult] = (await this.storeConnection.query(
-      `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.channel'))) as total FROM observatory_entries WHERE type = 'notification' ${channelSql} ${timeSql}`
+      `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.channel'))) as total FROM observatory_entries WHERE type = 'notification' ${channelSql} ${timeSql}`,
     )) as [any[]];
 
     return { results, count: this.formatValue(countResult[0].total, true) };
@@ -178,7 +200,9 @@ class NotificationWatcher extends BaseWatcher {
    * Graph Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async getIndexGraphDataSQL(filters: NotificationFilters): Promise<any> {
+  protected async getIndexGraphDataSQL(
+    filters: NotificationFilters,
+  ): Promise<any> {
     const { period, channel } = filters;
     const periodSql = period ? this.getPeriodSQL(period) : "";
     const channelSql = channel ? this.getEqualitySQL(channel, "channel") : "";
@@ -229,10 +253,10 @@ class NotificationWatcher extends BaseWatcher {
         FROM observatory_entries
         WHERE type = 'notification' ${periodSql} ${channelSql} AND JSON_EXTRACT(content, '$.status') != 'pending'
         ORDER BY created_at DESC
-      );`
+      );`,
     );
 
-    const aggregateResults : {
+    const aggregateResults: {
       total: number;
       shortest: string | null;
       longest: string | null;
@@ -242,7 +266,10 @@ class NotificationWatcher extends BaseWatcher {
       p95: string | null;
     } = results.shift();
     const countFormattedData = this.countGraphData(results, period as string);
-    const durationFormattedData = this.durationGraphData(results, period as string);
+    const durationFormattedData = this.durationGraphData(
+      results,
+      period as string,
+    );
 
     return {
       countFormattedData,
@@ -256,7 +283,7 @@ class NotificationWatcher extends BaseWatcher {
       p95: this.formatValue(aggregateResults.p95),
     };
   }
-  
+
   /**
    * Helper Methods
    * --------------------------------------------------------------------------
@@ -270,15 +297,15 @@ class NotificationWatcher extends BaseWatcher {
     const groupedData = Array.from({ length: 120 }, (_, index) => ({
       completed: 0,
       failed: 0,
-      label: this.getLabel(index, period)
+      label: this.getLabel(index, period),
     }));
 
     data.forEach((notification: any) => {
-      if (notification.content.status !== 'pending') {
+      if (notification.content.status !== "pending") {
         const notificationTime = new Date(notification.created_at).getTime();
         const status = notification.content.status;
         const intervalIndex = Math.floor(
-          (notificationTime - startDate) / (intervalDuration * 60 * 1000)
+          (notificationTime - startDate) / (intervalDuration * 60 * 1000),
         );
 
         if (intervalIndex >= 0 && intervalIndex < 120) {

@@ -1,6 +1,12 @@
 /** @format */
 
-import { ExternalLink, Globe, AlertCircle, AlertOctagon, CheckCircle } from "lucide-react";
+import {
+  ExternalLink,
+  Globe,
+  AlertCircle,
+  AlertOctagon,
+  CheckCircle,
+} from "lucide-react";
 import { Link } from "react-router";
 import {
   Table,
@@ -12,7 +18,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {memo, ReactNode} from "react";
+import { memo, ReactNode } from "react";
 import { formatCount, formatDuration } from "@/utils.js";
 import { HttpClientGroupResponse } from "../../../../../types";
 
@@ -44,12 +50,18 @@ export const GroupTable = memo(({ data, children }: Props) => {
               </TableCell>
               <TableCell>
                 <div className="flex gap-2">
-                  <Badge variant="secondary" className="flex gap-1 items-center">
+                  <Badge
+                    variant="secondary"
+                    className="flex gap-1 items-center"
+                  >
                     <CheckCircle className="h-3 w-3" />
                     {formatCount(request.count_200)}
                   </Badge>
                   {request.count_400 > 0 && (
-                    <Badge variant="warning" className="flex gap-1 items-center">
+                    <Badge
+                      variant="warning"
+                      className="flex gap-1 items-center"
+                    >
                       <AlertCircle className="h-3 w-3" />
                       {formatCount(request.count_400)}
                     </Badge>
@@ -63,7 +75,13 @@ export const GroupTable = memo(({ data, children }: Props) => {
                 </div>
               </TableCell>
               <TableCell>
-                <p className={request.average && request.average > 999 ? "text-yellow-600" : "text-black dark:text-white"}>
+                <p
+                  className={
+                    request.average && request.average > 999
+                      ? "text-yellow-600"
+                      : "text-black dark:text-white"
+                  }
+                >
                   {formatDuration(request.average)}
                 </p>
               </TableCell>

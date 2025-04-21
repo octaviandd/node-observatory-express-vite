@@ -2,7 +2,11 @@ import { Request, Response } from "express";
 import { StoreDriver } from "../../types";
 import Watcher, { WatcherEntry, WatcherFilters } from "./Watcher";
 import { v4 as uuidv4 } from "uuid";
-import { requestLocalStorage, jobLocalStorage, scheduleLocalStorage } from './../patchers/store';
+import {
+  requestLocalStorage,
+  jobLocalStorage,
+  scheduleLocalStorage,
+} from "./../patchers/store";
 import { Connection as PromiseConnection } from "mysql2/promise";
 
 export abstract class BaseWatcher implements Watcher {
@@ -37,7 +41,11 @@ export abstract class BaseWatcher implements Watcher {
    * Constructor & Initialization
    * --------------------------------------------------------------------------
    */
-  constructor(storeDriver: StoreDriver, storeConnection: PromiseConnection, redisClient: any) {
+  constructor(
+    storeDriver: StoreDriver,
+    storeConnection: PromiseConnection,
+    redisClient: any,
+  ) {
     this.storeDriver = storeDriver;
     this.redisClient = redisClient ? redisClient : null;
     this.refreshInterval;
@@ -76,7 +84,12 @@ export abstract class BaseWatcher implements Watcher {
     try {
       const modelId = req.params.id;
       const { requestId, jobId, scheduleId } = req.body;
-      const data = await this.handleRelatedData(modelId, requestId, jobId, scheduleId);
+      const data = await this.handleRelatedData(
+        modelId,
+        requestId,
+        jobId,
+        scheduleId,
+      );
       return res.status(200).json(data);
     } catch (error) {
       console.error(error);
@@ -88,8 +101,12 @@ export abstract class BaseWatcher implements Watcher {
     const entry: WatcherEntry = {
       uuid: uuidv4(),
       type: this.type,
-      content: JSON.stringify(this.type ==='request' || this.type === 'http' ? this.sanitizeContent(content) : content),
-      created_at: Date.now()
+      content: JSON.stringify(
+        this.type === "request" || this.type === "http"
+          ? this.sanitizeContent(content)
+          : content,
+      ),
+      created_at: Date.now(),
     };
 
     if (requestLocalStorage.getStore()?.get("requestId")) {
@@ -118,7 +135,7 @@ export abstract class BaseWatcher implements Watcher {
       return;
     }
 
-    const key = `observatory_entries:${this.type}:${entry.uuid}:${entry.requestId ?? 'null'}:${entry.jobId ?? 'null'}:${entry.scheduleId ?? 'null'}:${entry.created_at}`;
+    const key = `observatory_entries:${this.type}:${entry.uuid}:${entry.requestId ?? "null"}:${entry.jobId ?? "null"}:${entry.scheduleId ?? "null"}:${entry.created_at}`;
 
     delete entry.uuid;
     delete entry.requestId;
@@ -127,12 +144,12 @@ export abstract class BaseWatcher implements Watcher {
     delete entry.created_at;
     delete entry.type;
 
-     try {
-       await this.redisClient.set(key, JSON.stringify(entry.content));
-     } catch (error) {
-       console.error(`Error setting Redis key: ${key}`, error);
-       throw error;
-     }
+    try {
+      await this.redisClient.set(key, JSON.stringify(entry.content));
+    } catch (error) {
+      console.error(`Error setting Redis key: ${key}`, error);
+      throw error;
+    }
   }
 
   protected async refreshData(req: Request, res: Response): Promise<Response> {
@@ -147,12 +164,12 @@ export abstract class BaseWatcher implements Watcher {
 
   protected async migrateToDatabase() {
     this.refreshInterval = setInterval(async () => {
-       if (this.isMigrating) {
+      if (this.isMigrating) {
         return;
-       }
+      }
 
       this.isMigrating = true;
-      let cursor = '0';
+      let cursor = "0";
 
       const allKeys = [];
       const pattern = `observatory_entries:${this.type}:*`;
@@ -162,7 +179,7 @@ export abstract class BaseWatcher implements Watcher {
         do {
           const reply = await this.redisClient.scan(cursor, {
             MATCH: pattern,
-            COUNT: scanCount
+            COUNT: scanCount,
           });
 
           cursor = reply.cursor.toString();
@@ -171,12 +188,12 @@ export abstract class BaseWatcher implements Watcher {
           if (keysInBatch.length > 0) {
             allKeys.push(...keysInBatch);
           }
-        } while (cursor !== '0');
-          
-          if (!allKeys || !allKeys.length) {
-            this.isMigrating = false;
-            return;
-          }
+        } while (cursor !== "0");
+
+        if (!allKeys || !allKeys.length) {
+          this.isMigrating = false;
+          return;
+        }
 
         const parsedValues: any[] = [];
 
@@ -185,40 +202,47 @@ export abstract class BaseWatcher implements Watcher {
           key: key,
           value: values[index],
         }));
-      
-       const validKeyValuePairs = keyValuePairs.filter(kv => kv.value !== null);
 
-        validKeyValuePairs.forEach(({ key, value }: { key: any; value: any }) => {
-          try {
-            const timestamp = key.split(":").pop();
-            const date = new Date(parseInt(timestamp));
-            const formattedDate = date.toISOString().replace('T', ' ').substring(0, 19);
+        const validKeyValuePairs = keyValuePairs.filter(
+          (kv) => kv.value !== null,
+        );
 
-            const keySegments = key.split(':');
-            const parsedEntry : {[key: string]: any} = {
-              type: keySegments[1],
-              uuid: keySegments[2],
-              content: typeof value === "string" ? JSON.parse(value) : value,
-              created_at: formattedDate
-            };
-            
-            const requestIdSegment = keySegments[3];
-            const jobIdSegment = keySegments[4];
-            const scheduleIdSegment = keySegments[5];
+        validKeyValuePairs.forEach(
+          ({ key, value }: { key: any; value: any }) => {
+            try {
+              const timestamp = key.split(":").pop();
+              const date = new Date(parseInt(timestamp));
+              const formattedDate = date
+                .toISOString()
+                .replace("T", " ")
+                .substring(0, 19);
 
-            const hasRequestId = requestIdSegment !== 'null' ? true : false;
-            const hasJobId = jobIdSegment !== 'null' ? true : false;
-            const hasScheduleId = scheduleIdSegment !== 'null' ? true : false;
+              const keySegments = key.split(":");
+              const parsedEntry: { [key: string]: any } = {
+                type: keySegments[1],
+                uuid: keySegments[2],
+                content: typeof value === "string" ? JSON.parse(value) : value,
+                created_at: formattedDate,
+              };
 
-            if(hasRequestId) parsedEntry.request_id = requestIdSegment;
-            if(hasJobId) parsedEntry.job_id = jobIdSegment;
-            if(hasScheduleId) parsedEntry.schedule_id = scheduleIdSegment;
+              const requestIdSegment = keySegments[3];
+              const jobIdSegment = keySegments[4];
+              const scheduleIdSegment = keySegments[5];
 
-            parsedValues.push(parsedEntry);
-          } catch (error) {
-            console.error(`Error parsing value for key ${key}:`, error);
-          }
-        });
+              const hasRequestId = requestIdSegment !== "null" ? true : false;
+              const hasJobId = jobIdSegment !== "null" ? true : false;
+              const hasScheduleId = scheduleIdSegment !== "null" ? true : false;
+
+              if (hasRequestId) parsedEntry.request_id = requestIdSegment;
+              if (hasJobId) parsedEntry.job_id = jobIdSegment;
+              if (hasScheduleId) parsedEntry.schedule_id = scheduleIdSegment;
+
+              parsedValues.push(parsedEntry);
+            } catch (error) {
+              console.error(`Error parsing value for key ${key}:`, error);
+            }
+          },
+        );
 
         if (parsedValues.length > 0) {
           try {
@@ -238,11 +262,15 @@ export abstract class BaseWatcher implements Watcher {
                         entry.content,
                         entry.created_at,
                       ]),
-                    ]
+                    ],
                   );
                   await this.storeConnection.query("COMMIT");
                 } catch (error) {
-                  console.error("Error inserting batch data:", error, this.type);
+                  console.error(
+                    "Error inserting batch data:",
+                    error,
+                    this.type,
+                  );
                 }
                 break;
             }
@@ -278,7 +306,6 @@ export abstract class BaseWatcher implements Watcher {
     }
   }
 
-
   async handleView(id: string): Promise<any> {
     switch (this.storeDriver) {
       case "mysql2":
@@ -298,11 +325,19 @@ export abstract class BaseWatcher implements Watcher {
   }
 
   protected async getAllEntriesSQL(): Promise<any> {
-    const [results] = await this.storeConnection.query("SELECT * FROM observatory_entries WHERE type = ?", [this.type]);
+    const [results] = await this.storeConnection.query(
+      "SELECT * FROM observatory_entries WHERE type = ?",
+      [this.type],
+    );
     return results;
   }
 
-  protected handleRelatedData(modelId: string, requestId: string, jobId: string, scheduleId: string): Promise<any> {
+  protected handleRelatedData(
+    modelId: string,
+    requestId: string,
+    jobId: string,
+    scheduleId: string,
+  ): Promise<any> {
     switch (this.storeDriver) {
       case "mysql2":
         return this.handleRelatedDataSQL(modelId, requestId, jobId, scheduleId);
@@ -318,7 +353,15 @@ export abstract class BaseWatcher implements Watcher {
   protected async handleAddSQL(entry: WatcherEntry): Promise<void> {
     await this.storeConnection.query(
       "INSERT INTO observatory_entries (uuid, request_id, job_id, schedule_id, type, content, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [entry.uuid, entry.requestId, entry.jobId, entry.scheduleId, entry.type, entry.content, new Date()]
+      [
+        entry.uuid,
+        entry.requestId,
+        entry.jobId,
+        entry.scheduleId,
+        entry.type,
+        entry.content,
+        new Date(),
+      ],
     );
   }
 
@@ -345,15 +388,15 @@ export abstract class BaseWatcher implements Watcher {
     }
     this.refreshIntervalDuration = interval;
     this.migrateToDatabase();
-  }
+  };
 
   protected formatValue = (value: string | number | null, isCount = false) => {
-    if (!value) return '0' + (isCount ? '' : 'ms');
+    if (!value) return "0" + (isCount ? "" : "ms");
     const num = Number(value);
     if (num > 999) {
-      return `${(num / 1000).toFixed(2)}${isCount ? 'K' : 's'}`;
+      return `${(num / 1000).toFixed(2)}${isCount ? "K" : "s"}`;
     }
-    return `${num}${isCount ? '' : 'ms'}`;
+    return `${num}${isCount ? "" : "ms"}`;
   };
 
   protected groupItemsByType(items: any): { [key: string]: any[] } {
@@ -361,7 +404,7 @@ export abstract class BaseWatcher implements Watcher {
       const type = item.type;
       if (!acc[type]) {
         acc[type] = [];
-      } 
+      }
       acc[type].push(item);
       return acc;
     }, {});
@@ -372,7 +415,7 @@ export abstract class BaseWatcher implements Watcher {
 
     const sanitize = (obj: any): any => {
       // Handle non-object types
-      if (obj === null || typeof obj !== 'object') {
+      if (obj === null || typeof obj !== "object") {
         return obj;
       }
 
@@ -383,12 +426,12 @@ export abstract class BaseWatcher implements Watcher {
 
       // Handle arrays
       if (Array.isArray(obj)) {
-        return obj.map(item => sanitize(item));
+        return obj.map((item) => sanitize(item));
       }
 
       // Detect circular reference
       if (seen.has(obj)) {
-        return '[Circular Reference]';
+        return "[Circular Reference]";
       }
 
       // Add object to seen set
@@ -401,7 +444,7 @@ export abstract class BaseWatcher implements Watcher {
       for (const [key, value] of Object.entries(obj)) {
         try {
           // Skip functions
-          if (typeof value === 'function') {
+          if (typeof value === "function") {
             continue;
           }
           // Recursively sanitize value
@@ -427,13 +470,13 @@ export abstract class BaseWatcher implements Watcher {
     const now = Date.now(); // current timestamp (ms)
     const startDate = now - totalDuration * 60 * 1000; // start time (ms)
 
-     const groupedData = Array.from({ length: slotsCount }, (_, index) => ({
+    const groupedData = Array.from({ length: slotsCount }, (_, index) => ({
       durations: [] as number[],
       avgDuration: 0,
       p95: 0,
       count: 0,
-      label: this.getLabel(index, period)
-     }));
+      label: this.getLabel(index, period),
+    }));
 
     data.forEach((request: any) => {
       const requestTime = new Date(request.created_at).getTime();
@@ -441,7 +484,7 @@ export abstract class BaseWatcher implements Watcher {
 
       // Figure out which interval slot this request belongs to
       const intervalIndex = Math.floor(
-        (requestTime - startDate) / (intervalDuration * 60 * 1000)
+        (requestTime - startDate) / (intervalDuration * 60 * 1000),
       );
 
       if (intervalIndex >= 0 && intervalIndex < slotsCount) {
@@ -449,7 +492,7 @@ export abstract class BaseWatcher implements Watcher {
       }
     });
 
-     groupedData.forEach((slot, index) => {
+    groupedData.forEach((slot, index) => {
       const len = slot.durations.length;
       if (len > 0) {
         slot.durations.sort((a, b) => a - b);
@@ -472,63 +515,119 @@ export abstract class BaseWatcher implements Watcher {
 
     if (period === "1h") {
       let oneHourAgo = new Date().getTime() - 60 * 60 * 1000;
-      let interval = oneHourAgo + (index * intervalDuration * 60 * 1000);
-      let label = new Date(interval).toLocaleTimeString('en-US', { minute: '2-digit', second: '2-digit' }) + " - " + new Date(interval + intervalDuration * 60 * 1000).toLocaleTimeString('en-US', { minute: '2-digit', second: '2-digit' });
+      let interval = oneHourAgo + index * intervalDuration * 60 * 1000;
+      let label =
+        new Date(interval).toLocaleTimeString("en-US", {
+          minute: "2-digit",
+          second: "2-digit",
+        }) +
+        " - " +
+        new Date(interval + intervalDuration * 60 * 1000).toLocaleTimeString(
+          "en-US",
+          { minute: "2-digit", second: "2-digit" },
+        );
       return label;
     }
 
     if (period === "24h") {
       let oneDayAgo = new Date().getTime() - 24 * 60 * 60 * 1000;
-      let interval = oneDayAgo + (index * intervalDuration * 60 * 1000);
-      let label = new Date(interval).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + " - " + new Date(interval + intervalDuration * 60 * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      let interval = oneDayAgo + index * intervalDuration * 60 * 1000;
+      let label =
+        new Date(interval).toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }) +
+        " - " +
+        new Date(interval + intervalDuration * 60 * 1000).toLocaleTimeString(
+          "en-US",
+          { hour: "2-digit", minute: "2-digit" },
+        );
       return label;
     }
 
     if (period === "7d") {
       let oneWeekAgo = new Date().getTime() - 7 * 24 * 60 * 60 * 1000;
-      let interval = oneWeekAgo + (index * intervalDuration * 60 * 1000);
-      let label = new Date(interval).toLocaleTimeString('en-US', {weekday: 'short', hour: '2-digit', minute: '2-digit' }) + " - " + new Date(interval + intervalDuration * 60 * 1000).toLocaleTimeString('en-US', {weekday: 'short', hour: '2-digit', minute: '2-digit' });
+      let interval = oneWeekAgo + index * intervalDuration * 60 * 1000;
+      let label =
+        new Date(interval).toLocaleTimeString("en-US", {
+          weekday: "short",
+          hour: "2-digit",
+          minute: "2-digit",
+        }) +
+        " - " +
+        new Date(interval + intervalDuration * 60 * 1000).toLocaleTimeString(
+          "en-US",
+          { weekday: "short", hour: "2-digit", minute: "2-digit" },
+        );
       return label;
     }
 
     if (period === "14d") {
       let twoWeeksAgo = new Date().getTime() - 14 * 24 * 60 * 60 * 1000;
-      let interval = twoWeeksAgo + (index * intervalDuration * 60 * 1000);
-      let label = new Date(interval).toLocaleTimeString('en-US', {weekday: 'short', hour: '2-digit', minute: '2-digit' }) + " - " + new Date(interval + intervalDuration * 60 * 1000).toLocaleTimeString('en-US', {weekday: 'short', hour: '2-digit', minute: '2-digit' });
+      let interval = twoWeeksAgo + index * intervalDuration * 60 * 1000;
+      let label =
+        new Date(interval).toLocaleTimeString("en-US", {
+          weekday: "short",
+          hour: "2-digit",
+          minute: "2-digit",
+        }) +
+        " - " +
+        new Date(interval + intervalDuration * 60 * 1000).toLocaleTimeString(
+          "en-US",
+          { weekday: "short", hour: "2-digit", minute: "2-digit" },
+        );
       return label;
     }
 
     if (period === "30d") {
       let oneMonthAgo = new Date().getTime() - 30 * 24 * 60 * 60 * 1000;
-      let interval = oneMonthAgo + (index * intervalDuration * 60 * 1000);
-      let label = new Date(interval).toLocaleTimeString('en-US', { weekday: 'short', hour: '2-digit', minute: '2-digit' }) + " - " + new Date(interval + intervalDuration * 60 * 1000).toLocaleTimeString('en-US', { weekday: 'short', hour: '2-digit', minute: '2-digit' });
+      let interval = oneMonthAgo + index * intervalDuration * 60 * 1000;
+      let label =
+        new Date(interval).toLocaleTimeString("en-US", {
+          weekday: "short",
+          hour: "2-digit",
+          minute: "2-digit",
+        }) +
+        " - " +
+        new Date(interval + intervalDuration * 60 * 1000).toLocaleTimeString(
+          "en-US",
+          { weekday: "short", hour: "2-digit", minute: "2-digit" },
+        );
       return label;
     }
   }
 
-   /**
+  /**
    * Index Methods
    * --------------------------------------------------------------------------
    */
 
   handleIndexTableOrGraph(filters: WatcherFilters) {
-    if(filters.isTable) {
+    if (filters.isTable) {
       return this.handleIndexTableByInstanceOrGroup(filters);
     } else {
-       const handler: Record<StoreDriver, (filters: WatcherFilters) => Promise<any>> = {
+      const handler: Record<
+        StoreDriver,
+        (filters: WatcherFilters) => Promise<any>
+      > = {
         mysql2: this.getIndexGraphDataSQL,
       };
       return handler[this.storeDriver].call(this, filters);
     }
   }
 
-
   handleIndexTableByInstanceOrGroup(filters: WatcherFilters) {
-    const handler: Record<StoreDriver, (filters: WatcherFilters) => Promise<any>> = filters.index === 'instance' ? {
-      mysql2: this.getIndexTableDataByInstanceSQL,
-    } : {
-      mysql2: this.getIndexTableDataByGroupSQL,
-    };
+    const handler: Record<
+      StoreDriver,
+      (filters: WatcherFilters) => Promise<any>
+    > =
+      filters.index === "instance"
+        ? {
+            mysql2: this.getIndexTableDataByInstanceSQL,
+          }
+        : {
+            mysql2: this.getIndexTableDataByGroupSQL,
+          };
 
     return handler[this.storeDriver].call(this, filters);
   }
@@ -540,13 +639,24 @@ export abstract class BaseWatcher implements Watcher {
   protected abstract countGraphData(data: any, period: string): any;
   protected abstract extractFiltersFromRequest(req: Request): WatcherFilters;
 
-  protected abstract handleRelatedDataSQL(modelId: string, requestId: string, jobId: string, scheduleId: string): Promise<any>;
+  protected abstract handleRelatedDataSQL(
+    modelId: string,
+    requestId: string,
+    jobId: string,
+    scheduleId: string,
+  ): Promise<any>;
 
-  protected abstract getIndexGraphDataSQL(filters: WatcherFilters): Promise<any>;
+  protected abstract getIndexGraphDataSQL(
+    filters: WatcherFilters,
+  ): Promise<any>;
 
-  protected abstract getIndexTableDataByGroupSQL(filters: WatcherFilters): Promise<any>;
+  protected abstract getIndexTableDataByGroupSQL(
+    filters: WatcherFilters,
+  ): Promise<any>;
 
-  protected abstract getIndexTableDataByInstanceSQL(filters: WatcherFilters): Promise<any>;
+  protected abstract getIndexTableDataByInstanceSQL(
+    filters: WatcherFilters,
+  ): Promise<any>;
 
   protected abstract handleViewSQL(id: string): Promise<any>;
 }

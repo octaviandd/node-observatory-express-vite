@@ -1,5 +1,5 @@
-import type { RequestOptions } from 'node:http';
-import * as url from 'url';
+import type { RequestOptions } from "node:http";
+import * as url from "url";
 import { HttpRequestData } from "../types";
 
 /**
@@ -25,7 +25,7 @@ export const isPackageInstalled = (npmPackage: string) => {
  * @returns @Object
  */
 export const parseHeaders = <T extends Record<string, string>>(
-  headersString: string
+  headersString: string,
 ): { method: string; path: string; version: string; headers: T } => {
   const [startLine, ...headerLines] = headersString.split("\r\n");
 
@@ -72,12 +72,11 @@ export function getCallerInfo(filename: string) {
   //     !line.includes("node:async_hooks")
   // })
 
-
   for (const line of stackLines) {
     // Skip lines from node_modules or the patcher itself
     if (
       !line.includes("node_modules") && // Exclude dependencies
-      !line.includes(filename) &&  // Exclude this patch file dynamically
+      !line.includes(filename) && // Exclude this patch file dynamically
       !line.includes(__filename) &&
       !line.includes("Namespace") &&
       !line.includes("node:async_hooks")
@@ -116,21 +115,21 @@ export const getRequestInfo = (
   let origin: string;
   let optionsParsed: RequestOptions;
   let invalidUrl = false;
-  if (typeof options === 'string') {
+  if (typeof options === "string") {
     try {
       const convertedOptions = stringUrlToHttpOptions(options);
       optionsParsed = convertedOptions;
-      pathname = convertedOptions.pathname || '/';
+      pathname = convertedOptions.pathname || "/";
     } catch (e) {
       invalidUrl = true;
       // for backward compatibility with how url.parse() behaved.
       optionsParsed = {
         path: options,
       };
-      pathname = optionsParsed.path || '/';
+      pathname = optionsParsed.path || "/";
     }
 
-    origin = `${optionsParsed.protocol || 'http:'}//${optionsParsed.host}`;
+    origin = `${optionsParsed.protocol || "http:"}//${optionsParsed.host}`;
     if (extraOptions !== undefined) {
       Object.assign(optionsParsed, extraOptions);
     }
@@ -138,12 +137,12 @@ export const getRequestInfo = (
     optionsParsed = {
       protocol: options.protocol,
       hostname:
-        typeof options.hostname === 'string' && options.hostname.startsWith('[')
+        typeof options.hostname === "string" && options.hostname.startsWith("[")
           ? options.hostname.slice(1, -1)
           : options.hostname,
-      path: `${options.pathname || ''}${options.search || ''}`,
+      path: `${options.pathname || ""}${options.search || ""}`,
     };
-    if (options.port !== '') {
+    if (options.port !== "") {
       optionsParsed.port = Number(options.port);
     }
     if (options.username || options.password) {
@@ -155,27 +154,34 @@ export const getRequestInfo = (
       Object.assign(optionsParsed, extraOptions);
     }
   } else {
-    optionsParsed = Object.assign({ protocol: options.host ? 'http:' : undefined }, options);
+    optionsParsed = Object.assign(
+      { protocol: options.host ? "http:" : undefined },
+      options,
+    );
 
     const hostname =
       optionsParsed.host ||
-      (optionsParsed.port != null ? `${optionsParsed.hostname}${optionsParsed.port}` : optionsParsed.hostname);
-    origin = `${optionsParsed.protocol || 'http:'}//${hostname}`;
+      (optionsParsed.port != null
+        ? `${optionsParsed.hostname}${optionsParsed.port}`
+        : optionsParsed.hostname);
+    origin = `${optionsParsed.protocol || "http:"}//${hostname}`;
 
     pathname = (options as url.URL).pathname;
     if (!pathname && optionsParsed.path) {
       try {
         const parsedUrl = new URL(optionsParsed.path, origin);
-        pathname = parsedUrl.pathname || '/';
+        pathname = parsedUrl.pathname || "/";
       } catch (e) {
-        pathname = '/';
+        pathname = "/";
       }
     }
   }
 
   // some packages return method in lowercase..
   // ensure upperCase for consistency
-  const method = optionsParsed.method ? optionsParsed.method.toUpperCase() : 'GET';
+  const method = optionsParsed.method
+    ? optionsParsed.method.toUpperCase()
+    : "GET";
 
   return { origin, pathname, method, optionsParsed, invalidUrl };
 };
@@ -193,9 +199,10 @@ export function httpRequestToRequestData(request: {
   };
 }): any {
   const headers = request.headers || {};
-  const host = typeof headers.host === 'string' ? headers.host : undefined;
-  const protocol = request.protocol || (request.socket?.encrypted ? 'https' : 'http');
-  const url = request.url || '';
+  const host = typeof headers.host === "string" ? headers.host : undefined;
+  const protocol =
+    request.protocol || (request.socket?.encrypted ? "https" : "http");
+  const url = request.url || "";
 
   const absoluteUrl = getAbsoluteUrl({
     url,
@@ -212,13 +219,13 @@ export function httpRequestToRequestData(request: {
 
   return dropUndefinedKeys({
     url: absoluteUrl,
-    method: request.method || 'GET',
+    method: request.method || "GET",
     query_string: extractQueryParamsFromUrl(url),
     headers: Object.fromEntries(
       Object.entries(headers).map(([key, value]) => [
         key,
-        Array.isArray(value) ? value.join(', ') : value
-      ])
+        Array.isArray(value) ? value.join(", ") : value,
+      ]),
     ),
     cookies,
     data,
@@ -236,19 +243,24 @@ export function dropUndefinedKeys<T>(inputValue: T): T {
 }
 
 function isPojo(input: unknown): input is Record<string, unknown> {
-  if (input === null || typeof input !== 'object') {
+  if (input === null || typeof input !== "object") {
     return false;
   }
 
   try {
-    const name = (Object.getPrototypeOf(input) as { constructor: { name: string } }).constructor.name;
-    return !name || name === 'Object';
+    const name = (
+      Object.getPrototypeOf(input) as { constructor: { name: string } }
+    ).constructor.name;
+    return !name || name === "Object";
   } catch {
     return true;
   }
 }
 
-function _dropUndefinedKeys<T>(inputValue: T, memoizationMap: Map<unknown, unknown>): T {
+function _dropUndefinedKeys<T>(
+  inputValue: T,
+  memoizationMap: Map<unknown, unknown>,
+): T {
   if (isPojo(inputValue)) {
     // If this node has already been visited due to a circular reference, return the object it was mapped to in the new object
     const memoVal = memoizationMap.get(inputValue);
@@ -261,7 +273,7 @@ function _dropUndefinedKeys<T>(inputValue: T, memoizationMap: Map<unknown, unkno
     memoizationMap.set(inputValue, returnValue);
 
     for (const key of Object.getOwnPropertyNames(inputValue)) {
-      if (typeof inputValue[key] !== 'undefined') {
+      if (typeof inputValue[key] !== "undefined") {
         returnValue[key] = _dropUndefinedKeys(inputValue[key], memoizationMap);
       }
     }
@@ -299,7 +311,7 @@ function getAbsoluteUrl({
   protocol: string;
   host?: string;
 }): string | undefined {
-  if (url?.startsWith('http')) {
+  if (url?.startsWith("http")) {
     return url;
   }
 
@@ -320,7 +332,7 @@ export function extractQueryParamsFromUrl(url: string): string | undefined {
   try {
     // The `URL` constructor can't handle internal URLs of the form `/some/path/here`, so stick a dummy protocol and
     // hostname as the base. Since the point here is just to grab the query string, it doesn't matter what we use.
-    const queryParams = new URL(url, 'http://s.io').search.slice(1);
+    const queryParams = new URL(url, "http://s.io").search.slice(1);
     return queryParams.length ? queryParams : undefined;
   } catch {
     return undefined;
@@ -336,13 +348,25 @@ export function extractQueryParamsFromUrl(url: string): string | undefined {
  * @param stringUrl
  * @throws TypeError if the URL is not valid.
  */
-function stringUrlToHttpOptions(stringUrl: string): RequestOptions & { pathname: string } {
+function stringUrlToHttpOptions(
+  stringUrl: string,
+): RequestOptions & { pathname: string } {
   // This is heavily inspired by Node.js handling of the same situation, trying
   // to follow it as closely as possible while keeping in mind that we only
   // deal with string URLs, not URL objects.
-  const { hostname, pathname, port, username, password, search, protocol, hash, href, origin, host } = new URL(
-    stringUrl,
-  );
+  const {
+    hostname,
+    pathname,
+    port,
+    username,
+    password,
+    search,
+    protocol,
+    hash,
+    href,
+    origin,
+    host,
+  } = new URL(stringUrl);
 
   const options: RequestOptions & {
     pathname: string;
@@ -352,16 +376,17 @@ function stringUrlToHttpOptions(stringUrl: string): RequestOptions & { pathname:
     origin: string;
   } = {
     protocol: protocol,
-    hostname: hostname && hostname[0] === '[' ? hostname.slice(1, -1) : hostname,
+    hostname:
+      hostname && hostname[0] === "[" ? hostname.slice(1, -1) : hostname,
     hash: hash,
     search: search,
     pathname: pathname,
-    path: `${pathname || ''}${search || ''}`,
+    path: `${pathname || ""}${search || ""}`,
     href: href,
     origin: origin,
     host: host,
   };
-  if (port !== '') {
+  if (port !== "") {
     options.port = Number(port);
   }
   if (username || password) {
@@ -370,11 +395,10 @@ function stringUrlToHttpOptions(stringUrl: string): RequestOptions & { pathname:
   return options;
 }
 
-
 /**
  * Standardizes HTTP request data from various libraries to conform to the HttpRequestData interface
  * This ensures consistent data structure regardless of which HTTP client library was used
- * 
+ *
  * @param data The raw HTTP request data from any supported library
  * @returns A standardized HttpRequestData object
  */
@@ -382,22 +406,22 @@ export function standardizeHttpRequestData(data: any): HttpRequestData {
   // Ensure all required fields are present
   const standardized: HttpRequestData = {
     // Required fields with fallbacks
-    method: (data.method || 'GET').toUpperCase(),
-    origin: data.origin || '',
-    pathname: data.pathname || data.path || '/',
-    protocol: data.protocol || 'http:',
+    method: (data.method || "GET").toUpperCase(),
+    origin: data.origin || "",
+    pathname: data.pathname || data.path || "/",
+    protocol: data.protocol || "http:",
     statusCode: data.statusCode || 0,
-    statusMessage: data.statusMessage || '',
+    statusMessage: data.statusMessage || "",
     duration: data.duration || 0,
     aborted: data.aborted || false,
     headers: data.headers || {},
-    responseBody: data.responseBody || '',
+    responseBody: data.responseBody || "",
     responseBodySize: data.responseBodySize || 0,
     isMedia: data.isMedia || false,
-    library: data.library || 'unknown',
-    file: data.file || '',
-    line: data.line || '',
-    ...data
+    library: data.library || "unknown",
+    file: data.file || "",
+    line: data.line || "",
+    ...data,
   };
 
   // Normalize hostname/host
@@ -413,7 +437,11 @@ export function standardizeHttpRequestData(data: any): HttpRequestData {
   }
 
   // Ensure responseBody is properly handled
-  if (standardized.responseBody && typeof standardized.responseBody !== 'string' && !(standardized.responseBody instanceof Buffer)) {
+  if (
+    standardized.responseBody &&
+    typeof standardized.responseBody !== "string" &&
+    !(standardized.responseBody instanceof Buffer)
+  ) {
     try {
       // Try to stringify if it's an object
       standardized.responseBody = JSON.stringify(standardized.responseBody);
@@ -425,8 +453,10 @@ export function standardizeHttpRequestData(data: any): HttpRequestData {
 
   // Calculate responseBodySize if not provided
   if (!standardized.responseBodySize && standardized.responseBody) {
-    if (typeof standardized.responseBody === 'string') {
-      standardized.responseBodySize = Buffer.byteLength(standardized.responseBody);
+    if (typeof standardized.responseBody === "string") {
+      standardized.responseBodySize = Buffer.byteLength(
+        standardized.responseBody,
+      );
     } else if (standardized.responseBody instanceof Buffer) {
       standardized.responseBodySize = standardized.responseBody.length;
     }
@@ -441,7 +471,7 @@ export function standardizeHttpRequestData(data: any): HttpRequestData {
 /**
  * Extracts the most important information from HTTP request data for display
  * This is useful for creating summaries or table views of HTTP requests
- * 
+ *
  * @param data The standardized HTTP request data
  * @returns An object with the most relevant fields for display
  */
@@ -457,7 +487,7 @@ export function extractHttpDisplayData(data: HttpRequestData): {
 } {
   // Create the full URL from components
   const url = `${data.origin}${data.pathname}`;
-  
+
   return {
     id: data.uuid,
     method: data.method,
@@ -466,6 +496,8 @@ export function extractHttpDisplayData(data: HttpRequestData): {
     duration: data.duration,
     size: data.responseBodySize,
     library: data.library,
-    timestamp: data.created_at ? new Date(data.created_at).toISOString() : undefined
+    timestamp: data.created_at
+      ? new Date(data.created_at).toISOString()
+      : undefined,
   };
 }

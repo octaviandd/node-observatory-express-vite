@@ -11,7 +11,8 @@ import { useIndexTableData } from "@/hooks/useIndexTableData";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 export default function ExceptionsIndexTable() {
-  const { instanceData,
+  const {
+    instanceData,
     groupData,
     instanceDataCount,
     groupDataCount,
@@ -28,9 +29,9 @@ export default function ExceptionsIndexTable() {
   } = useIndexTableData({
     key: "exceptions",
     defaultInstanceStatusType: "all",
-  })
+  });
 
-  const Table = index === 'instance' ? InstanceTable : GroupTable
+  const Table = index === "instance" ? InstanceTable : GroupTable;
 
   return (
     <div className="relative">
@@ -39,10 +40,16 @@ export default function ExceptionsIndexTable() {
           <div
             className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-xs z-50"
             onClick={() =>
-              setSidePanelData({ isOpen: false, requestId: "", jobId: "", scheduleId: "", modelId: "" })
+              setSidePanelData({
+                isOpen: false,
+                requestId: "",
+                jobId: "",
+                scheduleId: "",
+                modelId: "",
+              })
             }
           ></div>,
-          document.body
+          document.body,
         )}
       {sidePanelData.isOpen && (
         <SidePanel
@@ -81,7 +88,9 @@ export default function ExceptionsIndexTable() {
             value={instanceStatusType}
             onValueChange={(value) => value && setInstanceStatusType(value)}
           >
-            <span className="text-sm text-muted-foreground border rounded-md px-2 py-1">SHOW</span>
+            <span className="text-sm text-muted-foreground border rounded-md px-2 py-1">
+              SHOW
+            </span>
             {["ALL", "UNHANDLED", "UNCAUGHT"].map((label, index) => (
               <ToggleGroupItem
                 key={index}
@@ -92,19 +101,27 @@ export default function ExceptionsIndexTable() {
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
-        ) : (
-          null
-        )}
+        ) : null}
       </div>
-       {/* @ts-expect-error dumb ts*/}
-      <Table data={index === "instance" ? instanceData : groupData} setSidePanelData={setSidePanelData}>
+      {/* @ts-expect-error dumb ts*/}
+      <Table data={index === "instance" ? instanceData : groupData}
+        setSidePanelData={setSidePanelData}
+      >
         <div className="flex justify-center my-2">
           {message ? (
-            <Button variant="outline" className="text-muted-foreground" disabled>
+            <Button
+              variant="outline"
+              className="text-muted-foreground"
+              disabled
+            >
               {message}
             </Button>
           ) : (
-            <Button variant="outline" className="text-muted-foreground" onClick={loadData}>
+            <Button
+              variant="outline"
+              className="text-muted-foreground"
+              onClick={loadData}
+            >
               Load older entries
             </Button>
           )}

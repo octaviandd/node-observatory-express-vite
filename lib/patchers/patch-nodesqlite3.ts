@@ -5,9 +5,12 @@ import shimmer from "shimmer";
 import { watchers } from "../logger";
 import { getCallerInfo } from "../utils";
 
-const SQLITE3_PATCHED_SYMBOL = Symbol.for('node-observer:sqlite3-patched');
+const SQLITE3_PATCHED_SYMBOL = Symbol.for("node-observer:sqlite3-patched");
 
-if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERVATORY_DATABASES).includes("sqlite3")) {
+if (
+  process.env.NODE_OBSERVATORY_DATABASES &&
+  JSON.parse(process.env.NODE_OBSERVATORY_DATABASES).includes("sqlite3")
+) {
   if (!(global as any)[SQLITE3_PATCHED_SYMBOL]) {
     (global as any)[SQLITE3_PATCHED_SYMBOL] = true;
 
@@ -22,7 +25,12 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
 
       // Patch the `run` method
       shimmer.wrap(exports.Database.prototype, "run", function (originalRun) {
-        return function patchedRun(this: any, sql: string, params: any, callback: any) {
+        return function patchedRun(
+          this: any,
+          sql: string,
+          params: any,
+          callback: any,
+        ) {
           const startTime = performance.now();
 
           // Handle both run(sql, callback) and run(sql, params, callback) signatures
@@ -33,14 +41,7 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
 
           const wrappedCallback = function (this: any, err: Error | null) {
             const endTime = performance.now();
-            logQuery(
-              "run",
-              sql,
-              params,
-              undefined,
-              endTime - startTime,
-              err,
-            );
+            logQuery("run", sql, params, undefined, endTime - startTime, err);
             if (callback) {
               callback.call(this, err);
             }
@@ -52,7 +53,12 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
 
       // Patch the `get` method
       shimmer.wrap(exports.Database.prototype, "get", function (originalGet) {
-        return function patchedGet(this: any, sql: string, params: any, callback: any) {
+        return function patchedGet(
+          this: any,
+          sql: string,
+          params: any,
+          callback: any,
+        ) {
           const callerInfo = getCallerInfo(__filename);
           const startTime = performance.now();
 
@@ -62,16 +68,13 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
             params = [];
           }
 
-          const wrappedCallback = function (this: any, err: Error | null, row: any) {
+          const wrappedCallback = function (
+            this: any,
+            err: Error | null,
+            row: any,
+          ) {
             const endTime = performance.now();
-            logQuery(
-              "get",
-              sql,
-              params,
-              row,
-              endTime - startTime,
-              err,
-            );
+            logQuery("get", sql, params, row, endTime - startTime, err);
             if (callback) {
               callback.call(this, err, row);
             }
@@ -83,7 +86,12 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
 
       // Patch the `all` method
       shimmer.wrap(exports.Database.prototype, "all", function (originalAll) {
-        return function patchedAll(this: any, sql: string, params: any, callback: any) {
+        return function patchedAll(
+          this: any,
+          sql: string,
+          params: any,
+          callback: any,
+        ) {
           const startTime = performance.now();
 
           // Handle both all(sql, callback) and all(sql, params, callback) signatures
@@ -92,16 +100,13 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
             params = [];
           }
 
-          const wrappedCallback = function (this: any, err: Error | null, rows: any[]) {
+          const wrappedCallback = function (
+            this: any,
+            err: Error | null,
+            rows: any[],
+          ) {
             const endTime = performance.now();
-            logQuery(
-              "all",
-              sql,
-              params,
-              rows,
-              endTime - startTime,
-              err,
-            );
+            logQuery("all", sql, params, rows, endTime - startTime, err);
             if (callback) {
               callback.call(this, err, rows);
             }
@@ -118,14 +123,7 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
 
           const wrappedCallback = function (this: any, err: Error | null) {
             const endTime = performance.now();
-            logQuery(
-              "exec",
-              sql,
-              [],
-              undefined,
-              endTime - startTime,
-              err,
-            );
+            logQuery("exec", sql, [], undefined, endTime - startTime, err);
             if (callback) {
               callback.call(this, err);
             }

@@ -18,31 +18,43 @@ import { memo, ReactNode } from "react";
 
 type Props = {
   data: CacheInstanceResponse[];
-  setSidePanelData: ({ isOpen, modelId, requestId, jobId, scheduleId }: { isOpen: boolean, modelId: string, requestId: string, jobId: string, scheduleId: string}) => void;
+  setSidePanelData: ({
+    isOpen,
+    modelId,
+    requestId,
+    jobId,
+    scheduleId,
+  }: {
+    isOpen: boolean;
+    modelId: string;
+    requestId: string;
+    jobId: string;
+    scheduleId: string;
+  }) => void;
   children: ReactNode;
 };
 
 export const InstanceTable = memo((props: Props) => {
   const { data, setSidePanelData, children } = props;
-  
+
   const getStatusVariant = (hits: number, writes: number, misses: number) => {
     if (hits > 0) {
-      if (writes > 0) return 'secondary';
-      return 'secondary';
+      if (writes > 0) return "secondary";
+      return "secondary";
     }
-    if (writes > 0) return 'warning';
-    if (misses > 0) return 'error';
-    return 'secondary';
+    if (writes > 0) return "warning";
+    if (misses > 0) return "error";
+    return "secondary";
   };
 
   const getStatusText = (hits: number, writes: number, misses: number) => {
     if (hits > 0) {
-      if (writes > 0) return 'HIT + WRITE';
-      return 'HIT';
+      if (writes > 0) return "HIT + WRITE";
+      return "HIT";
     }
-    if (writes > 0) return 'WRITE';
-    if (misses > 0) return 'MISS';
-    return 'HIT';
+    if (writes > 0) return "WRITE";
+    if (misses > 0) return "MISS";
+    return "HIT";
   };
 
   return (
@@ -65,18 +77,40 @@ export const InstanceTable = memo((props: Props) => {
               </TableCell>
               <TableCell>
                 <span className="flex items-center gap-2">
-                  <p className="text-muted-foreground">[{cache.content.type.toUpperCase()}]</p>
-                  <p className="text-black dark:text-white">{cache.content.key}</p>
+                  <p className="text-muted-foreground">
+                    [{cache.content.type.toUpperCase()}]
+                  </p>
+                  <p className="text-black dark:text-white">
+                    {cache.content.key}
+                  </p>
                 </span>
               </TableCell>
               <TableCell>
-                <Badge variant={getStatusVariant(cache.content.hits, cache.content.writes, cache.content.misses)}>
-                  {getStatusText(cache.content.hits, cache.content.writes, cache.content.misses)}
+                <Badge
+                  variant={getStatusVariant(
+                    cache.content.hits,
+                    cache.content.writes,
+                    cache.content.misses,
+                  )}
+                >
+                  {getStatusText(
+                    cache.content.hits,
+                    cache.content.writes,
+                    cache.content.misses,
+                  )}
                 </Badge>
               </TableCell>
               <TableCell>
-                <p className={Number(cache.content.duration) > 999 ? "text-yellow-600" : "text-black dark:text-white"}>
-                  {(parseFloat(cache.content.duration as string) / 1000).toFixed(6)}
+                <p
+                  className={
+                    Number(cache.content.duration) > 999
+                      ? "text-yellow-600"
+                      : "text-black dark:text-white"
+                  }
+                >
+                  {(
+                    parseFloat(cache.content.duration as string) / 1000
+                  ).toFixed(6)}
                 </p>
               </TableCell>
               <TableCell>
@@ -84,13 +118,19 @@ export const InstanceTable = memo((props: Props) => {
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => setSidePanelData({ isOpen: true, modelId: cache.uuid ?? '', requestId: cache.request_id ?? '', jobId: cache.job_id ?? '', scheduleId: cache.schedule_id ?? ''})}
+                    onClick={() =>
+                      setSidePanelData({
+                        isOpen: true,
+                        modelId: cache.uuid ?? "",
+                        requestId: cache.request_id ?? "",
+                        jobId: cache.job_id ?? "",
+                        scheduleId: cache.schedule_id ?? "",
+                      })
+                    }
                   >
                     <Link2 className="h-4 w-4 text-muted-foreground" />
                   </Button>
-                  <Link
-                    to={`/cache/${cache.uuid}`}
-                  >
+                  <Link to={`/cache/${cache.uuid}`}>
                     <Button variant="outline" size="icon">
                       <ExternalLink className="h-4 w-4 text-muted-foreground" />
                     </Button>

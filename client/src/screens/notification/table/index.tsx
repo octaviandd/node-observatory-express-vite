@@ -11,7 +11,8 @@ import { useIndexTableData } from "@/hooks/useIndexTableData";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 export default function NotificationsIndexTable() {
-  const { instanceData,
+  const {
+    instanceData,
     groupData,
     instanceDataCount,
     groupDataCount,
@@ -28,9 +29,9 @@ export default function NotificationsIndexTable() {
   } = useIndexTableData({
     key: "notifications",
     defaultInstanceStatusType: "All",
-  })
+  });
 
-  const Table = index === 'instance' ? InstanceTable : GroupTable
+  const Table = index === "instance" ? InstanceTable : GroupTable;
 
   return (
     <div className="relative">
@@ -39,10 +40,16 @@ export default function NotificationsIndexTable() {
           <div
             className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-xs z-50"
             onClick={() =>
-              setSidePanelData({ isOpen: false, requestId: "", jobId: "", scheduleId: "", modelId: "" })
+              setSidePanelData({
+                isOpen: false,
+                requestId: "",
+                jobId: "",
+                scheduleId: "",
+                modelId: "",
+              })
             }
           ></div>,
-          document.body
+          document.body,
         )}
       {sidePanelData.isOpen && (
         <SidePanel
@@ -58,9 +65,7 @@ export default function NotificationsIndexTable() {
         <div className="flex items-center gap-2">
           <MessageSquareDot className="h-5 w-5 text-muted-foreground" />
           <span className="font-medium text-sm text-dark dark:text-white">
-            {index === "group"
-              ? groupDataCount
-              : instanceDataCount}{" "}
+            {index === "group" ? groupDataCount : instanceDataCount}{" "}
             {index === "group" ? "Channels" : "Notifications"}
           </span>
           {!modelKey && (
@@ -79,9 +84,14 @@ export default function NotificationsIndexTable() {
           <ToggleGroup
             type="single"
             value={instanceStatusType}
-            onValueChange={(value) => value && setInstanceStatusType(value as "all" | "completed" | "failed")}
+            onValueChange={(value) =>
+              value &&
+              setInstanceStatusType(value as "all" | "completed" | "failed")
+            }
           >
-            <span className="text-sm text-muted-foreground border rounded-md px-2 py-1">SHOW</span>
+            <span className="text-sm text-muted-foreground border rounded-md px-2 py-1">
+              SHOW
+            </span>
             {["All", "Completed", "Failed"].map((status) => (
               <ToggleGroupItem
                 key={status}
@@ -92,12 +102,12 @@ export default function NotificationsIndexTable() {
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
-        ) : (
-          null
-        )}
+        ) : null}
       </div>
       {/* @ts-expect-error dumb ts*/}
-      <Table data={index === "instance" ? instanceData : groupData} setSidePanelData={setSidePanelData}>
+      <Table data={index === "instance" ? instanceData : groupData}
+        setSidePanelData={setSidePanelData}
+      >
         <div className="my-6">
           <div className="flex items-center justify-center">
             {message ? (

@@ -14,7 +14,11 @@ interface ScheduleFilters extends WatcherFilters {
 class ScheduleWatcher extends BaseWatcher {
   readonly type = "schedule";
 
-  constructor(storeDriver: StoreDriver, storeConnection: any, redisClient: any) {
+  constructor(
+    storeDriver: StoreDriver,
+    storeConnection: any,
+    redisClient: any,
+  ) {
     super(storeDriver, storeConnection, redisClient);
   }
 
@@ -31,14 +35,14 @@ class ScheduleWatcher extends BaseWatcher {
   protected async handleViewSQL(id: string): Promise<any> {
     let [results]: [any[], any] = await this.storeConnection.query(
       "SELECT * FROM observatory_entries WHERE uuid = ? AND type = ?",
-      [id, this.type]
+      [id, this.type],
     );
 
     let item = results[0];
 
     const [relatedItems]: [any[], any] = await this.storeConnection.query(
       "SELECT * FROM observatory_entries WHERE request_id = ? AND job_id = ? AND schedule_id = ? AND type != ?",
-      [item.request_id, item.job_id, item.schedule_id, this.type]
+      [item.request_id, item.job_id, item.schedule_id, this.type],
     );
 
     results = results.concat(relatedItems);
@@ -49,10 +53,14 @@ class ScheduleWatcher extends BaseWatcher {
    * Related Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async handleRelatedDataSQL(requestId: string, jobId: string, scheduleId: string): Promise<any> {
+  protected async handleRelatedDataSQL(
+    requestId: string,
+    jobId: string,
+    scheduleId: string,
+  ): Promise<any> {
     const [results]: [any[], any] = await this.storeConnection.query(
       "SELECT * FROM observatory_entries WHERE request_id = ? AND job_id = ? AND schedule_id = ? AND type != ?",
-      [requestId, jobId, scheduleId, this.type]
+      [requestId, jobId, scheduleId, this.type],
     );
     return this.groupItemsByType(results);
   }
@@ -61,7 +69,9 @@ class ScheduleWatcher extends BaseWatcher {
    * Instance Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async getIndexTableDataByInstanceSQL(filters: ScheduleFilters): Promise<any> {
+  protected async getIndexTableDataByInstanceSQL(
+    filters: ScheduleFilters,
+  ): Promise<any> {
     const { offset, limit, query, period, key, status } = filters;
     const periodSql = period ? this.getPeriodSQL(period) : "";
     const querySql = query ? this.getInclusionSQL(query, "scheduleId") : "";
@@ -69,12 +79,12 @@ class ScheduleWatcher extends BaseWatcher {
     const statusSql = status ? this.getStatusSQL(status) : "";
 
     const [results] = (await this.storeConnection.query(
-      `SELECT * FROM observatory_entries WHERE type = 'schedule' ${statusSql} ${querySql} ${periodSql} ${scheduleSql} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`
+      `SELECT * FROM observatory_entries WHERE type = 'schedule' ${statusSql} ${querySql} ${periodSql} ${scheduleSql} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`,
     )) as [any[]];
 
-     const [countResult] = await this.storeConnection.query(
-      `SELECT COUNT(*) AS total FROM observatory_entries WHERE type = 'schedule' ${statusSql} ${querySql} ${periodSql} ${scheduleSql}`
-    ) as [any[]];
+    const [countResult] = (await this.storeConnection.query(
+      `SELECT COUNT(*) AS total FROM observatory_entries WHERE type = 'schedule' ${statusSql} ${querySql} ${periodSql} ${scheduleSql}`,
+    )) as [any[]];
 
     return { results, count: this.formatValue(countResult[0].total, true) };
   }
@@ -83,7 +93,9 @@ class ScheduleWatcher extends BaseWatcher {
    * Group Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async getIndexTableDataByGroupSQL(filters: ScheduleFilters): Promise<any> {
+  protected async getIndexTableDataByGroupSQL(
+    filters: ScheduleFilters,
+  ): Promise<any> {
     const { offset, limit, period, groupFilter, query } = filters;
     const timeSql = period ? this.getPeriodSQL(period) : "";
     const querySql = query ? this.getInclusionSQL(query, "jobId") : "";
@@ -92,8 +104,8 @@ class ScheduleWatcher extends BaseWatcher {
       groupFilter === "all"
         ? "ORDER BY total DESC"
         : groupFilter === "errors"
-        ? "ORDER BY failed DESC"
-        : "ORDER BY longest DESC";
+          ? "ORDER BY failed DESC"
+          : "ORDER BY longest DESC";
 
     const [results] = (await this.storeConnection.query(
       `SELECT
@@ -124,13 +136,13 @@ class ScheduleWatcher extends BaseWatcher {
       WHERE type = 'schedule' ${timeSql} ${querySql} AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')
       GROUP BY JSON_UNQUOTE(JSON_EXTRACT(content, '$.scheduleId'))
        ${orderBySql}
-      LIMIT ${limit} OFFSET ${offset};`
+      LIMIT ${limit} OFFSET ${offset};`,
     )) as [any];
 
     const [countResult] = (await this.storeConnection.query(
       `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.scheduleId'))) as total
         FROM observatory_entries
-          WHERE type = 'schedule' ${timeSql} ${querySql} AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed');`
+          WHERE type = 'schedule' ${timeSql} ${querySql} AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed');`,
     )) as [any];
 
     return { results, count: this.formatValue(countResult[0].total, true) };
@@ -147,7 +159,7 @@ class ScheduleWatcher extends BaseWatcher {
     let scheduleKeySql = key ? this.getEqualitySQL(key, "scheduleId") : "";
 
     const [countResult] = (await this.storeConnection.query(
-      `SELECT COUNT(*) as total FROM observatory_entries WHERE type = 'schedule' AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed') ${timeSql} ${scheduleKeySql}`
+      `SELECT COUNT(*) as total FROM observatory_entries WHERE type = 'schedule' AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed') ${timeSql} ${scheduleKeySql}`,
     )) as [any[]];
 
     const [results] = (await this.storeConnection.query(
@@ -196,7 +208,7 @@ class ScheduleWatcher extends BaseWatcher {
         FROM observatory_entries
         WHERE type = 'schedule' ${timeSql} ${scheduleKeySql} AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')
         ORDER BY created_at DESC
-      );`
+      );`,
     )) as [any[], any];
 
     const aggregateResults: {
@@ -210,7 +222,10 @@ class ScheduleWatcher extends BaseWatcher {
     } = results.shift();
 
     const countFormattedData = this.countGraphData(results, period as string);
-    const durationFormattedData = this.durationGraphData(results, period as string);
+    const durationFormattedData = this.durationGraphData(
+      results,
+      period as string,
+    );
 
     return {
       countFormattedData,
@@ -238,14 +253,14 @@ class ScheduleWatcher extends BaseWatcher {
     const groupedData = Array.from({ length: 120 }, (_, index) => ({
       completed: 0,
       failed: 0,
-      label: this.getLabel(index, period)
+      label: this.getLabel(index, period),
     }));
 
     data.forEach((schedule: any) => {
       const scheduleTime = new Date(schedule.created_at).getTime();
       const status = schedule.content.status;
       const intervalIndex = Math.floor(
-        (scheduleTime - startDate) / (intervalDuration * 60 * 1000)
+        (scheduleTime - startDate) / (intervalDuration * 60 * 1000),
       );
 
       if (intervalIndex >= 0 && intervalIndex < 120) {

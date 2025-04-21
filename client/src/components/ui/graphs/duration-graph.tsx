@@ -1,18 +1,12 @@
 /** @format */
-import { Card, CardContent } from "@/components/ui/card"
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  Tooltip,
-  YAxis
-} from "recharts"
+import { Card, CardContent } from "@/components/ui/card";
+import { ResponsiveContainer, LineChart, Line, Tooltip, YAxis } from "recharts";
 
 type Props = {
-  data: { avgDuration: number, p95: number, label: string }[]
-  period: string
-  currentDate: string
-}
+  data: { avgDuration: number; p95: number; label: string }[];
+  period: string;
+  currentDate: string;
+};
 
 export const DurationGraph = ({ data, period, currentDate }: Props) => {
   const formattedData = data.map((entry, index: number) => ({
@@ -20,12 +14,14 @@ export const DurationGraph = ({ data, period, currentDate }: Props) => {
     "Average Duration": entry.avgDuration,
     "95th Percentile": entry.p95,
     label: entry.label,
-  }))
+  }));
 
   // Calculate max value for domain
   const maxValue = Math.max(
-    ...formattedData.map(d => Math.max(d["Average Duration"], d["95th Percentile"]))
-  )
+    ...formattedData.map((d) =>
+      Math.max(d["Average Duration"], d["95th Percentile"]),
+    ),
+  );
 
   return (
     <Card className="col-span-4 p-1 border-none shadow-none">
@@ -61,14 +57,17 @@ export const DurationGraph = ({ data, period, currentDate }: Props) => {
                               style={{ backgroundColor: item.color }}
                             />
                             <span className="text-sm font-medium">
-                              {item.name}: {Number(item.value) > 999 ? (Number(item.value) / 1000).toFixed(2) + "s" : Number(item.value).toFixed(2) + "ms"}
+                              {item.name}:{" "}
+                              {Number(item.value) > 999
+                                ? (Number(item.value) / 1000).toFixed(2) + "s"
+                                : Number(item.value).toFixed(2) + "ms"}
                             </span>
                           </div>
                         ))}
                       </div>
-                    )
+                    );
                   }
-                  return null
+                  return null;
                 }}
               />
               <Line
@@ -94,5 +93,5 @@ export const DurationGraph = ({ data, period, currentDate }: Props) => {
         </div>
       </CardContent>
     </Card>
-  )
-}
+  );
+};

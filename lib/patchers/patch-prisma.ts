@@ -1,27 +1,27 @@
-import { Hook } from 'require-in-the-middle';
-import shimmer from 'shimmer';
+import { Hook } from "require-in-the-middle";
+import shimmer from "shimmer";
 import { watchers } from "../logger";
 import { getCallerInfo } from "../utils";
 
-const PRISMA_PATCHED_SYMBOL = Symbol.for('node-observer:prisma-patched');
+const PRISMA_PATCHED_SYMBOL = Symbol.for("node-observer:prisma-patched");
 
 function patchPrismaModels(prisma: any) {
   const methodsToPatch = [
-    'findMany',
-    'findUnique',
-    'findUniqueOrThrow',
-    'findFirst',
-    'findFirstOrThrow',
-    'create',
-    'createMany',
-    'update',
-    'updateMany',
-    'delete',
-    'deleteMany',
-    'upsert',
-    'aggregate',
-    'groupBy',
-    'count',
+    "findMany",
+    "findUnique",
+    "findUniqueOrThrow",
+    "findFirst",
+    "findFirstOrThrow",
+    "create",
+    "createMany",
+    "update",
+    "updateMany",
+    "delete",
+    "deleteMany",
+    "upsert",
+    "aggregate",
+    "groupBy",
+    "count",
   ];
 
   // Prisma attaches model properties (like prisma.user, prisma.post) dynamically.
@@ -29,10 +29,10 @@ function patchPrismaModels(prisma: any) {
     // Skip non-model properties.
     if (!Object.prototype.hasOwnProperty.call(prisma, modelName)) continue;
     const model = prisma[modelName];
-    if (typeof model !== 'object' || model === null) continue;
+    if (typeof model !== "object" || model === null) continue;
 
     methodsToPatch.forEach((method) => {
-      if (typeof model[method] === 'function') {
+      if (typeof model[method] === "function") {
         shimmer.wrap(model, method, (originalMethod: Function) => {
           return async function patchedMethod(this: any, ...args: any[]) {
             const callerInfo = getCallerInfo(__filename);
@@ -46,10 +46,10 @@ function patchPrismaModels(prisma: any) {
                 modelName,
                 args,
                 duration,
-                status: 'success',
+                status: "success",
                 file: callerInfo.file,
                 line: callerInfo.line,
-              })
+              });
 
               return result;
             } catch (error: any) {
@@ -60,11 +60,11 @@ function patchPrismaModels(prisma: any) {
                 modelName,
                 args,
                 duration,
-                status: 'error',
+                status: "error",
                 error: error.message,
                 file: callerInfo.file,
                 line: callerInfo.line,
-              })
+              });
 
               throw error;
             }
@@ -75,11 +75,14 @@ function patchPrismaModels(prisma: any) {
   }
 }
 
-if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERVATORY_DATABASES).includes("prisma")) {
+if (
+  process.env.NODE_OBSERVATORY_DATABASES &&
+  JSON.parse(process.env.NODE_OBSERVATORY_DATABASES).includes("prisma")
+) {
   if (!(global as any)[PRISMA_PATCHED_SYMBOL]) {
     (global as any)[PRISMA_PATCHED_SYMBOL] = true;
 
-    new Hook(['@prisma/client'], (exports: any, name, basedir) => {
+    new Hook(["@prisma/client"], (exports: any, name, basedir) => {
       if (!exports || !exports.PrismaClient) {
         return exports;
       }

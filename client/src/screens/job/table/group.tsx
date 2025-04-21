@@ -1,6 +1,12 @@
 /** @format */
 
-import { AlertCircle, AlertOctagon, CheckCircle, ExternalLink, Layers } from "lucide-react";
+import {
+  AlertCircle,
+  AlertOctagon,
+  CheckCircle,
+  ExternalLink,
+  Layers,
+} from "lucide-react";
 import { Link } from "react-router";
 import {
   Table,
@@ -25,7 +31,7 @@ export const GroupTable = memo(({ data, children }: Props) => {
   return (
     <div className="rounded-md border">
       <Table>
-      <TableHeader>
+        <TableHeader>
           <TableRow>
             <TableHead className="w-[50%]">Details</TableHead>
             <TableHead>Events</TableHead>
@@ -46,13 +52,19 @@ export const GroupTable = memo(({ data, children }: Props) => {
               <TableCell>
                 <div className="flex gap-2">
                   {queue.completed > 0 && (
-                    <Badge variant="secondary" className="flex gap-1 items-center">
+                    <Badge
+                      variant="secondary"
+                      className="flex gap-1 items-center"
+                    >
                       <CheckCircle className="h-3 w-3" />
                       {formatCount(queue.completed) ?? 0}
                     </Badge>
                   )}
                   {queue.released > 0 && (
-                    <Badge variant="warning" className="flex gap-1 items-center">
+                    <Badge
+                      variant="warning"
+                      className="flex gap-1 items-center"
+                    >
                       <AlertCircle className="h-3 w-3" />
                       {formatCount(queue.released) ?? 0}
                     </Badge>
@@ -66,12 +78,24 @@ export const GroupTable = memo(({ data, children }: Props) => {
                 </div>
               </TableCell>
               <TableCell>
-                <p className={Number(queue.average) > 999 ? "text-yellow-600" : "text-black dark:text-white"}>
+                <p
+                  className={
+                    Number(queue.average) > 999
+                      ? "text-yellow-600"
+                      : "text-black dark:text-white"
+                  }
+                >
                   {formatDuration(Number(queue.average))}
                 </p>
               </TableCell>
               <TableCell>
-                <p className={Number(queue.p95) > 999 ? "text-yellow-600" : "text-black dark:text-white"}>
+                <p
+                  className={
+                    Number(queue.p95) > 999
+                      ? "text-yellow-600"
+                      : "text-black dark:text-white"
+                  }
+                >
                   {formatDuration(queue.p95 ?? 0)}
                 </p>
               </TableCell>

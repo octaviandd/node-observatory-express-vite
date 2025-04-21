@@ -1,15 +1,15 @@
 /** @format */
 
-import { JobInstanceResponse } from "../../../../../types"
-import { BaseCard } from "./base-card"
+import { JobInstanceResponse } from "../../../../../types";
+import { BaseCard } from "./base-card";
 
-export default function JobCard({ item }: {item: JobInstanceResponse}) {
+export default function JobCard({ item }: { item: JobInstanceResponse }) {
   const content = {
     id: item.job_id,
     queue: item.content.queue,
     status: item.content.status,
     method: item.content.method,
-  }
+  };
 
   return (
     <BaseCard
@@ -21,5 +21,5 @@ export default function JobCard({ item }: {item: JobInstanceResponse}) {
       package={item.content.package ?? "bull"}
       linkPath={`/job/${item.uuid}`}
     />
-  )
+  );
 }

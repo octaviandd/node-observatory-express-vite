@@ -5,9 +5,12 @@ import shimmer from "shimmer";
 import { watchers } from "../logger";
 import { getCallerInfo } from "../utils";
 
-const SENDGRID_PATCHED_SYMBOL = Symbol.for('node-observer:sendgrid-patched');
+const SENDGRID_PATCHED_SYMBOL = Symbol.for("node-observer:sendgrid-patched");
 
-if (process.env.NODE_OBSERVATORY_MAILER && JSON.parse(process.env.NODE_OBSERVATORY_MAILER).includes("@sendgrid/mail")) {
+if (
+  process.env.NODE_OBSERVATORY_MAILER &&
+  JSON.parse(process.env.NODE_OBSERVATORY_MAILER).includes("@sendgrid/mail")
+) {
   if (!(global as any)[SENDGRID_PATCHED_SYMBOL]) {
     (global as any)[SENDGRID_PATCHED_SYMBOL] = true;
 
@@ -21,8 +24,16 @@ if (process.env.NODE_OBSERVATORY_MAILER && JSON.parse(process.env.NODE_OBSERVATO
             const content = {
               command: "SendMail",
               to: Array.isArray(mailData.to) ? mailData.to : [mailData.to],
-              cc: Array.isArray(mailData.cc) ? mailData.cc : mailData.cc ? [mailData.cc] : [],
-              bcc: Array.isArray(mailData.bcc) ? mailData.bcc : mailData.bcc ? [mailData.bcc] : [],
+              cc: Array.isArray(mailData.cc)
+                ? mailData.cc
+                : mailData.cc
+                  ? [mailData.cc]
+                  : [],
+              bcc: Array.isArray(mailData.bcc)
+                ? mailData.bcc
+                : mailData.bcc
+                  ? [mailData.bcc]
+                  : [],
               from: mailData.from,
               subject: mailData.subject,
               body: mailData.html || mailData.text,
@@ -39,7 +50,9 @@ if (process.env.NODE_OBSERVATORY_MAILER && JSON.parse(process.env.NODE_OBSERVATO
               watchers.mailer.addContent({
                 status: "completed",
                 info: {
-                  messageId: Array.isArray(result) ? result[0].headers['x-message-id'] : result.headers['x-message-id'],
+                  messageId: Array.isArray(result)
+                    ? result[0].headers["x-message-id"]
+                    : result.headers["x-message-id"],
                   response: result,
                 },
                 duration,
@@ -69,62 +82,77 @@ if (process.env.NODE_OBSERVATORY_MAILER && JSON.parse(process.env.NODE_OBSERVATO
 
       // 2. Patch the `sendMultiple` function (shortcut for multiple emails)
       if (typeof (exports as any).sendMultiple === "function") {
-        shimmer.wrap(exports as any, "sendMultiple", function (originalSendMultiple) {
-          return async function patchedSendMultiple(this: any, mailData: any) {
-            const startTime = performance.now();
-            const callerInfo = getCallerInfo(__filename);
+        shimmer.wrap(
+          exports as any,
+          "sendMultiple",
+          function (originalSendMultiple) {
+            return async function patchedSendMultiple(
+              this: any,
+              mailData: any,
+            ) {
+              const startTime = performance.now();
+              const callerInfo = getCallerInfo(__filename);
 
-            const content = {
-              command: "SendMultiple",
-              to: Array.isArray(mailData.to) ? mailData.to : [mailData.to],
-              cc: Array.isArray(mailData.cc) ? mailData.cc : mailData.cc ? [mailData.cc] : [],
-              bcc: Array.isArray(mailData.bcc) ? mailData.bcc : mailData.bcc ? [mailData.bcc] : [],
-              from: mailData.from,
-              subject: mailData.subject,
-              body: mailData.html || mailData.text,
-              file: callerInfo.file,
-              line: callerInfo.line,
-              package: "@sendgrid/mail",
+              const content = {
+                command: "SendMultiple",
+                to: Array.isArray(mailData.to) ? mailData.to : [mailData.to],
+                cc: Array.isArray(mailData.cc)
+                  ? mailData.cc
+                  : mailData.cc
+                    ? [mailData.cc]
+                    : [],
+                bcc: Array.isArray(mailData.bcc)
+                  ? mailData.bcc
+                  : mailData.bcc
+                    ? [mailData.bcc]
+                    : [],
+                from: mailData.from,
+                subject: mailData.subject,
+                body: mailData.html || mailData.text,
+                file: callerInfo.file,
+                line: callerInfo.line,
+                package: "@sendgrid/mail",
+              };
+
+              try {
+                const result = await originalSendMultiple.call(this, mailData);
+                const endTime = performance.now();
+                const duration = parseFloat((endTime - startTime).toFixed(2));
+
+                watchers.mailer.addContent({
+                  status: "completed",
+                  info: {
+                    messageId: result[0].headers["x-message-id"],
+                    response: result,
+                  },
+                  duration,
+                  ...content,
+                  file: callerInfo.file,
+                  line: callerInfo.line,
+                });
+
+                return result;
+              } catch (err: any) {
+                const endTime = performance.now();
+                const duration = parseFloat((endTime - startTime).toFixed(2));
+
+                watchers.mailer.addContent({
+                  status: "failed",
+                  error: {
+                    name: err.name,
+                    message: err.message,
+                    stack: err.stack,
+                  },
+                  duration,
+                  ...content,
+                  file: callerInfo.file,
+                  line: callerInfo.line,
+                });
+                throw err;
+              }
             };
-
-            try {
-              const result = await originalSendMultiple.call(this, mailData);
-              const endTime = performance.now();
-              const duration = parseFloat((endTime - startTime).toFixed(2));
-
-              watchers.mailer.addContent({
-                status: "completed",
-                info: {
-                  messageId: result[0].headers['x-message-id'],
-                  response: result,
-                },
-                duration,
-                ...content,
-                file: callerInfo.file,
-                line: callerInfo.line,
-              });
-
-              return result;
-            } catch (err: any) {
-              const endTime = performance.now();
-              const duration = parseFloat((endTime - startTime).toFixed(2));
-
-              watchers.mailer.addContent({
-                status: "failed",
-                error: {
-                  name: err.name,
-                  message: err.message,
-                  stack: err.stack,
-                },
-                duration,
-                ...content,
-                file: callerInfo.file,
-                line: callerInfo.line,
-              });
-              throw err;
-            }
-          };
-        });
+          },
+        );
       }
 
       return exports;

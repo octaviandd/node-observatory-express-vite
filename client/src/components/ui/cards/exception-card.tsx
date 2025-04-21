@@ -1,8 +1,12 @@
 /** @format */
-import { ExceptionInstanceResponse } from "../../../../../types"
-import { BaseCard } from "./base-card"
+import { ExceptionInstanceResponse } from "../../../../../types";
+import { BaseCard } from "./base-card";
 
-export default function ExceptionCard({ item }: {item: ExceptionInstanceResponse}) {
+export default function ExceptionCard({
+  item,
+}: {
+  item: ExceptionInstanceResponse;
+}) {
   return (
     <BaseCard
       date={item.created_at}
@@ -12,5 +16,5 @@ export default function ExceptionCard({ item }: {item: ExceptionInstanceResponse
       package={item.content.type}
       linkPath={`/exception/${item.uuid}`}
     />
-  )
+  );
 }

@@ -1,9 +1,9 @@
 /** @format */
 
-import { QueryInstanceResponse } from "../../../../../types"
-import { BaseCard } from "./base-card"
+import { QueryInstanceResponse } from "../../../../../types";
+import { BaseCard } from "./base-card";
 
-export default function QueryCard({ item }: {item: QueryInstanceResponse}) {
+export default function QueryCard({ item }: { item: QueryInstanceResponse }) {
   return (
     <BaseCard
       date={item.created_at}
@@ -15,5 +15,5 @@ export default function QueryCard({ item }: {item: QueryInstanceResponse}) {
       language="sql"
       package={item.content.package}
     />
-  )
+  );
 }

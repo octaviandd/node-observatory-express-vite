@@ -5,9 +5,14 @@ import shimmer from "shimmer";
 import { watchers } from "../logger";
 import { getCallerInfo } from "../utils";
 
-const SEQUELIZE_PATCHED_SYMBOL = Symbol.for('node-observer:sequelize-patched');
+const SEQUELIZE_PATCHED_SYMBOL = Symbol.for("node-observer:sequelize-patched");
 
-if ((process.env.NODE_OBSERVATORY_MODELS && JSON.parse(process.env.NODE_OBSERVATORY_MODELS).includes("sequelize")) || (process.env.NODE_OBSERVATORY_QUERIES && JSON.parse(process.env.NODE_OBSERVATORY_QUERIES).includes("sequelize"))) {
+if (
+  (process.env.NODE_OBSERVATORY_MODELS &&
+    JSON.parse(process.env.NODE_OBSERVATORY_MODELS).includes("sequelize")) ||
+  (process.env.NODE_OBSERVATORY_QUERIES &&
+    JSON.parse(process.env.NODE_OBSERVATORY_QUERIES).includes("sequelize"))
+) {
   if (!(global as any)[SEQUELIZE_PATCHED_SYMBOL]) {
     (global as any)[SEQUELIZE_PATCHED_SYMBOL] = true;
 
@@ -16,10 +21,17 @@ if ((process.env.NODE_OBSERVATORY_MODELS && JSON.parse(process.env.NODE_OBSERVAT
         return exports;
       }
 
-      const modelMethods = ['create', 'findAll', 'findOne', 'findByPk', 'update', 'destroy'];
+      const modelMethods = [
+        "create",
+        "findAll",
+        "findOne",
+        "findByPk",
+        "update",
+        "destroy",
+      ];
 
-      modelMethods.forEach(method => {
-        shimmer.wrap(exports.Model, method, function(original: Function) {
+      modelMethods.forEach((method) => {
+        shimmer.wrap(exports.Model, method, function (original: Function) {
           return async function patchedMethod(this: any, ...args: any[]) {
             const startTime = performance.now();
 
@@ -85,7 +97,7 @@ function logModelOperation(
     file: callerInfo.file,
     line: callerInfo.line,
     error: error ? error.toString() : undefined,
-    status: error ? "failed" : "completed"
+    status: error ? "failed" : "completed",
   };
 
   watchers.model.addContent(modelLogEntry);

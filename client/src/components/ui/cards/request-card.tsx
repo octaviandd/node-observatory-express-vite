@@ -1,19 +1,22 @@
 /** @format */
 import { RequestInstanceResponse } from "../../../../../types";
-import { BaseCard } from "./base-card"
+import { BaseCard } from "./base-card";
 
-export default function RequestCard({ item }: {item: RequestInstanceResponse}) {
-  const duration = Number(item.content.duration)
-  const formattedDuration = duration > 999
-    ? `${(duration / 1000).toFixed(2)}s`
-    : `${duration}ms`
+export default function RequestCard({
+  item,
+}: {
+  item: RequestInstanceResponse;
+}) {
+  const duration = Number(item.content.duration);
+  const formattedDuration =
+    duration > 999 ? `${(duration / 1000).toFixed(2)}s` : `${duration}ms`;
 
   const content = {
     method: item.content.method,
     route: item.content.route,
     statusCode: item.content.statusCode,
     duration: formattedDuration,
-  }
+  };
 
   return (
     <BaseCard

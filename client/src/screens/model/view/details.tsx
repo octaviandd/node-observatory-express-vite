@@ -1,7 +1,7 @@
-import { ModelInstanceResponse } from '../../../../../types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { formatDuration, timeAgo } from '@/utils.js'
-import { Badge } from '@/components/ui/badge'
+import { ModelInstanceResponse } from "../../../../../types";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatDuration, timeAgo } from "@/utils.js";
+import { Badge } from "@/components/ui/badge";
 
 export default function Details({ model }: { model: ModelInstanceResponse }) {
   return (
@@ -31,7 +31,11 @@ export default function Details({ model }: { model: ModelInstanceResponse }) {
             <div className="col-span-3 text-muted-foreground">Status</div>
             <div className="col-span-9">
               <Badge
-                variant={model.content.status === "completed" ? "secondary" : "destructive"}
+                variant={
+                  model.content.status === "completed"
+                    ? "secondary"
+                    : "destructive"
+                }
               >
                 {model.content.status.toUpperCase()}
               </Badge>
@@ -59,16 +63,12 @@ export default function Details({ model }: { model: ModelInstanceResponse }) {
 
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">File</div>
-            <div className="col-span-9">
-              {model.content.file}
-            </div>
+            <div className="col-span-9">{model.content.file}</div>
           </div>
 
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Line</div>
-            <div className="col-span-9">
-              {model.content.line}
-            </div>
+            <div className="col-span-9">{model.content.line}</div>
           </div>
 
           {model.content.duration && (
@@ -82,5 +82,5 @@ export default function Details({ model }: { model: ModelInstanceResponse }) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

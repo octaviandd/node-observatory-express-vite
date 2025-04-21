@@ -5,9 +5,14 @@ import shimmer from "shimmer";
 import { watchers } from "../logger";
 import { getCallerInfo } from "../utils";
 
-const NODEMAILER_PATCHED_SYMBOL = Symbol.for('node-observer:nodemailer-patched');
+const NODEMAILER_PATCHED_SYMBOL = Symbol.for(
+  "node-observer:nodemailer-patched",
+);
 
-if (process.env.NODE_OBSERVATORY_MAILER && JSON.parse(process.env.NODE_OBSERVATORY_MAILER).includes("nodemailer")) {
+if (
+  process.env.NODE_OBSERVATORY_MAILER &&
+  JSON.parse(process.env.NODE_OBSERVATORY_MAILER).includes("nodemailer")
+) {
   if (!(global as any)[NODEMAILER_PATCHED_SYMBOL]) {
     (global as any)[NODEMAILER_PATCHED_SYMBOL] = true;
 
@@ -20,16 +25,26 @@ if (process.env.NODE_OBSERVATORY_MAILER && JSON.parse(process.env.NODE_OBSERVATO
               return function patchedSendMail(
                 this: any,
                 mailOptions: any,
-                callback: (err: Error | null, info?: any) => void
+                callback: (err: Error | null, info?: any) => void,
               ) {
                 const startTime = performance.now();
                 const callerInfo = getCallerInfo(__filename);
 
                 const content = {
                   command: "SendMail",
-                  to: Array.isArray(mailOptions.to) ? mailOptions.to : [mailOptions.to],
-                  cc: Array.isArray(mailOptions.cc) ? mailOptions.cc : mailOptions.cc ? [mailOptions.cc] : [],
-                  bcc: Array.isArray(mailOptions.bcc) ? mailOptions.bcc : mailOptions.bcc ? [mailOptions.bcc] : [],
+                  to: Array.isArray(mailOptions.to)
+                    ? mailOptions.to
+                    : [mailOptions.to],
+                  cc: Array.isArray(mailOptions.cc)
+                    ? mailOptions.cc
+                    : mailOptions.cc
+                      ? [mailOptions.cc]
+                      : [],
+                  bcc: Array.isArray(mailOptions.bcc)
+                    ? mailOptions.bcc
+                    : mailOptions.bcc
+                      ? [mailOptions.bcc]
+                      : [],
                   from: mailOptions.from,
                   subject: mailOptions.subject,
                   body: mailOptions.html || mailOptions.text,
@@ -38,13 +53,19 @@ if (process.env.NODE_OBSERVATORY_MAILER && JSON.parse(process.env.NODE_OBSERVATO
                   package: "nodemailer",
                 };
 
-                const result = originalSendMail.call(this, mailOptions, callback);
+                const result = originalSendMail.call(
+                  this,
+                  mailOptions,
+                  callback,
+                );
 
                 if (result && typeof result.then === "function") {
                   result
                     .then((info: any) => {
                       const endTime = performance.now();
-                      const duration = parseFloat((endTime - startTime).toFixed(2));
+                      const duration = parseFloat(
+                        (endTime - startTime).toFixed(2),
+                      );
 
                       watchers.mailer.addContent({
                         status: "completed",
@@ -58,7 +79,9 @@ if (process.env.NODE_OBSERVATORY_MAILER && JSON.parse(process.env.NODE_OBSERVATO
                     })
                     .catch((err: Error) => {
                       const endTime = performance.now();
-                      const duration = parseFloat((endTime - startTime).toFixed(2));
+                      const duration = parseFloat(
+                        (endTime - startTime).toFixed(2),
+                      );
 
                       watchers.mailer.addContent({
                         status: "failed",

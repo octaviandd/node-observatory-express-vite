@@ -1,8 +1,12 @@
-import { Card, CardContent } from '@/components/ui/card'
-import { NotificationInstanceResponse } from '../../../../../types'
-import { timeAgo } from '@/utils.js'
+import { Card, CardContent } from "@/components/ui/card";
+import { NotificationInstanceResponse } from "../../../../../types";
+import { timeAgo } from "@/utils.js";
 
-export default function Details({ notification }: { notification: NotificationInstanceResponse }) {
+export default function Details({
+  notification,
+}: {
+  notification: NotificationInstanceResponse;
+}) {
   return (
     <Card className="rounded-sm">
       <CardContent className="p-6">
@@ -51,5 +55,5 @@ export default function Details({ notification }: { notification: NotificationIn
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

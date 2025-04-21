@@ -1,5 +1,3 @@
-
-
 import { Request } from "express";
 import { StoreDriver } from "../../types";
 import { BaseWatcher } from "./BaseWatcher";
@@ -9,12 +7,16 @@ interface RequestFilters extends WatcherFilters {
   index: "instance" | "group";
   key?: string;
   status: "all" | "2xx" | "4xx" | "5xx";
-};
+}
 
 class RequestWatcher extends BaseWatcher {
   readonly type = "request";
 
-  constructor(storeDriver: StoreDriver, storeConnection: any, redisClient: any) {
+  constructor(
+    storeDriver: StoreDriver,
+    storeConnection: any,
+    redisClient: any,
+  ) {
     super(storeDriver, storeConnection, redisClient);
   }
 
@@ -23,12 +25,12 @@ class RequestWatcher extends BaseWatcher {
    * --------------------------------------------------------------------------
    */
   protected async handleViewSQL(id: string): Promise<any> {
-  const [results]: [any[], any] = await this.storeConnection.query(
-    "SELECT * FROM observatory_entries WHERE uuid = ? OR request_id = (SELECT request_id FROM observatory_entries WHERE uuid = ?)",
-    [id, id]
-  );
+    const [results]: [any[], any] = await this.storeConnection.query(
+      "SELECT * FROM observatory_entries WHERE uuid = ? OR request_id = (SELECT request_id FROM observatory_entries WHERE uuid = ?)",
+      [id, id],
+    );
 
-  return this.groupItemsByType(results);
+    return this.groupItemsByType(results);
   }
 
   /**
@@ -38,9 +40,8 @@ class RequestWatcher extends BaseWatcher {
   protected async handleRelatedDataSQL(requestId: string): Promise<any> {
     const [results]: [any[], any] = await this.storeConnection.query(
       "SELECT * FROM observatory_entries WHERE request_id = ? AND type != 'request'",
-      [requestId]
+      [requestId],
     );
-
 
     return this.groupItemsByType(results);
   }
@@ -49,7 +50,9 @@ class RequestWatcher extends BaseWatcher {
    * Instance Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async getIndexTableDataByInstanceSQL(filters: RequestFilters): Promise<any> {
+  protected async getIndexTableDataByInstanceSQL(
+    filters: RequestFilters,
+  ): Promise<any> {
     const { period, query, key, status, offset, limit } = filters;
     let routeSql = key ? this.getEqualitySQL(key, "route") : "";
     let querySql = query ? this.getInclusionSQL(query, "route") : "";
@@ -57,21 +60,23 @@ class RequestWatcher extends BaseWatcher {
     let statusSql = status ? this.getStatusSQL(status) : "";
 
     const [results] = (await this.storeConnection.query(
-      `SELECT * FROM observatory_entries WHERE type = 'request' ${routeSql} ${querySql} ${periodSql} ${statusSql} AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0' ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`
+      `SELECT * FROM observatory_entries WHERE type = 'request' ${routeSql} ${querySql} ${periodSql} ${statusSql} AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0' ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`,
     )) as [any[]];
 
-    const [countResult] = await this.storeConnection.query(
-      `SELECT COUNT(*) AS total FROM observatory_entries WHERE type = 'request' ${routeSql} ${querySql} ${periodSql} ${statusSql} AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0'`
-    ) as [any[]];
+    const [countResult] = (await this.storeConnection.query(
+      `SELECT COUNT(*) AS total FROM observatory_entries WHERE type = 'request' ${routeSql} ${querySql} ${periodSql} ${statusSql} AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0'`,
+    )) as [any[]];
 
     return { results, count: this.formatValue(countResult[0].total, true) };
-  };
+  }
 
   /**
    * Group Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async getIndexTableDataByGroupSQL(filters: RequestFilters): Promise<any> {
+  protected async getIndexTableDataByGroupSQL(
+    filters: RequestFilters,
+  ): Promise<any> {
     const { period, key, query, offset, limit } = filters;
     let routeSQL = key ? this.getEqualitySQL(key, "route") : "";
     let timeSQL = period ? this.getPeriodSQL(period) : "";
@@ -107,15 +112,15 @@ class RequestWatcher extends BaseWatcher {
       AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0'
       GROUP BY JSON_UNQUOTE(JSON_EXTRACT(content, '$.route'))
       ORDER BY total DESC
-      LIMIT ${limit} OFFSET ${offset}`
+      LIMIT ${limit} OFFSET ${offset}`,
     )) as [any];
 
     const [countResult] = (await this.storeConnection.query(
-      `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.route'))) as total FROM observatory_entries WHERE type = 'request' ${routeSQL} ${timeSQL} ${querySQL} AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0'`
+      `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.route'))) as total FROM observatory_entries WHERE type = 'request' ${routeSQL} ${timeSQL} ${querySQL} AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0'`,
     )) as [any[]];
 
     return { results, count: this.formatValue(countResult[0].total, true) };
-  };
+  }
 
   /**
    * Graph Data Methods
@@ -176,7 +181,7 @@ class RequestWatcher extends BaseWatcher {
         WHERE type = 'request' ${routeSql} ${timeSql}
         AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0'
         ORDER BY created_at DESC
-      );`
+      );`,
     )) as [any[], any];
 
     const aggregateResults: {
@@ -191,7 +196,10 @@ class RequestWatcher extends BaseWatcher {
     } = results.shift();
 
     const countFormattedData = this.countGraphData(results, period as string);
-    const durationFormattedData = this.durationGraphData(results, period as string);
+    const durationFormattedData = this.durationGraphData(
+      results,
+      period as string,
+    );
 
     return {
       countFormattedData,
@@ -205,7 +213,7 @@ class RequestWatcher extends BaseWatcher {
       average: this.formatValue(aggregateResults.average),
       p95: this.formatValue(aggregateResults.p95),
     };
-  };
+  }
 
   /**
    * Helper Methods
@@ -229,18 +237,18 @@ class RequestWatcher extends BaseWatcher {
       "200": 0,
       "400": 0,
       "500": 0,
-      label: this.getLabel(index, period)
+      label: this.getLabel(index, period),
     }));
 
     // Group requests into intervals
     data.forEach((request: any) => {
-      if(request.content.statusCode === 0) return;
+      if (request.content.statusCode === 0) return;
       const requestTime = new Date(request.created_at).getTime();
       const statusCode = Math.floor(request.content.statusCode / 100) * 100;
 
       // Calculate which interval the request falls into
       const intervalIndex = Math.floor(
-        (requestTime - startDate) / (intervalDuration * 60 * 1000)
+        (requestTime - startDate) / (intervalDuration * 60 * 1000),
       );
 
       if (intervalIndex >= 0 && intervalIndex < 120) {
@@ -264,9 +272,7 @@ class RequestWatcher extends BaseWatcher {
       limit: parseInt(req.query.limit as string, 10) || 20,
       index: req.query.index as "instance" | "group",
       status: req.query.status as "all" | "2xx" | "4xx" | "5xx",
-      key: req.query.key
-        ? decodeURIComponent(req.query.key as string)
-        : "",
+      key: req.query.key ? decodeURIComponent(req.query.key as string) : "",
     };
   }
 }

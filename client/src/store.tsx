@@ -1,11 +1,6 @@
 /** @format */
 
-import React, {
-  createContext,
-  useReducer,
-  ReactNode,
-  Dispatch,
-} from "react";
+import React, { createContext, useReducer, ReactNode, Dispatch } from "react";
 
 // Define the shape of your state
 interface State {
@@ -13,11 +8,19 @@ interface State {
 }
 
 // Define the shape of your actions
-type Action = { type: "setPeriod"; payload: "1h" | "24h" | "7d" | "14d" | "30d" };
+type Action = {
+  type: "setPeriod";
+  payload: "1h" | "24h" | "7d" | "14d" | "30d";
+};
 
 // Create the initial state
 const initialState: State = {
-  period: window.localStorage.getItem("period") as "1h" | "24h" | "7d" | "14d" | "30d",
+  period: window.localStorage.getItem("period") as
+    | "1h"
+    | "24h"
+    | "7d"
+    | "14d"
+    | "30d",
 };
 
 // Create a reducer function

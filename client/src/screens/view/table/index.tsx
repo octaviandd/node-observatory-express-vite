@@ -11,7 +11,8 @@ import { useIndexTableData } from "@/hooks/useIndexTableData";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 export default function ViewsIndexTable() {
-  const { instanceData,
+  const {
+    instanceData,
     groupData,
     instanceDataCount,
     groupDataCount,
@@ -28,9 +29,9 @@ export default function ViewsIndexTable() {
   } = useIndexTableData({
     key: "views",
     defaultInstanceStatusType: "all",
-  })
+  });
 
-  const Table = index === 'instance' ? InstanceTable : GroupTable
+  const Table = index === "instance" ? InstanceTable : GroupTable;
 
   return (
     <div className="relative">
@@ -39,10 +40,17 @@ export default function ViewsIndexTable() {
           <div
             className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-xs z-50"
             onClick={() =>
-              setSidePanelData({ ...sidePanelData, isOpen: false, requestId: "", jobId: "", scheduleId: "", modelId: "" })
+              setSidePanelData({
+                ...sidePanelData,
+                isOpen: false,
+                requestId: "",
+                jobId: "",
+                scheduleId: "",
+                modelId: "",
+              })
             }
           ></div>,
-          document.body
+          document.body,
         )}
       {sidePanelData.isOpen && (
         <SidePanel
@@ -58,9 +66,7 @@ export default function ViewsIndexTable() {
         <div className="flex items-center gap-2">
           <FileCode className="h-5 w-5 text-muted-foreground" />
           <span className="font-medium text-sm text-dark dark:text-white">
-            {index === "instance"
-              ? instanceDataCount
-              : groupDataCount}{" "}
+            {index === "instance" ? instanceDataCount : groupDataCount}{" "}
             {index === "instance" ? "View" : "Path"}
             {index === "instance" && Number(instanceDataCount) > 1 && "s"}
             {index === "group" && Number(groupDataCount) > 1 && "s"}
@@ -83,7 +89,9 @@ export default function ViewsIndexTable() {
             value={instanceStatusType}
             onValueChange={(value) => value && setInstanceStatusType(value)}
           >
-            <span className="text-sm text-muted-foreground border rounded-md px-2 py-1">SHOW</span>
+            <span className="text-sm text-muted-foreground border rounded-md px-2 py-1">
+              SHOW
+            </span>
             {["all", "completed", "failed"].map((status) => (
               <ToggleGroupItem
                 key={status}
@@ -94,9 +102,7 @@ export default function ViewsIndexTable() {
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
-        ) : (
-          null
-        )}
+        ) : null}
       </div>
       {/* @ts-expect-error dumb ts*/}
       <Table data={index === "instance" ? instanceData : groupData} setSidePanelData={setSidePanelData}>

@@ -1,12 +1,26 @@
-import { Badge } from '@/components/ui/badge'
-import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Card } from '@/components/ui/card'
-import { Link } from 'react-router'
-import { Button } from '@/components/ui/button'
-import { ExternalLinkIcon } from 'lucide-react'
-import { ScheduleInstanceResponse, JobInstanceResponse, RequestInstanceResponse, RequestContent, JobContent, ScheduleContent } from '../../../../../types'
+import { Badge } from "@/components/ui/badge";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
+import { Link } from "react-router";
+import { Button } from "@/components/ui/button";
+import { ExternalLinkIcon } from "lucide-react";
+import {
+  ScheduleInstanceResponse,
+  JobInstanceResponse,
+  RequestInstanceResponse,
+  RequestContent,
+  JobContent,
+  ScheduleContent,
+} from "../../../../../types";
 
-export default function Source({ source }: { source: RequestInstanceResponse | JobInstanceResponse | ScheduleInstanceResponse }) {
+export default function Source({
+  source,
+}: {
+  source:
+    | RequestInstanceResponse
+    | JobInstanceResponse
+    | ScheduleInstanceResponse;
+}) {
   return (
     <Card className="rounded-none">
       <CardHeader>
@@ -18,7 +32,16 @@ export default function Source({ source }: { source: RequestInstanceResponse | J
             <div className="col-span-3 text-muted-foreground">UUID</div>
             <div className="col-span-9 flex items-center gap-x-2">
               {source.uuid}
-              <Link to={source.type === "request" ? `/request/${source.uuid}` : source.type === 'job' ? `/job/${source.uuid}` : `/schedule/${source.uuid}`} className="ml-auto">
+              <Link
+                to={
+                  source.type === "request"
+                    ? `/request/${source.uuid}`
+                    : source.type === "job"
+                      ? `/job/${source.uuid}`
+                      : `/schedule/${source.uuid}`
+                }
+                className="ml-auto"
+              >
                 <Button variant="outline" size="sm">
                   <ExternalLinkIcon className="h-3 w-3" />
                 </Button>
@@ -32,20 +55,34 @@ export default function Source({ source }: { source: RequestInstanceResponse | J
           </div>
 
           <div className="grid items-center grid-cols-12">
-            <div className="col-span-3 text-muted-foreground">{source.type === "request" ? "Route" : source.type === 'job' ? "Job ID" : "Schedule ID"}</div>
-            <div className="col-span-9">{source.type === "request" ? (source.content as RequestContent).route : source.type === 'job' ? (source.content as JobContent).jobId : (source.content as ScheduleContent).scheduleId}</div>
+            <div className="col-span-3 text-muted-foreground">
+              {source.type === "request"
+                ? "Route"
+                : source.type === "job"
+                  ? "Job ID"
+                  : "Schedule ID"}
+            </div>
+            <div className="col-span-9">
+              {source.type === "request"
+                ? (source.content as RequestContent).route
+                : source.type === "job"
+                  ? (source.content as JobContent).jobId
+                  : (source.content as ScheduleContent).scheduleId}
+            </div>
           </div>
 
           {source.type === "request" && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-muted-foreground">Method</div>
               <div className="col-span-9">
-                <Badge variant="outline">{(source.content as RequestContent).method.toUpperCase()}</Badge>
+                <Badge variant="outline">
+                  {(source.content as RequestContent).method.toUpperCase()}
+                </Badge>
               </div>
             </div>
           )}
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

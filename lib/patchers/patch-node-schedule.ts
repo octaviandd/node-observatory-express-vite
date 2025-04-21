@@ -6,11 +6,16 @@ import { watchers } from "../logger";
 import { v4 as uuidv4 } from "uuid";
 import { getCallerInfo } from "../utils";
 
-const NODESCHEDULE_PATCHED_SYMBOL = Symbol.for('node-observer:nodeschedule-patched');
+const NODESCHEDULE_PATCHED_SYMBOL = Symbol.for(
+  "node-observer:nodeschedule-patched",
+);
 
 const METHODS = ["scheduleJob", "rescheduleJob", "cancelJob", "cancelNext"];
 
-if (process.env.NODE_OBSERVATORY_SCHEDULER && JSON.parse(process.env.NODE_OBSERVATORY_SCHEDULER).includes("node-schedule")) {
+if (
+  process.env.NODE_OBSERVATORY_SCHEDULER &&
+  JSON.parse(process.env.NODE_OBSERVATORY_SCHEDULER).includes("node-schedule")
+) {
   if (!(global as any)[NODESCHEDULE_PATCHED_SYMBOL]) {
     (global as any)[NODESCHEDULE_PATCHED_SYMBOL] = true;
 
@@ -23,7 +28,7 @@ if (process.env.NODE_OBSERVATORY_SCHEDULER && JSON.parse(process.env.NODE_OBSERV
             this: any,
             name: string | null,
             rule: any,
-            task: Function
+            task: Function,
           ) {
             const scheduleId = uuidv4();
             const callerInfo = getCallerInfo(__filename);
@@ -89,12 +94,12 @@ if (process.env.NODE_OBSERVATORY_SCHEDULER && JSON.parse(process.env.NODE_OBSERV
             };
 
             const job = originalScheduleJob.call(this, name, rule, wrappedTask);
-          
+
             if (job) {
-              if (typeof job.cancel === 'function') {
+              if (typeof job.cancel === "function") {
                 shimmer.wrap(
                   job,
-                  'cancel',
+                  "cancel",
                   function (originalCancel: Function) {
                     return function patchedCancel(this: any, ...args: any[]) {
                       const callerInfo = getCallerInfo(__filename);
@@ -106,20 +111,24 @@ if (process.env.NODE_OBSERVATORY_SCHEDULER && JSON.parse(process.env.NODE_OBSERV
                         file: callerInfo.file,
                         line: callerInfo.line,
                       });
-                    
+
                       return originalCancel.apply(this, args);
                     };
-                  }
+                  },
                 );
               }
-            
+
               // Patch reschedule method
-              if (typeof job.reschedule === 'function') {
+              if (typeof job.reschedule === "function") {
                 shimmer.wrap(
                   job,
-                  'reschedule',
+                  "reschedule",
                   function (originalReschedule: Function) {
-                    return function patchedReschedule(this: any, spec: any, ...args: any[]) {
+                    return function patchedReschedule(
+                      this: any,
+                      spec: any,
+                      ...args: any[]
+                    ) {
                       const callerInfo = getCallerInfo(__filename);
                       watchers.scheduler.addContent({
                         type: "reschedule",
@@ -130,22 +139,25 @@ if (process.env.NODE_OBSERVATORY_SCHEDULER && JSON.parse(process.env.NODE_OBSERV
                         file: callerInfo.file,
                         line: callerInfo.line,
                       });
-                    
+
                       return originalReschedule.apply(this, [spec, ...args]);
                     };
-                  }
+                  },
                 );
               }
-            
+
               // Patch nextInvocation method
-              if (typeof job.nextInvocation === 'function') {
+              if (typeof job.nextInvocation === "function") {
                 shimmer.wrap(
                   job,
-                  'nextInvocation',
+                  "nextInvocation",
                   function (originalNextInvocation: Function) {
-                    return function patchedNextInvocation(this: any, ...args: any[]) {
+                    return function patchedNextInvocation(
+                      this: any,
+                      ...args: any[]
+                    ) {
                       const result = originalNextInvocation.apply(this, args);
-                    
+
                       const callerInfo = getCallerInfo(__filename);
                       watchers.scheduler.addContent({
                         type: "nextInvocation",
@@ -156,17 +168,17 @@ if (process.env.NODE_OBSERVATORY_SCHEDULER && JSON.parse(process.env.NODE_OBSERV
                         file: callerInfo.file,
                         line: callerInfo.line,
                       });
-                    
+
                       return result;
                     };
-                  }
+                  },
                 );
               }
             }
 
             return job;
           };
-        }
+        },
       );
 
       // Patch other methods for logging

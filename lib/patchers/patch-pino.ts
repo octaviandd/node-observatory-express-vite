@@ -5,16 +5,19 @@ import shimmer from "shimmer";
 import { watchers } from "../logger";
 import { getCallerInfo } from "../utils";
 
-const PINO_PATCHED_SYMBOL = Symbol.for('node-observer:pino-patched');
+const PINO_PATCHED_SYMBOL = Symbol.for("node-observer:pino-patched");
 
-if (process.env.NODE_OBSERVATORY_LOGGING && JSON.parse(process.env.NODE_OBSERVATORY_LOGGING).includes("pino")) {
+if (
+  process.env.NODE_OBSERVATORY_LOGGING &&
+  JSON.parse(process.env.NODE_OBSERVATORY_LOGGING).includes("pino")
+) {
   if (!(global as any)[PINO_PATCHED_SYMBOL]) {
     (global as any)[PINO_PATCHED_SYMBOL] = true;
 
     new Hook(["pino"], function (
       exports: any,
       name: string,
-      basedir: string | undefined
+      basedir: string | undefined,
     ): any {
       // The `exports` here is the top-level function from "pino".
       // We can wrap that function to intercept any Pino logger creation.
@@ -22,38 +25,48 @@ if (process.env.NODE_OBSERVATORY_LOGGING && JSON.parse(process.env.NODE_OBSERVAT
       const originalPino = exports;
 
       function patchLoggerMethods(loggerInstance: any, contextMetadata = {}) {
-        ["info", "warn", "error", "debug", "trace", "fatal"].forEach((method) => {
-          if (typeof loggerInstance[method] === "function") {
-            shimmer.wrap(loggerInstance, method, function (originalMethod) {
-              return function patchedMethod(this: any, ...logArgs: any) {
-                const callerInfo = getCallerInfo(__filename);
+        ["info", "warn", "error", "debug", "trace", "fatal"].forEach(
+          (method) => {
+            if (typeof loggerInstance[method] === "function") {
+              shimmer.wrap(loggerInstance, method, function (originalMethod) {
+                return function patchedMethod(this: any, ...logArgs: any) {
+                  const callerInfo = getCallerInfo(__filename);
 
-                // Include the context metadata in the log content
-                watchers.logging.addContent({
-                  package: "pino",
-                  level: method,
-                  message: logArgs[0],
-                  metadata: logArgs[1] || {},
-                  context: contextMetadata, // Include the child logger's context
-                  file: callerInfo.file,
-                  line: callerInfo.line,
-                });
+                  // Include the context metadata in the log content
+                  watchers.logging.addContent({
+                    package: "pino",
+                    level: method,
+                    message: logArgs[0],
+                    metadata: logArgs[1] || {},
+                    context: contextMetadata, // Include the child logger's context
+                    file: callerInfo.file,
+                    line: callerInfo.line,
+                  });
 
-                return originalMethod.apply(this, logArgs);
-              };
-            });
-          }
-        });
+                  return originalMethod.apply(this, logArgs);
+                };
+              });
+            }
+          },
+        );
 
         // Patch the child method to handle nested child loggers
         if (typeof loggerInstance.child === "function") {
           shimmer.wrap(loggerInstance, "child", function (originalChild) {
-            return function patchedChild(this: any, childBindings: any, ...rest: any[]) {
-              const childLogger = originalChild.call(this, childBindings, ...rest);
+            return function patchedChild(
+              this: any,
+              childBindings: any,
+              ...rest: any[]
+            ) {
+              const childLogger = originalChild.call(
+                this,
+                childBindings,
+                ...rest,
+              );
               // Merge parent and child context
               const mergedContext = {
                 ...contextMetadata,
-                ...childBindings
+                ...childBindings,
               };
               // Patch the child logger's methods with the merged context
               patchLoggerMethods(childLogger, mergedContext);

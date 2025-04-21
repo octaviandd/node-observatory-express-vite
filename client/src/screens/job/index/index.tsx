@@ -1,6 +1,12 @@
 /** @format */
 
-import { Card, CardContent, CardHeader, CardTitle, CardSubtitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardSubtitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import JobsIndexTable from "../table";
 import { DurationGraph } from "@/components/ui/graphs/duration-graph";
@@ -22,9 +28,7 @@ export default function JobsIndex() {
                 <CardTitle className="text-sm text-muted-foreground">
                   JOB ATTEMPTS
                 </CardTitle>
-                <CardSubtitle>
-                  {data.count}
-                </CardSubtitle>
+                <CardSubtitle>{data.count}</CardSubtitle>
               </div>
               <div className="flex gap-4 text-xs">
                 <div className="flex flex-col items-center">
@@ -78,22 +82,22 @@ export default function JobsIndex() {
               <div className="flex gap-4 text-xs">
                 <div>
                   <span className="text-muted-foreground mr-1">AVG</span>
-                  <Badge variant="secondary">
-                    {data.average}
-                  </Badge>
+                  <Badge variant="secondary">{data.average}</Badge>
                 </div>
                 <div>
                   <span className="text-muted-foreground mr-1">P95</span>
-                  <Badge variant="warning">
-                    {data.p95}
-                  </Badge>
+                  <Badge variant="warning">{data.p95}</Badge>
                 </div>
               </div>
             </div>
           </CardHeader>
           <CardContent>
             <div className="h-auto">
-              <DurationGraph data={data.durationFormattedData} period={period} currentDate={currentDate} />
+              <DurationGraph
+                data={data.durationFormattedData}
+                period={period}
+                currentDate={currentDate}
+              />
             </div>
           </CardContent>
         </Card>

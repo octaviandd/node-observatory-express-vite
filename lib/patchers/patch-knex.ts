@@ -6,9 +6,14 @@ import { watchers } from "../logger";
 import { getCallerInfo } from "../utils";
 
 // Create a global symbol to track if knex has been patched
-const KNEX_PATCHED_SYMBOL = Symbol.for('node-observer:knex-patched');
+const KNEX_PATCHED_SYMBOL = Symbol.for("node-observer:knex-patched");
 
-if ((process.env.NODE_OBSERVATORY_QUERIES && JSON.parse(process.env.NODE_OBSERVATORY_QUERIES).includes("knex")) || (process.env.NODE_OBSERVATORY_MODELS && JSON.parse(process.env.NODE_OBSERVATORY_MODELS).includes("knex"))) {
+if (
+  (process.env.NODE_OBSERVATORY_QUERIES &&
+    JSON.parse(process.env.NODE_OBSERVATORY_QUERIES).includes("knex")) ||
+  (process.env.NODE_OBSERVATORY_MODELS &&
+    JSON.parse(process.env.NODE_OBSERVATORY_MODELS).includes("knex"))
+) {
   // Check if knex has already been patched
   if (!(global as any)[KNEX_PATCHED_SYMBOL]) {
     // Mark knex as patched
@@ -30,7 +35,13 @@ if ((process.env.NODE_OBSERVATORY_QUERIES && JSON.parse(process.env.NODE_OBSERVA
         return exports;
       }
 
-      function logQuery(context: string, sql: string, bindings: any, duration: number, error?: Error) {
+      function logQuery(
+        context: string,
+        sql: string,
+        bindings: any,
+        duration: number,
+        error?: Error,
+      ) {
         const callerInfo = getCallerInfo(__filename);
 
         const logEntry = {
@@ -45,7 +56,7 @@ if ((process.env.NODE_OBSERVATORY_QUERIES && JSON.parse(process.env.NODE_OBSERVA
           line: callerInfo.line,
           error: error ? error.toString() : undefined,
           sqlType: getSqlType(sql),
-          params: bindings
+          params: bindings,
         };
 
         watchers.query.addContent(logEntry);
@@ -79,17 +90,31 @@ if ((process.env.NODE_OBSERVATORY_QUERIES && JSON.parse(process.env.NODE_OBSERVA
               try {
                 const result = await originalQuery.apply(this, arguments);
                 const endTime = performance.now();
-                logQuery("Client.prototype._query", obj.sql, obj.bindings, endTime - startTime, undefined);
+                logQuery(
+                  "Client.prototype._query",
+                  obj.sql,
+                  obj.bindings,
+                  endTime - startTime,
+                  undefined,
+                );
                 return result;
               } catch (error: any) {
                 const endTime = performance.now();
-                logQuery("Client.prototype._query", obj.sql, obj.bindings, endTime - startTime, error);
+                logQuery(
+                  "Client.prototype._query",
+                  obj.sql,
+                  obj.bindings,
+                  endTime - startTime,
+                  error,
+                );
                 throw error;
               }
             };
-          }
+          },
         );
-      } else if (typeof (exports as any).Client.prototype.query === "function") {
+      } else if (
+        typeof (exports as any).Client.prototype.query === "function"
+      ) {
         // If `_query` doesn't exist, try patching `.query()` instead
         shimmer.wrap(
           (exports as any).Client.prototype,
@@ -104,15 +129,27 @@ if ((process.env.NODE_OBSERVATORY_QUERIES && JSON.parse(process.env.NODE_OBSERVA
               try {
                 const result = await originalQuery.apply(this, arguments);
                 const endTime = performance.now();
-                logQuery("Client.prototype.query", obj && obj.sql ? obj.sql : obj, obj && obj.bindings, endTime - startTime, undefined);
+                logQuery(
+                  "Client.prototype.query",
+                  obj && obj.sql ? obj.sql : obj,
+                  obj && obj.bindings,
+                  endTime - startTime,
+                  undefined,
+                );
                 return result;
               } catch (error: any) {
                 const endTime = performance.now();
-                logQuery("Client.prototype.query", obj && obj.sql ? obj.sql : obj, obj && obj.bindings, endTime - startTime, error);
+                logQuery(
+                  "Client.prototype.query",
+                  obj && obj.sql ? obj.sql : obj,
+                  obj && obj.bindings,
+                  endTime - startTime,
+                  error,
+                );
                 throw error;
               }
             };
-          }
+          },
         );
       }
 

@@ -21,7 +21,11 @@ class RedisWatcher extends BaseWatcher {
    * Constructor & Initialization
    * --------------------------------------------------------------------------
    */
-  constructor(storeDriver: StoreDriver, storeConnection: any, redisClient: any) {
+  constructor(
+    storeDriver: StoreDriver,
+    storeConnection: any,
+    redisClient: any,
+  ) {
     super(storeDriver, storeConnection, redisClient);
   }
 
@@ -32,14 +36,14 @@ class RedisWatcher extends BaseWatcher {
   protected async handleViewSQL(id: string): Promise<any> {
     let [results]: [any[], any] = await this.storeConnection.query(
       "SELECT * FROM observatory_entries WHERE uuid = ? AND type = ?",
-      [id, this.type]
+      [id, this.type],
     );
 
     let item = results[0];
 
     const [relatedItems]: [any[], any] = await this.storeConnection.query(
       "SELECT * FROM observatory_entries WHERE batch_id = ? AND type != ?",
-      [item.batch_id, this.type]
+      [item.batch_id, this.type],
     );
 
     results = results.concat(relatedItems);
@@ -54,7 +58,7 @@ class RedisWatcher extends BaseWatcher {
   protected async handleRelatedDataSQL(batchId: string): Promise<any> {
     const [results]: [any[], any] = await this.storeConnection.query(
       "SELECT * FROM observatory_entries WHERE batch_id = ? AND type != ?",
-      [batchId, this.type]
+      [batchId, this.type],
     );
     return this.groupItemsByType(results);
   }
@@ -63,7 +67,9 @@ class RedisWatcher extends BaseWatcher {
    * Instance Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async getIndexTableDataByInstanceSQL(filters: RedisFilters): Promise<any> {
+  protected async getIndexTableDataByInstanceSQL(
+    filters: RedisFilters,
+  ): Promise<any> {
     const { limit, offset, query } = filters;
     const querySQL = query ? this.getInclusionSQL(query, "command") : "";
 
@@ -72,23 +78,31 @@ class RedisWatcher extends BaseWatcher {
        WHERE type = 'redis' ${querySQL} 
        ORDER BY created_at DESC 
        LIMIT ? OFFSET ?`,
-      [limit, offset]
+      [limit, offset],
     );
 
     const [countResult] = await this.storeConnection.query(
       `SELECT COUNT(*) as total 
        FROM observatory_entries 
-       WHERE type = 'redis' ${querySQL}`
+       WHERE type = 'redis' ${querySQL}`,
     );
 
-    return { results, count: countResult[0].total > 999 ? (countResult[0].total / 1000).toFixed(2) + "K" : countResult[0].total };
+    return {
+      results,
+      count:
+        countResult[0].total > 999
+          ? (countResult[0].total / 1000).toFixed(2) + "K"
+          : countResult[0].total,
+    };
   }
 
   /**
    * Group Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async getIndexTableDataByGroupSQL(filters: RedisFilters): Promise<any> {
+  protected async getIndexTableDataByGroupSQL(
+    filters: RedisFilters,
+  ): Promise<any> {
     const { period, limit, offset, query } = filters;
     const periodSql = period ? this.getPeriodSQL(period) : "";
     const querySql = query ? this.getInclusionSQL(query, "command") : "";
@@ -103,16 +117,22 @@ class RedisWatcher extends BaseWatcher {
         GROUP BY JSON_UNQUOTE(JSON_EXTRACT(content, '$.command'))
         ORDER BY total DESC
         LIMIT ? OFFSET ?`,
-      [limit, offset]
+      [limit, offset],
     );
 
     const [countResult] = await this.storeConnection.query(
       `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.command'))) as total
        FROM observatory_entries
-       WHERE type = 'redis' ${periodSql} ${querySql}`
+       WHERE type = 'redis' ${periodSql} ${querySql}`,
     );
 
-    return { results, count: countResult[0].total > 999 ? (countResult[0].total / 1000).toFixed(2) + "K" : countResult[0].total };
+    return {
+      results,
+      count:
+        countResult[0].total > 999
+          ? (countResult[0].total / 1000).toFixed(2) + "K"
+          : countResult[0].total,
+    };
   }
 
   /**
@@ -149,12 +169,15 @@ class RedisWatcher extends BaseWatcher {
         FROM observatory_entries
         WHERE type = 'redis' ${periodSql}
         ORDER BY created_at DESC
-      );`
+      );`,
     );
 
     const aggregateResults = results.shift();
     const countFormattedData = this.countGraphData(results, period as string);
-    const durationFormattedData = this.durationGraphData(results, period as string);
+    const durationFormattedData = this.durationGraphData(
+      results,
+      period as string,
+    );
 
     return {
       results,
@@ -163,10 +186,10 @@ class RedisWatcher extends BaseWatcher {
       count: aggregateResults.total,
       shortest: parseFloat(aggregateResults.shortest || 0).toFixed(2),
       longest: parseFloat(aggregateResults.longest || 0).toFixed(2),
-      average: parseFloat(aggregateResults.average || 0).toFixed(2)
+      average: parseFloat(aggregateResults.average || 0).toFixed(2),
     };
   }
-  
+
   /**
    * Helper Methods
    * --------------------------------------------------------------------------
@@ -188,16 +211,16 @@ class RedisWatcher extends BaseWatcher {
       const redisTime = new Date(redis.created_at).getTime();
       const command = redis.content.command.toLowerCase();
       const intervalIndex = Math.floor(
-        (redisTime - startDate) / (intervalDuration * 60 * 1000)
+        (redisTime - startDate) / (intervalDuration * 60 * 1000),
       );
 
       if (intervalIndex >= 0 && intervalIndex < 120) {
         groupedData[intervalIndex].total++;
-        if (command.startsWith('get')) {
+        if (command.startsWith("get")) {
           groupedData[intervalIndex].gets++;
-        } else if (command.startsWith('set')) {
+        } else if (command.startsWith("set")) {
           groupedData[intervalIndex].sets++;
-        } else if (command.startsWith('del')) {
+        } else if (command.startsWith("del")) {
           groupedData[intervalIndex].deletes++;
         }
       }
@@ -223,4 +246,3 @@ class RedisWatcher extends BaseWatcher {
 }
 
 export default RedisWatcher;
-

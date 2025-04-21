@@ -1,11 +1,15 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router';
-import { ExternalLinkIcon } from 'lucide-react';
-import { RequestInstanceResponse } from '../../../../../types';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router";
+import { ExternalLinkIcon } from "lucide-react";
+import { RequestInstanceResponse } from "../../../../../types";
 
-export default function Source({ source }: { source: RequestInstanceResponse }) {
+export default function Source({
+  source,
+}: {
+  source: RequestInstanceResponse;
+}) {
   return (
     <Card className="rounded-none">
       <CardHeader>
@@ -38,11 +42,13 @@ export default function Source({ source }: { source: RequestInstanceResponse }) 
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Method</div>
             <div className="col-span-9">
-              <Badge variant="outline">{source.content.method.toUpperCase()}</Badge>
+              <Badge variant="outline">
+                {source.content.method.toUpperCase()}
+              </Badge>
             </div>
           </div>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

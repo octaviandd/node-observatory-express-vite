@@ -1,18 +1,18 @@
 /** @format */
-import { Card, CardContent } from "@/components/ui/card"
-import { BarChart, Bar, ResponsiveContainer, Tooltip } from "recharts"
+import { Card, CardContent } from "@/components/ui/card";
+import { BarChart, Bar, ResponsiveContainer, Tooltip } from "recharts";
 
 type Props = {
-  data: object[]
+  data: object[];
   barData: {
-    dataKey: string
-    stackId: string
-    fill: string
-    name?: string
-  }[]
-  period: string
-  currentDate: string
-}
+    dataKey: string;
+    stackId: string;
+    fill: string;
+    name?: string;
+  }[];
+  period: string;
+  currentDate: string;
+};
 
 export const CountGraph = ({ data, barData, period, currentDate }: Props) => {
   return (
@@ -52,9 +52,9 @@ export const CountGraph = ({ data, barData, period, currentDate }: Props) => {
                           </div>
                         ))}
                       </div>
-                    )
+                    );
                   }
-                  return null
+                  return null;
                 }}
               />
               {barData.map((bar) => (
@@ -76,5 +76,5 @@ export const CountGraph = ({ data, barData, period, currentDate }: Props) => {
         </div>
       </CardContent>
     </Card>
-  )
-}
+  );
+};

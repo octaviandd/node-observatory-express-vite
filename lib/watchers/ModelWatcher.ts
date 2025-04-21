@@ -1,5 +1,3 @@
-
-
 import { Request } from "express";
 import { StoreDriver } from "../../types";
 import { BaseWatcher } from "./BaseWatcher";
@@ -22,7 +20,11 @@ class ModelWatcher extends BaseWatcher {
    * Constructor & Initialization
    * --------------------------------------------------------------------------
    */
-  constructor(storeDriver: StoreDriver, storeConnection: any, redisClient: any) {
+  constructor(
+    storeDriver: StoreDriver,
+    storeConnection: any,
+    redisClient: any,
+  ) {
     super(storeDriver, storeConnection, redisClient);
   }
 
@@ -33,7 +35,7 @@ class ModelWatcher extends BaseWatcher {
   protected async handleViewSQL(id: string): Promise<any> {
     let [results]: [any[], any] = await this.storeConnection.query(
       "SELECT * FROM observatory_entries WHERE uuid = ?",
-      [id]
+      [id],
     );
 
     let item = results[0];
@@ -56,19 +58,23 @@ class ModelWatcher extends BaseWatcher {
       params.push(item.job_id);
     }
 
-    let jobCondition = ''
+    let jobCondition = "";
 
-    if(item.job_id) {
-      jobCondition = "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')";
+    if (item.job_id) {
+      jobCondition =
+        "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')";
     }
 
-    if(!item.request_id && !item.schedule_id && !item.job_id) {
+    if (!item.request_id && !item.schedule_id && !item.job_id) {
       return this.groupItemsByType(results);
     }
 
     const [relatedItems]: [any[], any] = await this.storeConnection.query(
-      "SELECT * FROM observatory_entries WHERE " + conditions.join(" OR ") + " AND type != ? " + jobCondition,
-      [...params, this.type]
+      "SELECT * FROM observatory_entries WHERE " +
+        conditions.join(" OR ") +
+        " AND type != ? " +
+        jobCondition,
+      [...params, this.type],
     );
 
     return this.groupItemsByType(relatedItems.concat(results));
@@ -79,36 +85,46 @@ class ModelWatcher extends BaseWatcher {
    * --------------------------------------------------------------------------
    */
 
-  protected async handleRelatedDataSQL(modelId: string, requestId: string, jobId: string, scheduleId: string): Promise<any> {
-    let query = 'SELECT * FROM observatory_entries WHERE type != ?';
+  protected async handleRelatedDataSQL(
+    modelId: string,
+    requestId: string,
+    jobId: string,
+    scheduleId: string,
+  ): Promise<any> {
+    let query = "SELECT * FROM observatory_entries WHERE type != ?";
 
-    if(requestId) {
+    if (requestId) {
       query += ` AND request_id = '${requestId}'`;
-    } 
+    }
 
     if (jobId) {
-      let jobFilter = "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')";
+      let jobFilter =
+        "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')";
       query += ` AND job_id = '${jobId}' ${jobFilter}`;
     }
 
-    if(scheduleId) {
+    if (scheduleId) {
       query += ` AND schedule_id = '${scheduleId}'`;
     }
 
-    if(!requestId && !jobId && !scheduleId) {
-      return {}
+    if (!requestId && !jobId && !scheduleId) {
+      return {};
     }
 
-    const [results]: [any[], any] = await this.storeConnection.query(query, [this.type]);
+    const [results]: [any[], any] = await this.storeConnection.query(query, [
+      this.type,
+    ]);
     return this.groupItemsByType(results);
   }
 
-   /**
+  /**
    * Instance Data Methods
    * --------------------------------------------------------------------------
    */
 
-  protected async getIndexTableDataByInstanceSQL(filters: ModelFilters): Promise<any> {
+  protected async getIndexTableDataByInstanceSQL(
+    filters: ModelFilters,
+  ): Promise<any> {
     const { limit, offset, model, query, status } = filters;
     const modelSQL = model ? this.getEqualitySQL(model, "modelName") : "";
     const querySQL = query ? this.getInclusionSQL(query, "modelName") : "";
@@ -119,12 +135,12 @@ class ModelWatcher extends BaseWatcher {
        WHERE type = 'model' ${modelSQL} ${querySQL} ${statusSQL}
        ORDER BY created_at DESC
        LIMIT ? OFFSET ?`,
-      [limit, offset]
+      [limit, offset],
     );
 
     const [countResult] = await this.storeConnection.query(
       `SELECT COUNT(*) as total FROM observatory_entries
-       WHERE type = 'model' ${modelSQL} ${querySQL} ${statusSQL}`
+       WHERE type = 'model' ${modelSQL} ${querySQL} ${statusSQL}`,
     );
 
     return { results, count: this.formatValue(countResult[0].total, true) };
@@ -134,7 +150,9 @@ class ModelWatcher extends BaseWatcher {
    * Group Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async getIndexTableDataByGroupSQL(filters: ModelFilters): Promise<any> {
+  protected async getIndexTableDataByGroupSQL(
+    filters: ModelFilters,
+  ): Promise<any> {
     const { limit, offset, model, query } = filters;
     const modelSQL = model ? this.getEqualitySQL(model, "modelName") : "";
     const querySQL = query ? this.getInclusionSQL(query, "modelName") : "";
@@ -168,13 +186,13 @@ class ModelWatcher extends BaseWatcher {
         GROUP BY JSON_UNQUOTE(JSON_EXTRACT(content, '$.modelName'))
         ORDER BY total DESC
         LIMIT ? OFFSET ?`,
-      [limit, offset]
+      [limit, offset],
     );
 
     const [countResult] = await this.storeConnection.query(
       `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.modelName'))) as total 
        FROM observatory_entries 
-       WHERE type = 'model' ${modelSQL} ${querySQL}`
+       WHERE type = 'model' ${modelSQL} ${querySQL}`,
     );
 
     return { results, count: this.formatValue(countResult[0].total, true) };
@@ -234,7 +252,7 @@ class ModelWatcher extends BaseWatcher {
         FROM observatory_entries
         WHERE type = 'model' ${timeSql}
         ORDER BY created_at DESC
-      );`
+      );`,
     )) as [any[], any];
 
     const aggregateResults: {
@@ -248,7 +266,10 @@ class ModelWatcher extends BaseWatcher {
     } = results.shift();
 
     const countFormattedData = this.countGraphData(results, period as string);
-    const durationFormattedData = this.durationGraphData(results, period as string);
+    const durationFormattedData = this.durationGraphData(
+      results,
+      period as string,
+    );
 
     return {
       results,
@@ -275,19 +296,19 @@ class ModelWatcher extends BaseWatcher {
     const startDate = now - totalDuration * 60 * 1000;
 
     const groupedData = Array.from({ length: 120 }, (_, index) => ({
-      "completed": 0,
-      "failed": 0,
-      label: this.getLabel(index, period)
+      completed: 0,
+      failed: 0,
+      label: this.getLabel(index, period),
     }));
 
     data.forEach((model: any) => {
       const modelTime = new Date(model.created_at).getTime();
       const statusCode = model.content.status;
       const intervalIndex = Math.floor(
-        (modelTime - startDate) / (intervalDuration * 60 * 1000)
+        (modelTime - startDate) / (intervalDuration * 60 * 1000),
       );
 
-     if (intervalIndex >= 0 && intervalIndex < 120) {
+      if (intervalIndex >= 0 && intervalIndex < 120) {
         groupedData[intervalIndex] = {
           ...groupedData[intervalIndex],
           //@ts-ignore
@@ -300,7 +321,9 @@ class ModelWatcher extends BaseWatcher {
   }
 
   private getStatusSQL(type: string) {
-    return type === "all" ? '' : `AND JSON_EXTRACT(content, '$.status') = '${type}'`;
+    return type === "all"
+      ? ""
+      : `AND JSON_EXTRACT(content, '$.status') = '${type}'`;
   }
 
   protected extractFiltersFromRequest(req: Request): ModelFilters {

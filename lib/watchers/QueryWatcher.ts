@@ -14,7 +14,11 @@ interface QueryFilters extends WatcherFilters {
 class QueryWatcher extends BaseWatcher {
   readonly type = "query";
 
-  constructor(storeDriver: StoreDriver, storeConnection: any, redisClient: any) {
+  constructor(
+    storeDriver: StoreDriver,
+    storeConnection: any,
+    redisClient: any,
+  ) {
     super(storeDriver, storeConnection, redisClient);
   }
 
@@ -40,11 +44,10 @@ class QueryWatcher extends BaseWatcher {
   protected async handleViewSQL(id: string): Promise<any> {
     let [results]: [any[], any] = await this.storeConnection.query(
       "SELECT * FROM observatory_entries WHERE uuid = ? AND type = ?",
-      [id, this.type]
+      [id, this.type],
     );
 
     let item = results[0];
-
 
     let conditions = [];
     let params = [];
@@ -64,10 +67,11 @@ class QueryWatcher extends BaseWatcher {
       params.push(item.job_id);
     }
 
-
     const [relatedItems]: [any[], any] = await this.storeConnection.query(
-      "SELECT * FROM observatory_entries WHERE " + conditions.join(" OR ") + " AND type != ?",
-      [...params, this.type]
+      "SELECT * FROM observatory_entries WHERE " +
+        conditions.join(" OR ") +
+        " AND type != ?",
+      [...params, this.type],
     );
 
     return this.groupItemsByType(relatedItems.concat(results));
@@ -77,7 +81,12 @@ class QueryWatcher extends BaseWatcher {
    * Related Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async handleRelatedDataSQL(modelId: string, requestId: string, jobId: string, scheduleId: string): Promise<any> {
+  protected async handleRelatedDataSQL(
+    modelId: string,
+    requestId: string,
+    jobId: string,
+    scheduleId: string,
+  ): Promise<any> {
     let source = "";
     let sourceId = "";
 
@@ -89,7 +98,7 @@ class QueryWatcher extends BaseWatcher {
     if (jobId) {
       source = "job";
       sourceId = jobId;
-    } 
+    }
 
     if (scheduleId) {
       source = "schedule";
@@ -98,45 +107,55 @@ class QueryWatcher extends BaseWatcher {
 
     const [results]: [any[], any] = await this.storeConnection.query(
       `SELECT * FROM observatory_entries WHERE ${source}_id = ? AND type = '${source}'`,
-      [sourceId]
-    );  
+      [sourceId],
+    );
 
     return this.groupItemsByType(results);
   }
-
 
   /**
    * Instance Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async getIndexTableDataByInstanceSQL(filters: QueryFilters): Promise<any> {
+  protected async getIndexTableDataByInstanceSQL(
+    filters: QueryFilters,
+  ): Promise<any> {
     const { period, limit, offset, query, status, key } = filters;
     const periodSql = period ? this.getPeriodSQL(period) : "";
     const querySql = query ? this.getInclusionSQL(query, "query") : "";
     const keySql = key ? this.getEqualitySQL(key, "sql") : "";
-    const statusSql = status !== "all" ? `AND ${this.getStatusSQL(status)}` : "";
+    const statusSql =
+      status !== "all" ? `AND ${this.getStatusSQL(status)}` : "";
 
     const [results] = await this.storeConnection.query(
       `SELECT * FROM observatory_entries
        WHERE type = 'query' ${periodSql} ${querySql} ${statusSql} ${keySql}
        ORDER BY created_at DESC
        LIMIT ? OFFSET ?`,
-      [limit, offset]
+      [limit, offset],
     );
 
     const [countResult] = await this.storeConnection.query(
       `SELECT COUNT(*) as total FROM observatory_entries
-       WHERE type = 'query' ${periodSql} ${querySql} ${statusSql} ${keySql}`
+       WHERE type = 'query' ${periodSql} ${querySql} ${statusSql} ${keySql}`,
     );
 
-    return { results, count: countResult[0].total > 999 ? (countResult[0].total / 1000).toFixed(2) + "K" : countResult[0].total };
+    return {
+      results,
+      count:
+        countResult[0].total > 999
+          ? (countResult[0].total / 1000).toFixed(2) + "K"
+          : countResult[0].total,
+    };
   }
 
   /**
    * Group Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async getIndexTableDataByGroupSQL(filters: QueryFilters): Promise<any> {
+  protected async getIndexTableDataByGroupSQL(
+    filters: QueryFilters,
+  ): Promise<any> {
     const { period, limit, offset, query } = filters;
     const periodSql = period ? this.getPeriodSQL(period) : "";
     const querySql = query ? this.getInclusionSQL(query, "endpoint") : "";
@@ -171,16 +190,22 @@ class QueryWatcher extends BaseWatcher {
         GROUP BY JSON_UNQUOTE(JSON_EXTRACT(content, '$.sql'))
         ORDER BY total DESC
         LIMIT ? OFFSET ?`,
-      [limit, offset]
+      [limit, offset],
     );
 
     const [countResult] = await this.storeConnection.query(
       `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.sql'))) as total
        FROM observatory_entries
-       WHERE type = 'query' ${periodSql} ${querySql}`
+       WHERE type = 'query' ${periodSql} ${querySql}`,
     );
 
-    return { results, count: countResult[0].total > 999 ? (countResult[0].total / 1000).toFixed(2) + "K" : countResult[0].total };
+    return {
+      results,
+      count:
+        countResult[0].total > 999
+          ? (countResult[0].total / 1000).toFixed(2) + "K"
+          : countResult[0].total,
+    };
   }
 
   /**
@@ -238,12 +263,15 @@ class QueryWatcher extends BaseWatcher {
         FROM observatory_entries
         WHERE type = 'query' ${periodSql} ${keySql}
         ORDER BY created_at DESC
-      );`
+      );`,
     );
 
     const aggregateResults = results.shift();
     const countFormattedData = this.countGraphData(results, period as string);
-    const durationFormattedData = this.durationGraphData(results, period as string);
+    const durationFormattedData = this.durationGraphData(
+      results,
+      period as string,
+    );
 
     return {
       countFormattedData,
@@ -257,7 +285,7 @@ class QueryWatcher extends BaseWatcher {
       p95: this.formatValue(aggregateResults.p95),
     };
   }
-  
+
   /**
    * Helper Methods
    * --------------------------------------------------------------------------
@@ -271,7 +299,7 @@ class QueryWatcher extends BaseWatcher {
     const groupedData = Array.from({ length: 120 }, (_, index) => ({
       completed: 0,
       failed: 0,
-      label: this.getLabel(index, period)
+      label: this.getLabel(index, period),
     }));
 
     data.forEach((query: any) => {
@@ -279,7 +307,7 @@ class QueryWatcher extends BaseWatcher {
       const queryStatus = query.content.status;
 
       const intervalIndex = Math.floor(
-        (queryTime - startDate) / (intervalDuration * 60 * 1000)
+        (queryTime - startDate) / (intervalDuration * 60 * 1000),
       );
 
       if (intervalIndex >= 0 && intervalIndex < 120) {

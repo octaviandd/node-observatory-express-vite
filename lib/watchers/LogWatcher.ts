@@ -29,7 +29,11 @@ class LogWatcher extends BaseWatcher {
    * Constructor & Initialization
    * --------------------------------------------------------------------------
    */
-  constructor(storeDriver: StoreDriver, storeConnection: any, redisClient: any) {
+  constructor(
+    storeDriver: StoreDriver,
+    storeConnection: any,
+    redisClient: any,
+  ) {
     super(storeDriver, storeConnection, redisClient);
   }
 
@@ -39,7 +43,11 @@ class LogWatcher extends BaseWatcher {
    */
   private getLogTypeSQL(logType: string): string {
     const types = logType.split(",");
-    return types.map(type => `JSON_EXTRACT(content, '$.level') LIKE '%${type.toLowerCase()}%'`)
+    return types
+      .map(
+        (type) =>
+          `JSON_EXTRACT(content, '$.level') LIKE '%${type.toLowerCase()}%'`,
+      )
       .join(" OR ");
   }
 
@@ -50,7 +58,7 @@ class LogWatcher extends BaseWatcher {
   protected async handleViewSQL(id: string): Promise<any> {
     let [results]: [any[], any] = await this.storeConnection.query(
       "SELECT * FROM observatory_entries WHERE uuid = ?",
-      [id]
+      [id],
     );
 
     let item = results[0];
@@ -73,19 +81,23 @@ class LogWatcher extends BaseWatcher {
       params.push(item.job_id);
     }
 
-    let jobCondition = ''
+    let jobCondition = "";
 
-    if(item.job_id) {
-      jobCondition = "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')";
+    if (item.job_id) {
+      jobCondition =
+        "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')";
     }
 
-    if(!item.request_id && !item.schedule_id && !item.job_id) {
+    if (!item.request_id && !item.schedule_id && !item.job_id) {
       return this.groupItemsByType(results);
     }
 
     const [relatedItems]: [any[], any] = await this.storeConnection.query(
-      "SELECT * FROM observatory_entries WHERE " + conditions.join(" OR ") + " AND type != ? " + jobCondition,
-      [...params, this.type]
+      "SELECT * FROM observatory_entries WHERE " +
+        conditions.join(" OR ") +
+        " AND type != ? " +
+        jobCondition,
+      [...params, this.type],
     );
 
     return this.groupItemsByType(relatedItems.concat(results));
@@ -95,27 +107,35 @@ class LogWatcher extends BaseWatcher {
    * Related Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async handleRelatedDataSQL(modelId: string, requestId: string, jobId: string, scheduleId: string): Promise<any> {
-    let query = 'SELECT * FROM observatory_entries WHERE type != ?';
+  protected async handleRelatedDataSQL(
+    modelId: string,
+    requestId: string,
+    jobId: string,
+    scheduleId: string,
+  ): Promise<any> {
+    let query = "SELECT * FROM observatory_entries WHERE type != ?";
 
-    if(requestId) {
+    if (requestId) {
       query += ` AND request_id = '${requestId}'`;
-    } 
+    }
 
     if (jobId) {
-      let jobFilter = "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')";
+      let jobFilter =
+        "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')";
       query += ` AND job_id = '${jobId}' ${jobFilter}`;
     }
 
-    if(scheduleId) {
+    if (scheduleId) {
       query += ` AND schedule_id = '${scheduleId}'`;
     }
 
-    if(!requestId && !jobId && !scheduleId) {
-      return {}
+    if (!requestId && !jobId && !scheduleId) {
+      return {};
     }
-    
-    const [results]: [any[], any] = await this.storeConnection.query(query, [this.type]);
+
+    const [results]: [any[], any] = await this.storeConnection.query(query, [
+      this.type,
+    ]);
     return this.groupItemsByType(results);
   }
 
@@ -124,26 +144,33 @@ class LogWatcher extends BaseWatcher {
    * --------------------------------------------------------------------------
    */
 
-  protected async getIndexTableDataByInstanceSQL(filters: LogFilters): Promise<any> {
+  protected async getIndexTableDataByInstanceSQL(
+    filters: LogFilters,
+  ): Promise<any> {
     const { limit, offset, logType, query, key, period } = filters;
-    const typeSql = logType.toLowerCase() === "all" ? "" : `AND ${this.getLogTypeSQL(logType)}`;
+    const typeSql =
+      logType.toLowerCase() === "all"
+        ? ""
+        : `AND ${this.getLogTypeSQL(logType)}`;
     const querySql = query ? this.getInclusionSQL(query, "message") : "";
-    const messageSql = key ? `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.message')) = '${key}'` : "";
+    const messageSql = key
+      ? `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.message')) = '${key}'`
+      : "";
     const periodSql = period ? this.getPeriodSQL(period) : "";
 
-    const [results] = await this.storeConnection.query(
+    const [results] = (await this.storeConnection.query(
       `SELECT * FROM observatory_entries
        WHERE type = 'log' ${typeSql} ${querySql} ${messageSql} ${periodSql}
        ORDER BY created_at DESC
-       LIMIT ${limit} OFFSET ${offset}`
-    ) as [any[]];
+       LIMIT ${limit} OFFSET ${offset}`,
+    )) as [any[]];
 
-    const [countResults] = await this.storeConnection.query(
+    const [countResults] = (await this.storeConnection.query(
       `SELECT COUNT(*) as total FROM observatory_entries
-       WHERE type = 'log' ${typeSql} ${querySql} ${messageSql} ${periodSql}`
-    ) as [any[]];
+       WHERE type = 'log' ${typeSql} ${querySql} ${messageSql} ${periodSql}`,
+    )) as [any[]];
 
-    console.log(results)
+    console.log(results);
 
     return { results, count: this.formatValue(countResults[0].total, true) };
   }
@@ -153,7 +180,9 @@ class LogWatcher extends BaseWatcher {
    * --------------------------------------------------------------------------
    */
 
-  protected async getIndexTableDataByGroupSQL(filters: LogFilters): Promise<any> {
+  protected async getIndexTableDataByGroupSQL(
+    filters: LogFilters,
+  ): Promise<any> {
     const { limit, offset, query, period } = filters;
     const querySql = query ? this.getInclusionSQL(query, "message") : "";
     const periodSql = period ? this.getPeriodSQL(period) : "";
@@ -173,13 +202,13 @@ class LogWatcher extends BaseWatcher {
       WHERE type = 'log' ${querySql} ${periodSql}
       GROUP BY JSON_UNQUOTE(JSON_EXTRACT(content, '$.message'))
       ORDER BY total DESC
-      LIMIT ${limit} OFFSET ${offset}`
+      LIMIT ${limit} OFFSET ${offset}`,
     )) as [any];
 
     const [countResult] = (await this.storeConnection.query(
       `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.message'))) as total
        FROM observatory_entries
-       WHERE type = 'log' ${querySql} ${periodSql}`
+       WHERE type = 'log' ${querySql} ${periodSql}`,
     )) as [any];
 
     return { results, count: this.formatValue(countResult[0].total, true) };
@@ -192,7 +221,9 @@ class LogWatcher extends BaseWatcher {
   protected async getIndexGraphDataSQL(filters: LogFilters): Promise<any> {
     const { period, key } = filters;
     const periodSql = period ? this.getPeriodSQL(period) : "";
-    const messageSql = key ? `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.message')) = '${key}'` : "";
+    const messageSql = key
+      ? `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.message')) = '${key}'`
+      : "";
 
     const [results] = await this.storeConnection.query(
       `(
@@ -238,10 +269,10 @@ class LogWatcher extends BaseWatcher {
         FROM observatory_entries
         WHERE type = 'log' ${periodSql} ${messageSql}
         ORDER BY created_at DESC
-      );`
+      );`,
     );
 
-    const aggregateResults : {
+    const aggregateResults: {
       total: number;
       info: number;
       warn: number;
@@ -285,7 +316,7 @@ class LogWatcher extends BaseWatcher {
       trace: 0,
       fatal: 0,
       log: 0,
-      label: this.getLabel(index, period)
+      label: this.getLabel(index, period),
     }));
 
     data.forEach((log: any) => {
@@ -294,7 +325,7 @@ class LogWatcher extends BaseWatcher {
 
       // Calculate which interval the log falls into
       const intervalIndex = Math.floor(
-        (logTime - startDate) / (intervalDuration * 60 * 1000)
+        (logTime - startDate) / (intervalDuration * 60 * 1000),
       );
 
       if (intervalIndex >= 0 && intervalIndex < 120) {
@@ -323,7 +354,7 @@ class LogWatcher extends BaseWatcher {
       isTable: req.query.table === "true",
       logType: req.query.status as LogFilters["logType"],
       index: req.query.index as "instance" | "group",
-      key: req.query.key as string
+      key: req.query.key as string,
     };
   }
 }

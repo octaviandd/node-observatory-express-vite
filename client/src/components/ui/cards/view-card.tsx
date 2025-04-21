@@ -1,12 +1,11 @@
 /** @format */
-import { ViewInstanceResponse } from "../../../../../types"
-import { BaseCard } from "./base-card"
+import { ViewInstanceResponse } from "../../../../../types";
+import { BaseCard } from "./base-card";
 
-export default function ViewCard({ view }: {view: ViewInstanceResponse}) {
-  const duration = Number(view.content.duration)
-  const formattedDuration = duration > 999 
-    ? `${(duration / 1000).toFixed(2)}s` 
-    : `${duration}ms`
+export default function ViewCard({ view }: { view: ViewInstanceResponse }) {
+  const duration = Number(view.content.duration);
+  const formattedDuration =
+    duration > 999 ? `${(duration / 1000).toFixed(2)}s` : `${duration}ms`;
 
   return (
     <BaseCard
@@ -17,5 +16,5 @@ export default function ViewCard({ view }: {view: ViewInstanceResponse}) {
       line={view.content.line}
       linkPath={`/view/${view.uuid}`}
     />
-  )
+  );
 }

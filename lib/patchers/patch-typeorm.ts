@@ -5,9 +5,12 @@ import shimmer from "shimmer";
 import { watchers } from "../logger";
 import { getCallerInfo } from "../utils";
 
-const TYPEORM_PATCHED_SYMBOL = Symbol.for('node-observer:typeorm-patched');
+const TYPEORM_PATCHED_SYMBOL = Symbol.for("node-observer:typeorm-patched");
 
-if (process.env.NODE_OBSERVATORY_MODELS && JSON.parse(process.env.NODE_OBSERVATORY_MODELS).includes("typeorm")) {
+if (
+  process.env.NODE_OBSERVATORY_MODELS &&
+  JSON.parse(process.env.NODE_OBSERVATORY_MODELS).includes("typeorm")
+) {
   if (!(global as any)[TYPEORM_PATCHED_SYMBOL]) {
     // Mark typeorm as patched
     (global as any)[TYPEORM_PATCHED_SYMBOL] = true;
@@ -50,7 +53,7 @@ if (process.env.NODE_OBSERVATORY_MODELS && JSON.parse(process.env.NODE_OBSERVATO
                     method,
                     this.target?.name,
                     args,
-                    result, 
+                    result,
                     parseFloat((endTime - startTime).toFixed(2)),
                     undefined,
                   );
@@ -68,41 +71,45 @@ if (process.env.NODE_OBSERVATORY_MODELS && JSON.parse(process.env.NODE_OBSERVATO
                   throw error;
                 }
               };
-            }
+            },
           );
         }
       });
 
-      shimmer.wrap(exports.BaseEntity.prototype, "save", function (originalSave) {
-        return async function patchedSave(this: any, ...args: any[]) {
-          const startTime = performance.now();
+      shimmer.wrap(
+        exports.BaseEntity.prototype,
+        "save",
+        function (originalSave) {
+          return async function patchedSave(this: any, ...args: any[]) {
+            const startTime = performance.now();
 
-          try {
-            const result = await originalSave.apply(this, args);
-            const endTime = performance.now();
-            logModelOperation(
-              "save",
-              this.constructor.name,
-              args,
-              result,
-              parseFloat((endTime - startTime).toFixed(2)),
-              undefined,
-            );
-            return result;
-          } catch (error: any) {
-            const endTime = performance.now();
-            logModelOperation(
-              "save",
-              this.constructor.name,
-              args,
-              undefined,
-              parseFloat((endTime - startTime).toFixed(2)),
-              error,
-            );
-            throw error;
-          }
-        };
-      });
+            try {
+              const result = await originalSave.apply(this, args);
+              const endTime = performance.now();
+              logModelOperation(
+                "save",
+                this.constructor.name,
+                args,
+                result,
+                parseFloat((endTime - startTime).toFixed(2)),
+                undefined,
+              );
+              return result;
+            } catch (error: any) {
+              const endTime = performance.now();
+              logModelOperation(
+                "save",
+                this.constructor.name,
+                args,
+                undefined,
+                parseFloat((endTime - startTime).toFixed(2)),
+                error,
+              );
+              throw error;
+            }
+          };
+        },
+      );
 
       return exports;
     });
@@ -138,7 +145,7 @@ if (process.env.NODE_OBSERVATORY_MODELS && JSON.parse(process.env.NODE_OBSERVATO
       file: callerInfo.file,
       line: callerInfo.line,
       error: error ? error.toString() : undefined,
-      status: error ? "failed" : "completed"
+      status: error ? "failed" : "completed",
     };
     watchers.model.addContent(modelLogEntry);
   }

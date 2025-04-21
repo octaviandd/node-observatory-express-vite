@@ -1,12 +1,15 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router';
-import { ViewCrumbs } from './crumbs';
-import { RequestInstanceResponse, ViewInstanceResponse } from '../../../../../types';
-import Source from './source';
-import Details from './details';
-import ContentTabs from './tabs';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useEffect, useState } from "react";
+import { useParams } from "react-router";
+import { ViewCrumbs } from "./crumbs";
+import {
+  RequestInstanceResponse,
+  ViewInstanceResponse,
+} from "../../../../../types";
+import Source from "./source";
+import Details from "./details";
+import ContentTabs from "./tabs";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function ViewPreview() {
   const params = useParams();
@@ -20,7 +23,7 @@ export default function ViewPreview() {
   }>({
     view: {} as ViewInstanceResponse,
     source: null,
-    error: '',
+    error: "",
     loading: true,
   });
 
@@ -41,7 +44,11 @@ export default function ViewPreview() {
         loading: false,
       }));
     } catch (error) {
-      setData((prev) => ({ ...prev, error: error instanceof Error ? error.message : 'Unknown Error', loading: false }));
+      setData((prev) => ({
+        ...prev,
+        error: error instanceof Error ? error.message : "Unknown Error",
+        loading: false,
+      }));
     }
   };
 
@@ -79,12 +86,14 @@ export default function ViewPreview() {
     <div className="flex flex-col gap-6">
       <ViewCrumbs view={data.view} />
 
-      {data.source && (
-        <Source source={data.source} />
-      )}
+      {data.source && <Source source={data.source} />}
 
       <Details view={data.view} />
-      <ContentTabs activeTab={activeTab} setActiveTab={setActiveTab} view={data.view} />
+      <ContentTabs
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        view={data.view}
+      />
     </div>
   );
 }

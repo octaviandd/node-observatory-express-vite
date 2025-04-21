@@ -1,17 +1,17 @@
-import { TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Card, CardContent } from '@/components/ui/card'
-import { TabsContent, Tabs } from '@/components/ui/tabs'
+import { TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { TabsContent, Tabs } from "@/components/ui/tabs";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { NotificationInstanceResponse } from '../../../../../types';
+import { NotificationInstanceResponse } from "../../../../../types";
 
 type Props = {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   data: {
     notification: NotificationInstanceResponse;
-  }
-}
+  };
+};
 
 export default function ContentTabs({ activeTab, setActiveTab, data }: Props) {
   return (
@@ -41,5 +41,5 @@ export default function ContentTabs({ activeTab, setActiveTab, data }: Props) {
         </Tabs>
       </CardContent>
     </Card>
-  )
+  );
 }

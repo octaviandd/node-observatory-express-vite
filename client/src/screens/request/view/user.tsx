@@ -33,5 +33,5 @@ export const RequestPreviewUser = React.memo(
         </CardContent>
       </Card>
     );
-  }
+  },
 );

@@ -1,6 +1,12 @@
 /** @format */
 
-import { Card, CardContent, CardHeader, CardTitle, CardSubtitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardSubtitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
 import LogsIndexTable from "../table";
@@ -31,9 +37,7 @@ export default function LogsIndex() {
                 <CardTitle className="text-sm text-muted-foreground">
                   LOGS
                 </CardTitle>
-                <CardSubtitle>
-                  {data.count}
-                </CardSubtitle>
+                <CardSubtitle>{data.count}</CardSubtitle>
               </div>
               <div className="flex gap-4 text-xs">
                 <div className="flex flex-col items-center">
@@ -85,7 +89,7 @@ export default function LogsIndex() {
             <div className="h-auto">
               <CountGraph
                 data={data.countFormattedData}
-                barData={LOG_LEVELS.map(level => ({
+                barData={LOG_LEVELS.map((level) => ({
                   dataKey: level.dataKey,
                   stackId: level.dataKey,
                   fill: level.fill,

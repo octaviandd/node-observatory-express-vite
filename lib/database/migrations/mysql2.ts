@@ -2,7 +2,9 @@
 import { Connection } from "mysql2";
 import { Connection as PromiseConnection } from "mysql2/promise";
 
-export async function up(connection: Connection | PromiseConnection): Promise<void> {
+export async function up(
+  connection: Connection | PromiseConnection,
+): Promise<void> {
   try {
     const [rows]: any = await (connection as PromiseConnection).query(`
       SELECT COUNT(*) as count 
@@ -31,18 +33,26 @@ export async function up(connection: Connection | PromiseConnection): Promise<vo
           INDEX idx_created_at (created_at)
         );
       `);
-      console.log('observatory_entries table created via mysql2/promise')
+      console.log("observatory_entries table created via mysql2/promise");
     }
   } catch (e: unknown) {
-    console.error(`Failed to create observatory_entires table via mysql2/promise: ${e}`)
-  } 
+    console.error(
+      `Failed to create observatory_entires table via mysql2/promise: ${e}`,
+    );
+  }
 }
 
-export async function down(connection: Connection | PromiseConnection): Promise<void> {
+export async function down(
+  connection: Connection | PromiseConnection,
+): Promise<void> {
   try {
-    await (connection as PromiseConnection).query("DROP TABLE IF EXISTS observatory_entries;");
-    console.log('observatory_entries table droped via mysql2/promise')
+    await (connection as PromiseConnection).query(
+      "DROP TABLE IF EXISTS observatory_entries;",
+    );
+    console.log("observatory_entries table droped via mysql2/promise");
   } catch (e: unknown) {
-    console.error(`Failed to drpop observatory_entires table via mysql2/promise: ${e}`)
+    console.error(
+      `Failed to drpop observatory_entires table via mysql2/promise: ${e}`,
+    );
   }
 }

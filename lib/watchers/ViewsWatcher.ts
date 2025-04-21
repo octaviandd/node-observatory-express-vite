@@ -12,7 +12,11 @@ interface ViewFilters extends WatcherFilters {
 class ViewWatcher extends BaseWatcher {
   readonly type = "view";
 
-  constructor(storeDriver: StoreDriver, storeConnection: any, redisClient: any) {
+  constructor(
+    storeDriver: StoreDriver,
+    storeConnection: any,
+    redisClient: any,
+  ) {
     super(storeDriver, storeConnection, redisClient);
   }
 
@@ -21,10 +25,10 @@ class ViewWatcher extends BaseWatcher {
    * --------------------------------------------------------------------------
    */
   protected async handleViewSQL(id: string): Promise<any> {
-    console.log('hit')
+    console.log("hit");
     let [results]: [any[], any] = await this.storeConnection.query(
       "SELECT * FROM observatory_entries WHERE uuid = ?",
-      [id]
+      [id],
     );
 
     let item = results[0];
@@ -37,13 +41,15 @@ class ViewWatcher extends BaseWatcher {
       params.push(item.request_id);
     }
 
-    if(!item.request_id && !item.schedule_id && !item.job_id) {
+    if (!item.request_id && !item.schedule_id && !item.job_id) {
       return this.groupItemsByType(results);
     }
 
     const [relatedItems]: [any[], any] = await this.storeConnection.query(
-      "SELECT * FROM observatory_entries WHERE " + conditions.join(" OR ") + " AND type != ?",
-      [...params, this.type]
+      "SELECT * FROM observatory_entries WHERE " +
+        conditions.join(" OR ") +
+        " AND type != ?",
+      [...params, this.type],
     );
 
     return this.groupItemsByType(relatedItems.concat(results));
@@ -53,15 +59,19 @@ class ViewWatcher extends BaseWatcher {
    * Related Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async handleRelatedDataSQL(viewId: string, requestId: string, jobId: string, scheduleId: string): Promise<any> {
-    if(!requestId && !jobId && !scheduleId) {
-      return {}
+  protected async handleRelatedDataSQL(
+    viewId: string,
+    requestId: string,
+    jobId: string,
+    scheduleId: string,
+  ): Promise<any> {
+    if (!requestId && !jobId && !scheduleId) {
+      return {};
     }
 
     const [results]: [any[], any] = await this.storeConnection.query(
       "SELECT * FROM observatory_entries WHERE request_id = ? AND type != ?",
-      [requestId, this.type]
-
+      [requestId, this.type],
     );
 
     return this.groupItemsByType(results);
@@ -71,35 +81,46 @@ class ViewWatcher extends BaseWatcher {
    * Instance Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async getIndexTableDataByInstanceSQL(filters: ViewFilters): Promise<any> {
+  protected async getIndexTableDataByInstanceSQL(
+    filters: ViewFilters,
+  ): Promise<any> {
     const { query, offset, limit, path, period, status } = filters;
     const querySql = query ? this.getInclusionSQL(query, "view") : "";
     const pathSql = path ? this.getInclusionSQL(path, "view") : "";
     const periodSql = period ? this.getPeriodSQL(period) : "";
-    const statusSql = status !== "all" ? this.getEqualitySQL(status, "status") : "";
+    const statusSql =
+      status !== "all" ? this.getEqualitySQL(status, "status") : "";
 
     const [results] = await this.storeConnection.query(
       `SELECT * FROM observatory_entries
        WHERE type = 'view' ${querySql} ${pathSql} ${periodSql} ${statusSql}
        ORDER BY created_at DESC
        LIMIT ? OFFSET ?`,
-      [limit, offset]
+      [limit, offset],
     );
 
     const [countResult] = await this.storeConnection.query(
       `SELECT COUNT(*) as total FROM observatory_entries
-       WHERE type = 'view' ${querySql} ${pathSql} ${periodSql} ${statusSql}`
+       WHERE type = 'view' ${querySql} ${pathSql} ${periodSql} ${statusSql}`,
     );
 
-    return { results, count: countResult[0].total > 999 ? (countResult[0].total / 1000).toFixed(2) + "K" : countResult[0].total };
+    return {
+      results,
+      count:
+        countResult[0].total > 999
+          ? (countResult[0].total / 1000).toFixed(2) + "K"
+          : countResult[0].total,
+    };
   }
 
   /**
    * Group Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async getIndexTableDataByGroupSQL(filters: ViewFilters): Promise<any> {
-    const { offset, limit, query, period , status} = filters;
+  protected async getIndexTableDataByGroupSQL(
+    filters: ViewFilters,
+  ): Promise<any> {
+    const { offset, limit, query, period, status } = filters;
     const periodSql = period ? this.getPeriodSQL(period) : "";
     const querySql = query ? this.getInclusionSQL(query, "view") : "";
 
@@ -130,11 +151,11 @@ class ViewWatcher extends BaseWatcher {
       WHERE type = 'view' ${querySql} ${periodSql}
       GROUP BY JSON_UNQUOTE(JSON_EXTRACT(content, '$.view'))
       ORDER BY total DESC
-      LIMIT ${limit} OFFSET ${offset}`
+      LIMIT ${limit} OFFSET ${offset}`,
     )) as [any];
 
     const [countResult] = (await this.storeConnection.query(
-      `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.view'))) as total FROM observatory_entries WHERE type = 'view' ${querySql} ${periodSql}`
+      `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.view'))) as total FROM observatory_entries WHERE type = 'view' ${querySql} ${periodSql}`,
     )) as [any[]];
 
     return { results, count: this.formatValue(countResult[0].total, true) };
@@ -195,7 +216,7 @@ class ViewWatcher extends BaseWatcher {
         FROM observatory_entries
         WHERE type = 'view' ${periodSql} ${pathSql}
         ORDER BY created_at DESC
-      );`
+      );`,
     );
 
     const aggregateResults: {
@@ -208,8 +229,10 @@ class ViewWatcher extends BaseWatcher {
       p95: string | null;
     } = results.shift();
     const countFormattedData = this.countGraphData(results, period as string);
-    const durationFormattedData = this.durationGraphData(results, period as string);
-
+    const durationFormattedData = this.durationGraphData(
+      results,
+      period as string,
+    );
 
     return {
       results,
@@ -221,10 +244,10 @@ class ViewWatcher extends BaseWatcher {
       shortest: this.formatValue(aggregateResults.shortest),
       longest: this.formatValue(aggregateResults.longest),
       average: this.formatValue(aggregateResults.average),
-      p95: this.formatValue(aggregateResults.p95)
+      p95: this.formatValue(aggregateResults.p95),
     };
   }
-  
+
   /**
    * Helper Methods
    * --------------------------------------------------------------------------
@@ -238,22 +261,22 @@ class ViewWatcher extends BaseWatcher {
     const groupedData = Array.from({ length: 120 }, (_, index) => ({
       completed: 0,
       failed: 0,
-      label: this.getLabel(index, period)
+      label: this.getLabel(index, period),
     }));
 
     data.forEach((view: any) => {
       const viewTime = new Date(view.created_at).getTime();
       const status = view.content.status;
       const intervalIndex = Math.floor(
-        (viewTime - startDate) / (intervalDuration * 60 * 1000)
+        (viewTime - startDate) / (intervalDuration * 60 * 1000),
       );
 
       if (intervalIndex >= 0 && intervalIndex < 120) {
         if (status === "completed") {
-            groupedData[intervalIndex].completed++;
-          } else {
-            groupedData[intervalIndex].failed++;
-          }
+          groupedData[intervalIndex].completed++;
+        } else {
+          groupedData[intervalIndex].failed++;
+        }
       }
     });
 

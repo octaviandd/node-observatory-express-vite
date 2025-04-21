@@ -11,7 +11,8 @@ import { useIndexTableData } from "@/hooks/useIndexTableData";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 export default function HttpIndexTable() {
-  const { instanceData,
+  const {
+    instanceData,
     groupData,
     instanceDataCount,
     groupDataCount,
@@ -28,9 +29,9 @@ export default function HttpIndexTable() {
   } = useIndexTableData({
     key: "https",
     defaultInstanceStatusType: "all",
-  })
+  });
 
-  const Table = index === 'instance' ? InstanceTable : GroupTable
+  const Table = index === "instance" ? InstanceTable : GroupTable;
 
   return (
     <div className="relative">
@@ -39,10 +40,17 @@ export default function HttpIndexTable() {
           <div
             className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-xs z-50"
             onClick={() =>
-              setSidePanelData({ ...sidePanelData, isOpen: false, requestId: "", jobId: "", scheduleId: "", modelId: "" })
+              setSidePanelData({
+                ...sidePanelData,
+                isOpen: false,
+                requestId: "",
+                jobId: "",
+                scheduleId: "",
+                modelId: "",
+              })
             }
           ></div>,
-          document.body
+          document.body,
         )}
       {sidePanelData.isOpen && (
         <SidePanel
@@ -74,20 +82,31 @@ export default function HttpIndexTable() {
           />
         </div>
         {modelKey ? (
-          <ToggleGroup type="single" value={instanceStatusType} onValueChange={(value) => value && setInstanceStatusType(value)}>
-            <span className="text-sm text-muted-foreground border rounded-md px-2 py-1">SHOW</span>
+          <ToggleGroup
+            type="single"
+            value={instanceStatusType}
+            onValueChange={(value) => value && setInstanceStatusType(value)}
+          >
+            <span className="text-sm text-muted-foreground border rounded-md px-2 py-1">
+              SHOW
+            </span>
             {["all", "2xx", "4xx", "5xx"].map((status) => (
-              <ToggleGroupItem key={status} value={status} aria-label={status} className="text-black cursor-pointer dark:text-white">
+              <ToggleGroupItem
+                key={status}
+                value={status}
+                aria-label={status}
+                className="text-black cursor-pointer dark:text-white"
+              >
                 {status.toUpperCase()}
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
-        ) : (
-          null
-        )}
+        ) : null}
       </div>
       {/* @ts-expect-error dumb ts*/}
-      <Table data={index === "instance" ? instanceData : groupData} setSidePanelData={setSidePanelData}>
+      <Table data={index === "instance" ? instanceData : groupData}
+        setSidePanelData={setSidePanelData}
+      >
         <div className="my-6">
           <div className="flex items-center justify-center">
             {message ? (

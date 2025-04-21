@@ -6,9 +6,12 @@ import { watchers } from "../logger";
 import { getCallerInfo } from "../utils";
 
 // Create a global symbol to track if loglevel has been patched
-const LOGLEVEL_PATCHED_SYMBOL = Symbol.for('node-observer:loglevel-patched');
+const LOGLEVEL_PATCHED_SYMBOL = Symbol.for("node-observer:loglevel-patched");
 
-if (process.env.NODE_OBSERVATORY_LOGGING && JSON.parse(process.env.NODE_OBSERVATORY_LOGGING).includes("loglevel")) {
+if (
+  process.env.NODE_OBSERVATORY_LOGGING &&
+  JSON.parse(process.env.NODE_OBSERVATORY_LOGGING).includes("loglevel")
+) {
   // Check if loglevel has already been patched
   if (!(global as any)[LOGLEVEL_PATCHED_SYMBOL]) {
     // Mark loglevel as patched
@@ -60,7 +63,10 @@ if (process.env.NODE_OBSERVATORY_LOGGING && JSON.parse(process.env.NODE_OBSERVAT
           ["trace", "debug", "info", "warn", "error"].forEach((method) => {
             if (typeof logger[method] === "function") {
               shimmer.wrap(logger, method, function (originalMethod) {
-                return function patchedLoggerMethod(this: any, ...logArgs: any[]) {
+                return function patchedLoggerMethod(
+                  this: any,
+                  ...logArgs: any[]
+                ) {
                   const logContent = {
                     package: "loglevel",
                     logger: args[0],

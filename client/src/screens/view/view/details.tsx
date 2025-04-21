@@ -1,7 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { formatDuration, getSize, timeAgo } from '@/utils.js';
-import { ViewInstanceResponse } from '../../../../../types';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { formatDuration, getSize, timeAgo } from "@/utils.js";
+import { ViewInstanceResponse } from "../../../../../types";
 
 export default function Details({ view }: { view: ViewInstanceResponse }) {
   return (
@@ -31,7 +31,11 @@ export default function Details({ view }: { view: ViewInstanceResponse }) {
             <div className="col-span-3 text-muted-foreground">Status</div>
             <div className="col-span-9">
               <Badge
-                variant={view.content.status === "completed" ? "secondary" : "destructive"}
+                variant={
+                  view.content.status === "completed"
+                    ? "secondary"
+                    : "destructive"
+                }
               >
                 {view.content.status.toUpperCase()}
               </Badge>
@@ -63,9 +67,7 @@ export default function Details({ view }: { view: ViewInstanceResponse }) {
 
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Size</div>
-            <div className="col-span-9">
-              {getSize(view.content.size)}
-            </div>
+            <div className="col-span-9">{getSize(view.content.size)}</div>
           </div>
 
           {view.content.error && (
@@ -79,5 +81,5 @@ export default function Details({ view }: { view: ViewInstanceResponse }) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

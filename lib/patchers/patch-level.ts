@@ -6,9 +6,12 @@ import { watchers } from "../logger";
 import { getCallerInfo } from "../utils";
 
 // Create a global symbol to track if level has been patched
-const LEVEL_PATCHED_SYMBOL = Symbol.for('node-observer:level-patched');
+const LEVEL_PATCHED_SYMBOL = Symbol.for("node-observer:level-patched");
 
-if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATORY_CACHE).includes("level")) {
+if (
+  process.env.NODE_OBSERVATORY_CACHE &&
+  JSON.parse(process.env.NODE_OBSERVATORY_CACHE).includes("level")
+) {
   // Check if level has already been patched
   if (!(global as any)[LEVEL_PATCHED_SYMBOL]) {
     // Mark level as patched
@@ -25,13 +28,17 @@ if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATOR
 
       // Patch the main export function
       shimmer.wrap(exports, "Level", function (originalLevel) {
-        return function patchedLevel(this: any, location: string, options?: any) {
+        return function patchedLevel(
+          this: any,
+          location: string,
+          options?: any,
+        ) {
           // Create the database instance
           const db = new originalLevel(location, options);
 
           // Patch the database methods
-          const methodsToPath = ['put', 'del', 'get'];
-        
+          const methodsToPath = ["put", "del", "get"];
+
           methodsToPath.forEach((method) => {
             if (db && typeof db[method] === "function") {
               shimmer.wrap(db, method, function (originalMethod) {
@@ -43,7 +50,7 @@ if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATOR
                     type: method,
                     package: "level",
                     file: callerInfo.file,
-                    line: callerInfo.line
+                    line: callerInfo.line,
                   };
 
                   // Add key information to the log based on method
@@ -59,11 +66,9 @@ if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATOR
                     // if (Array.isArray(args[0])) {
                     //   // Record operation types and keys
                     //   const ops = args[0];
-                    
                     //   // Process operations with and without sublevels
                     //   const putOps = ops.filter(op => op.type === 'put');
                     //   const delOps = ops.filter(op => op.type === 'del');
-
                     //   // Process keys for each type of operation
                     //   if (putOps.length > 0) {
                     //     logContent["putEntries"] = putOps.map(op => {
@@ -87,7 +92,6 @@ if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATOR
                     //           }
                     //         }
                     //       }
-
                     //       return {
                     //         key: op.key,
                     //         value: op.value,
@@ -95,7 +99,6 @@ if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATOR
                     //       };
                     //     });
                     //   }
-                    
                     //   if (delOps.length > 0) {
                     //     logContent["delEntries"] = delOps.map(op => {
                     //       // Extract sublevel name if present
@@ -118,13 +121,11 @@ if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATOR
                     //           }
                     //         }
                     //       }
-
                     //       return {
                     //         key: op.key,
                     //         sublevel: sublevelName
                     //       };
                     //     });
-                      
                     //     // For backward compatibility, keep the delKeys array
                     //     logContent["delKeys"] = delOps.map(op => op.key);
                     //   }
@@ -132,7 +133,7 @@ if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATOR
                   }
 
                   const startTime = performance.now();
-                
+
                   try {
                     // READ operations (get)
                     if (method === "get") {
@@ -140,29 +141,36 @@ if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATOR
                         const result = await originalMethod.apply(this, args);
                         const endTime = performance.now();
 
-                        const isHit = result !== undefined && result !== null && result !== false;
-                      
+                        const isHit =
+                          result !== undefined &&
+                          result !== null &&
+                          result !== false;
+
                         logContent["hits"] = isHit ? 1 : 0;
                         logContent["misses"] = !isHit ? 1 : 0;
-                      
+
                         logContent["value"] = result;
-                        logContent["duration"] = parseFloat((endTime - startTime).toFixed(2));
-                      
+                        logContent["duration"] = parseFloat(
+                          (endTime - startTime).toFixed(2),
+                        );
+
                         watchers.cache.addContent(logContent);
                         return result;
                       } catch (error: any) {
                         // LevelDB throws NotFoundError when key doesn't exist
                         const endTime = performance.now();
-                      
-                        if (error.code === 'LEVEL_NOT_FOUND') {
+
+                        if (error.code === "LEVEL_NOT_FOUND") {
                           logContent["hits"] = 0;
                           logContent["misses"] = 1;
                         } else {
                           // Other errors
                           logContent["error"] = error.message;
                         }
-                      
-                        logContent["duration"] = parseFloat((endTime - startTime).toFixed(2));
+
+                        logContent["duration"] = parseFloat(
+                          (endTime - startTime).toFixed(2),
+                        );
                         watchers.cache.addContent(logContent);
                         throw error;
                       }
@@ -171,22 +179,26 @@ if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATOR
                     else {
                       const result = await originalMethod.apply(this, args);
                       const endTime = performance.now();
-                    
+
                       if (method === "put" || method === "del") {
                         logContent["writes"] = 1;
                       } else if (method === "batch" && Array.isArray(args[0])) {
                         // logContent["writes"] = args[0].length;
                       }
-                    
-                      logContent["duration"] = parseFloat((endTime - startTime).toFixed(2));
+
+                      logContent["duration"] = parseFloat(
+                        (endTime - startTime).toFixed(2),
+                      );
                       watchers.cache.addContent(logContent);
                       return result;
                     }
                   } catch (error: unknown) {
                     // This catches errors that aren't handled in the individual method blocks
                     if (!logContent.error) {
-                      logContent["error"] = error instanceof Error ? error.message : String(error);
-                      logContent["stack"] = error instanceof Error ? error.stack : String(error);
+                      logContent["error"] =
+                        error instanceof Error ? error.message : String(error);
+                      logContent["stack"] =
+                        error instanceof Error ? error.stack : String(error);
                       watchers.cache.addContent(logContent);
                     }
                     throw error;

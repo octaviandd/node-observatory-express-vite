@@ -6,7 +6,7 @@ import { watchers } from "../logger";
 import { getCallerInfo } from "../utils";
 
 // Create a global symbol to track if keyv has been patched
-const KEYV_PATCHED_SYMBOL = Symbol.for('node-observer:keyv-patched');
+const KEYV_PATCHED_SYMBOL = Symbol.for("node-observer:keyv-patched");
 
 const patchMethod = (prototype: any, method: string) => {
   shimmer.wrap(prototype, method, function (original) {
@@ -54,8 +54,10 @@ const patchMethod = (prototype: any, method: string) => {
       } catch (error) {
         const endTime = performance.now();
         logContent["duration"] = parseFloat((endTime - startTime).toFixed(2));
-        logContent["error"] = error instanceof Error ? error.message : String(error);
-        logContent["stack"] = error instanceof Error ? error.stack : String(error);
+        logContent["error"] =
+          error instanceof Error ? error.message : String(error);
+        logContent["stack"] =
+          error instanceof Error ? error.stack : String(error);
         watchers.cache.addContent(logContent);
         throw error;
       }
@@ -63,7 +65,10 @@ const patchMethod = (prototype: any, method: string) => {
   });
 };
 
-if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATORY_CACHE).includes("keyv")) {
+if (
+  process.env.NODE_OBSERVATORY_CACHE &&
+  JSON.parse(process.env.NODE_OBSERVATORY_CACHE).includes("keyv")
+) {
   // Check if keyv has already been patched
   if (!(global as any)[KEYV_PATCHED_SYMBOL]) {
     // Mark keyv as patched
@@ -75,7 +80,7 @@ if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATOR
       }
 
       ["set", "get", "delete", "has"].forEach((method) =>
-        patchMethod(exports.Keyv.prototype, method)
+        patchMethod(exports.Keyv.prototype, method),
       );
       return exports;
     });

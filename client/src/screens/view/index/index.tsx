@@ -1,5 +1,11 @@
 /** @format */
-import { Card, CardContent, CardHeader, CardSubtitle, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardSubtitle,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import ViewsIndexTable from "../table/index";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
@@ -21,9 +27,7 @@ export default function ViewsIndex() {
                 <CardTitle className="text-sm text-muted-foreground">
                   VIEWS
                 </CardTitle>
-                <CardSubtitle>
-                  {data.count}
-                </CardSubtitle>
+                <CardSubtitle>{data.count}</CardSubtitle>
               </div>
             </div>
             <div className="flex gap-4 text-xs">
@@ -70,22 +74,22 @@ export default function ViewsIndex() {
               <div className="flex gap-4 text-xs">
                 <div>
                   <span className="text-muted-foreground mr-1">AVG</span>
-                  <Badge variant="secondary">
-                    {data.average}
-                  </Badge>
+                  <Badge variant="secondary">{data.average}</Badge>
                 </div>
                 <div>
                   <span className="text-muted-foreground mr-1">P95</span>
-                  <Badge variant="warning">
-                    {data.p95}
-                  </Badge>
+                  <Badge variant="warning">{data.p95}</Badge>
                 </div>
               </div>
             </div>
           </CardHeader>
           <CardContent>
             <div className="h-auto">
-              <DurationGraph data={data.durationFormattedData} period={period} currentDate={currentDate} />
+              <DurationGraph
+                data={data.durationFormattedData}
+                period={period}
+                currentDate={currentDate}
+              />
             </div>
           </CardContent>
         </Card>

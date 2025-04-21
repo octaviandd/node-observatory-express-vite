@@ -9,13 +9,25 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import {memo, ReactNode} from "react";
+import { memo, ReactNode } from "react";
 import { formatDate, formatDuration } from "@/utils.js";
 import { ScheduleInstanceResponse } from "../../../../../types";
 
 type Props = {
   data: ScheduleInstanceResponse[];
-  setSidePanelData: ({ isOpen, modelId, requestId, jobId, scheduleId }: { isOpen: boolean, modelId: string, requestId: string, jobId: string, scheduleId: string}) => void;
+  setSidePanelData: ({
+    isOpen,
+    modelId,
+    requestId,
+    jobId,
+    scheduleId,
+  }: {
+    isOpen: boolean;
+    modelId: string;
+    requestId: string;
+    jobId: string;
+    scheduleId: string;
+  }) => void;
   children: ReactNode;
 };
 
@@ -40,7 +52,10 @@ export const InstanceTable = memo(({ data, children }: Props) => {
         </TableHeader>
         <TableBody>
           {data.map((schedule: ScheduleInstanceResponse) => (
-            <TableRow key={schedule.uuid} className={!schedule.content.status ? "bg-red-800/20" : ""}>
+            <TableRow
+              key={schedule.uuid}
+              className={!schedule.content.status ? "bg-red-800/20" : ""}
+            >
               <TableCell className="font-medium text-muted-foreground">
                 {formatDate(schedule.created_at)}
               </TableCell>
@@ -53,8 +68,16 @@ export const InstanceTable = memo(({ data, children }: Props) => {
                 </Badge>
               </TableCell>
               <TableCell>
-                <p className={schedule.content.duration && schedule.content.duration > 999 ? "text-yellow-600" : "text-black dark:text-white"}>
-                  {schedule.content.duration ? formatDuration(schedule.content.duration) : "N/A"}
+                <p
+                  className={
+                    schedule.content.duration && schedule.content.duration > 999
+                      ? "text-yellow-600"
+                      : "text-black dark:text-white"
+                  }
+                >
+                  {schedule.content.duration
+                    ? formatDuration(schedule.content.duration)
+                    : "N/A"}
                 </p>
               </TableCell>
               {/* <TableCell>

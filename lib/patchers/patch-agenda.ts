@@ -7,9 +7,12 @@ import { getCallerInfo } from "../utils";
 import { v4 as uuidv4 } from "uuid";
 
 // Create a global symbol to track if agenda has been patched
-const AGENDA_PATCHED_SYMBOL = Symbol.for('node-observer:agenda-patched');
+const AGENDA_PATCHED_SYMBOL = Symbol.for("node-observer:agenda-patched");
 
-if (process.env.NODE_OBSERVATORY_JOBS && JSON.parse(process.env.NODE_OBSERVATORY_JOBS).includes("agenda")) {
+if (
+  process.env.NODE_OBSERVATORY_JOBS &&
+  JSON.parse(process.env.NODE_OBSERVATORY_JOBS).includes("agenda")
+) {
   // Check if agenda has already been patched
   if (!(global as any)[AGENDA_PATCHED_SYMBOL]) {
     // Mark agenda as patched
@@ -34,91 +37,102 @@ if (process.env.NODE_OBSERVATORY_JOBS && JSON.parse(process.env.NODE_OBSERVATORY
     new Hook(["agenda"], function (
       exports: any,
       name: string,
-      basedir: string | undefined
+      basedir: string | undefined,
     ) {
       // Agenda typically exports a class, so let's access its prototype
       if (exports && exports.prototype) {
         const AgendaProto = exports.prototype;
 
-        Object.entries(METHODS_TO_PATCH).forEach(([methodName, displayName]) => {
-          if (typeof AgendaProto[methodName] === "function") {
-            shimmer.wrap(AgendaProto, methodName, function (originalFn) {
-              return async function patchedAgendaMethod(this: any, ...args: any[]) {
-                const callerInfo = getCallerInfo(__filename);
+        Object.entries(METHODS_TO_PATCH).forEach(
+          ([methodName, displayName]) => {
+            if (typeof AgendaProto[methodName] === "function") {
+              shimmer.wrap(AgendaProto, methodName, function (originalFn) {
+                return async function patchedAgendaMethod(
+                  this: any,
+                  ...args: any[]
+                ) {
+                  const callerInfo = getCallerInfo(__filename);
 
-                let result;
-                let didFail = false;
-                let failReason;
+                  let result;
+                  let didFail = false;
+                  let failReason;
 
-                // ───── Log when a job is scheduled ─────
-                if (methodName === "schedule" || methodName === "scheduleJob") {
-                  const jobData = args[1];
-                  watchers.jobs.addContent({
-                    status: "scheduled",
-                    method: displayName,
-                    queue: this.name,
-                    jobData,
-                    token: this.token,
-                    file: callerInfo.file,
-                    line: callerInfo.line,
-                    package: "agenda",
-                  });
-                }
+                  // ───── Log when a job is scheduled ─────
+                  if (
+                    methodName === "schedule" ||
+                    methodName === "scheduleJob"
+                  ) {
+                    const jobData = args[1];
+                    watchers.jobs.addContent({
+                      status: "scheduled",
+                      method: displayName,
+                      queue: this.name,
+                      jobData,
+                      token: this.token,
+                      file: callerInfo.file,
+                      line: callerInfo.line,
+                      package: "agenda",
+                    });
+                  }
 
-                // ───── Log when a job is created ─────
-                if (methodName === "create" && args[0]) {
-                  const jobName = args[0];
-                  const jobData = args[1] || {};
-                  watchers.jobs.addContent({
-                    status: "started",
-                    method: displayName,
-                    queue: this.name,
-                    connectionName: this._collection?.dbName || "default",
-                    jobData,
-                    jobId: args[0]?.attrs?._id || uuidv4(),
-                    token: this.token,
-                    file: callerInfo.file,
-                    line: callerInfo.line,
-                    package: "agenda",
-                  });
-                }
+                  // ───── Log when a job is created ─────
+                  if (methodName === "create" && args[0]) {
+                    const jobName = args[0];
+                    const jobData = args[1] || {};
+                    watchers.jobs.addContent({
+                      status: "started",
+                      method: displayName,
+                      queue: this.name,
+                      connectionName: this._collection?.dbName || "default",
+                      jobData,
+                      jobId: args[0]?.attrs?._id || uuidv4(),
+                      token: this.token,
+                      file: callerInfo.file,
+                      line: callerInfo.line,
+                      package: "agenda",
+                    });
+                  }
 
-                // ───── Log when a job is started immediately ─────
-                if (methodName === "now" && args[0]) {
-                  const jobName = args[0];
-                  const jobData = args[1] || {};
-                  watchers.jobs.addContent({
-                    status: "started",
-                    method: displayName,
-                    queue: this.name,
-                    connectionName: this._collection?.dbName || "default",
-                    jobData,
-                    jobId: args[0]?.attrs?._id || uuidv4(),
-                    token: this.token,
-                    file: callerInfo.file,
-                    line: callerInfo.line,
-                    package: "agenda",
-                  });
-                }
+                  // ───── Log when a job is started immediately ─────
+                  if (methodName === "now" && args[0]) {
+                    const jobName = args[0];
+                    const jobData = args[1] || {};
+                    watchers.jobs.addContent({
+                      status: "started",
+                      method: displayName,
+                      queue: this.name,
+                      connectionName: this._collection?.dbName || "default",
+                      jobData,
+                      jobId: args[0]?.attrs?._id || uuidv4(),
+                      token: this.token,
+                      file: callerInfo.file,
+                      line: callerInfo.line,
+                      package: "agenda",
+                    });
+                  }
 
-                try {
-                  // Call the original function
-                  result = await originalFn.apply(this, args);
-                  return result;
-                } catch (err: any) {
-                  didFail = true;
-                  failReason = err?.message || err;
-                  throw err;
-                }
-              };
-            });
-          }
-        });
+                  try {
+                    // Call the original function
+                    result = await originalFn.apply(this, args);
+                    return result;
+                  } catch (err: any) {
+                    didFail = true;
+                    failReason = err?.message || err;
+                    throw err;
+                  }
+                };
+              });
+            }
+          },
+        );
 
         // Patch the job execution logic to track attempt duration and retries
         if (typeof AgendaProto.processJobs === "function") {
           shimmer.wrap(AgendaProto, "processJobs", function (originalFn) {
-            return async function patchedProcessJobs(this: any, ...args: any[]) {
+            return async function patchedProcessJobs(
+              this: any,
+              ...args: any[]
+            ) {
               const job = args[0];
               const attemptStartTime = performance.now();
 
@@ -140,7 +154,9 @@ if (process.env.NODE_OBSERVATORY_JOBS && JSON.parse(process.env.NODE_OBSERVATORY
                 // Call the original function
                 const result = await originalFn.apply(this, args);
                 const attemptEndTime = performance.now();
-                const duration = parseFloat((attemptEndTime - attemptStartTime).toFixed(2));
+                const duration = parseFloat(
+                  (attemptEndTime - attemptStartTime).toFixed(2),
+                );
 
                 // Log successful completion
                 watchers.jobs.addContent({
@@ -161,7 +177,9 @@ if (process.env.NODE_OBSERVATORY_JOBS && JSON.parse(process.env.NODE_OBSERVATORY
                 return result;
               } catch (err: any) {
                 const attemptEndTime = performance.now();
-                const duration = parseFloat((attemptEndTime - attemptStartTime).toFixed(2));
+                const duration = parseFloat(
+                  (attemptEndTime - attemptStartTime).toFixed(2),
+                );
                 const failReason = err?.message || err;
 
                 // Check if the job will be retried

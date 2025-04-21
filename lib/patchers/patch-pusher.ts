@@ -6,9 +6,12 @@ import { watchers } from "../logger";
 import { getCallerInfo } from "../utils";
 
 // Create a global symbol to track if pusher has been patched
-const PUSHER_PATCHED_SYMBOL = Symbol.for('node-observer:pusher-patched');
+const PUSHER_PATCHED_SYMBOL = Symbol.for("node-observer:pusher-patched");
 
-if (process.env.NODE_OBSERVATORY_NOTIFICATIONS && JSON.parse(process.env.NODE_OBSERVATORY_NOTIFICATIONS).includes("pusher")) {
+if (
+  process.env.NODE_OBSERVATORY_NOTIFICATIONS &&
+  JSON.parse(process.env.NODE_OBSERVATORY_NOTIFICATIONS).includes("pusher")
+) {
   // Check if pusher has already been patched
   if (!(global as any)[PUSHER_PATCHED_SYMBOL]) {
     // Mark pusher as patched
@@ -31,12 +34,12 @@ if (process.env.NODE_OBSERVATORY_NOTIFICATIONS && JSON.parse(process.env.NODE_OB
                 event: string,
                 data: any,
                 options: any,
-                callback?: Function // Make callback optional
+                callback?: Function, // Make callback optional
               ) {
                 const startTime = performance.now();
                 const callerInfo = getCallerInfo(__filename);
                 let hasLogged = false; // Flag to prevent double logging
-              
+
                 // Create a logging object to track this notification
                 const loggingObject = {
                   method: "trigger",
@@ -52,7 +55,7 @@ if (process.env.NODE_OBSERVATORY_NOTIFICATIONS && JSON.parse(process.env.NODE_OB
                 // If no callback is provided, use a dummy callback to ensure logging
                 const wrappedCallback = (error: any, response: any) => {
                   if (hasLogged) return; // Skip if already logged
-                
+
                   const endTime = performance.now();
                   hasLogged = true;
 
@@ -75,30 +78,34 @@ if (process.env.NODE_OBSERVATORY_NOTIFICATIONS && JSON.parse(process.env.NODE_OB
 
                 try {
                   // Validate inputs before calling the original method
-                  if (!channel || channel.trim() === '') {
-                    const error = new Error('Invalid channel name: Channel cannot be empty');
-                  
+                  if (!channel || channel.trim() === "") {
+                    const error = new Error(
+                      "Invalid channel name: Channel cannot be empty",
+                    );
+
                     // Log the error immediately
                     hasLogged = true;
                     watchers.notifications.addContent({
                       ...loggingObject,
                       status: "failed",
                       error: error.message,
-                      duration: parseFloat((performance.now() - startTime).toFixed(2)),
+                      duration: parseFloat(
+                        (performance.now() - startTime).toFixed(2),
+                      ),
                       file: callerInfo.file,
                       line: callerInfo.line,
                     });
-                  
+
                     // If there's a callback, call it with the error
                     if (typeof callback === "function") {
                       callback(error, null);
                       return null; // Return null as the original method would
                     }
-                  
+
                     // If no callback, throw the error
                     throw error;
                   }
-                
+
                   // Call the original trigger method with the wrapped callback
                   const result = originalTrigger.call(
                     this,
@@ -106,7 +113,7 @@ if (process.env.NODE_OBSERVATORY_NOTIFICATIONS && JSON.parse(process.env.NODE_OB
                     event,
                     data,
                     options,
-                    wrappedCallback
+                    wrappedCallback,
                   );
 
                   // If the result is a Promise, handle it
@@ -130,23 +137,24 @@ if (process.env.NODE_OBSERVATORY_NOTIFICATIONS && JSON.parse(process.env.NODE_OB
                 } catch (error: unknown) {
                   // Catch any synchronous errors from the original method
                   if (hasLogged) throw error; // Re-throw without logging again
-                
+
                   const endTime = performance.now();
                   hasLogged = true;
-                
+
                   // Log the error
                   watchers.notifications.addContent({
                     ...loggingObject,
                     status: "failed",
-                    error: error instanceof Error ? error.message : String(error),
-                    duration: parseFloat((endTime - startTime).toFixed(2))
+                    error:
+                      error instanceof Error ? error.message : String(error),
+                    duration: parseFloat((endTime - startTime).toFixed(2)),
                   });
-                
+
                   // Re-throw the error
                   throw error;
                 }
               };
-            }
+            },
           );
         }
 
@@ -159,12 +167,12 @@ if (process.env.NODE_OBSERVATORY_NOTIFICATIONS && JSON.parse(process.env.NODE_OB
               return function patchedTriggerBatch(
                 this: any,
                 batch: { channel: string; event: string; data: any }[],
-                callback?: Function // Make callback optional
+                callback?: Function, // Make callback optional
               ) {
                 const startTime = performance.now();
                 const callerInfo = getCallerInfo(__filename);
                 let hasLogged = false; // Flag to prevent double logging
-              
+
                 // Create a logging object to track this batch notification
                 const loggingObject = {
                   method: "triggerBatch",
@@ -177,7 +185,7 @@ if (process.env.NODE_OBSERVATORY_NOTIFICATIONS && JSON.parse(process.env.NODE_OB
                 // If no callback is provided, use a dummy callback to ensure logging
                 const wrappedCallback = (error: any, response: any) => {
                   if (hasLogged) return; // Skip if already logged
-                
+
                   const endTime = performance.now();
                   hasLogged = true;
 
@@ -201,51 +209,59 @@ if (process.env.NODE_OBSERVATORY_NOTIFICATIONS && JSON.parse(process.env.NODE_OB
                 try {
                   // Validate batch before calling the original method
                   if (!batch || !Array.isArray(batch) || batch.length === 0) {
-                    const error = new Error('Invalid batch: Batch cannot be empty');
-                  
+                    const error = new Error(
+                      "Invalid batch: Batch cannot be empty",
+                    );
+
                     // Log the error immediately
                     hasLogged = true;
                     watchers.notifications.addContent({
                       ...loggingObject,
                       status: "failed",
                       error: error.message,
-                      duration: parseFloat((performance.now() - startTime).toFixed(2)),
+                      duration: parseFloat(
+                        (performance.now() - startTime).toFixed(2),
+                      ),
                       file: callerInfo.file,
                       line: callerInfo.line,
                     });
-                  
+
                     // If there's a callback, call it with the error
                     if (typeof callback === "function") {
                       callback(error, null);
                       return null;
                     }
-                  
+
                     // If no callback, throw the error
                     throw error;
                   }
-                
+
                   // Check for invalid channels in the batch
                   for (const item of batch) {
-                    if (!item.channel || item.channel.trim() === '') {
-                      const error = new Error('Invalid channel name in batch: Channel cannot be empty');
-                    
+                    if (!item.channel || item.channel.trim() === "") {
+                      const error = new Error(
+                        "Invalid channel name in batch: Channel cannot be empty",
+                      );
+
                       // Log the error immediately
                       hasLogged = true;
                       watchers.notifications.addContent({
                         ...loggingObject,
                         status: "failed",
                         error: error.message,
-                        duration: parseFloat((performance.now() - startTime).toFixed(2)),
+                        duration: parseFloat(
+                          (performance.now() - startTime).toFixed(2),
+                        ),
                         file: callerInfo.file,
                         line: callerInfo.line,
                       });
-                    
+
                       // If there's a callback, call it with the error
                       if (typeof callback === "function") {
                         callback(error, null);
                         return null;
                       }
-                    
+
                       // If no callback, throw the error
                       throw error;
                     }
@@ -255,7 +271,7 @@ if (process.env.NODE_OBSERVATORY_NOTIFICATIONS && JSON.parse(process.env.NODE_OB
                   const result = originalTriggerBatch.call(
                     this,
                     batch,
-                    wrappedCallback
+                    wrappedCallback,
                   );
 
                   // If the result is a Promise, handle it
@@ -279,25 +295,26 @@ if (process.env.NODE_OBSERVATORY_NOTIFICATIONS && JSON.parse(process.env.NODE_OB
                 } catch (error: unknown) {
                   // Catch any synchronous errors from the original method
                   if (hasLogged) throw error; // Re-throw without logging again
-                
+
                   const endTime = performance.now();
                   hasLogged = true;
-                
+
                   // Log the error
                   watchers.notifications.addContent({
                     ...loggingObject,
                     status: "failed",
-                    error: error instanceof Error ? error.message : String(error),
+                    error:
+                      error instanceof Error ? error.message : String(error),
                     duration: parseFloat((endTime - startTime).toFixed(2)),
                     file: callerInfo.file,
                     line: callerInfo.line,
                   });
-                
+
                   // Re-throw the error
                   throw error;
                 }
               };
-            }
+            },
           );
         }
       }

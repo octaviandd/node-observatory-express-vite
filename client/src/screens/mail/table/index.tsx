@@ -11,7 +11,8 @@ import { createPortal } from "react-dom";
 import SidePanel from "@/components/ui/side-panel";
 
 export default function MailsIndexTable() {
-  const { instanceData,
+  const {
+    instanceData,
     groupData,
     instanceDataCount,
     groupDataCount,
@@ -28,9 +29,9 @@ export default function MailsIndexTable() {
   } = useIndexTableData({
     key: "mails",
     defaultInstanceStatusType: "all",
-  })
+  });
 
-  const Table = index === 'instance' ? InstanceTable : GroupTable
+  const Table = index === "instance" ? InstanceTable : GroupTable;
 
   return (
     <div className="relative">
@@ -39,10 +40,16 @@ export default function MailsIndexTable() {
           <div
             className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-xs z-50"
             onClick={() =>
-              setSidePanelData({ isOpen: false, requestId: "", jobId: "", scheduleId: "", modelId: "" })
+              setSidePanelData({
+                isOpen: false,
+                requestId: "",
+                jobId: "",
+                scheduleId: "",
+                modelId: "",
+              })
             }
           ></div>,
-          document.body
+          document.body,
         )}
       {sidePanelData.isOpen && (
         <SidePanel
@@ -74,15 +81,17 @@ export default function MailsIndexTable() {
           </div>
         </div>
         {modelKey ? (
-          <ToggleGroup 
-            type="single" 
-            value={instanceStatusType} 
+          <ToggleGroup
+            type="single"
+            value={instanceStatusType}
             onValueChange={(value) => value && setInstanceStatusType(value)}
           >
-            <span className="text-sm text-muted-foreground border rounded-md px-2 py-1">SHOW</span>
+            <span className="text-sm text-muted-foreground border rounded-md px-2 py-1">
+              SHOW
+            </span>
             {["all", "completed", "failed"].map((status) => (
-              <ToggleGroupItem 
-                key={status} 
+              <ToggleGroupItem
+                key={status}
                 value={status}
                 className="text-black cursor-pointer dark:text-white"
               >
@@ -90,12 +99,12 @@ export default function MailsIndexTable() {
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
-        ) : (
-          null
-        )}
+        ) : null}
       </div>
       {/* @ts-expect-error dumb ts*/}
-      <Table data={index === "instance" ? instanceData : groupData} setSidePanelData={setSidePanelData}>
+      <Table data={index === "instance" ? instanceData : groupData}
+        setSidePanelData={setSidePanelData}
+      >
         <div className="my-6">
           <div className="flex items-center justify-center">
             {message ? (

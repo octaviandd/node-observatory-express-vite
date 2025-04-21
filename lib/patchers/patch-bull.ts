@@ -8,9 +8,12 @@ import { v4 as uuidv4 } from "uuid";
 import { jobLocalStorage } from "./store";
 
 // Create a global symbol to track if bull has been patched
-const BULL_PATCHED_SYMBOL = Symbol.for('node-observer:bull-patched');
+const BULL_PATCHED_SYMBOL = Symbol.for("node-observer:bull-patched");
 
-if (process.env.NODE_OBSERVATORY_JOBS && JSON.parse(process.env.NODE_OBSERVATORY_JOBS).includes("bull")) {
+if (
+  process.env.NODE_OBSERVATORY_JOBS &&
+  JSON.parse(process.env.NODE_OBSERVATORY_JOBS).includes("bull")
+) {
   // Check if bull has already been patched
   if (!(global as any)[BULL_PATCHED_SYMBOL]) {
     // Mark bull as patched
@@ -54,35 +57,41 @@ if (process.env.NODE_OBSERVATORY_JOBS && JSON.parse(process.env.NODE_OBSERVATORY
 
                 if (methodName === "add") {
                   const jobData = args[1] || args[0]; // The data might be the second argument
-                  watchers.jobs.addContent({
-                    status: "started",
-                    method: displayName,
-                    queue: this.queue?.name || this.name,
-                    connectionName,
-                    jobData,
-                    token: this.token,
-                    file: callerInfo.file,
-                    line: callerInfo.line,
-                    package: "bull",
-                  }, createdAt);
+                  watchers.jobs.addContent(
+                    {
+                      status: "started",
+                      method: displayName,
+                      queue: this.queue?.name || this.name,
+                      connectionName,
+                      jobData,
+                      token: this.token,
+                      file: callerInfo.file,
+                      line: callerInfo.line,
+                      package: "bull",
+                    },
+                    createdAt,
+                  );
                 }
 
                 if (methodName === "processJob" && args[0]) {
                   attemptStartTime = performance.now();
 
                   const job = args[0];
-                  watchers.jobs.addContent({
-                    status: "processing",
-                    method: displayName,
-                    queue: this.queue?.name || this.name,
-                    attemptsMade: job.attemptsMade,
-                    connectionName,
-                    jobId: job.id,
-                    token: this.token,
-                    file: callerInfo.file,
-                    line: callerInfo.line,
-                    package: "bull",
-                  }, createdAt);
+                  watchers.jobs.addContent(
+                    {
+                      status: "processing",
+                      method: displayName,
+                      queue: this.queue?.name || this.name,
+                      attemptsMade: job.attemptsMade,
+                      connectionName,
+                      jobId: job.id,
+                      token: this.token,
+                      file: callerInfo.file,
+                      line: callerInfo.line,
+                      package: "bull",
+                    },
+                    createdAt,
+                  );
                 }
 
                 try {
@@ -95,10 +104,19 @@ if (process.env.NODE_OBSERVATORY_JOBS && JSON.parse(process.env.NODE_OBSERVATORY
                 } finally {
                   if (methodName === "processJob" && args[0]) {
                     const job = args[0];
-                    const { processedOn, finishedOn, failedReason, returnvalue, attemptsMade, opts } = job;
+                    const {
+                      processedOn,
+                      finishedOn,
+                      failedReason,
+                      returnvalue,
+                      attemptsMade,
+                      opts,
+                    } = job;
 
                     let duration =
-                      processedOn && finishedOn ? parseFloat((finishedOn - processedOn).toFixed(2)) : null;
+                      processedOn && finishedOn
+                        ? parseFloat((finishedOn - processedOn).toFixed(2))
+                        : null;
 
                     const attemptEndTime = performance.now();
                     const attemptDuration = attemptStartTime
@@ -116,52 +134,61 @@ if (process.env.NODE_OBSERVATORY_JOBS && JSON.parse(process.env.NODE_OBSERVATORY
                     // finishedOn doesn't necessarely indicate that the job was completed but rather that all attempts have been made.
 
                     if (failedReason && returnvalue === null) {
-                      watchers.jobs.addContent({
-                        status: "failed",
-                        method: displayName,
-                        queue: this.queue?.name || this.name,
-                        connectionName,
-                        jobId: job.id,
-                        token: this.token,
-                        file: callerInfo.file,
-                        line: callerInfo.line,
-                        duration,
-                        failedReason,
-                        attemptsMade,
-                        package: "bull",
-                        returnValue: returnvalue,
-                      }, createdAt);
-
-                      if (attemptsMade < opts.attempts && !finishedOn) {
-                        watchers.jobs.addContent({
-                          status: "released",
+                      watchers.jobs.addContent(
+                        {
+                          status: "failed",
                           method: displayName,
                           queue: this.queue?.name || this.name,
                           connectionName,
                           jobId: job.id,
-                          duration,
                           token: this.token,
                           file: callerInfo.file,
                           line: callerInfo.line,
+                          duration,
+                          failedReason,
                           attemptsMade,
                           package: "bull",
-                        }, createdAt);
+                          returnValue: returnvalue,
+                        },
+                        createdAt,
+                      );
+
+                      if (attemptsMade < opts.attempts && !finishedOn) {
+                        watchers.jobs.addContent(
+                          {
+                            status: "released",
+                            method: displayName,
+                            queue: this.queue?.name || this.name,
+                            connectionName,
+                            jobId: job.id,
+                            duration,
+                            token: this.token,
+                            file: callerInfo.file,
+                            line: callerInfo.line,
+                            attemptsMade,
+                            package: "bull",
+                          },
+                          createdAt,
+                        );
                       }
                     } else if (returnvalue !== null) {
-                      watchers.jobs.addContent({
-                        status: "completed",
-                        method: displayName,
-                        queue: this.queue?.name || this.name,
-                        connectionName,
-                        jobId: job.id,
-                        token: this.token,
-                        file: callerInfo.file,
-                        line: callerInfo.line,
-                        duration,
-                        attemptsMade,
-                        package: "bull",
-                        returnValue: returnvalue,
-                      }, createdAt);
+                      watchers.jobs.addContent(
+                        {
+                          status: "completed",
+                          method: displayName,
+                          queue: this.queue?.name || this.name,
+                          connectionName,
+                          jobId: job.id,
+                          token: this.token,
+                          file: callerInfo.file,
+                          line: callerInfo.line,
+                          duration,
+                          attemptsMade,
+                          package: "bull",
+                          returnValue: returnvalue,
+                        },
+                        createdAt,
+                      );
                     }
                   }
                 }
@@ -180,4 +207,3 @@ if (process.env.NODE_OBSERVATORY_JOBS && JSON.parse(process.env.NODE_OBSERVATORY
     });
   }
 }
-

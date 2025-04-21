@@ -6,7 +6,12 @@ import { CacheCrumbs } from "./crumbs";
 import { CachePreviewInfo } from "./info";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CacheInstanceResponse, RequestInstanceResponse, JobInstanceResponse, ScheduleInstanceResponse } from "../../../../../types";
+import {
+  CacheInstanceResponse,
+  RequestInstanceResponse,
+  JobInstanceResponse,
+  ScheduleInstanceResponse,
+} from "../../../../../types";
 import Source from "./source";
 import ContentTabs from "./tabs";
 
@@ -17,7 +22,11 @@ export default function CachePreview() {
     cache: CacheInstanceResponse;
     loading: boolean;
     error: string | null;
-    source: RequestInstanceResponse | JobInstanceResponse | ScheduleInstanceResponse | null;
+    source:
+      | RequestInstanceResponse
+      | JobInstanceResponse
+      | ScheduleInstanceResponse
+      | null;
   }>({
     cache: {} as CacheInstanceResponse,
     loading: true,
@@ -34,18 +43,33 @@ export default function CachePreview() {
     try {
       const response = await fetch(`/observatory-api/data/cache/${params.id}`);
       if (!response.ok) {
-        throw new Error('Failed to fetch cache data');
+        throw new Error("Failed to fetch cache data");
       }
       const { request, cache, job, schedule } = await response.json();
 
       if (!cache) {
-        throw new Error('Cache data not found');
+        throw new Error("Cache data not found");
       }
 
-      setData({ cache: cache[0], loading: false, error: null, source: request ? request[0] : job ? job[0] : schedule ? schedule[0] : null });
+      setData({
+        cache: cache[0],
+        loading: false,
+        error: null,
+        source: request
+          ? request[0]
+          : job
+            ? job[0]
+            : schedule
+              ? schedule[0]
+              : null,
+      });
     } catch (error) {
-      console.error('Error fetching cache data:', error);
-      setData({ ...data, loading: false, error: error instanceof Error ? error.message : 'An error occurred' });
+      console.error("Error fetching cache data:", error);
+      setData({
+        ...data,
+        loading: false,
+        error: error instanceof Error ? error.message : "An error occurred",
+      });
     }
   };
 
@@ -73,12 +97,14 @@ export default function CachePreview() {
     <div className="flex flex-col gap-y-6">
       <CacheCrumbs cache={data.cache} />
 
-      {data.source && (
-        <Source source={data.source} />
-      )}
+      {data.source && <Source source={data.source} />}
 
       <CachePreviewInfo cache={data.cache} />
-      <ContentTabs activeTab={activeTab} setActiveTab={setActiveTab} data={data} />
+      <ContentTabs
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        data={data}
+      />
     </div>
   );
 }

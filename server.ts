@@ -1,4 +1,3 @@
-
 /** @format */
 import { setupLogger } from "./lib/logger";
 import express from "express";
@@ -21,7 +20,7 @@ async function startServer() {
     host: "localhost",
     user: "root",
     database: "observatory",
-    timezone: "UTC"
+    timezone: "UTC",
   });
 
   let redisConnection = createClient({

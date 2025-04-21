@@ -1,16 +1,16 @@
-import { Card, CardContent } from '@/components/ui/card'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { MailInstanceResponse } from '../../../../../types'
+import { MailInstanceResponse } from "../../../../../types";
 
 type Props = {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   data: {
     mail: MailInstanceResponse;
-  }
-}
+  };
+};
 export default function ContentTabs({ activeTab, setActiveTab, data }: Props) {
   return (
     <Card className="rounded-none shadow-xs">
@@ -39,5 +39,5 @@ export default function ContentTabs({ activeTab, setActiveTab, data }: Props) {
         </Tabs>
       </CardContent>
     </Card>
-  )
+  );
 }

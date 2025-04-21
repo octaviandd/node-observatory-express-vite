@@ -3,7 +3,11 @@
 import React from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { MailInstanceResponse, NotificationInstanceResponse, LogInstanceResponse } from "../../../../../types";
+import {
+  MailInstanceResponse,
+  NotificationInstanceResponse,
+  LogInstanceResponse,
+} from "../../../../../types";
 
 type Props = {
   mails: MailInstanceResponse[];
@@ -42,5 +46,5 @@ export const RequestPreviewNotifications = React.memo(
         </CardContent>
       </Card>
     );
-  }
+  },
 );

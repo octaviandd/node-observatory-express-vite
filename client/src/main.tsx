@@ -33,168 +33,170 @@ import { StoreProvider } from "./store";
 import MainLayout from "./App";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-scan({enabled: !import.meta.env.PROD})
+scan({ enabled: !import.meta.env.PROD });
 
-const router = createBrowserRouter([
+const router = createBrowserRouter(
+  [
+    {
+      path: "/",
+      element: <MainLayout />,
+      errorElement: <div>404</div>,
+      children: [
+        {
+          index: true,
+          element: <Dashboard />,
+        },
+        {
+          path: "/mails",
+          element: <MailsIndex />,
+        },
+        {
+          path: "/mails/:key",
+          element: <MailsIndex />,
+        },
+        {
+          path: "/mail/:id",
+          element: <MailPreview />,
+        },
+        {
+          path: "/exceptions",
+          element: <ExceptionIndex />,
+        },
+        {
+          path: "/exceptions/:key",
+          element: <ExceptionIndex />,
+        },
+        {
+          path: "/exception/:id",
+          element: <ExceptionPreview />,
+        },
+        {
+          path: "/logs",
+          element: <LogIndex />,
+        },
+        {
+          path: "/logs/:key",
+          element: <LogIndex />,
+        },
+        {
+          path: "/log/:id",
+          element: <LogPreview />,
+        },
+        {
+          path: "/notifications",
+          element: <NotificationsIndex />,
+        },
+        {
+          path: "/notifications/:key",
+          element: <NotificationsIndex />,
+        },
+        {
+          path: "/notification/:id",
+          element: <NotificationPreview />,
+        },
+        {
+          path: "/jobs",
+          element: <JobsIndex />,
+        },
+        {
+          path: "/jobs/:key",
+          element: <JobsIndex />,
+        },
+        {
+          path: "/job/:id",
+          element: <JobPreview />,
+        },
+        {
+          path: "/caches",
+          element: <CacheIndex />,
+        },
+        {
+          path: "/caches/:key",
+          element: <CacheIndex />,
+        },
+        {
+          path: "/cache/:id",
+          element: <CachePreview />,
+        },
+        {
+          path: "/queries",
+          element: <QueriesIndex />,
+        },
+        {
+          path: "/queries/:key",
+          element: <QueriesIndex />,
+        },
+        {
+          path: "/query/:id",
+          element: <QueryPreview />,
+        },
+        {
+          path: "/models",
+          element: <ModelsIndex />,
+        },
+        {
+          path: "/models/:key",
+          element: <ModelsIndex />,
+        },
+        {
+          path: "/model/:id",
+          element: <ModelPreview />,
+        },
+        {
+          path: "/requests",
+          element: <RequestsIndex />,
+        },
+        {
+          path: "/requests/:key",
+          element: <RequestsIndex />,
+        },
+        {
+          path: "/request/:id",
+          element: <RequestView />,
+        },
+        {
+          path: "/schedules",
+          element: <ScheduleIndex />,
+        },
+        {
+          path: "/schedules/:key",
+          element: <ScheduleIndex />,
+        },
+        {
+          path: "/schedule/:id",
+          element: <SchedulePreview />,
+        },
+        {
+          path: "/https",
+          element: <HttpIndex />,
+        },
+        {
+          path: "/https/:key",
+          element: <HttpIndex />,
+        },
+        {
+          path: "/http/:id",
+          element: <HttpPreview />,
+        },
+        {
+          path: "/views",
+          element: <ViewsIndex />,
+        },
+        {
+          path: "/views/:key",
+          element: <ViewsIndex />,
+        },
+        {
+          path: "/view/:id",
+          element: <ViewPreview />,
+        },
+      ],
+    },
+  ],
   {
-    path: "/",
-    element: <MainLayout />,
-    errorElement: <div>404</div>,
-    children: [
-      {
-        index: true,
-        element: <Dashboard />,
-      },
-      {
-        path: "/mails",
-        element: <MailsIndex />,
-      },
-      {
-        path: "/mails/:key",
-        element: <MailsIndex />,
-      },
-      {
-        path: "/mail/:id",
-        element: <MailPreview />,
-      },
-      {
-        path: "/exceptions",
-        element: <ExceptionIndex />,
-      },
-      {
-        path: "/exceptions/:key",
-        element: <ExceptionIndex />,
-      },
-      {
-        path: "/exception/:id",
-        element: <ExceptionPreview />,
-      },
-      {
-        path: "/logs",
-        element: <LogIndex />,
-      },
-      {
-        path: "/logs/:key",
-        element: <LogIndex />,
-      },
-      {
-        path: "/log/:id",
-        element: <LogPreview />,
-      },
-      {
-        path: "/notifications",
-        element: <NotificationsIndex />,
-      },
-      {
-        path: "/notifications/:key",
-        element: <NotificationsIndex />,
-      },
-      {
-        path: "/notification/:id",
-        element: <NotificationPreview />,
-      },
-      {
-        path: "/jobs",
-        element: <JobsIndex />,
-      },
-      {
-        path: "/jobs/:key",
-        element: <JobsIndex />,
-      },
-      {
-        path: "/job/:id",
-        element: <JobPreview />,
-      },
-      {
-        path: "/caches",
-        element: <CacheIndex />,
-      },
-      {
-        path: "/caches/:key",
-        element: <CacheIndex />,
-      },
-      {
-        path: "/cache/:id",
-        element: <CachePreview />,
-      },
-      {
-        path: "/queries",
-        element: <QueriesIndex />,
-      },
-      {
-        path: "/queries/:key",
-        element: <QueriesIndex />,
-      },
-      {
-        path: "/query/:id",
-        element: <QueryPreview />,
-      },
-      {
-        path: "/models",
-        element: <ModelsIndex />,
-      },
-      {
-        path: "/models/:key",
-        element: <ModelsIndex />,
-      },
-      {
-        path: "/model/:id",
-        element: <ModelPreview />,
-      },
-      {
-        path: "/requests",
-        element: <RequestsIndex />,
-      },
-      {
-        path: "/requests/:key",
-        element: <RequestsIndex />,
-      },
-      {
-        path: "/request/:id",
-        element: <RequestView />,
-      },
-      {
-        path: "/schedules",
-        element: <ScheduleIndex />,
-      },
-      {
-        path: "/schedules/:key",
-        element: <ScheduleIndex />,
-      },
-      {
-        path: "/schedule/:id",
-        element: <SchedulePreview />,
-      },
-      {
-        path: "/https",
-        element: <HttpIndex />,
-      },
-      {
-        path: "/https/:key",
-        element: <HttpIndex />,
-      },
-      {
-        path: "/http/:id",
-        element: <HttpPreview />,
-      },
-      {
-        path: "/views",
-        element: <ViewsIndex />,
-      },
-      {
-        path: "/views/:key",
-        element: <ViewsIndex />,
-      },
-      {
-        path: "/view/:id",
-        element: <ViewPreview />,
-      }
-    ],
+    basename: import.meta.env.PROD ? "observatory" : "",
   },
-],
-{
-  basename: import.meta.env.PROD ? 'observatory' : ''
-});
+);
 
 createRoot(document.getElementById("root") as HTMLDivElement).render(
   <StrictMode>
@@ -203,5 +205,5 @@ createRoot(document.getElementById("root") as HTMLDivElement).render(
         <RouterProvider router={router}></RouterProvider>
       </ScrollArea>
     </StoreProvider>
-  </StrictMode>
+  </StrictMode>,
 );

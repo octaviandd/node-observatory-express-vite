@@ -8,9 +8,12 @@ import type { QueryOptions } from "mysql";
 import { getCallerInfo } from "../utils";
 
 // Create a global symbol to track if mysql has been patched
-const MYSQL_PATCHED_SYMBOL = Symbol.for('node-observer:mysql-patched');
+const MYSQL_PATCHED_SYMBOL = Symbol.for("node-observer:mysql-patched");
 
-if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERVATORY_DATABASES).includes("mysql")) {
+if (
+  process.env.NODE_OBSERVATORY_DATABASES &&
+  JSON.parse(process.env.NODE_OBSERVATORY_DATABASES).includes("mysql")
+) {
   // Check if mysql has already been patched
   if (!(global as any)[MYSQL_PATCHED_SYMBOL]) {
     // Mark mysql as patched
@@ -31,7 +34,7 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
             patchConnectionQuery(connection, "Connection");
             return connection;
           };
-        }
+        },
       );
 
       // 2) Patch createPool
@@ -64,7 +67,7 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
         this: Connection,
         sqlOrOptions: string | QueryOptions,
         values?: any,
-        callback?: Function
+        callback?: Function,
       ) {
         if ((this as any)._isLoggerQuery) {
           return originalQuery.call(this, sqlOrOptions, values, callback);
@@ -77,16 +80,27 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
         if (shouldLogQuery(sql)) {
           const startTime = performance.now();
           const queryPromise = new Promise((resolve, reject) => {
-            originalQuery.call(this, sqlOrOptions, values, (error: any, result: any) => {
-              const endTime = performance.now();
-              if (error) {
-                logQuery(contextName, sql, this, endTime - startTime, error);
-                reject(error);
-              } else {
-                logQuery(contextName, sql, this, endTime - startTime, undefined);
-                resolve(result);
-              }
-            });
+            originalQuery.call(
+              this,
+              sqlOrOptions,
+              values,
+              (error: any, result: any) => {
+                const endTime = performance.now();
+                if (error) {
+                  logQuery(contextName, sql, this, endTime - startTime, error);
+                  reject(error);
+                } else {
+                  logQuery(
+                    contextName,
+                    sql,
+                    this,
+                    endTime - startTime,
+                    undefined,
+                  );
+                  resolve(result);
+                }
+              },
+            );
           });
           return queryPromise;
         }
@@ -107,7 +121,7 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
         this: Pool,
         sqlOrOptions: string | QueryOptions,
         values?: any,
-        callback?: Function
+        callback?: Function,
       ) {
         if ((this as any)._isLoggerQuery) {
           return originalQuery.call(this, sqlOrOptions, values, callback);
@@ -118,16 +132,27 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
         if (shouldLogQuery(sql)) {
           const startTime = performance.now();
           const queryPromise = new Promise((resolve, reject) => {
-            originalQuery.call(this, sqlOrOptions, values, (error: any, result: any) => {
-              const endTime = performance.now();
-              if (error) {
-                logQuery(contextName, sql, this, endTime - startTime, error);
-                reject(error);
-              } else {
-                logQuery(contextName, sql, this, endTime - startTime, undefined);
-                resolve(result);
-              }
-            });
+            originalQuery.call(
+              this,
+              sqlOrOptions,
+              values,
+              (error: any, result: any) => {
+                const endTime = performance.now();
+                if (error) {
+                  logQuery(contextName, sql, this, endTime - startTime, error);
+                  reject(error);
+                } else {
+                  logQuery(
+                    contextName,
+                    sql,
+                    this,
+                    endTime - startTime,
+                    undefined,
+                  );
+                  resolve(result);
+                }
+              },
+            );
           });
           return queryPromise;
         }

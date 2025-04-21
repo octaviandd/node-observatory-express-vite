@@ -5,18 +5,18 @@ import { StoreContext } from "@/store";
 import { timePeriod } from "@/utils";
 import { useParams } from "react-router";
 
-export const useIndexData = ({
-  type,
-}: {
-  type: string;
-}) => {
+export const useIndexData = ({ type }: { type: string }) => {
   const { state } = useContext(StoreContext);
   const params = useParams();
   const param = params.key || "";
   const [data, setData] = useState<{
     results: object[];
     countFormattedData: object[];
-    durationFormattedData: { avgDuration: number, p95: number, label: string }[];
+    durationFormattedData: {
+      avgDuration: number;
+      p95: number;
+      label: string;
+    }[];
     count: number;
     indexCountOne: number;
     indexCountTwo: number;
@@ -65,7 +65,7 @@ export const useIndexData = ({
       const response = await fetch(
         `/observatory-api/data/${type}?period=${state.period}${
           param ? `&key=${encodeURIComponent(param)}` : ""
-        }`
+        }`,
       );
 
       const {

@@ -8,7 +8,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import ContentTabs from "./tabs";
-import { HttpClientInstanceResponse, ModelInstanceResponse, JobInstanceResponse, NotificationInstanceResponse, MailInstanceResponse, LogInstanceResponse, ExceptionInstanceResponse, CacheInstanceResponse, RequestInstanceResponse, ScheduleInstanceResponse, QueryInstanceResponse } from "../../../../../types";
+import {
+  HttpClientInstanceResponse,
+  ModelInstanceResponse,
+  JobInstanceResponse,
+  NotificationInstanceResponse,
+  MailInstanceResponse,
+  LogInstanceResponse,
+  ExceptionInstanceResponse,
+  CacheInstanceResponse,
+  RequestInstanceResponse,
+  ScheduleInstanceResponse,
+  QueryInstanceResponse,
+} from "../../../../../types";
 import Source from "./source";
 
 export default function JobPreview() {
@@ -51,26 +63,54 @@ export default function JobPreview() {
   }, [params.id]);
 
   const getItem = async () => {
-    setData(prevState => ({ ...prevState, loading: true }));
+    setData((prevState) => ({ ...prevState, loading: true }));
     try {
       const response = await fetch(`/observatory-api/data/jobs/${params.id}`);
       if (!response.ok) {
-        throw new Error('Failed to fetch job data');
+        throw new Error("Failed to fetch job data");
       }
       const data = await response.json();
-      const { query, http, job, cache, notification, mail, log, exception, request, model, schedule } = data;
+      const {
+        query,
+        http,
+        job,
+        cache,
+        notification,
+        mail,
+        log,
+        exception,
+        request,
+        model,
+        schedule,
+      } = data;
 
       if (!job?.[0]) {
-        throw new Error('Job data not found');
+        throw new Error("Job data not found");
       }
 
       setJob(job[0]);
-      setData(prevState => ({ ...prevState, notifications: notification ?? [], mails: mail ?? [], logs: log ?? [], exceptions: exception ?? [], caches: cache ?? [], https: http ?? [], models: model ?? [], requests: request ?? [], job: job ?? [], schedule: schedule ?? [], queries: query ?? [] }));
+      setData((prevState) => ({
+        ...prevState,
+        notifications: notification ?? [],
+        mails: mail ?? [],
+        logs: log ?? [],
+        exceptions: exception ?? [],
+        caches: cache ?? [],
+        https: http ?? [],
+        models: model ?? [],
+        requests: request ?? [],
+        job: job ?? [],
+        schedule: schedule ?? [],
+        queries: query ?? [],
+      }));
     } catch (error) {
-      console.error('Error fetching job data:', error);
-      setData(prevState => ({ ...prevState, error: error instanceof Error ? error.message : 'An error occurred' }));
+      console.error("Error fetching job data:", error);
+      setData((prevState) => ({
+        ...prevState,
+        error: error instanceof Error ? error.message : "An error occurred",
+      }));
     } finally {
-      setData(prevState => ({ ...prevState, loading: false }));
+      setData((prevState) => ({ ...prevState, loading: false }));
     }
   };
 
@@ -97,14 +137,14 @@ export default function JobPreview() {
     <div className="flex flex-col gap-y-6">
       <JobPreviewCrumbs job={job} />
 
-      {data.requests.length > 0 && (
-        <Source source={data.requests[0]} />
-      )}
+      {data.requests.length > 0 && <Source source={data.requests[0]} />}
 
       <Card>
         <CardContent className="p-6">
           <div className="flex items-center gap-x-4">
-            <span className="text-sm text-muted-foreground uppercase">Details</span>
+            <span className="text-sm text-muted-foreground uppercase">
+              Details
+            </span>
             {job && <span>{job.content.duration}</span>}
           </div>
         </CardContent>
@@ -123,7 +163,21 @@ export default function JobPreview() {
         </CardContent>
       </Card>
 
-      <ContentTabs activeTab={activeTab} setActiveTab={setActiveTab} data={{ job, notifications: data.notifications, mails: data.mails, logs: data.logs, queries: data.queries, caches: data.caches, https: data.https, exceptions: data.exceptions, models: data.models }} />
+      <ContentTabs
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        data={{
+          job,
+          notifications: data.notifications,
+          mails: data.mails,
+          logs: data.logs,
+          queries: data.queries,
+          caches: data.caches,
+          https: data.https,
+          exceptions: data.exceptions,
+          models: data.models,
+        }}
+      />
     </div>
   );
 }

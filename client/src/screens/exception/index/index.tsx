@@ -1,6 +1,12 @@
 /** @format */
 
-import { Card, CardContent, CardHeader, CardTitle, CardSubtitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardSubtitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
 import ExceptionsIndexTable from "../table";
@@ -21,9 +27,7 @@ export default function ExceptionsIndex() {
                 <CardTitle className="text-sm text-muted-foreground">
                   EXCEPTIONS
                 </CardTitle>
-                <CardSubtitle>
-                  {data.count}
-                </CardSubtitle>
+                <CardSubtitle>{data.count}</CardSubtitle>
               </div>
               <div className="flex gap-4 text-xs">
                 <div className="flex flex-col items-center">

@@ -1,5 +1,5 @@
-import * as React from "react"
-import { memo } from "react"
+import * as React from "react";
+import { memo } from "react";
 import {
   ArrowUpDown,
   Bell,
@@ -17,10 +17,10 @@ import {
   Settings2,
   SquareActivity,
   SquareTerminal,
-} from "lucide-react"
+} from "lucide-react";
 
-import { NavMain } from "@/components/nav-main"
-import { AppSettings } from "@/components/app-settings"
+import { NavMain } from "@/components/nav-main";
+import { AppSettings } from "@/components/app-settings";
 import {
   Sidebar,
   SidebarContent,
@@ -29,8 +29,8 @@ import {
   SidebarRail,
   SidebarMenu,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { Link } from "react-router"
+} from "@/components/ui/sidebar";
+import { Link } from "react-router";
 
 // This is sample data.
 const data = {
@@ -48,13 +48,13 @@ const data = {
     {
       title: "Activity",
       url: "#",
-      icon: SquareActivity, 
+      icon: SquareActivity,
       isActive: true,
       items: [
         {
           title: "Requests",
           url: "/requests",
-          icon: ArrowUpDown
+          icon: ArrowUpDown,
         },
         {
           title: "Jobs",
@@ -135,37 +135,42 @@ const data = {
         {
           title: "Views",
           url: "/views",
-          icon: File
+          icon: File,
         },
       ],
     },
   ],
-}
+};
 
-export const AppSidebar = memo(({ ...props }: React.ComponentProps<typeof Sidebar>) => {
-  return (
-    <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
-        <Link to="/" className="flex items-center gap-2 px-4 py-5 text-2xl font-semibold border-b">
-          <img src="/images/neural-network.png" alt="" className="w-8" />
-          <span>Observatory</span>
-        </Link>
-        <Link to="/" className="flex items-center text-lg gap-2 px-2 py-2">
-          {data.dashboard.icon && <data.dashboard.icon className="w-4 h-4" />}
-          <span>{data.dashboard.title}</span>
-        </Link>
-      </SidebarHeader>
-      <SidebarContent>
-        <NavMain items={data.navMain} />
-      </SidebarContent>
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <AppSettings />
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
-      <SidebarRail />
-    </Sidebar>
-  )
-});
+export const AppSidebar = memo(
+  ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
+    return (
+      <Sidebar collapsible="icon" {...props}>
+        <SidebarHeader>
+          <Link
+            to="/"
+            className="flex items-center gap-2 px-4 py-5 text-2xl font-semibold border-b"
+          >
+            <img src="/images/neural-network.png" alt="" className="w-8" />
+            <span>Observatory</span>
+          </Link>
+          <Link to="/" className="flex items-center text-lg gap-2 px-2 py-2">
+            {data.dashboard.icon && <data.dashboard.icon className="w-4 h-4" />}
+            <span>{data.dashboard.title}</span>
+          </Link>
+        </SidebarHeader>
+        <SidebarContent>
+          <NavMain items={data.navMain} />
+        </SidebarContent>
+        <SidebarFooter>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <AppSettings />
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
+        <SidebarRail />
+      </Sidebar>
+    );
+  },
+);

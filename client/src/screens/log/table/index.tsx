@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export default function LogsIndexTable() {
-  const { instanceData,
+  const {
+    instanceData,
     groupData,
     instanceDataCount,
     groupDataCount,
@@ -25,9 +26,9 @@ export default function LogsIndexTable() {
   } = useIndexTableData({
     key: "logs",
     defaultInstanceStatusType: "all",
-  })
+  });
 
-  const Table = index === 'instance' ? InstanceTable : GroupTable
+  const Table = index === "instance" ? InstanceTable : GroupTable;
 
   // const [dropdownOpen, setDropdownOpen] = useState(false);
   // const [logTypes, setLogTypes] = useState<any>([
@@ -52,7 +53,6 @@ export default function LogsIndexTable() {
   //   setInstanceStatusType(logTypes.filter((t: any) => t.checked).map((t: any) => t.label).join(","));
   // };
 
-
   return (
     <div className="relative">
       {sidePanelData.isOpen &&
@@ -60,10 +60,17 @@ export default function LogsIndexTable() {
           <div
             className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-xs z-50"
             onClick={() =>
-              setSidePanelData({ ...sidePanelData, isOpen: false, modelId: "", requestId: "", jobId: "", scheduleId: "" })
+              setSidePanelData({
+                ...sidePanelData,
+                isOpen: false,
+                modelId: "",
+                requestId: "",
+                jobId: "",
+                scheduleId: "",
+              })
             }
           ></div>,
-          document.body
+          document.body,
         )}
       {sidePanelData.isOpen && (
         <SidePanel
@@ -96,7 +103,9 @@ export default function LogsIndexTable() {
         </div>
       </div>
       {/* @ts-expect-error dumb ts*/}
-      <Table data={index === "instance" ? instanceData : groupData} setSidePanelData={setSidePanelData}>
+      <Table data={index === "instance" ? instanceData : groupData}
+        setSidePanelData={setSidePanelData}
+      >
         <div className="my-6">
           <div className="flex items-center justify-center">
             {message ? (

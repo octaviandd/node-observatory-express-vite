@@ -11,7 +11,7 @@ export type Logger =
   | "bunyan"
   | "log4js" // not otel
   | "signale" // not otel
-  | "loglevel" // not otel
+  | "loglevel"; // not otel
 
 /**
  * Supported scheduler libraries
@@ -51,8 +51,8 @@ export type Notifications =
   | "pusher" // not otel
   // | "firebase-admin"
   // | "socket.io"
-  | "ably" // not otel
-  // | "kafkajs";
+  | "ably"; // not otel
+// | "kafkajs";
 
 /**
  * Supported HTTP client libraries
@@ -167,23 +167,23 @@ export interface HttpRequestData {
   responseBodySize: number;
   isMedia: boolean;
   library: string; // Which HTTP client library was used
-  
+
   // Source information
   file: string;
   line: string;
-  
+
   // Common optional fields with different representations
   host?: string;
   hostname?: string;
   path?: string;
   port?: string | number | null;
-  
+
   // Library-specific optional fields
   // Axios specific
   maxRedirects?: number;
   maxBodyLength?: number | null;
   beforeRedirects?: Record<string, any>;
-  
+
   // Got specific
   hooks?: {
     init?: any[];
@@ -211,7 +211,7 @@ export interface HttpRequestData {
   methodRewriting?: boolean;
   resolveBodyOnly?: boolean;
   ignoreInvalidCookies?: boolean;
-  
+
   // Node-fetch specific
   href?: string;
   slashes?: boolean;
@@ -219,17 +219,17 @@ export interface HttpRequestData {
   hash?: string | null;
   search?: string | null;
   query?: string | null;
-  
+
   // Superagent specific
   agent?: boolean | any;
   rejectUnauthorized?: boolean;
-  
+
   // Needle specific
   signal?: any;
-  
+
   // URL components that might be represented differently
   url?: string | Record<string, any>;
-  
+
   // Any other properties not explicitly defined
   [key: string]: any;
 }
@@ -261,7 +261,6 @@ export interface SidePanelState {
   isOpen: boolean;
 }
 
-
 export interface ExceptionContent {
   type: "exception";
   message: string;
@@ -283,9 +282,9 @@ export interface ViewContent {
   cacheInfo: {
     cacheEnabled: boolean;
   };
-  data: string,
-  line: string,
-  file: string,
+  data: string;
+  line: string;
+  file: string;
   duration: number;
   size: number;
   status: "completed" | "failed";
@@ -321,7 +320,14 @@ export interface ScheduleContent {
 
 export interface JobContent {
   type: "job";
-  method: "process" | "add" | "retryJob" | "start" | "pause" | "resume" | "processJob";
+  method:
+    | "process"
+    | "add"
+    | "retryJob"
+    | "start"
+    | "pause"
+    | "resume"
+    | "processJob";
   status: "started" | "processing" | "completed" | "failed" | "released";
   package: "bull" | "agenda";
   queue: string;
@@ -379,7 +385,12 @@ export interface MailContent {
     messageId: string;
     response: string;
   } | null;
-  package: "nodemailer" | "postmark" | "@sendgrid/mail" | "mailgun.js" | "@aws-sdk/client-ses";
+  package:
+    | "nodemailer"
+    | "postmark"
+    | "@sendgrid/mail"
+    | "mailgun.js"
+    | "@aws-sdk/client-ses";
   duration?: number;
   command?: string;
   error?: {
@@ -397,7 +408,14 @@ export interface MailContent {
 
 export interface CacheContent {
   type: "cache";
-  package: "redis" | "ioredis" | "node-cache" | "lru-cache" | "memjs" | "level" | "keyv";
+  package:
+    | "redis"
+    | "ioredis"
+    | "node-cache"
+    | "lru-cache"
+    | "memjs"
+    | "level"
+    | "keyv";
   duration?: string;
   error?: {
     message: string;
@@ -422,7 +440,14 @@ export interface QueryContent {
   hostname: string;
   port: string;
   database: string;
-  package: "mysql2" | "pg" | "sequelize" | "knex" | "prisma" | "sqlite3" | "typeorm";
+  package:
+    | "mysql2"
+    | "pg"
+    | "sequelize"
+    | "knex"
+    | "prisma"
+    | "sqlite3"
+    | "typeorm";
   error?: {
     message: string;
     name: string;
@@ -435,7 +460,30 @@ export interface QueryContent {
 }
 export interface ModelContent {
   type: "model";
-  method: "create" | "find" | "findById" | "findByPk" | "findAll" | "update" | "destroy" | "count" | "sum" | "min" | "max" | "avg" | "median" | "mode" | "group" | "groupBy" | "groupByCount" | "groupBySum" | "groupByMin" | "groupByMax" | "groupByAvg" | "groupByMedian" | "groupByMode";
+  method:
+    | "create"
+    | "find"
+    | "findById"
+    | "findByPk"
+    | "findAll"
+    | "update"
+    | "destroy"
+    | "count"
+    | "sum"
+    | "min"
+    | "max"
+    | "avg"
+    | "median"
+    | "mode"
+    | "group"
+    | "groupBy"
+    | "groupByCount"
+    | "groupBySum"
+    | "groupByMin"
+    | "groupByMax"
+    | "groupByAvg"
+    | "groupByMedian"
+    | "groupByMode";
   status: "completed" | "failed";
   package: "sequelize" | "knex" | "prisma" | "sqlite3" | "typeorm";
   modelName: string;
@@ -470,8 +518,8 @@ export interface RequestContent {
   requestSize: number;
   session: Record<string, any>;
   package: "express";
-  file: string,
-  line: string
+  file: string;
+  line: string;
 }
 
 export interface HttpClientContent {
@@ -500,9 +548,9 @@ export interface HttpClientContent {
   statusMessage?: string;
   aborted?: boolean;
   fullUrl?: string;
-  line: string
-  file: string
-  package: string
+  line: string;
+  file: string;
+  package: string;
 }
 
 export interface ClientResponse {
@@ -512,8 +560,32 @@ export interface ClientResponse {
   schedule_id?: string;
   created_at: string;
   updated_at: string;
-  type: "view" | "exception" | "request" | "model" | "cache" | "job" | "query" | "log" | "notification" | "mail" | "schedule" | "http";
-  content: ViewContent | ExceptionContent | RequestContent | ModelContent | CacheContent | JobContent | QueryContent | LogContent | NotificationContent | MailContent | ScheduleContent | HttpClientContent;
+  type:
+    | "view"
+    | "exception"
+    | "request"
+    | "model"
+    | "cache"
+    | "job"
+    | "query"
+    | "log"
+    | "notification"
+    | "mail"
+    | "schedule"
+    | "http";
+  content:
+    | ViewContent
+    | ExceptionContent
+    | RequestContent
+    | ModelContent
+    | CacheContent
+    | JobContent
+    | QueryContent
+    | LogContent
+    | NotificationContent
+    | MailContent
+    | ScheduleContent
+    | HttpClientContent;
 }
 
 export interface BaseGroupResponse {
@@ -578,8 +650,8 @@ export interface NotificationInstanceResponse extends ClientResponse {
 
 export interface QueryInstanceResponse extends ClientResponse {
   content: QueryContent;
-  average: number,
-  p95: number
+  average: number;
+  p95: number;
 }
 
 export interface ModelInstanceResponse extends ClientResponse {
@@ -588,8 +660,8 @@ export interface ModelInstanceResponse extends ClientResponse {
 
 export interface HttpClientGroupResponse extends BaseGroupResponse {
   route: string;
-  average: number,
-  p95: number,
+  average: number;
+  p95: number;
   count_200: number;
   count_400: number;
   count_500: number;
@@ -607,8 +679,8 @@ export interface RequestGroupResponse extends BaseGroupResponse {
   count_200: number;
   count_400: number;
   count_500: number;
-  average: number,
-  p95: number
+  average: number;
+  p95: number;
 }
 
 export interface LogGroupResponse extends BaseGroupResponse {
@@ -642,8 +714,8 @@ export interface QueryGroupResponse extends BaseGroupResponse {
   endpoint: string;
   completed: number;
   failed: number;
-  p95: number,
-  average: number
+  p95: number;
+  average: number;
 }
 
 export interface ViewGroupResponse extends BaseGroupResponse {

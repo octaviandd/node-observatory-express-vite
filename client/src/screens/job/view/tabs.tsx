@@ -1,9 +1,19 @@
-import { CacheInstanceResponse, ExceptionInstanceResponse, JobInstanceResponse, MailInstanceResponse, ModelInstanceResponse, NotificationInstanceResponse, QueryInstanceResponse, HttpClientInstanceResponse, LogInstanceResponse } from '../../../../../types'
-import { CardContent } from '@/components/ui/card';
+import {
+  CacheInstanceResponse,
+  ExceptionInstanceResponse,
+  JobInstanceResponse,
+  MailInstanceResponse,
+  ModelInstanceResponse,
+  NotificationInstanceResponse,
+  QueryInstanceResponse,
+  HttpClientInstanceResponse,
+  LogInstanceResponse,
+} from "../../../../../types";
+import { CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { Card } from '@/components/ui/card';
+import { Card } from "@/components/ui/card";
 
 type Props = {
   activeTab: string;
@@ -18,8 +28,8 @@ type Props = {
     https: HttpClientInstanceResponse[];
     exceptions: ExceptionInstanceResponse[];
     models: ModelInstanceResponse[];
-  }
-}
+  };
+};
 
 export default function ContentTabs({ activeTab, setActiveTab, data }: Props) {
   return (
@@ -193,5 +203,5 @@ export default function ContentTabs({ activeTab, setActiveTab, data }: Props) {
         </Tabs>
       </CardContent>
     </Card>
-  )
+  );
 }

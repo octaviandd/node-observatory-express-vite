@@ -23,14 +23,18 @@ class HTTPClientWatcher extends BaseWatcher {
    * Constructor & Initialization
    * --------------------------------------------------------------------------
    */
-  constructor(storeDriver: StoreDriver, storeConnection: any, redisClient: any) {
+  constructor(
+    storeDriver: StoreDriver,
+    storeConnection: any,
+    redisClient: any,
+  ) {
     super(storeDriver, storeConnection, redisClient);
   }
 
   private getStatusSQL(status: string): string {
     return status === "all"
       ? ""
-      : `AND JSON_EXTRACT(content, '$.statusCode') LIKE '${status.replace('xx', '%')}'`;
+      : `AND JSON_EXTRACT(content, '$.statusCode') LIKE '${status.replace("xx", "%")}'`;
   }
 
   /**
@@ -39,9 +43,9 @@ class HTTPClientWatcher extends BaseWatcher {
    */
 
   protected async handleViewSQL(id: string): Promise<any> {
-   let [results]: [any[], any] = await this.storeConnection.query(
+    let [results]: [any[], any] = await this.storeConnection.query(
       "SELECT * FROM observatory_entries WHERE uuid = ?",
-      [id]
+      [id],
     );
 
     let item = results[0];
@@ -64,19 +68,23 @@ class HTTPClientWatcher extends BaseWatcher {
       params.push(item.job_id);
     }
 
-    let jobCondition = ''
+    let jobCondition = "";
 
-    if(item.job_id) {
-      jobCondition = "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')";
+    if (item.job_id) {
+      jobCondition =
+        "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')";
     }
 
-    if(!item.request_id && !item.schedule_id && !item.job_id) {
+    if (!item.request_id && !item.schedule_id && !item.job_id) {
       return this.groupItemsByType(results);
     }
 
     const [relatedItems]: [any[], any] = await this.storeConnection.query(
-      "SELECT * FROM observatory_entries WHERE " + conditions.join(" OR ") + " AND type != ? " + jobCondition,
-      [...params, this.type]
+      "SELECT * FROM observatory_entries WHERE " +
+        conditions.join(" OR ") +
+        " AND type != ? " +
+        jobCondition,
+      [...params, this.type],
     );
 
     return this.groupItemsByType(relatedItems.concat(results));
@@ -86,27 +94,35 @@ class HTTPClientWatcher extends BaseWatcher {
    * Related Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async handleRelatedDataSQL(modelId: string, requestId: string, jobId: string, scheduleId: string): Promise<any> {
-    let query = 'SELECT * FROM observatory_entries WHERE type != ?';
+  protected async handleRelatedDataSQL(
+    modelId: string,
+    requestId: string,
+    jobId: string,
+    scheduleId: string,
+  ): Promise<any> {
+    let query = "SELECT * FROM observatory_entries WHERE type != ?";
 
-    if(requestId) {
+    if (requestId) {
       query += ` AND request_id = '${requestId}'`;
-    } 
+    }
 
     if (jobId) {
-      let jobFilter = "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')";
+      let jobFilter =
+        "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')";
       query += ` AND job_id = '${jobId}' ${jobFilter}`;
     }
 
-    if(scheduleId) {
+    if (scheduleId) {
       query += ` AND schedule_id = '${scheduleId}'`;
     }
 
-    if(!requestId && !jobId && !scheduleId) {
-      return {}
+    if (!requestId && !jobId && !scheduleId) {
+      return {};
     }
 
-    const [results]: [any[], any] = await this.storeConnection.query(query, [this.type]);
+    const [results]: [any[], any] = await this.storeConnection.query(query, [
+      this.type,
+    ]);
     return this.groupItemsByType(results);
   }
 
@@ -115,7 +131,9 @@ class HTTPClientWatcher extends BaseWatcher {
    * --------------------------------------------------------------------------
    */
 
-  protected async getIndexTableDataByInstanceSQL(filters: HTTPClientFilters): Promise<any> {
+  protected async getIndexTableDataByInstanceSQL(
+    filters: HTTPClientFilters,
+  ): Promise<any> {
     const { period, query, status, key, limit, offset } = filters;
     const periodSql = period ? this.getPeriodSQL(period) : "";
     const querySql = query ? this.getInclusionSQL(query, "origin") : "";
@@ -127,13 +145,13 @@ class HTTPClientWatcher extends BaseWatcher {
        WHERE type = 'http' ${periodSql} ${querySql} ${statusSql} ${keySql}
        AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0'
        ORDER BY created_at DESC
-       LIMIT ${limit} OFFSET ${offset}` 
+       LIMIT ${limit} OFFSET ${offset}`,
     );
-    
+
     const [countResult] = await this.storeConnection.query(
       `SELECT COUNT(*) AS total FROM observatory_entries
        WHERE type = 'http' ${periodSql} ${querySql} ${statusSql} ${keySql}
-       AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0'`
+       AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0'`,
     );
 
     return { results, count: this.formatValue(countResult[0].total, true) };
@@ -143,12 +161,13 @@ class HTTPClientWatcher extends BaseWatcher {
    * Group Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async getIndexTableDataByGroupSQL(filters: HTTPClientFilters): Promise<any> {
+  protected async getIndexTableDataByGroupSQL(
+    filters: HTTPClientFilters,
+  ): Promise<any> {
     const { period, query, key, limit, offset } = filters;
     const periodSql = period ? this.getPeriodSQL(period) : "";
     const querySql = query ? this.getInclusionSQL(query, "request.url") : "";
-    const keySql = key ? this.getEqualitySQL(key, 'request.url') : "";
-
+    const keySql = key ? this.getEqualitySQL(key, "request.url") : "";
 
     const [results] = await this.storeConnection.query(
       `SELECT
@@ -180,14 +199,14 @@ class HTTPClientWatcher extends BaseWatcher {
         AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0'
         GROUP BY JSON_UNQUOTE(JSON_EXTRACT(content, '$.origin'))
         ORDER BY total DESC
-        LIMIT ${limit} OFFSET ${offset}`
+        LIMIT ${limit} OFFSET ${offset}`,
     );
 
     const [countResult] = await this.storeConnection.query(
       `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.origin'))) as total 
        FROM observatory_entries 
        WHERE type = 'http' ${periodSql} ${querySql} ${keySql}
-       AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0'`
+       AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0'`,
     );
 
     return { results, count: this.formatValue(countResult[0].total, true) };
@@ -197,10 +216,12 @@ class HTTPClientWatcher extends BaseWatcher {
    * Graph Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async getIndexGraphDataSQL(filters: HTTPClientFilters): Promise<any> {
+  protected async getIndexGraphDataSQL(
+    filters: HTTPClientFilters,
+  ): Promise<any> {
     const { period, key } = filters;
     const periodSql = period ? this.getPeriodSQL(period) : "";
-    const keySql = key ? this.getInclusionSQL(key, 'origin') : "";
+    const keySql = key ? this.getInclusionSQL(key, "origin") : "";
 
     const [results] = await this.storeConnection.query(
       `(
@@ -252,7 +273,7 @@ class HTTPClientWatcher extends BaseWatcher {
         WHERE type = 'http' ${periodSql} ${keySql}
         AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0'
         ORDER BY created_at DESC
-      );`
+      );`,
     );
 
     const aggregateResults: {
@@ -267,7 +288,10 @@ class HTTPClientWatcher extends BaseWatcher {
     } = results.shift();
 
     const countFormattedData = this.countGraphData(results, period as string);
-    const durationFormattedData = this.durationGraphData(results, period as string);
+    const durationFormattedData = this.durationGraphData(
+      results,
+      period as string,
+    );
 
     return {
       countFormattedData,
@@ -297,15 +321,15 @@ class HTTPClientWatcher extends BaseWatcher {
       "200": 0,
       "400": 0,
       "500": 0,
-      label: this.getLabel(index, period)
+      label: this.getLabel(index, period),
     }));
 
     data.forEach((request: any) => {
-      if(request.content.statusCode === 0) return;
+      if (request.content.statusCode === 0) return;
       const requestTime = new Date(request.created_at).getTime();
       const statusCode = Math.floor(request.content.statusCode / 100) * 100;
       const intervalIndex = Math.floor(
-        (requestTime - startDate) / (intervalDuration * 60 * 1000)
+        (requestTime - startDate) / (intervalDuration * 60 * 1000),
       );
 
       if (intervalIndex >= 0 && intervalIndex < 120) {
@@ -329,10 +353,12 @@ class HTTPClientWatcher extends BaseWatcher {
       limit: parseInt(req.query.limit as string, 10) || 20,
       index: req.query.index as "instance" | "group",
       status: req.query.status as "all" | "2xx" | "4xx" | "5xx",
-      key: req.query.key ? decodeURIComponent(req.query.key as string) : undefined,
+      key: req.query.key
+        ? decodeURIComponent(req.query.key as string)
+        : undefined,
     };
   }
-  
+
   /**
    * Add content to the watcher
    * --------------------------------------------------------------------------
@@ -355,27 +381,27 @@ class HTTPClientWatcher extends BaseWatcher {
   async getStandardizedRequests(
     limit: number = 20,
     offset: number = 0,
-    filters: Partial<HTTPClientFilters> = {}
+    filters: Partial<HTTPClientFilters> = {},
   ): Promise<HttpRequestData[]> {
     // Create default filters
     const defaultFilters: HTTPClientFilters = {
-      period: '24h',
+      period: "24h",
       offset,
       limit,
-      status: 'all',
-      index: 'instance',
-      isTable: true
+      status: "all",
+      index: "instance",
+      isTable: true,
     };
 
     try {
-    // Merge with provided filters
+      // Merge with provided filters
       const mergedFilters = { ...defaultFilters, ...filters };
 
       // Get raw data based on store driver
       let results: any[] = [];
 
       switch (this.storeDriver) {
-        case 'mysql2':
+        case "mysql2":
           const data = await this.getIndexTableDataByInstanceSQL(mergedFilters);
           results = data.results || [];
           break;
@@ -384,14 +410,15 @@ class HTTPClientWatcher extends BaseWatcher {
       }
 
       // Standardize each result
-      return results.map(item => {
+      return results.map((item) => {
         let content: any;
 
         try {
           // Parse content if it's a string
-          content = typeof item.content === 'string'
-            ? JSON.parse(item.content)
-            : item.content;
+          content =
+            typeof item.content === "string"
+              ? JSON.parse(item.content)
+              : item.content;
         } catch (error: any) {
           console.error(`Failed to parse HTTP request data: ${error.message}`);
           content = {};

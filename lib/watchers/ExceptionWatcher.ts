@@ -22,18 +22,22 @@ class ExceptionWatcher extends BaseWatcher {
    * Constructor & Initialization
    * --------------------------------------------------------------------------
    */
-  constructor(storeDriver: StoreDriver, storeConnection: any, redisClient: any) {
+  constructor(
+    storeDriver: StoreDriver,
+    storeConnection: any,
+    redisClient: any,
+  ) {
     super(storeDriver, storeConnection, redisClient);
   }
 
-   /**
+  /**
    * View Methods
    * --------------------------------------------------------------------------
    */
   protected async handleViewSQL(id: string): Promise<any> {
-     let [results]: [any[], any] = await this.storeConnection.query(
+    let [results]: [any[], any] = await this.storeConnection.query(
       "SELECT * FROM observatory_entries WHERE uuid = ?",
-      [id]
+      [id],
     );
 
     let item = results[0];
@@ -56,58 +60,72 @@ class ExceptionWatcher extends BaseWatcher {
       params.push(item.job_id);
     }
 
-    let jobCondition = ''
+    let jobCondition = "";
 
-    if(item.job_id) {
-      jobCondition = "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')";
+    if (item.job_id) {
+      jobCondition =
+        "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')";
     }
 
-    if(!item.request_id && !item.schedule_id && !item.job_id) {
+    if (!item.request_id && !item.schedule_id && !item.job_id) {
       return this.groupItemsByType(results);
     }
 
     const [relatedItems]: [any[], any] = await this.storeConnection.query(
-      "SELECT * FROM observatory_entries WHERE " + conditions.join(" OR ") + " AND type != ? " + jobCondition,
-      [...params, this.type]
+      "SELECT * FROM observatory_entries WHERE " +
+        conditions.join(" OR ") +
+        " AND type != ? " +
+        jobCondition,
+      [...params, this.type],
     );
 
     return this.groupItemsByType(relatedItems.concat(results));
   }
 
-   /**
+  /**
    * Related Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async handleRelatedDataSQL(modelId: string, requestId: string, jobId: string, scheduleId: string): Promise<any> {
-    let query = 'SELECT * FROM observatory_entries WHERE type != ?';
+  protected async handleRelatedDataSQL(
+    modelId: string,
+    requestId: string,
+    jobId: string,
+    scheduleId: string,
+  ): Promise<any> {
+    let query = "SELECT * FROM observatory_entries WHERE type != ?";
 
-    if(requestId) {
+    if (requestId) {
       query += ` AND request_id = '${requestId}'`;
     }
 
     if (jobId) {
-      let jobFilter = "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')";
+      let jobFilter =
+        "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')";
       query += ` AND job_id = '${jobId}' ${jobFilter}`;
     }
 
-    if(scheduleId) {
+    if (scheduleId) {
       query += ` AND schedule_id = '${scheduleId}'`;
     }
 
-    if(!requestId && !jobId && !scheduleId) {
-      return {}
+    if (!requestId && !jobId && !scheduleId) {
+      return {};
     }
 
-    const [results]: [any[], any] = await this.storeConnection.query(query, [this.type]);
+    const [results]: [any[], any] = await this.storeConnection.query(query, [
+      this.type,
+    ]);
 
     return this.groupItemsByType(results);
   }
 
-   /**
+  /**
    * Table Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async getIndexTableDataSQL(filters: ExceptionFilters): Promise<any> {
+  protected async getIndexTableDataSQL(
+    filters: ExceptionFilters,
+  ): Promise<any> {
     const { limit, offset, type, query } = filters;
     const typeSQL = type ? this.getInclusionSQL(type, "type") : "";
     const querySQL = query ? this.getInclusionSQL(query, "message") : "";
@@ -117,12 +135,12 @@ class ExceptionWatcher extends BaseWatcher {
        WHERE type = 'exception' ${typeSQL} ${querySQL} 
        ORDER BY created_at DESC 
        LIMIT ? OFFSET ?`,
-      [limit, offset]
+      [limit, offset],
     );
 
     const [countResult] = await this.storeConnection.query(
       `SELECT COUNT(*) as total FROM observatory_entries 
-       WHERE type = 'exception' ${typeSQL} ${querySQL}`
+       WHERE type = 'exception' ${typeSQL} ${querySQL}`,
     );
 
     return { results, count: countResult[0].total };
@@ -133,9 +151,11 @@ class ExceptionWatcher extends BaseWatcher {
    * --------------------------------------------------------------------------
    */
 
-  protected async getIndexTableDataByInstanceSQL(filters: ExceptionFilters): Promise<any> {
+  protected async getIndexTableDataByInstanceSQL(
+    filters: ExceptionFilters,
+  ): Promise<any> {
     const { limit, offset, type, query, key } = filters;
-    const typeSQL = type !== 'all' ? this.getInclusionSQL(type, "type") : "";
+    const typeSQL = type !== "all" ? this.getInclusionSQL(type, "type") : "";
     const querySQL = query ? this.getInclusionSQL(query, "message") : "";
     const keySQL = key ? this.getEqualitySQL(key, "message") : "";
 
@@ -144,12 +164,12 @@ class ExceptionWatcher extends BaseWatcher {
        WHERE type = 'exception' ${typeSQL} ${querySQL} ${keySQL}
        ORDER BY created_at DESC
        LIMIT ? OFFSET ?`,
-      [limit, offset]
+      [limit, offset],
     );
 
     const [countResult] = await this.storeConnection.query(
       `SELECT COUNT(*) as total FROM observatory_entries
-       WHERE type = 'exception' ${typeSQL} ${querySQL} ${keySQL}`
+       WHERE type = 'exception' ${typeSQL} ${querySQL} ${keySQL}`,
     );
 
     return { results, count: this.formatValue(countResult[0].total, true) };
@@ -159,7 +179,9 @@ class ExceptionWatcher extends BaseWatcher {
    * Group Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async getIndexTableDataByGroupSQL(filters: ExceptionFilters): Promise<any> {
+  protected async getIndexTableDataByGroupSQL(
+    filters: ExceptionFilters,
+  ): Promise<any> {
     const { period, limit, offset, query } = filters;
     const periodSQL = period ? this.getPeriodSQL(period) : "";
     const querySQL = query ? this.getInclusionSQL(query, "message") : "";
@@ -175,11 +197,11 @@ class ExceptionWatcher extends BaseWatcher {
       GROUP BY header
       ORDER BY total DESC
       LIMIT ? OFFSET ?`,
-      [limit, offset]
+      [limit, offset],
     );
-    
-     const [countResult] = (await this.storeConnection.query(
-      `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.message'))) as total FROM observatory_entries WHERE type = 'exception' ${periodSQL} ${querySQL}`
+
+    const [countResult] = (await this.storeConnection.query(
+      `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.message'))) as total FROM observatory_entries WHERE type = 'exception' ${periodSQL} ${querySQL}`,
     )) as [any[]];
 
     return { results, count: this.formatValue(countResult[0].total, true) };
@@ -189,12 +211,14 @@ class ExceptionWatcher extends BaseWatcher {
    * Graph Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async getIndexGraphDataSQL(filters: ExceptionFilters): Promise<any> {
+  protected async getIndexGraphDataSQL(
+    filters: ExceptionFilters,
+  ): Promise<any> {
     const { period, key } = filters;
     const periodSql = period ? this.getPeriodSQL(period) : "";
     const keySql = key ? this.getEqualitySQL(key, "message") : "";
 
-    const [results] = await this.storeConnection.query(
+    const [results] = (await this.storeConnection.query(
       `(
         SELECT
           COUNT(*) as total,
@@ -218,10 +242,10 @@ class ExceptionWatcher extends BaseWatcher {
         FROM observatory_entries
         WHERE type = 'exception' ${periodSql} ${keySql}
         ORDER BY created_at DESC
-      );`
-    ) as any[];
+      );`,
+    )) as any[];
 
-    const aggregateResults : {
+    const aggregateResults: {
       total: number;
       unhandledRejection: string | null;
       uncaughtException: string | null;
@@ -232,7 +256,10 @@ class ExceptionWatcher extends BaseWatcher {
     return {
       countFormattedData,
       count: this.formatValue(aggregateResults.total, true),
-      indexCountOne: this.formatValue(aggregateResults.unhandledRejection, true),
+      indexCountOne: this.formatValue(
+        aggregateResults.unhandledRejection,
+        true,
+      ),
       indexCountTwo: this.formatValue(aggregateResults.uncaughtException, true),
     };
   }
@@ -251,7 +278,7 @@ class ExceptionWatcher extends BaseWatcher {
     const groupedData = Array.from({ length: 120 }, (_, index) => ({
       unhandledRejection: 0,
       uncaughtException: 0,
-      label: this.getLabel(index, period)
+      label: this.getLabel(index, period),
     }));
 
     data.forEach((exception: any) => {
@@ -259,7 +286,7 @@ class ExceptionWatcher extends BaseWatcher {
       const type = exception.content.type;
 
       const intervalIndex = Math.floor(
-        (exceptionTime - startDate) / (intervalDuration * 60 * 1000)
+        (exceptionTime - startDate) / (intervalDuration * 60 * 1000),
       );
 
       if (intervalIndex >= 0 && intervalIndex < 120) {

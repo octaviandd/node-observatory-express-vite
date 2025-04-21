@@ -5,7 +5,12 @@ import { useParams } from "react-router";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ExceptionCrumbs } from "./crumbs";
-import { ExceptionInstanceResponse, ScheduleInstanceResponse, JobInstanceResponse, RequestInstanceResponse } from "../../../../../types";
+import {
+  ExceptionInstanceResponse,
+  ScheduleInstanceResponse,
+  JobInstanceResponse,
+  RequestInstanceResponse,
+} from "../../../../../types";
 import Source from "./source";
 import { ExceptionInfo } from "./info";
 import ContentTabs from "./tabs";
@@ -16,7 +21,11 @@ export default function ExceptionView() {
 
   const [data, setData] = useState<{
     exception: ExceptionInstanceResponse;
-    source: RequestInstanceResponse | JobInstanceResponse | ScheduleInstanceResponse | null;
+    source:
+      | RequestInstanceResponse
+      | JobInstanceResponse
+      | ScheduleInstanceResponse
+      | null;
     loading: boolean;
     error: string | null;
   }>({
@@ -38,25 +47,31 @@ export default function ExceptionView() {
     try {
       const response = await fetch(`/api/data/exceptions/${params.id}`);
       if (!response.ok) {
-        throw new Error('Failed to fetch exception data');
+        throw new Error("Failed to fetch exception data");
       }
       const { exception, request, job, schedule } = await response.json();
 
       if (!exception?.[0]) {
-        throw new Error('Exception not found');
+        throw new Error("Exception not found");
       }
 
       setData({
         ...data,
         exception: exception[0],
-        source: request ? request[0] : job ? job[0] : schedule ? schedule[0] : null,
+        source: request
+          ? request[0]
+          : job
+            ? job[0]
+            : schedule
+              ? schedule[0]
+              : null,
         loading: false,
       });
     } catch (error) {
-      console.error('Error fetching exception data:', error);
+      console.error("Error fetching exception data:", error);
       setData({
         ...data,
-        error: error instanceof Error ? error.message : 'An error occurred',
+        error: error instanceof Error ? error.message : "An error occurred",
         loading: false,
       });
     }
@@ -85,12 +100,14 @@ export default function ExceptionView() {
     <div className="flex flex-col gap-6">
       <ExceptionCrumbs exception={data.exception} />
 
-      {data.source && (
-        <Source source={data.source} />
-      )}
+      {data.source && <Source source={data.source} />}
 
       <ExceptionInfo exception={data.exception} />
-      <ContentTabs activeTab={activeTab} setActiveTab={setActiveTab} data={data} />
+      <ContentTabs
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        data={data}
+      />
     </div>
   );
 }

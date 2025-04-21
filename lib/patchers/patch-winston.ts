@@ -6,9 +6,12 @@ import { watchers } from "../logger";
 import { getCallerInfo } from "../utils";
 
 // Create a global symbol to track if winston has been patched
-const WINSTON_PATCHED_SYMBOL = Symbol.for('node-observer:winston-patched');
+const WINSTON_PATCHED_SYMBOL = Symbol.for("node-observer:winston-patched");
 
-if (process.env.NODE_OBSERVATORY_LOGGING && JSON.parse(process.env.NODE_OBSERVATORY_LOGGING).includes("winston")) {
+if (
+  process.env.NODE_OBSERVATORY_LOGGING &&
+  JSON.parse(process.env.NODE_OBSERVATORY_LOGGING).includes("winston")
+) {
   // Check if winston has already been patched
   if (!(global as any)[WINSTON_PATCHED_SYMBOL]) {
     // Mark winston as patched
@@ -17,7 +20,7 @@ if (process.env.NODE_OBSERVATORY_LOGGING && JSON.parse(process.env.NODE_OBSERVAT
     new Hook(["winston"], function (
       exports: any,
       name: string,
-      basedir: string | undefined
+      basedir: string | undefined,
     ) {
       // `exports` is the Winston module
       // We can patch Winston's logger creation functions or the default logger.
@@ -51,7 +54,7 @@ if (process.env.NODE_OBSERVATORY_LOGGING && JSON.parse(process.env.NODE_OBSERVAT
                   };
                 });
               }
-            }
+            },
           );
 
           return loggerInstance;
@@ -83,7 +86,7 @@ if (process.env.NODE_OBSERVATORY_LOGGING && JSON.parse(process.env.NODE_OBSERVAT
                 };
               });
             }
-          }
+          },
         );
       }
 

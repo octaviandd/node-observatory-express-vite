@@ -4,7 +4,7 @@ import { DatabaseZap } from "lucide-react";
 import SidePanel from "../../../components/ui/side-panel";
 import { createPortal } from "react-dom";
 import { InstanceTable } from "./instance";
-import {GroupTable} from "./group";
+import { GroupTable } from "./group";
 import { useIndexTableData } from "@/hooks/useIndexTableData";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,17 +32,26 @@ export default function CacheIndexTable() {
     defaultInstanceStatusType: "all",
   });
 
-  const Table = index === 'instance' ? InstanceTable : GroupTable
+  const Table = index === "instance" ? InstanceTable : GroupTable;
 
   return (
     <div className="relative">
-      {sidePanelData.isOpen && createPortal(
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-xs z-50"
-          onClick={() => setSidePanelData({ isOpen: false, requestId: "", jobId: "", scheduleId: "", modelId: "" })}
-        ></div>,
-        document.body
-      )}
+      {sidePanelData.isOpen &&
+        createPortal(
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-xs z-50"
+            onClick={() =>
+              setSidePanelData({
+                isOpen: false,
+                requestId: "",
+                jobId: "",
+                scheduleId: "",
+                modelId: "",
+              })
+            }
+          ></div>,
+          document.body,
+        )}
       {sidePanelData.isOpen && (
         <SidePanel
           setSidePanelData={setSidePanelData}
@@ -74,25 +83,37 @@ export default function CacheIndexTable() {
             )}
           </div>
         </div>
-        {!modelKey ? (
-          null
-        ) : (
+        {!modelKey ? null : (
           <ToggleGroup
             type="single"
             value={instanceStatusType}
             onValueChange={(value) => value && setInstanceStatusType(value)}
           >
-            <span className="text-sm text-muted-foreground border rounded-md px-2 py-1">SHOW</span>
-            <ToggleGroupItem value="all" className="text-black cursor-pointer dark:text-white">
+            <span className="text-sm text-muted-foreground border rounded-md px-2 py-1">
+              SHOW
+            </span>
+            <ToggleGroupItem
+              value="all"
+              className="text-black cursor-pointer dark:text-white"
+            >
               ALL
             </ToggleGroupItem>
-            <ToggleGroupItem value="hits" className="text-black cursor-pointer dark:text-white">
+            <ToggleGroupItem
+              value="hits"
+              className="text-black cursor-pointer dark:text-white"
+            >
               HITS
             </ToggleGroupItem>
-            <ToggleGroupItem value="misses" className="text-black cursor-pointer dark:text-white">
+            <ToggleGroupItem
+              value="misses"
+              className="text-black cursor-pointer dark:text-white"
+            >
               MISSES
             </ToggleGroupItem>
-            <ToggleGroupItem value="writes" className="text-black cursor-pointer dark:text-white">
+            <ToggleGroupItem
+              value="writes"
+              className="text-black cursor-pointer dark:text-white"
+            >
               WRITES
             </ToggleGroupItem>
           </ToggleGroup>

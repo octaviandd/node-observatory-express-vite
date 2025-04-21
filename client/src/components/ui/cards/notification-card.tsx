@@ -1,8 +1,12 @@
 /** @format */
-import { NotificationInstanceResponse } from "../../../../../types"
-import { BaseCard } from "./base-card"
+import { NotificationInstanceResponse } from "../../../../../types";
+import { BaseCard } from "./base-card";
 
-export default function NotificationCard({ item }: {item: NotificationInstanceResponse}) {
+export default function NotificationCard({
+  item,
+}: {
+  item: NotificationInstanceResponse;
+}) {
   return (
     <BaseCard
       date={item.created_at}
@@ -12,5 +16,5 @@ export default function NotificationCard({ item }: {item: NotificationInstanceRe
       line={item.content.line}
       linkPath={`/notification/${item.uuid}`}
     />
-  )
+  );
 }

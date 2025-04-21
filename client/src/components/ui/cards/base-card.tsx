@@ -1,11 +1,16 @@
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Folder, ExternalLink, ChevronUp, ChevronDown } from "lucide-react"
-import { Link } from "react-router"
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
-import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism"
-import { useState } from "react"
-import { formatDate } from "@/utils.js"
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Folder, ExternalLink, ChevronUp, ChevronDown } from "lucide-react";
+import { Link } from "react-router";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { useState } from "react";
+import { formatDate } from "@/utils.js";
 
 export const BaseCard = ({
   date,
@@ -14,16 +19,16 @@ export const BaseCard = ({
   line,
   package: pkg,
   linkPath,
-  language = "json"
+  language = "json",
 }: {
-  date: string
-  metadata?: string | number
-  content: object | string
-  file: string
-  line: string
-  package?: string
-  linkPath?: string
-  language?: string
+  date: string;
+  metadata?: string | number;
+  content: object | string;
+  file: string;
+  line: string;
+  package?: string;
+  linkPath?: string;
+  language?: string;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -62,21 +67,25 @@ export const BaseCard = ({
               style={materialDark}
               wrapLines={true}
               lineProps={{
-                style: { wordBreak: "break-all", whiteSpace: "pre-wrap" }
+                style: { wordBreak: "break-all", whiteSpace: "pre-wrap" },
               }}
             >
-              {typeof content === 'string' ? content : JSON.stringify(content, null, 2)}
+              {typeof content === "string"
+                ? content
+                : JSON.stringify(content, null, 2)}
             </SyntaxHighlighter>
           </CardContent>
           <CardFooter className="justify-between pt-2">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Folder className="h-4 w-4" />
-              <span className="overflow-hidden text-ellipsis whitespace-nowrap w-[250px]">{file}:{line}</span>
+              <span className="overflow-hidden text-ellipsis whitespace-nowrap w-[250px]">
+                {file}:{line}
+              </span>
             </div>
             {pkg && <span className="whitespace-nowrap text-sm">{pkg}</span>}
           </CardFooter>
         </>
       )}
     </Card>
-  )
-}
+  );
+};

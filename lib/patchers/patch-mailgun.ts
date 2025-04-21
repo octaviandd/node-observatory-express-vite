@@ -6,9 +6,12 @@ import { watchers } from "../logger";
 import { getCallerInfo } from "../utils";
 
 // Create a global symbol to track if mailgun has been patched
-const MAILGUN_PATCHED_SYMBOL = Symbol.for('node-observer:mailgun-patched');
+const MAILGUN_PATCHED_SYMBOL = Symbol.for("node-observer:mailgun-patched");
 
-if (process.env.NODE_OBSERVATORY_MAILER && JSON.parse(process.env.NODE_OBSERVATORY_MAILER).includes("mailgun.js")) {
+if (
+  process.env.NODE_OBSERVATORY_MAILER &&
+  JSON.parse(process.env.NODE_OBSERVATORY_MAILER).includes("mailgun.js")
+) {
   // Check if mailgun has already been patched
   if (!(global as any)[MAILGUN_PATCHED_SYMBOL]) {
     // Mark mailgun as patched
@@ -23,19 +26,35 @@ if (process.env.NODE_OBSERVATORY_MAILER && JSON.parse(process.env.NODE_OBSERVATO
         return function PatchedMailgun(this: any, ...args: any[]) {
           const mailgun = new OriginalMailgun(...args);
 
-          if (mailgun && mailgun.messages && typeof mailgun.messages().create === "function") {
+          if (
+            mailgun &&
+            mailgun.messages &&
+            typeof mailgun.messages().create === "function"
+          ) {
             const messages = mailgun.messages();
             shimmer.wrap(messages, "create", function (originalCreate) {
-              return async function patchedCreate(this: any, domain: string, data: any) {
+              return async function patchedCreate(
+                this: any,
+                domain: string,
+                data: any,
+              ) {
                 const startTime = performance.now();
-                
+
                 const callerInfo = getCallerInfo(__filename);
 
                 const content = {
                   command: "SendMail",
                   to: Array.isArray(data.to) ? data.to : [data.to],
-                  cc: Array.isArray(data.cc) ? data.cc : data.cc ? [data.cc] : [],
-                  bcc: Array.isArray(data.bcc) ? data.bcc : data.bcc ? [data.bcc] : [],
+                  cc: Array.isArray(data.cc)
+                    ? data.cc
+                    : data.cc
+                      ? [data.cc]
+                      : [],
+                  bcc: Array.isArray(data.bcc)
+                    ? data.bcc
+                    : data.bcc
+                      ? [data.bcc]
+                      : [],
                   from: data.from,
                   subject: data.subject,
                   body: data.html || data.text,

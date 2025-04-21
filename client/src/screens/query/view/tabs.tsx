@@ -1,16 +1,16 @@
-import { TabsList, TabsTrigger, Tabs, TabsContent } from '@/components/ui/tabs'
-import { Card, CardContent } from '@/components/ui/card'
+import { TabsList, TabsTrigger, Tabs, TabsContent } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { QueryInstanceResponse } from '../../../../../types';
+import { QueryInstanceResponse } from "../../../../../types";
 
 type Props = {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   data: {
     query: QueryInstanceResponse;
-  }
-}
+  };
+};
 
 export default function ContentTabs({ activeTab, setActiveTab, data }: Props) {
   return (
@@ -26,7 +26,9 @@ export default function ContentTabs({ activeTab, setActiveTab, data }: Props) {
               style={materialDark}
               wrapLines={true}
               wrapLongLines={true}
-              lineProps={{ style: { wordBreak: "break-all", whiteSpace: "pre-wrap" } }}
+              lineProps={{
+                style: { wordBreak: "break-all", whiteSpace: "pre-wrap" },
+              }}
               customStyle={{ margin: 0, borderRadius: 0 }}
             >
               {JSON.stringify(data.query, null, 2)}
@@ -35,5 +37,5 @@ export default function ContentTabs({ activeTab, setActiveTab, data }: Props) {
         </Tabs>
       </CardContent>
     </Card>
-  )
+  );
 }

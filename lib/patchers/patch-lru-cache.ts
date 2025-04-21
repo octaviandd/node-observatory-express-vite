@@ -7,9 +7,12 @@ import { getCallerInfo } from "../utils";
 import { LRUCacheCommandArgsMapping } from "../constants";
 
 // Create a global symbol to track if lrucache has been patched
-const LRUCACHE_PATCHED_SYMBOL = Symbol.for('node-observer:lrucache-patched');
+const LRUCACHE_PATCHED_SYMBOL = Symbol.for("node-observer:lrucache-patched");
 
-if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATORY_CACHE).includes("lru-cache")) {
+if (
+  process.env.NODE_OBSERVATORY_CACHE &&
+  JSON.parse(process.env.NODE_OBSERVATORY_CACHE).includes("lru-cache")
+) {
   // Check if lrucache has already been patched
   if (!(global as any)[LRUCACHE_PATCHED_SYMBOL]) {
     // Mark lrucache as patched
@@ -33,14 +36,18 @@ if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATOR
               const callerInfo = getCallerInfo(__filename);
 
               const argNames =
-                LRUCacheCommandArgsMapping[method as keyof typeof LRUCacheCommandArgsMapping] || [];
+                LRUCacheCommandArgsMapping[
+                  method as keyof typeof LRUCacheCommandArgsMapping
+                ] || [];
               const logContent: { [key: string]: any } = {
                 type: method,
                 package: "lru-cache",
                 file: callerInfo.file,
                 line: callerInfo.line,
                 // Map standard arguments like 'key' if applicable
-                key: argNames.includes("key") ? args[argNames.indexOf("key")] : undefined,
+                key: argNames.includes("key")
+                  ? args[argNames.indexOf("key")]
+                  : undefined,
               };
 
               const startTime = performance.now();
@@ -48,7 +55,9 @@ if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATOR
               try {
                 const result = originalFn.apply(this, args);
                 const endTime = performance.now();
-                logContent["duration"] = parseFloat((endTime - startTime).toFixed(2));
+                logContent["duration"] = parseFloat(
+                  (endTime - startTime).toFixed(2),
+                );
 
                 // --- Standardized Logging Logic ---
                 if (method === "get") {
@@ -62,7 +71,9 @@ if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATOR
                   logContent["misses"] = isHit ? 0 : 1;
                 } else if (method === "set") {
                   logContent["writes"] = 1;
-                  logContent["value"] = argNames.includes("value") ? args[argNames.indexOf("value")] : undefined; // Log the set value
+                  logContent["value"] = argNames.includes("value")
+                    ? args[argNames.indexOf("value")]
+                    : undefined; // Log the set value
                 } else if (method === "del") {
                   // 'del' doesn't clearly indicate a write vs. no-op if key didn't exist,
                   // but we log it as an attempted write/delete operation.
@@ -74,11 +85,16 @@ if (process.env.NODE_OBSERVATORY_CACHE && JSON.parse(process.env.NODE_OBSERVATOR
                   watchers.cache.addContent(logContent);
                 }
                 return result;
-              } catch (error: unknown) { // Use unknown for better type safety
+              } catch (error: unknown) {
+                // Use unknown for better type safety
                 const endTime = performance.now(); // Capture end time even on error
-                logContent["duration"] = parseFloat((endTime - startTime).toFixed(2));
-                logContent["error"] = error instanceof Error ? error.message : String(error);
-                logContent["stack"] = error instanceof Error ? error.stack : undefined; // Include stack only if Error object
+                logContent["duration"] = parseFloat(
+                  (endTime - startTime).toFixed(2),
+                );
+                logContent["error"] =
+                  error instanceof Error ? error.message : String(error);
+                logContent["stack"] =
+                  error instanceof Error ? error.stack : undefined; // Include stack only if Error object
                 if (watchers?.cache) {
                   watchers.cache.addContent(logContent);
                 }

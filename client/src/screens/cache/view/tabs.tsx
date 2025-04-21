@@ -1,8 +1,8 @@
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { CacheInstanceResponse } from '../../../../../types';
+import { CacheInstanceResponse } from "../../../../../types";
 
 type Props = {
   activeTab: string;
@@ -10,7 +10,7 @@ type Props = {
   data: {
     cache: CacheInstanceResponse;
   };
-}
+};
 export default function ContentTabs({ activeTab, setActiveTab, data }: Props) {
   return (
     <Card className="rounded-none shadow-xs">
@@ -39,5 +39,5 @@ export default function ContentTabs({ activeTab, setActiveTab, data }: Props) {
         </Tabs>
       </CardContent>
     </Card>
-  )
+  );
 }

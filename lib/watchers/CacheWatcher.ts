@@ -14,7 +14,11 @@ interface CacheFilters extends WatcherFilters {
 class CacheWatcher extends BaseWatcher {
   readonly type = "cache";
 
-  constructor(storeDriver: StoreDriver, storeConnection: any, redisClient: any) {
+  constructor(
+    storeDriver: StoreDriver,
+    storeConnection: any,
+    redisClient: any,
+  ) {
     super(storeDriver, storeConnection, redisClient);
   }
 
@@ -37,7 +41,7 @@ class CacheWatcher extends BaseWatcher {
   protected async handleViewSQL(id: string): Promise<any> {
     let [results]: [any[], any] = await this.storeConnection.query(
       "SELECT * FROM observatory_entries WHERE uuid = ?",
-      [id]
+      [id],
     );
 
     let item = results[0];
@@ -60,19 +64,23 @@ class CacheWatcher extends BaseWatcher {
       params.push(item.job_id);
     }
 
-    let jobCondition = ''
+    let jobCondition = "";
 
-    if(item.job_id) {
-      jobCondition = "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')";
+    if (item.job_id) {
+      jobCondition =
+        "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')";
     }
 
-    if(!item.request_id && !item.schedule_id && !item.job_id) {
+    if (!item.request_id && !item.schedule_id && !item.job_id) {
       return this.groupItemsByType(results);
     }
 
     const [relatedItems]: [any[], any] = await this.storeConnection.query(
-      "SELECT * FROM observatory_entries WHERE " + conditions.join(" OR ") + " AND type != ? " + jobCondition,
-      [...params, this.type]
+      "SELECT * FROM observatory_entries WHERE " +
+        conditions.join(" OR ") +
+        " AND type != ? " +
+        jobCondition,
+      [...params, this.type],
     );
 
     return this.groupItemsByType(relatedItems.concat(results));
@@ -82,51 +90,59 @@ class CacheWatcher extends BaseWatcher {
    * Related Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async handleRelatedDataSQL(modelId: string, requestId: string, jobId: string, scheduleId: string): Promise<any> {
-    let query = 'SELECT * FROM observatory_entries WHERE type != ?';
+  protected async handleRelatedDataSQL(
+    modelId: string,
+    requestId: string,
+    jobId: string,
+    scheduleId: string,
+  ): Promise<any> {
+    let query = "SELECT * FROM observatory_entries WHERE type != ?";
 
-    if(requestId) {
+    if (requestId) {
       query += ` AND request_id = '${requestId}'`;
     }
 
     if (jobId) {
-      let jobFilter = "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')";
+      let jobFilter =
+        "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')";
       query += ` AND job_id = '${jobId}' ${jobFilter}`;
     }
 
-    if(scheduleId) {
+    if (scheduleId) {
       query += ` AND schedule_id = '${scheduleId}'`;
     }
 
-    if(!requestId && !jobId && !scheduleId) {
-      return {}
+    if (!requestId && !jobId && !scheduleId) {
+      return {};
     }
 
-    const [results]: [any[], any] = await this.storeConnection.query(query, [this.type]);
+    const [results]: [any[], any] = await this.storeConnection.query(query, [
+      this.type,
+    ]);
     return this.groupItemsByType(results);
   }
-
 
   /**
    * Instance Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async getIndexTableDataByInstanceSQL(filters: CacheFilters): Promise<any> {
+  protected async getIndexTableDataByInstanceSQL(
+    filters: CacheFilters,
+  ): Promise<any> {
     const { period, limit, offset, query, cacheType, key } = filters;
     let periodSql = period ? this.getPeriodSQL(period) : "";
     let querySql = query ? this.getInclusionSQL(query, "stats") : "";
     let statusSql = cacheType === "all" ? "" : this.getStatusSQL(cacheType);
     let keySql = key ? this.getEqualitySQL(key, "key") : "";
 
-
     const [results] = (await this.storeConnection.query(
-      `SELECT * FROM observatory_entries WHERE type = 'cache' ${periodSql} ${querySql} ${statusSql} ${keySql} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`
+      `SELECT * FROM observatory_entries WHERE type = 'cache' ${periodSql} ${querySql} ${statusSql} ${keySql} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`,
     )) as [any[]];
 
     console.log(results);
 
     const [countResult] = (await this.storeConnection.query(
-      `SELECT COUNT(*) as total FROM observatory_entries WHERE type = 'cache' ${periodSql} ${querySql} ${statusSql} ${keySql}`
+      `SELECT COUNT(*) as total FROM observatory_entries WHERE type = 'cache' ${periodSql} ${querySql} ${statusSql} ${keySql}`,
     )) as [any[]];
 
     return { results, count: this.formatValue(countResult[0].total, true) };
@@ -136,7 +152,9 @@ class CacheWatcher extends BaseWatcher {
    * Group Data Methods
    * --------------------------------------------------------------------------
    */
-  protected async getIndexTableDataByGroupSQL(filters: CacheFilters): Promise<any> {
+  protected async getIndexTableDataByGroupSQL(
+    filters: CacheFilters,
+  ): Promise<any> {
     const { period, limit, offset, query, key } = filters;
     const periodSql = period ? this.getPeriodSQL(period) : "";
     const querySql = query ? this.getInclusionSQL(query, "stats") : "";
@@ -171,11 +189,11 @@ class CacheWatcher extends BaseWatcher {
       WHERE type = 'cache' ${periodSql} ${querySql} ${keySql} AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.wasSet')) IS NULL
       GROUP BY JSON_UNQUOTE(JSON_EXTRACT(content, '$.key'))
       ORDER BY total DESC
-      LIMIT ${limit} OFFSET ${offset}`
+      LIMIT ${limit} OFFSET ${offset}`,
     )) as [any];
 
-     const [countResult] = (await this.storeConnection.query(
-      `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.key'))) as total FROM observatory_entries WHERE type = 'cache' ${periodSql} ${querySql} ${keySql} AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.wasSet')) IS NULL`
+    const [countResult] = (await this.storeConnection.query(
+      `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.key'))) as total FROM observatory_entries WHERE type = 'cache' ${periodSql} ${querySql} ${keySql} AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.wasSet')) IS NULL`,
     )) as [any[]];
 
     return { results, count: this.formatValue(countResult[0].total, true) };
@@ -185,7 +203,6 @@ class CacheWatcher extends BaseWatcher {
    * Graph Data Methods
    * --------------------------------------------------------------------------
    */
- 
 
   protected async getIndexGraphDataSQL(filters: CacheFilters): Promise<any> {
     const { period, key } = filters;
@@ -240,7 +257,7 @@ class CacheWatcher extends BaseWatcher {
         FROM observatory_entries
         WHERE type = 'cache' ${periodSql} ${keySql}
         ORDER BY created_at DESC
-      );`
+      );`,
     )) as [any[], any];
 
     const aggregateResults: {
@@ -255,7 +272,10 @@ class CacheWatcher extends BaseWatcher {
     } = results.shift();
 
     const countFormattedData = this.countGraphData(results, period as string);
-    const durationFormattedData = this.durationGraphData(results, period as string);
+    const durationFormattedData = this.durationGraphData(
+      results,
+      period as string,
+    );
 
     return {
       countFormattedData,
@@ -285,7 +305,7 @@ class CacheWatcher extends BaseWatcher {
       misses: 0,
       hits: 0,
       writes: 0,
-      label: this.getLabel(index, period)
+      label: this.getLabel(index, period),
     }));
 
     data.forEach((cache: any) => {
@@ -294,7 +314,7 @@ class CacheWatcher extends BaseWatcher {
       const misses = cache.content.misses ? 1 : 0;
       const writes = cache.content.writes ? 1 : 0;
       const intervalIndex = Math.floor(
-        (cacheTime - startDate) / (intervalDuration * 60 * 1000)
+        (cacheTime - startDate) / (intervalDuration * 60 * 1000),
       );
 
       if (intervalIndex >= 0 && intervalIndex < 120) {

@@ -3,6 +3,7 @@
 A comprehensive observability and monitoring solution for Node.js applications that automatically tracks server, database, API, and infrastructure performance without requiring code changes.
 
 ## 📋 Table of Contents
+
 - [Features](#features)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
@@ -16,6 +17,7 @@ A comprehensive observability and monitoring solution for Node.js applications t
 ## ✨ Features
 
 ### Real-time Monitoring & Observability
+
 - 🌐 **HTTP Request Tracking**: Automatically captures request metrics including latency, status codes, payloads, and headers
 - 📊 **Database Observability**: Monitors queries across multiple database drivers with timing and performance metrics
 - ⏱️ **Job & Task Monitoring**: Tracks background jobs, cron tasks, and scheduled operations
@@ -28,6 +30,7 @@ A comprehensive observability and monitoring solution for Node.js applications t
 - 📦 **Model Operations**: Monitors ORM and database model interactions
 
 ### Automatic Instrumentation
+
 NodeJS Observatory uses monkey patching to automatically instrument your application without requiring code changes. It intercepts and enhances the functionality of popular Node.js libraries and frameworks.
 
 ## 🚀 Installation
@@ -39,20 +42,21 @@ yarn add nodejs-observatory
 ```
 
 ## 🎯 Quick Start
+
 ```typescript
-import { setupObservatory } from 'nodejs-observatory';
-import express from 'express';
+import { setupObservatory } from "nodejs-observatory";
+import express from "express";
 const app = express();
 
 // Initialize observatory with basic configuration
 setupObservatory({
-  framework: 'express',
+  framework: "express",
   errors: true,
   packages: {
-    database: ['mysql2'],
-    logging: ['winston'],
-    cache: ['redis']
-  }
+    database: ["mysql2"],
+    logging: ["winston"],
+    cache: ["redis"],
+  },
 });
 ```
 
@@ -61,6 +65,7 @@ setupObservatory({
 ### Supported Integrations
 
 #### Database Drivers
+
 - ✅ MySQL / MySQL2
 - ✅ PostgreSQL
 - ✅ MongoDB / Mongoose
@@ -71,6 +76,7 @@ setupObservatory({
 - ✅ SQLite3
 
 #### Logging
+
 - ✅ Winston
 - ✅ Pino
 - ✅ Bunyan
@@ -80,6 +86,7 @@ setupObservatory({
 - ✅ Roarr
 
 #### Job/Scheduler Processing
+
 - ✅ Bull
 - ✅ Agenda
 - ✅ Bree
@@ -87,6 +94,7 @@ setupObservatory({
 - ✅ Node-Cron
 
 #### Caching
+
 - ✅ Redis
 - ✅ IORedis
 - ✅ Node-Cache
@@ -96,6 +104,7 @@ setupObservatory({
 - ✅ Keyv
 
 #### HTTP Clients
+
 - ✅ Axios
 - ✅ Got
 - ✅ Superagent
@@ -104,10 +113,12 @@ setupObservatory({
 - ✅ Node-HTTP(S)
 
 #### Messaging/Notifications
+
 - ✅ Pusher
 - ✅ Ably
 
 #### Email Services
+
 - ✅ Nodemailer
 - ✅ SendGrid
 - ✅ Mailgun

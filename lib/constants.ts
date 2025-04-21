@@ -81,16 +81,16 @@ export const nodeCacheCommandsArgs: { [key: string]: string[] } = Object.freeze(
     get: ["key"],
     // mget: ["key"],
     has: ["key"],
-    
+
     // Write operations
     set: ["key", "value"],
     // mset: ["key"],
     del: ["key"],
     take: ["key"],
-    
+
     // Special operations that still fit our paradigm
     // flushAll: [],
-  }
+  },
 );
 
 /**
@@ -133,13 +133,11 @@ export const ioRedisCommandsArgs: { [key: string]: string[] } = Object.freeze({
   // zincrby: ["key", "increment", "member"],
 });
 
-
 export const levelDBCommandsArgs: { [key: string]: string[] } = Object.freeze({
   get: ["key"],
   put: ["key", "value"],
   del: ["key"],
 });
-
 
 /**
  * A mapping of LRU Cache methods to their argument names.

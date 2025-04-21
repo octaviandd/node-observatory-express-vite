@@ -2,7 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
-import { CacheInstanceResponse, HttpClientInstanceResponse, JobInstanceResponse, LogInstanceResponse, MailInstanceResponse, NotificationInstanceResponse, QueryInstanceResponse, RequestInstanceResponse } from "../../../types";
+import {
+  CacheInstanceResponse,
+  HttpClientInstanceResponse,
+  JobInstanceResponse,
+  LogInstanceResponse,
+  MailInstanceResponse,
+  NotificationInstanceResponse,
+  QueryInstanceResponse,
+  RequestInstanceResponse,
+} from "../../../types";
 
 type DataState = {
   request: RequestInstanceResponse | null;
@@ -51,5 +60,5 @@ export const usePreviewData = () => {
     });
   };
 
-  return data
+  return data;
 };

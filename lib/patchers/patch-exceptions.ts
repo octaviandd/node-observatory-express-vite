@@ -7,7 +7,9 @@ import { inspect } from "util";
 import { getCallerInfo } from "../utils";
 
 // Create a global symbol to track if exceptions have been patched
-const EXCEPTIONS_PATCHED_SYMBOL = Symbol.for('node-observer:exceptions-patched');
+const EXCEPTIONS_PATCHED_SYMBOL = Symbol.for(
+  "node-observer:exceptions-patched",
+);
 
 /**
  * Extract detailed error information, including formatted code context
@@ -77,7 +79,7 @@ function uncaughtPatcher() {
     if (watchers.errors) {
       watchers?.errors.addContent({
         type: "uncaughtException",
-        ...details
+        ...details,
       });
     }
   });
@@ -87,12 +89,12 @@ function uncaughtPatcher() {
  * Monkey patch for unhandled rejections to record errors
  */
 function unhandledRejectionPatcher() {
-  process.on("unhandledRejection", (reason) => {  
+  process.on("unhandledRejection", (reason) => {
     const details = extractErrorDetails(reason);
     if (watchers?.errors) {
       watchers?.errors.addContent({
         type: "unhandledRejection",
-        ...details
+        ...details,
       });
     }
   });
@@ -107,6 +109,5 @@ if (process.env.NODE_OBSERVATORY_ERRORS) {
     // Apply all patchers
     uncaughtPatcher();
     unhandledRejectionPatcher();
-
   }
 }

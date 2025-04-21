@@ -11,22 +11,34 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RequestPreviewTabs } from "./tabs";
-import { CacheInstanceResponse, ExceptionInstanceResponse, HttpClientInstanceResponse, JobInstanceResponse, LogInstanceResponse, MailInstanceResponse, ModelInstanceResponse, NotificationInstanceResponse, QueryInstanceResponse, RequestInstanceResponse, ViewInstanceResponse } from "../../../../../types";
+import {
+  CacheInstanceResponse,
+  ExceptionInstanceResponse,
+  HttpClientInstanceResponse,
+  JobInstanceResponse,
+  LogInstanceResponse,
+  MailInstanceResponse,
+  ModelInstanceResponse,
+  NotificationInstanceResponse,
+  QueryInstanceResponse,
+  RequestInstanceResponse,
+  ViewInstanceResponse,
+} from "../../../../../types";
 
 export default function RequestPreview() {
   const params = useParams();
   const [data, setData] = useState<{
-    request: RequestInstanceResponse | null
-    notifications: NotificationInstanceResponse[] | [],
-    mails: MailInstanceResponse[] | [],
-    logs: LogInstanceResponse[] | [],
-    queries: QueryInstanceResponse[] | [],
-    https: HttpClientInstanceResponse[] | [],
-    jobs: JobInstanceResponse[] | [],
-    caches: CacheInstanceResponse[] | [],
-    exceptions: ExceptionInstanceResponse[] | [],
-    views: ViewInstanceResponse[] | [],
-    models: ModelInstanceResponse[] | [],
+    request: RequestInstanceResponse | null;
+    notifications: NotificationInstanceResponse[] | [];
+    mails: MailInstanceResponse[] | [];
+    logs: LogInstanceResponse[] | [];
+    queries: QueryInstanceResponse[] | [];
+    https: HttpClientInstanceResponse[] | [];
+    jobs: JobInstanceResponse[] | [];
+    caches: CacheInstanceResponse[] | [];
+    exceptions: ExceptionInstanceResponse[] | [];
+    views: ViewInstanceResponse[] | [];
+    models: ModelInstanceResponse[] | [];
   }>({
     request: null,
     notifications: [],
@@ -51,15 +63,29 @@ export default function RequestPreview() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/observatory-api/data/requests/${params.id}`);
+      const response = await fetch(
+        `/observatory-api/data/requests/${params.id}`,
+      );
       if (!response.ok) {
-        throw new Error('Failed to fetch request data');
+        throw new Error("Failed to fetch request data");
       }
       const result = await response.json();
-      const { request, query, http, job, cache, notification, mail, log, exception, view, model } = result;
+      const {
+        request,
+        query,
+        http,
+        job,
+        cache,
+        notification,
+        mail,
+        log,
+        exception,
+        view,
+        model,
+      } = result;
 
       if (!request?.[0]) {
-        throw new Error('Request data not found');
+        throw new Error("Request data not found");
       }
 
       setData({
@@ -76,8 +102,8 @@ export default function RequestPreview() {
         models: model ?? [],
       });
     } catch (error) {
-      console.error('Error fetching request data:', error);
-      setError(error instanceof Error ? error.message : 'An error occurred');
+      console.error("Error fetching request data:", error);
+      setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -108,7 +134,6 @@ export default function RequestPreview() {
   return (
     <div className="flex flex-col gap-y-6">
       {data.request && <RequestCrumbs request={data.request} />}
-      
 
       <Card>
         <CardContent className="grid grid-cols-2 gap-x-10 p-5">
@@ -131,7 +156,9 @@ export default function RequestPreview() {
         </CardContent>
       </Card>
 
-      {data.request && <RequestPreviewTabs data={{...data, request: data.request}} />}
+      {data.request && (
+        <RequestPreviewTabs data={{ ...data, request: data.request }} />
+      )}
     </div>
   );
 }

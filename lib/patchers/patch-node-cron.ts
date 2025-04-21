@@ -6,11 +6,14 @@ import { watchers } from "../logger";
 import { v4 as uuidv4 } from "uuid";
 import { getCallerInfo } from "../utils";
 
-const NODECRON_PATCHED_SYMBOL = Symbol.for('node-observer:nodecron-patched');
+const NODECRON_PATCHED_SYMBOL = Symbol.for("node-observer:nodecron-patched");
 
 const METHODS = ["schedule", "validate", "getTasks"];
 
-if (process.env.NODE_OBSERVATORY_SCHEDULER && JSON.parse(process.env.NODE_OBSERVATORY_SCHEDULER).includes("node-cron")) {
+if (
+  process.env.NODE_OBSERVATORY_SCHEDULER &&
+  JSON.parse(process.env.NODE_OBSERVATORY_SCHEDULER).includes("node-cron")
+) {
   if (!(global as any)[NODECRON_PATCHED_SYMBOL]) {
     (global as any)[NODECRON_PATCHED_SYMBOL] = true;
 
@@ -23,7 +26,7 @@ if (process.env.NODE_OBSERVATORY_SCHEDULER && JSON.parse(process.env.NODE_OBSERV
             this: any,
             cronExpression: string,
             task: Function,
-            options?: any
+            options?: any,
           ) {
             const scheduleId = uuidv4();
             const callerInfo = getCallerInfo(__filename);
@@ -95,14 +98,14 @@ if (process.env.NODE_OBSERVATORY_SCHEDULER && JSON.parse(process.env.NODE_OBSERV
               this,
               cronExpression,
               wrappedTask,
-              options
+              options,
             );
-          
+
             // Patch the stop method on the returned scheduled task
-            if (scheduledTask && typeof scheduledTask.stop === 'function') {
+            if (scheduledTask && typeof scheduledTask.stop === "function") {
               shimmer.wrap(
                 scheduledTask,
-                'stop',
+                "stop",
                 function (originalStop: Function) {
                   return function patchedStop(this: any, ...args: any[]) {
                     const callerInfo = getCallerInfo(__filename);
@@ -116,17 +119,17 @@ if (process.env.NODE_OBSERVATORY_SCHEDULER && JSON.parse(process.env.NODE_OBSERV
                       file: callerInfo.file,
                       line: callerInfo.line,
                     });
-                  
+
                     // Call the original stop method
                     return originalStop.apply(this, args);
                   };
-                }
+                },
               );
             }
-          
+
             return scheduledTask;
           };
-        }
+        },
       );
 
       // Patch the `validate` and `getTasks` methods for logging

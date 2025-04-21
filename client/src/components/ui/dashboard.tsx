@@ -5,7 +5,13 @@ import { CountGraph } from "../ui/graphs/count-graph";
 import { DurationGraph } from "../ui/graphs/duration-graph";
 import { Link } from "react-router";
 import { useIndexData } from "@/hooks/useIndexData";
-import { Card, CardContent, CardHeader, CardSubtitle, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardSubtitle,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,28 +27,40 @@ import { formatDuration, formatCount } from "@/utils";
 import { QueryGroupResponse, RequestGroupResponse } from "../../../../types";
 
 export default function Dashboard() {
-  const { data: requests, currentDate, period } = useIndexData({ type: "requests" });
+  const {
+    data: requests,
+    currentDate,
+    period,
+  } = useIndexData({ type: "requests" });
   const { data: exceptions } = useIndexData({ type: "exceptions" });
   const { data: jobs } = useIndexData({ type: "jobs" });
   const { state } = useContext(StoreContext);
-  const [groupedRequests, setGroupedRequests] = useState<RequestGroupResponse[]>([]);
-  const [groupedQueries, setGroupedQueries] = useState<QueryGroupResponse[]>([]);
+  const [groupedRequests, setGroupedRequests] = useState<
+    RequestGroupResponse[]
+  >([]);
+  const [groupedQueries, setGroupedQueries] = useState<QueryGroupResponse[]>(
+    [],
+  );
 
   useEffect(() => {
-    fetch(`/observatory-api/data/requests?table=true&offset=0&index=group&period=${state.period}`)
-      .then(res => res.json())
-      .then(data => {
+    fetch(
+      `/observatory-api/data/requests?table=true&offset=0&index=group&period=${state.period}`,
+    )
+      .then((res) => res.json())
+      .then((data) => {
         setGroupedRequests(data.results);
-      })
-  }, [state.period])
+      });
+  }, [state.period]);
 
   useEffect(() => {
-    fetch(`/observatory-api/data/queries?table=true&offset=0&index=group&period=${state.period}`)
-      .then(res => res.json())
-      .then(data => {
+    fetch(
+      `/observatory-api/data/queries?table=true&offset=0&index=group&period=${state.period}`,
+    )
+      .then((res) => res.json())
+      .then((data) => {
         setGroupedQueries(data.results);
-      })
-  }, [state.period])
+      });
+  }, [state.period]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -67,9 +85,7 @@ export default function Dashboard() {
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     REQUESTS
                   </CardTitle>
-                  <CardSubtitle>
-                    {requests.count}
-                  </CardSubtitle>
+                  <CardSubtitle>{requests.count}</CardSubtitle>
                 </div>
                 <div className="flex gap-4 text-xs">
                   <div className="flex flex-col items-center">
@@ -180,7 +196,8 @@ export default function Dashboard() {
                         ? "30 days"
                         : state.period === "24h"
                           ? "24 hours"
-                          : "1 hour"}.
+                          : "1 hour"}
+                  .
                 </CardSubtitle>
               </CardHeader>
               <CardContent>
@@ -196,19 +213,22 @@ export default function Dashboard() {
                       {
                         dataKey: "uncaughtException",
                         stackId: "b",
-                        fill : "#ffc658",
+                        fill: "#ffc658",
                       },
                     ]}
                     period={period}
-                    currentDate={currentDate}   
+                    currentDate={currentDate}
                   />
                 </div>
 
                 {exceptions.count > 0 && (
                   <Button variant="outline" asChild className="w-full mt-4">
-                    <Link to="/exceptions" className="flex items-center justify-center gap-2">
+                    <Link
+                      to="/exceptions"
+                      className="flex items-center justify-center gap-2"
+                    >
                       View Details
-                    <ArrowRightCircle className="h-4 w-4" />
+                      <ArrowRightCircle className="h-4 w-4" />
                     </Link>
                   </Button>
                 )}
@@ -225,13 +245,18 @@ export default function Dashboard() {
                     </CardTitle>
                   </div>
                   <CardSubtitle>
-                    {formatCount(groupedRequests.filter(request => request.average > 1000).length)} routes are slower than 1000ms.
+                    {formatCount(
+                      groupedRequests.filter(
+                        (request) => request.average > 1000,
+                      ).length,
+                    )}{" "}
+                    routes are slower than 1000ms.
                   </CardSubtitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
                     {groupedRequests
-                      .filter(request => request.average > 1000)
+                      .filter((request) => request.average > 1000)
                       .slice(0, 3)
                       .map((request, index) => (
                         <div
@@ -249,11 +274,15 @@ export default function Dashboard() {
                         </div>
                       ))}
                   </div>
-                  {groupedRequests.filter(request => request.average > 1000).length > 1 && (
+                  {groupedRequests.filter((request) => request.average > 1000)
+                    .length > 1 && (
                     <Button variant="outline" asChild className="w-full mt-4">
-                      <Link to="/requests" className="flex items-center justify-center gap-2">
+                      <Link
+                        to="/requests"
+                        className="flex items-center justify-center gap-2"
+                      >
                         View Details
-                      <ArrowRightCircle className="h-4 w-4" />
+                        <ArrowRightCircle className="h-4 w-4" />
                       </Link>
                     </Button>
                   )}
@@ -269,13 +298,16 @@ export default function Dashboard() {
                     </CardTitle>
                   </div>
                   <CardSubtitle>
-                    {formatCount(groupedQueries.filter(query => query.p95 > 1000).length)} endpoints are slower than 1000ms.
+                    {formatCount(
+                      groupedQueries.filter((query) => query.p95 > 1000).length,
+                    )}{" "}
+                    endpoints are slower than 1000ms.
                   </CardSubtitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
                     {groupedQueries
-                      .filter(query => query.p95 > 1000)
+                      .filter((query) => query.p95 > 1000)
                       .slice(0, 3)
                       .map((query, index) => (
                         <div
@@ -294,11 +326,15 @@ export default function Dashboard() {
                       ))}
                   </div>
 
-                  {groupedQueries.filter(query => query.p95 > 1000).length > 1 && (
+                  {groupedQueries.filter((query) => query.p95 > 1000).length >
+                    1 && (
                     <Button variant="outline" asChild className="w-full mt-4">
-                      <Link to="/queries" className="flex items-center justify-center gap-2">
+                      <Link
+                        to="/queries"
+                        className="flex items-center justify-center gap-2"
+                      >
                         View Details
-                      <ArrowRightCircle className="h-4 w-4" />
+                        <ArrowRightCircle className="h-4 w-4" />
                       </Link>
                     </Button>
                   )}
@@ -311,9 +347,7 @@ export default function Dashboard() {
                 <div className="flex text-xs">
                   <div className="flex items-center gap-2 w-full">
                     <span className="text-muted-foreground">JOB ATTEMPTS</span>
-                    <span className="font-medium">
-                      {jobs.count}
-                    </span>
+                    <span className="font-medium">{jobs.count}</span>
                   </div>
                 </div>
                 <div className="flex text-xs gap-x-2">
@@ -336,7 +370,6 @@ export default function Dashboard() {
                     </span>
                   </div>
                 </div>
-
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="h-auto">
@@ -353,7 +386,9 @@ export default function Dashboard() {
                 </div>
 
                 <div>
-                  <p className="text-sm text-muted-foreground mb-2">JOBS DURATION</p>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    JOBS DURATION
+                  </p>
                   <CardSubtitle>
                     {jobs.shortest} – {jobs.longest}
                   </CardSubtitle>
@@ -364,11 +399,13 @@ export default function Dashboard() {
                       currentDate={currentDate}
                     />
                   </div>
-                  
                 </div>
 
                 <Button variant="outline" asChild className="w-full">
-                  <Link to="/jobs" className="flex items-center justify-center gap-2">
+                  <Link
+                    to="/jobs"
+                    className="flex items-center justify-center gap-2"
+                  >
                     View Details
                     <ArrowRightCircle className="h-4 w-4" />
                   </Link>

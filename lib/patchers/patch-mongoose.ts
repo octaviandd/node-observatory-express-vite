@@ -6,9 +6,12 @@ import { watchers } from "../logger";
 import { getCallerInfo } from "../utils";
 
 // Create a global symbol to track if mongoose has been patched
-const MONGOOSE_PATCHED_SYMBOL = Symbol.for('node-observer:mongoose-patched');
+const MONGOOSE_PATCHED_SYMBOL = Symbol.for("node-observer:mongoose-patched");
 
-if (process.env.NODE_OBSERVATORY_MODELS && JSON.parse(process.env.NODE_OBSERVATORY_MODELS).includes("mongoose")) {
+if (
+  process.env.NODE_OBSERVATORY_MODELS &&
+  JSON.parse(process.env.NODE_OBSERVATORY_MODELS).includes("mongoose")
+) {
   // Check if mongoose has already been patched
   if (!(global as any)[MONGOOSE_PATCHED_SYMBOL]) {
     // Mark mongoose as patched
@@ -25,65 +28,78 @@ if (process.env.NODE_OBSERVATORY_MODELS && JSON.parse(process.env.NODE_OBSERVATO
 
       // Patch static methods at the Model constructor level
       const staticMethodsToPatch = [
-        "create", "findOne", "find", "findById", "countDocuments",
-        "updateOne", "updateMany", "deleteOne", "deleteMany", "aggregate", "findOneAndUpdate", "findOneAndDelete"
+        "create",
+        "findOne",
+        "find",
+        "findById",
+        "countDocuments",
+        "updateOne",
+        "updateMany",
+        "deleteOne",
+        "deleteMany",
+        "aggregate",
+        "findOneAndUpdate",
+        "findOneAndDelete",
       ];
 
-      shimmer.wrap(exports.Model.prototype, "save", function(originalSave) {
+      shimmer.wrap(exports.Model.prototype, "save", function (originalSave) {
         return async function patchedSave(this: any, ...args: any[]) {
           const startTime = performance.now();
 
-            try {
-              const result = await originalSave.apply(this, args);
+          try {
+            const result = await originalSave.apply(this, args);
 
-              const endTime = performance.now();
-              logModelOperation(
-                'create',
-                result.__proto__.$collection.modelName,
-                args,
-                result.toObject(),
-                parseFloat((endTime - startTime).toFixed(2)),
-                undefined
-              );
-              return result;
-            } catch (error: any) {
-              // Do not log the error for the model, it should be logged as an exception since the model doesn't exist yet. 
-              throw error;
-            }
+            const endTime = performance.now();
+            logModelOperation(
+              "create",
+              result.__proto__.$collection.modelName,
+              args,
+              result.toObject(),
+              parseFloat((endTime - startTime).toFixed(2)),
+              undefined,
+            );
+            return result;
+          } catch (error: any) {
+            // Do not log the error for the model, it should be logged as an exception since the model doesn't exist yet.
+            throw error;
+          }
         };
       });
 
-      staticMethodsToPatch.forEach(method => {
-        if (typeof exports.Model[method] === "function" && !exports.Model[method].__patched) {
-          shimmer.wrap(exports.Model, method, function(originalMethod) {
+      staticMethodsToPatch.forEach((method) => {
+        if (
+          typeof exports.Model[method] === "function" &&
+          !exports.Model[method].__patched
+        ) {
+          shimmer.wrap(exports.Model, method, function (originalMethod) {
             async function patchedMethod(this: any, ...args: any[]) {
               const startTime = performance.now();
-              
+
               try {
                 const result = await originalMethod.apply(this, args);
                 const endTime = performance.now();
                 logModelOperation(
                   method,
-                  this.modelName || 'Unknown',
+                  this.modelName || "Unknown",
                   args,
                   result.toJSON ? result.toJSON() : result,
                   parseFloat((endTime - startTime).toFixed(2)),
-                  undefined
+                  undefined,
                 );
                 return result;
               } catch (error: any) {
                 const endTime = performance.now();
                 logModelOperation(
                   method,
-                  this.modelName || 'Unknown',
+                  this.modelName || "Unknown",
                   args,
                   undefined,
                   parseFloat((endTime - startTime).toFixed(2)),
-                  error
+                  error,
                 );
                 throw error;
               }
-            };
+            }
 
             patchedMethod.__patched = true;
             return patchedMethod;
@@ -124,7 +140,7 @@ if (process.env.NODE_OBSERVATORY_MODELS && JSON.parse(process.env.NODE_OBSERVATO
       file: callerInfo.file,
       line: callerInfo.line,
       error: error ? error.toString() : undefined,
-      status: error ? "failed" : "completed"
+      status: error ? "failed" : "completed",
     };
     watchers.model.addContent(modelLogEntry);
   }

@@ -5,7 +5,7 @@ import shimmer from "shimmer";
 import { watchers } from "../logger";
 import { getCallerInfo } from "../utils";
 
-const PG_PATCHED_SYMBOL = Symbol.for('node-observer:pg-patched');
+const PG_PATCHED_SYMBOL = Symbol.for("node-observer:pg-patched");
 
 /**
  * Determines if a query or execute command should be logged.
@@ -15,7 +15,10 @@ function shouldLogQuery(sql: string): boolean {
   return !!sql && !sql.toLowerCase().includes("observatory_entries");
 }
 
-if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERVATORY_DATABASES).includes("pg")) {
+if (
+  process.env.NODE_OBSERVATORY_DATABASES &&
+  JSON.parse(process.env.NODE_OBSERVATORY_DATABASES).includes("pg")
+) {
   if (!(global as any)[PG_PATCHED_SYMBOL]) {
     (global as any)[PG_PATCHED_SYMBOL] = true;
 
@@ -26,7 +29,12 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
 
       // Patch the `query` method on the Client class
       shimmer.wrap(exports.Client.prototype, "query", function (originalQuery) {
-        return function patchedQuery(this: any, config: any, values: any[], callback: any) {
+        return function patchedQuery(
+          this: any,
+          config: any,
+          values: any[],
+          callback: any,
+        ) {
           if (!shouldLogQuery(config)) {
             return originalQuery.call(this, config, values, callback);
           }
@@ -44,13 +52,7 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
 
           const wrappedCallback = function (err: Error | null, result: any) {
             const endTime = performance.now();
-            logQuery(
-              queryText,
-              queryValues,
-              result,
-              endTime - startTime,
-              err,
-            );
+            logQuery(queryText, queryValues, result, endTime - startTime, err);
             if (callback) {
               callback(err, result);
             }
@@ -63,7 +65,12 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
       // Patch the `query` method on the Pool class
       if (typeof exports.Pool === "function") {
         shimmer.wrap(exports.Pool.prototype, "query", function (originalQuery) {
-          return function patchedQuery(this: any, config: any, values: any[], callback: any) {
+          return function patchedQuery(
+            this: any,
+            config: any,
+            values: any[],
+            callback: any,
+          ) {
             if (!shouldLogQuery(config)) {
               return originalQuery.call(this, config, values, callback);
             }
@@ -93,7 +100,12 @@ if (process.env.NODE_OBSERVATORY_DATABASES && JSON.parse(process.env.NODE_OBSERV
               }
             };
 
-            return originalQuery.call(this, config, queryValues, wrappedCallback);
+            return originalQuery.call(
+              this,
+              config,
+              queryValues,
+              wrappedCallback,
+            );
           };
         });
       }

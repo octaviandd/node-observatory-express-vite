@@ -5,9 +5,11 @@ import shimmer from "shimmer";
 import { watchers } from "../logger";
 import { getCallerInfo } from "../utils";
 
-
-if (process.env.NODE_OBSERVATORY_QUERIES && JSON.parse(process.env.NODE_OBSERVATORY_QUERIES).includes("mysql2")) {
-  const MYSQL2_PATCHED_SYMBOL = Symbol.for('node-observer:mysql2-patched');
+if (
+  process.env.NODE_OBSERVATORY_QUERIES &&
+  JSON.parse(process.env.NODE_OBSERVATORY_QUERIES).includes("mysql2")
+) {
+  const MYSQL2_PATCHED_SYMBOL = Symbol.for("node-observer:mysql2-patched");
 
   // Check if mysql2 has already been patched
   if (!(global as any)[MYSQL2_PATCHED_SYMBOL]) {
@@ -23,7 +25,10 @@ if (process.env.NODE_OBSERVATORY_QUERIES && JSON.parse(process.env.NODE_OBSERVAT
         exports,
         "createConnection",
         (originalCreateConnection: Function) => {
-          return async function patchedCreateConnection(this: any, ...args: any[]) {
+          return async function patchedCreateConnection(
+            this: any,
+            ...args: any[]
+          ) {
             const connectionPromise: Promise<any> =
               originalCreateConnection.apply(this, args);
             const connection = await connectionPromise;
@@ -31,7 +36,7 @@ if (process.env.NODE_OBSERVATORY_QUERIES && JSON.parse(process.env.NODE_OBSERVAT
             patchExecute(connection, "Connection");
             return connectionPromise;
           };
-        }
+        },
       );
 
       // Patch createPool
@@ -54,7 +59,11 @@ if (process.env.NODE_OBSERVATORY_QUERIES && JSON.parse(process.env.NODE_OBSERVAT
   function shouldLogQuery(sql: any): boolean {
     const stack = new Error().stack as string;
     const query = typeof sql === "string" ? sql : sql.sql;
-    return !!query && !query.toLowerCase().includes("observatory_entries") && !stack.toLowerCase().includes("basewatcher");
+    return (
+      !!query &&
+      !query.toLowerCase().includes("observatory_entries") &&
+      !stack.toLowerCase().includes("basewatcher")
+    );
   }
 
   /**
@@ -67,7 +76,7 @@ if (process.env.NODE_OBSERVATORY_QUERIES && JSON.parse(process.env.NODE_OBSERVAT
       return async function patchedQuery(
         this: any,
         sqlOrOptions: any,
-        values?: any
+        values?: any,
       ) {
         const sql =
           typeof sqlOrOptions === "string" ? sqlOrOptions : sqlOrOptions.sql;
@@ -78,14 +87,7 @@ if (process.env.NODE_OBSERVATORY_QUERIES && JSON.parse(process.env.NODE_OBSERVAT
             const result = await originalQuery.call(this, sqlOrOptions, values);
             const endTime = performance.now();
             const duration = parseFloat((endTime - startTime).toFixed(2));
-            logQuery(
-              contextName,
-              sql,
-              this,
-              duration,
-              undefined,
-              values
-            );
+            logQuery(contextName, sql, this, duration, undefined, values);
             return result;
           } catch (error: any) {
             const endTime = performance.now();
@@ -110,7 +112,7 @@ if (process.env.NODE_OBSERVATORY_QUERIES && JSON.parse(process.env.NODE_OBSERVAT
       return async function patchedExecute(
         this: any,
         sqlOrOptions: any,
-        values?: any
+        values?: any,
       ) {
         const sql =
           typeof sqlOrOptions === "string" ? sqlOrOptions : sqlOrOptions.sql;
@@ -118,7 +120,11 @@ if (process.env.NODE_OBSERVATORY_QUERIES && JSON.parse(process.env.NODE_OBSERVAT
         if (shouldLogQuery(sql)) {
           const startTime = performance.now();
           try {
-            const result = await originalExecute.call(this, sqlOrOptions, values);
+            const result = await originalExecute.call(
+              this,
+              sqlOrOptions,
+              values,
+            );
             const endTime = performance.now();
             const duration = parseFloat((endTime - startTime).toFixed(2));
             logQuery(contextName, sql, this, duration, undefined, values);
@@ -151,7 +157,7 @@ if (process.env.NODE_OBSERVATORY_QUERIES && JSON.parse(process.env.NODE_OBSERVAT
     connection: any,
     duration: number,
     error?: Error,
-    values?: any
+    values?: any,
   ) {
     const callerInfo = getCallerInfo(__filename);
 
@@ -159,17 +165,29 @@ if (process.env.NODE_OBSERVATORY_QUERIES && JSON.parse(process.env.NODE_OBSERVAT
       context,
       sql,
       duration,
-      hostname: connection.config?.host || connection.pool.config?.connectionConfig?.host || "unknown",
-      port: connection.config?.port || connection.pool.config?.connectionConfig?.port || "unknown",
-      database: connection.config?.database || connection.pool.config?.connectionConfig?.database || "unknown",
-      user: connection.config?.user || connection.pool.config?.connectionConfig?.user || "unknown",
+      hostname:
+        connection.config?.host ||
+        connection.pool.config?.connectionConfig?.host ||
+        "unknown",
+      port:
+        connection.config?.port ||
+        connection.pool.config?.connectionConfig?.port ||
+        "unknown",
+      database:
+        connection.config?.database ||
+        connection.pool.config?.connectionConfig?.database ||
+        "unknown",
+      user:
+        connection.config?.user ||
+        connection.pool.config?.connectionConfig?.user ||
+        "unknown",
       package: "mysql2",
       file: callerInfo.file,
       line: callerInfo.line,
       error: error ? error.toString() : undefined,
       status: error ? "failed" : "completed",
       sqlType: getSqlType(sql),
-      params: values
+      params: values,
     };
 
     watchers.query.addContent(logEntry);
@@ -191,6 +209,4 @@ if (process.env.NODE_OBSERVATORY_QUERIES && JSON.parse(process.env.NODE_OBSERVAT
         return "OTHER";
     }
   }
-
 }
-

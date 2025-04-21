@@ -3,7 +3,13 @@ import RequestIndexTable from "../table/index";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
 import { DurationGraph } from "@/components/ui/graphs/duration-graph";
 import { useIndexData } from "@/hooks/useIndexData";
-import { Card, CardContent, CardHeader, CardTitle, CardSubtitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardSubtitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 export default function RequestsIndex() {
@@ -20,9 +26,7 @@ export default function RequestsIndex() {
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 REQUESTS
               </CardTitle>
-              <CardSubtitle>
-                {data.count}
-              </CardSubtitle>
+              <CardSubtitle>{data.count}</CardSubtitle>
             </div>
             <div className="flex gap-4 text-xs">
               <div className="flex flex-col items-center">
@@ -50,7 +54,13 @@ export default function RequestsIndex() {
               <CountGraph
                 data={data.countFormattedData}
                 barData={[
-                  { dataKey: "200", stackId: "a", fill: document.documentElement.classList.contains("dark") ? "#242427" : "#f1f5f9" },
+                  {
+                    dataKey: "200",
+                    stackId: "a",
+                    fill: document.documentElement.classList.contains("dark")
+                      ? "#242427"
+                      : "#f1f5f9",
+                  },
                   { dataKey: "400", stackId: "b", fill: "#ffc658" },
                   { dataKey: "500", stackId: "c", fill: "#ef4444" },
                 ]}
@@ -84,7 +94,11 @@ export default function RequestsIndex() {
           </CardHeader>
           <CardContent>
             <div className="h-auto">
-              <DurationGraph data={data.durationFormattedData} period={period} currentDate={currentDate} />
+              <DurationGraph
+                data={data.durationFormattedData}
+                period={period}
+                currentDate={currentDate}
+              />
             </div>
           </CardContent>
         </Card>
