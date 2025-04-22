@@ -136,7 +136,7 @@ export default function RequestPreview() {
       {data.request && <RequestCrumbs request={data.request} />}
 
       <Card>
-        <CardContent className="grid grid-cols-2 gap-x-10 p-5">
+        <CardContent className="grid grid-cols-2 gap-x-10 p-1">
           {data.request && <RequestPreviewInfo request={data.request} />}
           <RequestPreviewDetails
             queries={data.queries}
