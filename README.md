@@ -1,6 +1,6 @@
-# 🔍 NodeJS Observatory
+# 🔍 Node Observatory
 
-A comprehensive observability and monitoring solution for Node.js applications that automatically tracks server, database, API, and infrastructure performance without requiring code changes.
+A comprehensive observability and monitoring solution for Node.js applications that automatically instruments your server, database, APIs, and infrastructure without requiring code changes.
 
 ## 📋 Table of Contents
 
@@ -16,6 +16,10 @@ A comprehensive observability and monitoring solution for Node.js applications t
 
 ## ✨ Features
 
+### Automatic Instrumentation
+
+Node Observatory uses monkey patching to automatically instrument your application without requiring code changes. It intercepts and enhances the functionality of popular Node.js libraries and frameworks through our patching system.
+
 ### Real-time Monitoring & Observability
 
 - 🌐 **HTTP Request Tracking**: Automatically captures request metrics including latency, status codes, payloads, and headers
@@ -29,34 +33,44 @@ A comprehensive observability and monitoring solution for Node.js applications t
 - 📧 **Mail Operations**: Tracks email sending across multiple mail providers
 - 📦 **Model Operations**: Monitors ORM and database model interactions
 
-### Automatic Instrumentation
-
-NodeJS Observatory uses monkey patching to automatically instrument your application without requiring code changes. It intercepts and enhances the functionality of popular Node.js libraries and frameworks.
-
 ## 🚀 Installation
 
 ```bash
-npm install nodejs-observatory
+npm install node-observatory
 # or
-yarn add nodejs-observatory
+yarn add node-observatory
 ```
 
 ## 🎯 Quick Start
 
 ```typescript
-import { setupObservatory } from "nodejs-observatory";
+import { setupLogger } from "node-observatory";
 import express from "express";
-const app = express();
+import mysql2 from "mysql2/promise";
+import { createClient } from "redis";
 
-// Initialize observatory with basic configuration
-setupObservatory({
-  framework: "express",
-  errors: true,
-  packages: {
-    database: ["mysql2"],
-    logging: ["winston"],
-    cache: ["redis"],
-  },
+const app = express();
+app.use(express.json());
+
+// Set up database and Redis connections
+const mysql2Connection = await mysql2.createConnection({
+  host: "host",
+  user: "user",
+  password: "password",
+  database: "database",
+  timezone: "UTC",
+});
+
+const redisConnection = createClient({
+  url: "redis://localhost:6379",
+});
+await redisConnection.connect();
+
+// Initialize observatory with your connections
+await setupLogger(app, "mysql2", mysql2Connection, redisConnection);
+
+app.listen(3000, () => {
+  console.log("Server is running on port 3000");
 });
 ```
 
@@ -64,8 +78,12 @@ setupObservatory({
 
 ### Supported Integrations
 
-#### Database Drivers
+Node Observatory automatically instruments the following libraries:
 
+#### Web Frameworks
+- ✅ Express
+
+#### Database Drivers
 - ✅ MySQL / MySQL2
 - ✅ PostgreSQL
 - ✅ MongoDB / Mongoose
@@ -76,17 +94,14 @@ setupObservatory({
 - ✅ SQLite3
 
 #### Logging
-
 - ✅ Winston
 - ✅ Pino
 - ✅ Bunyan
 - ✅ Log4js
 - ✅ Signale
 - ✅ Loglevel
-- ✅ Roarr
 
 #### Job/Scheduler Processing
-
 - ✅ Bull
 - ✅ Agenda
 - ✅ Bree
@@ -94,7 +109,6 @@ setupObservatory({
 - ✅ Node-Cron
 
 #### Caching
-
 - ✅ Redis
 - ✅ IORedis
 - ✅ Node-Cache
@@ -104,7 +118,6 @@ setupObservatory({
 - ✅ Keyv
 
 #### HTTP Clients
-
 - ✅ Axios
 - ✅ Got
 - ✅ Superagent
@@ -113,12 +126,10 @@ setupObservatory({
 - ✅ Node-HTTP(S)
 
 #### Messaging/Notifications
-
 - ✅ Pusher
 - ✅ Ably
 
 #### Email Services
-
 - ✅ Nodemailer
 - ✅ SendGrid
 - ✅ Mailgun
@@ -127,44 +138,50 @@ setupObservatory({
 
 ## 🔧 Advanced Usage
 
-NodeJS Observatory can be configured to track specific aspects of your application using environment variables:
+Node Observatory can be configured to track specific aspects of your application using environment variables:
 
-```
+```env
 NODE_OBSERVATORY_ERRORS=true
-NODE_OBSERVATORY_HTTP=true
-NODE_OBSERVATORY_JOBS=true
-NODE_OBSERVATORY_LOGGING=true
-NODE_OBSERVATORY_SCHEDULER=true
-NODE_OBSERVATORY_MAILER=true
-NODE_OBSERVATORY_CACHE=true
-NODE_OBSERVATORY_NOTIFICATIONS=true
-NODE_OBSERVATORY_QUERIES=true
-NODE_OBSERVATORY_VIEWS=true
-NODE_OBSERVATORY_MODELS=true
+NODE_OBSERVATORY_ERROR_TRACING=true
+NODE_OBSERVATORY_JOBS=["bull"]
+NODE_OBSERVATORY_MAILER=["nodemailer","@aws-sdk/client-ses","mailgun.js","postmark","sendgrid"]
+NODE_OBSERVATORY_CACHE=["node-cache","redis","ioredis","memjs","level","keyv"]
+NODE_OBSERVATORY_NOTIFICATIONS=["pusher","ably"]
+NODE_OBSERVATORY_QUERIES=["mysql2","typeorm","sequelize"]
+NODE_OBSERVATORY_MODELS=["typeorm","sequelize","mongoose"]
+NODE_OBSERVATORY_LOGGING=["winston","pino","bunyan","log4js","signale","loglevel"]
+NODE_OBSERVATORY_HTTP=["http","axios","fetch","got","superagent","undici","ky","needle","phin","node-fetch"]
+NODE_OBSERVATORY_SCHEDULER=["node-schedule","node-cron"]
+NODE_OBSERVATORY_VIEWS=["handlebars","pug","ejs"]
+NODE_OBSERVATORY_DATABASE=["mysql2"]
 ```
 
-## 🧪 Testing
+## 📊 Client Dashboard
 
-The package includes comprehensive tests for all supported integrations:
+The NodeJS Observatory includes a modern React dashboard built with:
 
-```bash
-# Run all tests
-npm run test:mocha
+- **React + TypeScript**: Type-safe component development
+- **Vite**: Lightning-fast frontend tooling
+- **Tailwind CSS**: Utility-first styling
+- **Shadcn/UI**: Beautiful, accessible UI components
 
-# Run specific component tests
-npm run test:exceptions
-npm run test:express
-npm run test:queries
-npm run test:jobs
-# etc.
+### Dashboard Features
 
-# Run load tests using k6
-npm run test-k6
-```
+- **Real-time data visualization**: Monitor your application performance in real-time
+- **Detailed inspection views**: Drill down into specific requests, queries, jobs, and more
+- **Timeline analysis**: View application activity over time with interactive charts
+- **Filter and search**: Quickly find specific events and patterns
+- **Performance metrics**: Track response times, error rates, and throughput
+- **Dark/Light mode**: Choose your preferred theme
 
-## 🤝 Contributing
+### Running the Dashboard
 
-Contributions are welcome! The codebase uses TypeScript and follows a modular architecture with separate patchers for each supported library.
+The dashboard is automatically served by the observatory when you initialize it with your application:
+http://your-app-host/observatory
+
+
+The API for retrieving observability data is available at:
+http://your-app-host/observatory-api/data
 
 ## 📄 License
 
