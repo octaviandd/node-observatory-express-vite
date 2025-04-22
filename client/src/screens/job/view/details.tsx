@@ -1,142 +1,129 @@
-/** @format */
-import React from "react";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import {
-  CacheInstanceResponse,
-  ExceptionInstanceResponse,
-  HttpClientInstanceResponse,
-  LogInstanceResponse,
-  MailInstanceResponse,
-  NotificationInstanceResponse,
-  QueryInstanceResponse,
-} from "../../../../../types";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { formatDuration, timeAgo } from "@/utils.js";
+import { JobInstanceResponse } from "../../../../../types";
 
-export const JobPreviewDetails = React.memo(
-  ({
-    queries,
-    caches,
-    https,
-    notifications,
-    mails,
-    logs,
-    exceptions,
-  }: {
-    queries: QueryInstanceResponse[];
-    caches: CacheInstanceResponse[];
-    https: HttpClientInstanceResponse[];
-    notifications: NotificationInstanceResponse[];
-    mails: MailInstanceResponse[];
-    logs: LogInstanceResponse[];
-    exceptions: ExceptionInstanceResponse[];
-  }) => {
-    const filterByType = <T extends { type: string }>(
-      data: T[],
-      type: string,
-    ): T[] => data.filter((item) => item.type === type);
+export default function Details({ job }: { job: JobInstanceResponse }) {
+  return (
+    <Card className="rounded-none shadow-xs">
+      <CardHeader>
+        <CardTitle>Job Details</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col gap-y-4">
+          <div className="grid items-center grid-cols-12">
+            <div className="col-span-3 text-sm text-muted-foreground">Time</div>
+            <div className="col-span-9 text-sm">
+              {new Date(job.created_at)
+                .toLocaleString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "numeric",
+                  second: "numeric",
+                  hour12: false,
+                })
+                .replace(",", "")}
+              <span className="text-xs text-muted-foreground ml-2">
+                ({timeAgo(job.created_at)})
+              </span>
+            </div>
+          </div>
 
-    const sumOf = <T extends object>(items: T[], pluck: (item: T) => number) =>
-      items.reduce((acc, item) => acc + pluck(item), 0);
+          <div className="grid items-center grid-cols-12">
+            <div className="col-span-3 text-sm text-muted-foreground">
+              Status
+            </div>
+            <div className="col-span-9">
+              <Badge
+                variant={
+                  job.content.status === "failed"
+                    ? "destructive"
+                    : "secondary"
+                }
+              >
+                {job.content.status.toUpperCase()}
+              </Badge>
+            </div>
+          </div>
 
-    const averageOf = <T extends object>(
-      items: T[],
-      pluck: (item: T) => number,
-    ) => (!items.length ? 0 : sumOf(items, pluck) / items.length);
+          {job.content.duration !== undefined && (
+            <div className="grid items-center grid-cols-12">
+              <div className="col-span-3 text-sm text-muted-foreground">
+                Duration
+              </div>
+              <div className="col-span-9 text-sm">
+                {formatDuration(job.content.duration)}
+              </div>
+            </div>
+          )}
 
-    const queryItems = filterByType(queries, "query");
-    const stats = {
-      queryCount: queryItems.length,
-      queryAverage: averageOf(queryItems, (item) => item.content.duration),
-      httpCount: filterByType(https, "http").length,
-      notificationCount: filterByType(notifications, "notification").length,
-      queryWrites: filterByType(queries, "write").length,
-      queryReads: filterByType(queries, "read").length,
-      cacheHits: sumOf(caches, (item) => (!item.content.hits ? 1 : 0)),
-      cacheMisses: sumOf(caches, (item) => (item.content.misses ? 1 : 0)),
-      mailCount: mails.length,
-      logCount: logs.length,
-      exceptionCount: exceptions.length,
-    };
+          {job.content.package && (
+            <div className="grid items-center grid-cols-12">
+              <div className="col-span-3 text-sm text-muted-foreground">
+                Package
+              </div>
+              <div className="col-span-9">
+                <Badge variant="secondary" className="capitalize">
+                  {job.content.package}
+                </Badge>
+              </div>
+            </div>
+          )}
 
-    return (
-      <Card className="border-0 shadow-none">
-        <CardHeader className="pb-5">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-medium">Meta-data</h3>
+          {job.content.queue && (
+            <div className="grid items-center grid-cols-12">
+              <div className="col-span-3 text-sm text-muted-foreground">
+                Queue
+              </div>
+              <div className="col-span-9 text-sm">{job.content.queue}</div>
+            </div>
+          )}
+
+          <div className="grid items-center grid-cols-12">
+            <div className="col-span-3 text-sm text-muted-foreground">
+              Attempts Made
+            </div>
+            <div className="col-span-9 text-sm">{job.content.attemptsMade}</div>
           </div>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground uppercase">
-              Queries
-            </span>
-            <span>
-              {stats.queryCount > 999
-                ? (stats.queryCount / 1000).toFixed(2) + "k"
-                : stats.queryCount}{" "}
-              /{" "}
-              {stats.queryCount
-                ? stats.queryAverage > 999
-                  ? (stats.queryAverage / 1000).toFixed(2) + "s"
-                  : stats.queryAverage.toFixed(2) + "ms"
-                : "0ms"}
-            </span>
-          </div>
-          <Separator />
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground uppercase">
-              Outgoing Requests
-            </span>
-            <span>{stats.httpCount}</span>
-          </div>
-          <Separator />
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground uppercase">
-              Notifications
-            </span>
-            <span>{stats.notificationCount}</span>
-          </div>
-          <Separator />
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground uppercase">
-              Storage
-            </span>
-            <span>
-              {stats.queryReads} reads / {stats.queryWrites} writes
-            </span>
-          </div>
-          <Separator />
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground uppercase">
-              Cache
-            </span>
-            <span>
-              {stats.cacheHits} Hits / {stats.cacheMisses} Misses
-            </span>
-          </div>
-          <Separator />
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground uppercase">
-              Mails
-            </span>
-            <span>{stats.mailCount}</span>
-          </div>
-          <Separator />
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground uppercase">
-              Logs
-            </span>
-            <span>{stats.logCount}</span>
-          </div>
-          <Separator />
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground uppercase">
-              Exceptions
-            </span>
-            <span>{stats.exceptionCount}</span>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  },
-);
+
+          {job.content.failedReason && (
+            <div className="grid items-center grid-cols-12">
+              <div className="col-span-3 text-sm text-muted-foreground">
+                Failed Reason
+              </div>
+              <div className="col-span-9 text-sm">{job.content.failedReason}</div>
+            </div>
+          )}
+
+          {job.content.method && (
+            <div className="grid items-center grid-cols-12">
+              <div className="col-span-3 text-sm text-muted-foreground">
+                Method
+              </div>
+              <div className="col-span-9 text-sm">{job.content.method}</div>
+            </div>
+          )}
+
+          {job.content.file && (
+            <div className="grid items-center grid-cols-12">
+              <div className="col-span-3 text-sm text-muted-foreground">
+                File
+              </div>
+              <div className="col-span-9 text-sm">{job.content.file}</div>
+            </div>
+          )}
+
+          {job.content.line && (
+            <div className="grid items-center grid-cols-12">
+              <div className="col-span-3 text-sm text-muted-foreground">
+                Line
+              </div>
+              <div className="col-span-9 text-sm">{job.content.line}</div>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

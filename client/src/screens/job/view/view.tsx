@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { JobPreviewCrumbs } from "./crumbs";
-import { JobPreviewDetails } from "./details";
-import { Card, CardContent } from "@/components/ui/card";
+import { JobMetadata } from "./metadata";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import ContentTabs from "./tabs";
@@ -21,6 +20,7 @@ import {
   ScheduleInstanceResponse,
   QueryInstanceResponse,
 } from "../../../../../types";
+import JobDetails from "./details";
 import Source from "./source";
 
 export default function JobPreview() {
@@ -139,29 +139,17 @@ export default function JobPreview() {
 
       {data.requests.length > 0 && <Source source={data.requests[0]} />}
 
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center gap-x-4">
-            <span className="text-sm text-muted-foreground uppercase">
-              Details
-            </span>
-            {job && <span>{job.content.duration}</span>}
-          </div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className="p-6">
-          <JobPreviewDetails
-            queries={data.queries}
-            caches={data.caches}
-            https={data.https}
-            notifications={data.notifications}
-            mails={data.mails}
-            logs={data.logs}
-            exceptions={data.exceptions}
-          />
-        </CardContent>
-      </Card>
+      <JobDetails job={job}></JobDetails>
+
+      <JobMetadata
+        queries={data.queries}
+        caches={data.caches}
+        https={data.https}
+        notifications={data.notifications}
+        mails={data.mails}
+        logs={data.logs}
+        exceptions={data.exceptions}
+      />
 
       <ContentTabs
         activeTab={activeTab}
