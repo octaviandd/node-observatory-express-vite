@@ -109,28 +109,29 @@ export default function SidePanel({
       exception,
     } = data;
 
-    setJobs(type === "jobs" && job ? job : []);
-    setMails(type === "mails" && mail ? mail : []);
-    setQueries(type === "queries" && query ? query : []);
-    setCache(type === "caches" && cache ? cache : []);
+    console.log(job)
+
+    setJobs(type === "jobs" && job ? job : job?.length > 0 ? job : []);
+    setMails(type === "mails" && mail ? mail : mail?.length > 0 ? mail : []);
+    setQueries(type === "queries" && query ? query : query?.length > 0 ? query : []);
+    setCache(type === "caches" && cache ? cache : cache?.length > 0 ? cache : []);
     setHttp(type === "https" && http ? (http[0] ? http[0] : http) : []);
     setNotifications(
-      type === "notifications" && notification ? notification : [],
+      type === "notifications" && notification ? notification : notification?.length > 0 ? notification : [],
     );
-    setLogs(type === "logs" && log ? log : []);
-    setRequest(type === "requests" && request ? request : []);
-    setModel(type === "models" && model ? model : []);
-    setExceptions(type === "exceptions" && exception ? exception : []);
+    setLogs(type === "logs" && log ? log : log?.length > 0 ? log : []);
+    setRequest(type === "requests" && request ? request : request?.length > 0 ? request : []);
+    setModel(type === "models" && model ? model : model?.length > 0 ? model : []);
+    setExceptions(type === "exceptions" && exception ? exception : exception?.length > 0 ? exception : []);
     setLoading(false);
   };
 
   const renderSection = <T extends object>(
     title: string,
-    count: number,
     items: T[],
     CardComponent: React.ComponentType<{ item: T }>,
   ) => {
-    if (count === 0) return null;
+    if (items.length === 0) return null;
     return (
       <>
         <div className="flex items-center gap-2 px-6 mb-3">
@@ -138,7 +139,7 @@ export default function SidePanel({
             {title}
           </span>
           <Badge variant="secondary" className="text-xs">
-            {count}
+            {items.length}
           </Badge>
         </div>
         <div className="flex flex-col gap-4 px-6">
@@ -207,26 +208,16 @@ export default function SidePanel({
                   No related data found
                 </div>
               )}
-            {renderSection("REQUESTS", request.length, request, RequestCard)}
-            {renderSection("LOGS", logs.length, logs, LogCard)}
-            {renderSection(
-              "NOTIFICATIONS",
-              notifications.length,
-              notifications,
-              NotificationCard,
-            )}
-            {renderSection("MAILS", mails.length, mails, MailCard)}
-            {renderSection("QUERIES", queries.length, queries, QueryCard)}
-            {renderSection("JOBS", jobs.length, jobs, JobCard)}
-            {renderSection("HTTP REQUESTS", http.length, http, HttpCard)}
-            {renderSection("CACHE ENTRIES", cache.length, cache, CacheCard)}
-            {renderSection("MODELS", model.length, model, ModelCard)}
-            {renderSection(
-              "EXCEPTIONS",
-              exceptions.length,
-              exceptions,
-              ExceptionCard,
-            )}
+            {renderSection("REQUESTS", request, RequestCard)}
+            {renderSection("LOGS", logs, LogCard)}
+            {renderSection("NOTIFICATIONS", notifications, NotificationCard)}
+            {renderSection("MAILS", mails, MailCard)}
+            {renderSection("QUERIES", queries, QueryCard)}
+            {renderSection("JOBS", jobs, JobCard)}
+            {renderSection("HTTP REQUESTS", http, HttpCard)}
+            {renderSection("CACHE ENTRIES", cache, CacheCard)}
+            {renderSection("MODELS", model, ModelCard)}
+            {renderSection("EXCEPTIONS", exceptions, ExceptionCard)}
           </ScrollArea>
         )}
       </SheetContent>

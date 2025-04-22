@@ -15,12 +15,12 @@ type Action = {
 
 // Create the initial state
 const initialState: State = {
-  period: window.localStorage.getItem("period") as
+  period: (window.localStorage.getItem("period") as
     | "1h"
     | "24h"
     | "7d"
     | "14d"
-    | "30d",
+    | "30d") ?? '1h'
 };
 
 // Create a reducer function
