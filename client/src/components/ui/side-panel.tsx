@@ -109,7 +109,6 @@ export default function SidePanel({
       exception,
     } = data;
 
-    console.log(job)
 
     setJobs(type === "jobs" && job ? job : job?.length > 0 ? job : []);
     setMails(type === "mails" && mail ? mail : mail?.length > 0 ? mail : []);
