@@ -86,11 +86,16 @@ export async function setupLogger(
   connection: Connection | PromiseConnection,
   redisClient: ReturnType<typeof createClient>,
 ): Promise<void> {
+  console.log('Init observatory')
   connection = connection.hasOwnProperty("Promise")
     ? connection
   // @ts-expect-error
     : connection.promise();
+  
+  console.log('Setup Migrations')
   await setupMigrations(driver, connection as PromiseConnection);
+
+  console.log('Setup watchers')
   const {
     queryWatcherInstance,
     logWatcherInstance,
@@ -129,6 +134,7 @@ export async function setupLogger(
   process.env.NODE_OBSERVATORY_MODELS &&
     (watchers.model = modelWatcherInstance);
 
+  console.log('Setup routes');
   app.use(
     "/observatory",
     createProxyMiddleware({

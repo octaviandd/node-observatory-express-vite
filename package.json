@@ -1,6 +1,6 @@
 {
   "name": "node-observatory",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "license": "proprietary",
   "private": false,
   "description": "A Nodejs application that provides live monitoring of your application",
@@ -11,14 +11,16 @@
     "dist",
     "client/dist",
     "LICENSE.txt",
-    "README.md"
+    "README.md",
+    "types.d.ts"
   ],
   "scripts": {
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json}\"",
     "lint": "eslint --fix .",
     "deps-check": "depcheck",
     "cleanup": "npm run format && npm run lint && npm run deps-check",
-    "build": "npm run clean && tsc && cd client && npm run build",
+    "build": "npm run clean && tsc && npm run build:types && cp types.d.ts dist/ && cd client && npm run build",
+    "build:types": "tsc --declaration --emitDeclarationOnly --outDir dist",
     "start": "node dist/lib/logger.js",
     "clean": "rm -rf dist && cd client && rm -rf dist",
     "dev": "npx ts-node-dev server.ts"

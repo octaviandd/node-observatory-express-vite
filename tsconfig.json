@@ -3,6 +3,9 @@
     "target": "es6",
     "module": "commonjs",
     "outDir": "dist",
+    "baseUrl": ".",
+    "declaration": true,
+    "declarationDir": "dist",
     "strict": true,
     "strictNullChecks": true,
     "esModuleInterop": true,
@@ -17,6 +20,6 @@
       "undici-types": ["./node_modules/undici-types/index.d.ts"]
     }
   },
-  "include": ["**/*.ts"], // Include all .ts files
-  "exclude": ["node_modules", "client", "tests/**/*.test.ts"] // Exclude the client directory and test files
+  "include": ["lib/**/*.ts", "server.ts", "types.d.ts"],
+  "exclude": ["dist", "node_modules", "client", "tests/**/*.test.ts"]
 }
