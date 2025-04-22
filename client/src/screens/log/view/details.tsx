@@ -3,11 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { timeAgo } from "@/utils.js";
 import { LogInstanceResponse } from "../../../../../types";
 
-export default function Details({
-  data,
-}: {
-  data: { log: LogInstanceResponse };
-}) {
+export default function Details({ log }: { log: LogInstanceResponse }) {
   const LOG_LEVELS = [
     { dataKey: "info", variant: "secondary" },
     { dataKey: "warn", variant: "warning" },
@@ -26,9 +22,9 @@ export default function Details({
       <CardContent>
         <div className="flex flex-col gap-y-4">
           <div className="grid items-center grid-cols-12">
-            <div className="col-span-3 text-muted-foreground">Time</div>
-            <div className="col-span-9">
-              {new Date(data.log.created_at).toLocaleString("en-US", {
+            <div className="col-span-3 text-sm text-muted-foreground">Time</div>
+            <div className="col-span-9 text-sm">
+              {new Date(log.created_at).toLocaleString("en-US", {
                 weekday: "long",
                 year: "numeric",
                 month: "long",
@@ -37,47 +33,92 @@ export default function Details({
                 minute: "numeric",
                 second: "numeric",
               })}{" "}
-              ({timeAgo(data.log.created_at)})
+              <span className="text-xs text-muted-foreground ml-2">
+                ({timeAgo(log.created_at)})
+              </span>
             </div>
           </div>
 
           <div className="grid items-center grid-cols-12">
-            <div className="col-span-3 text-muted-foreground">Level</div>
-            <div className="col-span-9">
+            <div className="col-span-3 text-sm text-muted-foreground">
+              Level
+            </div>
+            <div className="col-span-9 text-sm">
               <Badge
                 variant={
                   LOG_LEVELS.find(
-                    (level) => level.dataKey === data.log.content.level,
+                    (level) => level.dataKey === log.content.level,
                   )?.variant as
-                    | "secondary"
-                    | "warning"
-                    | "error"
-                    | "debug"
-                    | "trace"
-                    | "log"
-                    | "default"
-                    | "destructive"
-                    | "outline"
-                    | "success"
-                    | null
-                    | undefined
+                  | "secondary"
+                  | "warning"
+                  | "error"
+                  | "debug"
+                  | "trace"
+                  | "log"
+                  | "default"
+                  | "destructive"
+                  | "outline"
+                  | "success"
+                  | null
+                  | undefined
                 }
               >
-                {data.log.content.level.toUpperCase()}
+                {log.content.level.toUpperCase()}
               </Badge>
             </div>
           </div>
 
-          <div className="grid items-center grid-cols-12">
-            <div className="col-span-3 text-muted-foreground">Message</div>
-            <div className="col-span-9">{data.log.content.message}</div>
-          </div>
-          <div className="grid items-center grid-cols-12">
-            <div className="col-span-3 text-muted-foreground">File</div>
-            <div className="col-span-9">
-              {data.log.content.file}:{data.log.content.line}
+          {log.content.message && (
+            <div className="grid items-center grid-cols-12">
+              <div className="col-span-3 text-sm text-muted-foreground">
+                Message
+              </div>
+              <div className="col-span-9">
+                <Badge variant="secondary" className="capitalize">
+                  {typeof log.content.message === 'object' ? JSON.stringify(log.content.message) : log.content.message}
+                </Badge>
+              </div>
             </div>
-          </div>
+          )}
+
+          {log.content.package && (
+            <div className="grid items-center grid-cols-12">
+              <div className="col-span-3 text-sm text-muted-foreground">
+                Package
+              </div>
+              <div className="col-span-9">
+                <Badge variant="secondary" className="capitalize">
+                  {log.content.package}
+                </Badge>
+              </div>
+            </div>
+          )}
+
+          {log.content.file && (
+            <div className="grid items-center grid-cols-12">
+              <div className="col-span-3 text-sm text-muted-foreground">
+                File
+              </div>
+              <div className="col-span-9">
+                <Badge variant="secondary" className="capitalize">
+                  {log.content.file}
+                </Badge>
+              </div>
+            </div>
+          )}
+
+          {log.content.line && (
+            <div className="grid items-center grid-cols-12">
+              <div className="col-span-3 text-sm text-muted-foreground">
+                Lile
+              </div>
+              <div className="col-span-9">
+                <Badge variant="secondary" className="capitalize">
+                  {log.content.line}
+                </Badge>
+              </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

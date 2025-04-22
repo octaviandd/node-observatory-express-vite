@@ -24,10 +24,10 @@ export default function LogView() {
     loading: boolean;
     error: string | null;
     source:
-      | RequestInstanceResponse
-      | JobInstanceResponse
-      | ScheduleInstanceResponse
-      | null;
+    | RequestInstanceResponse
+    | JobInstanceResponse
+    | ScheduleInstanceResponse
+    | null;
   }>({
     log: {} as LogInstanceResponse,
     loading: true,
@@ -91,7 +91,7 @@ export default function LogView() {
 
       {data.source && <Source source={data.source} />}
 
-      <Details data={{ log: data.log }} />
+      <Details log={data.log} />
       <ContentTabs
         activeTab={activeTab}
         setActiveTab={setActiveTab}

@@ -36,7 +36,7 @@ export const LogCrumbs = React.memo(({ log }: { log: LogInstanceResponse }) => {
           </BreadcrumbItem>
           <BreadcrumbItem>
             <BreadcrumbLink className="text-muted-foreground">
-              {log.content.message}
+              {typeof log.content.message === 'object' ? JSON.stringify(log.content.message) : log.content.message}
             </BreadcrumbLink>
           </BreadcrumbItem>
         </Breadcrumb>

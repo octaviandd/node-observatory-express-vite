@@ -4,7 +4,7 @@ import React from "react";
 import { CacheInstanceResponse } from "../../../../../types";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { timeAgo } from "@/utils.js";
+import { formatDuration, timeAgo } from "@/utils.js";
 
 export const CachePreviewInfo = React.memo(
   ({ cache }: { cache: CacheInstanceResponse }) => {
@@ -54,7 +54,7 @@ export const CachePreviewInfo = React.memo(
 
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-muted-foreground">Duration</div>
-              {/* <div className="col-span-9">{formatDuration(cache.content.duration)}</div> */}
+              <div className="col-span-9">{formatDuration(Number(cache.content.duration))}</div>
             </div>
 
             <div className="grid items-center grid-cols-12">
