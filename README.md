@@ -45,6 +45,7 @@ yarn add node-observatory
 
 ```typescript
 import { setupLogger } from "node-observatory";
+// The import must be at the top of your entry file.
 import express from "express";
 import mysql2 from "mysql2/promise";
 import { createClient } from "redis";

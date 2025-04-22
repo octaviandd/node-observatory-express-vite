@@ -64,18 +64,9 @@ export function getCallerInfo(filename: string) {
   const stack = new Error().stack;
   const stackLines = stack?.split("\n") || [];
 
-  // const filteredStackLines = stackLines.filter(line => {
-  //   return !line.includes("node_modules") && // Exclude dependencies
-  //     !line.includes(filename) &&  // Exclude this patch file dynamically
-  //     !line.includes(__filename) &&
-  //     !line.includes("Namespace") &&
-  //     !line.includes("node:async_hooks")
-  // })
-
   for (const line of stackLines) {
-    // Skip lines from node_modules or the patcher itself
     if (
-      !line.includes("node_modules") && // Exclude dependencies
+      !line.includes("node_modules") &&
       !line.includes(filename) && // Exclude this patch file dynamically
       !line.includes(__filename) &&
       !line.includes("Namespace") &&

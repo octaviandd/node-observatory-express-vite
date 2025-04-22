@@ -8,6 +8,8 @@ client/node_modules
 dist
 client/stats.html
 
+*.tgz
+
 # testing
 /coverage
 
