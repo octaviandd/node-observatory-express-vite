@@ -4,7 +4,6 @@ import React from "react";
 import { ExceptionInstanceResponse } from "../../../../../types";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { timeAgo } from "@/utils.js";
-import { Badge } from "@/components/ui/badge";
 
 export const ExceptionInfo = React.memo(
   ({ exception }: { exception: ExceptionInstanceResponse }) => {
@@ -16,8 +15,8 @@ export const ExceptionInfo = React.memo(
         <CardContent>
           <div className="flex flex-col gap-y-4">
             <div className="grid items-center grid-cols-12">
-              <div className="col-span-3 text-muted-foreground">Time</div>
-              <div className="col-span-9">
+              <div className="col-span-3 text-sm text-muted-foreground">Time</div>
+              <div className="col-span-9 text-sm">
                 {new Date(exception.created_at).toLocaleString("en-US", {
                   weekday: "long",
                   year: "numeric",
@@ -31,27 +30,41 @@ export const ExceptionInfo = React.memo(
               </div>
             </div>
 
-            <div className="grid items-center grid-cols-12">
-              <div className="col-span-3 text-muted-foreground">Title</div>
-              <div className="col-span-9">{exception.content.title}</div>
-            </div>
-
-            <div className="grid items-center grid-cols-12">
-              <div className="col-span-3 text-muted-foreground">Type</div>
-              <div className="col-span-9">
-                <Badge variant="secondary">{exception.content.type}</Badge>
+            {exception.content.title && (
+              <div className="grid items-center grid-cols-12">
+                <div className="col-span-3 text-sm text-muted-foreground">
+                  Title
+                </div>
+                <div className="col-span-9 text-sm">{exception.content.title}</div>
               </div>
-            </div>
+            )}
 
-            <div className="grid items-center grid-cols-12">
-              <div className="col-span-3 text-muted-foreground">File</div>
-              <div className="col-span-9">{exception.content.file}</div>
-            </div>
+            {exception.content.type && (
+              <div className="grid items-center grid-cols-12">
+                <div className="col-span-3 text-sm text-muted-foreground">
+                  Type
+                </div>
+                <div className="col-span-9 text-sm">{exception.content.type}</div>
+              </div>
+            )}
 
-            <div className="grid items-center grid-cols-12">
-              <div className="col-span-3 text-muted-foreground">Line</div>
-              <div className="col-span-9">{exception.content.line}</div>
-            </div>
+            {exception.content.file && (
+              <div className="grid items-center grid-cols-12">
+                <div className="col-span-3 text-sm text-muted-foreground">
+                  File
+                </div>
+                <div className="col-span-9 text-sm">{exception.content.file}</div>
+              </div>
+            )}
+
+            {exception.content.line && (
+              <div className="grid items-center grid-cols-12">
+                <div className="col-span-3 text-sm text-muted-foreground">
+                  line
+                </div>
+                <div className="col-span-9 text-sm">{exception.content.line}</div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

@@ -15,6 +15,7 @@ export const HTTPCrumbs = React.memo(
   ({ http }: { http: HttpClientInstanceResponse }) => {
     const getStatusColor = (status: number) => {
       if (String(status).startsWith("2")) return "secondary";
+      if (String(status).startsWith("3")) return "secondary";
       if (String(status).startsWith("3")) return "warning";
       return "destructive";
     };

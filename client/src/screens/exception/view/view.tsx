@@ -22,10 +22,10 @@ export default function ExceptionView() {
   const [data, setData] = useState<{
     exception: ExceptionInstanceResponse;
     source:
-      | RequestInstanceResponse
-      | JobInstanceResponse
-      | ScheduleInstanceResponse
-      | null;
+    | RequestInstanceResponse
+    | JobInstanceResponse
+    | ScheduleInstanceResponse
+    | null;
     loading: boolean;
     error: string | null;
   }>({
@@ -45,7 +45,7 @@ export default function ExceptionView() {
       loading: true,
     });
     try {
-      const response = await fetch(`/api/data/exceptions/${params.id}`);
+      const response = await fetch(`/observatory-api/data/exceptions/${params.id}`);
       if (!response.ok) {
         throw new Error("Failed to fetch exception data");
       }

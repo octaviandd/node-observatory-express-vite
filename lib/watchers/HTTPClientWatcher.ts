@@ -171,7 +171,7 @@ class HTTPClientWatcher extends BaseWatcher {
 
     const [results] = await this.storeConnection.query(
       `SELECT
-        JSON_UNQUOTE(JSON_EXTRACT(content, '$.origin')) AS url,
+        JSON_UNQUOTE(JSON_EXTRACT(content, '$.origin')) AS route,
         COUNT(*) AS total,
         SUM(CASE WHEN JSON_EXTRACT(content, '$.statusCode') LIKE '2%' THEN 1 ELSE 0 END) AS count_200,
         SUM(CASE WHEN JSON_EXTRACT(content, '$.statusCode') LIKE '4%' THEN 1 ELSE 0 END) AS count_400,

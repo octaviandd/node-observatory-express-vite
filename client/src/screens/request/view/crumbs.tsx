@@ -14,8 +14,8 @@ import { RequestInstanceResponse } from "../../../../../types";
 export const RequestCrumbs = React.memo(
   ({ request }: { request: RequestInstanceResponse }) => {
     const getStatusColor = (status: number) => {
-      if (String(status).startsWith("2")) return "success";
-      if (String(status).startsWith("3")) return "success";
+      if (String(status).startsWith("2")) return "secondary";
+      if (String(status).startsWith("3")) return "secondary";
       if (String(status).startsWith("4")) return "warning";
       return "destructive";
     };
