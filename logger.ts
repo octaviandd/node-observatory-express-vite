@@ -1,7 +1,7 @@
 /** @format */
 import "dotenv/config";
 import "./lib/patchers/index";
-import { mysql2Up } from "./lib/database/migrations/index";
+import { mongodbUp, mysql2Up, prismaUp } from "./lib/database/migrations/index";
 import {
   LogWatcher,
   MailWatcher,
@@ -23,8 +23,8 @@ import { createClient } from "redis";
 import { Connection } from "mysql2";
 import { Connection as PromiseConnection } from "mysql2/promise";
 import { createProxyMiddleware } from "http-proxy-middleware";
-
-console.log('hit1')
+import path from "path";
+import express from "express";
 
 export const instanceCreator = (
   driver: StoreDriver,
@@ -74,8 +74,6 @@ export const watchers: any = {
   model: null,
 };
 
-console.log('hit2')
-
 /**
  * Initial entry point for setting up the logger
  * @param config - Configuration object for the logger
@@ -96,10 +94,8 @@ export async function setupLogger(
   // @ts-expect-error
     : connection.promise();
   
-  console.log('Setup Migrations')
   await setupMigrations(driver, connection as PromiseConnection);
 
-  console.log('Setup watchers')
   const {
     queryWatcherInstance,
     logWatcherInstance,
@@ -138,13 +134,17 @@ export async function setupLogger(
   process.env.NODE_OBSERVATORY_MODELS &&
     (watchers.model = modelWatcherInstance);
 
-  console.log('Setup routes');
+  const clientPath = path.join(__dirname, '../client/dist');
+
+  app.use('/observatory', express.static(clientPath));
+
   app.use(
-    "/observatory",
+    "/observatory-api",
     createProxyMiddleware({
       target: `http://localhost:${process.env.NODE_OBSERVATORY_PORT}`,
       changeOrigin: true,
-      pathRewrite: { "^/observatory": "" },
+      secure: false,
+      pathRewrite: { "^/observatory-api": "" },
     }),
   );
   app.use("/observatory-api/data", router);
@@ -158,13 +158,18 @@ export async function setupLogger(
 async function setupMigrations(
   driver: StoreDriver,
   connection: PromiseConnection,
-): Promise<void | never> {
-  if (driver === "mysql2") {
-    await mysql2Up(connection);
-  } else {
-    throw new Error("Unsupported database driver");
+): Promise<void> {
+  switch (driver) {
+    case "mysql2":
+      await mysql2Up(connection);
+      break
+    case "mongoose":
+      await mongodbUp(connection);
+      break;
+    case "prisma":
+      await prismaUp();
+      break
+    default:
+      break
   }
 }
-
-console.log('hit4')
-export default setupLogger;

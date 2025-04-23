@@ -114,7 +114,7 @@ export type Views = "ejs" | "pug" | "handlebars";
  * Supported database drivers for storing logs and metrics
  * @typedef {string} StoreDriver
  */
-export type StoreDriver = "mysql2";
+export type StoreDriver = "mysql2" | "mongoose" | "prisma";
 
 /**
  * Interface representing standardized HTTP request data across different libraries

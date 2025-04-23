@@ -15,7 +15,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/observatory-api": {
-        target: "http://localhost:9999", // Your test server port
+        target: process.env.TEST_SERVER_PORT,
         changeOrigin: true,
       },
     },
