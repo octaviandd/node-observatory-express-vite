@@ -1,7 +1,8 @@
-node_modules/
-dist/
-client/dist
-client/node_modules
+packages/server/node_modules/
+packages/client/node_modules/
+packages/server/dist/
+packages/client/dist
+packages/client/package-lock.json
+packages/server/package-lock.json
 coverage/
-build/
 package-lock.json

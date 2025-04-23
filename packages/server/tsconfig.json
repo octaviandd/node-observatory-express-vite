@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "outDir": "dist",
+    "declarationDir": "dist",
+    "baseUrl": ".",
+    "declaration": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "esModuleInterop": true,
+    "noImplicitAny": true,
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "strictPropertyInitialization": false,
+    "emitDecoratorMetadata": true,
+    "skipLibCheck": true,
+    "paths": {
+      // This is solely to stop a bug with @types/node as of 12/15/2023
+      "undici-types": ["./node_modules/undici-types/index.d.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/types.d.ts", "index.ts"],
+  "exclude": ["dist", "node_modules", "**/*.test.ts"]
+}

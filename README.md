@@ -10,8 +10,7 @@ A comprehensive observability and monitoring solution for Node.js applications t
 - [Configuration](#configuration)
 - [Supported Integrations](#supported-integrations)
 - [Advanced Usage](#advanced-usage)
-- [Testing](#testing)
-- [Contributing](#contributing)
+- [Package Structure](#package-structure)
 - [License](#license)
 
 ## ✨ Features
@@ -35,16 +34,21 @@ Node Observatory uses monkey patching to automatically instrument your applicati
 
 ## 🚀 Installation
 
+You can install the full package or just the components you need:
+
 ```bash
+# Install the complete package
 npm install node-observatory
-# or
-yarn add node-observatory
+
+# Or install individual packages
+npm install @node-observatory/server
+npm install @node-observatory/client
 ```
 
 ## 🎯 Quick Start
 
 ```typescript
-import { setupLogger } from "node-observatory";
+import { setupLogger } from "@node-observatory/server";
 // The import must be at the top of your entry file.
 import express from "express";
 import mysql2 from "mysql2/promise";
@@ -72,6 +76,7 @@ await setupLogger(app, "mysql2", mysql2Connection, redisConnection);
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
+  console.log("Observatory dashboard available at: http://localhost:3000/observatory");
 });
 ```
 
@@ -174,7 +179,7 @@ The NodeJS Observatory includes a modern React dashboard built with:
 - **Performance metrics**: Track response times, error rates, and throughput
 - **Dark/Light mode**: Choose your preferred theme
 
-### Running the Dashboard
+### Accessing the Dashboard
 
 The dashboard is automatically served by the observatory when you initialize it with your application:
 http://your-app-host/observatory
@@ -182,6 +187,15 @@ http://your-app-host/observatory
 
 The API for retrieving observability data is available at:
 http://your-app-host/observatory-api/data
+
+## 📦 Package Structure
+
+Node Observatory is organized as a monorepo with the following packages:
+
+- **@node-observatory/server**: The core instrumentation engine that monitors your application
+- **@node-observatory/client**: The React dashboard for visualizing monitoring data
+
+You can install and use these packages separately depending on your needs.
 
 ## 📄 License
 
