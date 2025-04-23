@@ -1,7 +1,7 @@
 /** @format */
 import "dotenv/config";
-import "./patchers/index";
-import { mysql2Up } from "./database/migrations/index";
+import "./lib/patchers/index";
+import { mysql2Up } from "./lib/database/migrations/index";
 import {
   LogWatcher,
   MailWatcher,
@@ -16,13 +16,15 @@ import {
   RedisWatcher,
   ViewWatcher,
   ModelWatcher,
-} from "./watchers/index";
-import { StoreDriver } from "../types";
-import router from "./routes/routes";
+} from "./lib/watchers/index";
+import { StoreDriver } from "./types";
+import router from "./lib/routes/routes";
 import { createClient } from "redis";
 import { Connection } from "mysql2";
 import { Connection as PromiseConnection } from "mysql2/promise";
 import { createProxyMiddleware } from "http-proxy-middleware";
+
+console.log('hit1')
 
 export const instanceCreator = (
   driver: StoreDriver,
@@ -71,6 +73,8 @@ export const watchers: any = {
   view: null,
   model: null,
 };
+
+console.log('hit2')
 
 /**
  * Initial entry point for setting up the logger
@@ -162,4 +166,5 @@ async function setupMigrations(
   }
 }
 
+console.log('hit4')
 export default setupLogger;

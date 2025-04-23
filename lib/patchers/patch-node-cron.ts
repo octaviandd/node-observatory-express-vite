@@ -2,7 +2,7 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../logger";
+import { watchers } from "../../logger";
 import { v4 as uuidv4 } from "uuid";
 import { getCallerInfo } from "../utils";
 

@@ -1,6 +1,6 @@
 /** @format */
 
-import { watchers } from "../logger";
+import { watchers } from "../../logger";
 import { getCallerInfo } from "../utils";
 
 // Create a global symbol to track if fetch has been patched

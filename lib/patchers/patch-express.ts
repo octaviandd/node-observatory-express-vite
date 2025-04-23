@@ -12,7 +12,7 @@ import { v4 as uuidv4 } from "uuid";
 import path from "path";
 
 // Imports for application-specific logic (Assume these exist)
-import { watchers } from "../logger"; // Your logging mechanism
+import { watchers } from "../../logger"; // Your logging mechanism
 import { requestLocalStorage } from "./store"; // Your AsyncLocalStorage instance
 
 // Symbol to prevent double patching

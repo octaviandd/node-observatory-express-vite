@@ -3,7 +3,7 @@
 import shimmer from "shimmer";
 import http from "http";
 import https from "https";
-import { watchers } from "../logger";
+import { watchers } from "../../logger";
 import {
   getCallerInfo,
   getRequestInfo,

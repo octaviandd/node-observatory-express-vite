@@ -2,7 +2,7 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../logger";
+import { watchers } from "../../logger";
 import { getCallerInfo } from "../utils";
 
 const PG_PATCHED_SYMBOL = Symbol.for("node-observer:pg-patched");

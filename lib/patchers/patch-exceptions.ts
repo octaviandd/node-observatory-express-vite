@@ -2,7 +2,7 @@
 
 import fs from "fs";
 import path from "path";
-import { watchers } from "../logger";
+import { watchers } from "../../logger";
 import { inspect } from "util";
 import { getCallerInfo } from "../utils";
 

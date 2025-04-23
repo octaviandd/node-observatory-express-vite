@@ -2,7 +2,7 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../logger";
+import { watchers } from "../../logger";
 import type { Connection, Pool } from "mysql";
 import type { QueryOptions } from "mysql";
 import { getCallerInfo } from "../utils";

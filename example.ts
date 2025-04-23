@@ -1,5 +1,5 @@
 /** @format */
-import { setupLogger } from "./lib/logger";
+import { setupLogger } from "./logger";
 import express from "express";
 import cors from "cors";
 import mysql2 from "mysql2/promise";
