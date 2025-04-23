@@ -76,8 +76,8 @@ function patchPrismaModels(prisma: any) {
 }
 
 if (
-  process.env.NODE_OBSERVATORY_DATABASES &&
-  JSON.parse(process.env.NODE_OBSERVATORY_DATABASES).includes("prisma")
+  process.env.NODE_OBSERVATORY_MODELS &&
+  JSON.parse(process.env.NODE_OBSERVATORY_MODELS).includes("prisma")
 ) {
   if (!(global as any)[PRISMA_PATCHED_SYMBOL]) {
     (global as any)[PRISMA_PATCHED_SYMBOL] = true;

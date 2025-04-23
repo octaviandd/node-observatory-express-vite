@@ -9,9 +9,7 @@ const SEQUELIZE_PATCHED_SYMBOL = Symbol.for("node-observer:sequelize-patched");
 
 if (
   (process.env.NODE_OBSERVATORY_MODELS &&
-    JSON.parse(process.env.NODE_OBSERVATORY_MODELS).includes("sequelize")) ||
-  (process.env.NODE_OBSERVATORY_QUERIES &&
-    JSON.parse(process.env.NODE_OBSERVATORY_QUERIES).includes("sequelize"))
+    JSON.parse(process.env.NODE_OBSERVATORY_MODELS).includes("sequelize"))
 ) {
   if (!(global as any)[SEQUELIZE_PATCHED_SYMBOL]) {
     (global as any)[SEQUELIZE_PATCHED_SYMBOL] = true;

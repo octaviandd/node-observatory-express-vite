@@ -111,38 +111,6 @@ export type Model = "typeorm" | "sequelize" | "prisma" | "knex" | "sqlite3";
 export type Views = "ejs" | "pug" | "handlebars";
 
 /**
- * Configuration options for the logger
- * @interface Config
- * @property {boolean} errors - Whether to track uncaught errors
- * @property {object} [packages] - Optional packages configuration
- * @property {Http[]} [packages.http] - HTTP client libraries to observe
- * @property {Logger[]} [packages.logging] - Logging libraries to observe
- * @property {Queries[]} [packages.queries] - Query libraries to observe
- * @property {Jobs[]} [packages.jobs] - Job processing libraries to observe
- * @property {Scheduler[]} [packages.scheduler] - Scheduler libraries to observe
- * @property {Mailer[]} [packages.mailer] - Email libraries to observe
- * @property {Cache[]} [packages.cache] - Caching libraries to observe
- * @property {Notifications[]} [packages.notifications] - Notification libraries to observe
- * @property {Model[]} [packages.models] - Model libraries to observe
- * @property {Views[]} [packages.views] - View libraries to observe
- */
-export interface Config {
-  errors: boolean;
-  packages?: {
-    http?: Http[];
-    logging?: Logger[];
-    queries?: Queries[];
-    jobs?: Jobs[];
-    scheduler?: Scheduler[];
-    mailer?: Mailer[];
-    cache?: Cache[];
-    notifications?: Notifications[];
-    models?: Model[];
-    views?: Views[];
-  };
-}
-
-/**
  * Supported database drivers for storing logs and metrics
  * @typedef {string} StoreDriver
  */

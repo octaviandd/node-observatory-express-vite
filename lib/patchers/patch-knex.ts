@@ -10,9 +10,7 @@ const KNEX_PATCHED_SYMBOL = Symbol.for("node-observer:knex-patched");
 
 if (
   (process.env.NODE_OBSERVATORY_QUERIES &&
-    JSON.parse(process.env.NODE_OBSERVATORY_QUERIES).includes("knex")) ||
-  (process.env.NODE_OBSERVATORY_MODELS &&
-    JSON.parse(process.env.NODE_OBSERVATORY_MODELS).includes("knex"))
+    JSON.parse(process.env.NODE_OBSERVATORY_QUERIES).includes("knex"))
 ) {
   // Check if knex has already been patched
   if (!(global as any)[KNEX_PATCHED_SYMBOL]) {

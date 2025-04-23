@@ -16,8 +16,8 @@ function shouldLogQuery(sql: string): boolean {
 }
 
 if (
-  process.env.NODE_OBSERVATORY_DATABASES &&
-  JSON.parse(process.env.NODE_OBSERVATORY_DATABASES).includes("pg")
+  process.env.NODE_OBSERVATORY_QUERIES &&
+  JSON.parse(process.env.NODE_OBSERVATORY_QUERIES).includes("pg")
 ) {
   if (!(global as any)[PG_PATCHED_SYMBOL]) {
     (global as any)[PG_PATCHED_SYMBOL] = true;

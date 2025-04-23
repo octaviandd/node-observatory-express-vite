@@ -33,6 +33,8 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
       return exports;
     }
 
+    console.log('Express checks passed.')
+
     // --- Patch 1: Central Request Handling Entry Point ---
     // Wraps the main request handler to set up context, start timers, and patch instance-specific methods.
     shimmer.wrap(exports.application, "handle", function (originalAppHandle) {
@@ -42,7 +44,7 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
         res: ExpressResponse,
         next: NextFunction,
       ) {
-        // Skip internal/observatory requests and other specific cases like SSE if needed
+        console.log('Patching express..')
 
         if (req.url && req.url.includes("observatory-api")) {
           return originalAppHandle.call(this, req, res, next);
@@ -307,7 +309,6 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
             callback?: (err: Error, html: string) => void,
           ) {
             const renderStartTime = performance.now();
-            const renderStore = requestLocalStorage.getStore(); // Get context for requestId
 
             // Handle arguments flexibility (options is optional)
             let actualOptions: object | undefined =
@@ -404,7 +405,6 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
                 store.set("totalWrittenBytes", 0); // Reset on error
               }
             }
-            // If write WAS used, size is already being tracked; 'send' often just calls 'end'
           }
 
           // Call the original send function

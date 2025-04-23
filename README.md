@@ -154,7 +154,6 @@ NODE_OBSERVATORY_LOGGING=["winston","pino","bunyan","log4js","signale","loglevel
 NODE_OBSERVATORY_HTTP=["http","axios","fetch","got","superagent","undici","ky","needle","phin","node-fetch"]
 NODE_OBSERVATORY_SCHEDULER=["node-schedule","node-cron"]
 NODE_OBSERVATORY_VIEWS=["handlebars","pug","ejs"]
-NODE_OBSERVATORY_DATABASE=["mysql2"]
 ```
 
 ## 📊 Client Dashboard

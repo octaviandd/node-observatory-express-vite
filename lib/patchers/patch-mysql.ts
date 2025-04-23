@@ -11,8 +11,8 @@ import { getCallerInfo } from "../utils";
 const MYSQL_PATCHED_SYMBOL = Symbol.for("node-observer:mysql-patched");
 
 if (
-  process.env.NODE_OBSERVATORY_DATABASES &&
-  JSON.parse(process.env.NODE_OBSERVATORY_DATABASES).includes("mysql")
+  process.env.NODE_OBSERVATORY_QUERIES &&
+  JSON.parse(process.env.NODE_OBSERVATORY_QUERIES).includes("mysql")
 ) {
   // Check if mysql has already been patched
   if (!(global as any)[MYSQL_PATCHED_SYMBOL]) {
