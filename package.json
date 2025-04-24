@@ -1,8 +1,7 @@
   {
     "name": "node-observatory",
+    "private": false,
     "version": "1.0.0",
-    "dependencies": {
-      "@node-observatory/server": "^1.0.0",
-      "@node-observatory/client": "^1.0.0"
-    }
+    "workspaces": ["packages/*"],
+    "dependencies": {}
   }
