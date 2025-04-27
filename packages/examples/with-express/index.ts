@@ -1,6 +1,10 @@
 /** @format */
 import { ExpressAdapter } from "@node-observatory/express";
+<<<<<<< HEAD
 import { createObserver } from "@node-observatory/api"
+=======
+import { observatory } from "@node-observatory/api"
+>>>>>>> ee8ae814172fe3eb70daa563f8d52c2200af9c5d
 import express from "express";
 import cors from "cors";
 import mysql2 from "mysql2/promise";

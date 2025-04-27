@@ -1,6 +1,9 @@
 {
   "name": "@node-observatory/ui",
+<<<<<<< HEAD
   "version": "1.0.0",
+=======
+>>>>>>> ee8ae814172fe3eb70daa563f8d52c2200af9c5d
   "private": false,
   "author": "Octavian David",
   "license": "MIT",
