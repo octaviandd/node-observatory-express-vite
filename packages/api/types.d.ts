@@ -727,5 +727,4 @@ export interface IServerAdapter {
   setEntryRoute(route: AppViewRoute): IServerAdapter;
   setErrorHandler(handler: (error: Error & {statusCode : HTTPStatus}) => ControllerHandlerReturnType): IServerAdapter;
   setApiRoutes(routes: AppControllerRoute[]): IServerAdapter;
-  setUIConfig(config: UIConfig): IServerAdapter;
 }

@@ -1,11 +1,17 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-packages/client/node_modules
-packages/server/node_modules
+packages/ui/node_modules
+packages/api/node_modules
+packages/examples/with-express/node_modules
+packages/express/node_modules
 
-packages/client/dist
-packages/server/dist
+
+packages/ui/dist
+packages/api/dist
+packages/examples/with-express/dist
+packages/express/dist
+
 
 /.pnp
 .pnp.js
@@ -18,7 +24,13 @@ client/stats.html
 /coverage
 
 # misc
-packages/server/.env
+packages/api/.env
+packages/api/package-lock.json
+packages/express/package-lock.json
+packages/examples/with-express/package-lock.json
+packages/ui/package-lock.json
+
+
 .DS_Store
 
 npm-debug.log*
