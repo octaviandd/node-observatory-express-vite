@@ -2,7 +2,7 @@
     "name": "node-observatory",
     "version": "1.0.0",
     "dependencies": {
-      "@node-observatory/server": "^1.0.0",
-      "@node-observatory/client": "^1.0.0"
+      "@node-observatory/api": "^1.0.0",
+      "@node-observatory/ui": "^1.0.0"
     }
   }
