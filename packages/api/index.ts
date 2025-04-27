@@ -16,30 +16,19 @@ import {
   ViewWatcher,
   ModelWatcher,
 } from "./src/watchers/index";
-<<<<<<< HEAD
 import { HTTPStatus, IServerAdapter, StoreDriver } from "./types";
-=======
-import { StoreDriver } from "./types";
->>>>>>> ee8ae814172fe3eb70daa563f8d52c2200af9c5d
 import { createClient } from "redis";
 import { Connection } from "mysql2";
 import { Connection as PromiseConnection } from "mysql2/promise";
 import apiRoutes from "src/routes/routes";
-<<<<<<< HEAD
 import path from "path";
 import { AppViewRoute } from "./types";
-=======
->>>>>>> ee8ae814172fe3eb70daa563f8d52c2200af9c5d
 
 export const instanceCreator = (
   driver: StoreDriver,
   connection: Connection | PromiseConnection,
   redisClient: ReturnType<typeof createClient>,
-<<<<<<< HEAD
   serverAdapter: IServerAdapter
-=======
-  serverAdapter: any
->>>>>>> ee8ae814172fe3eb70daa563f8d52c2200af9c5d
 ) => ({
   logWatcherInstance: new LogWatcher(driver, connection, redisClient, serverAdapter),
   mailWatcherInstance: new MailWatcher(driver, connection, redisClient, serverAdapter),
@@ -66,10 +55,6 @@ export const instanceCreator = (
     redisClient,
     serverAdapter
   ),
-<<<<<<< HEAD
-=======
-  redisWatcherInstance: new RedisWatcher(driver, connection, redisClient, serverAdapter),
->>>>>>> ee8ae814172fe3eb70daa563f8d52c2200af9c5d
   viewWatcherInstance: new ViewWatcher(driver, connection, redisClient, serverAdapter),
   modelWatcherInstance: new ModelWatcher(driver, connection, redisClient, serverAdapter),
 });
@@ -98,14 +83,9 @@ export const watchers: any = {
  * @param redisClient - Redis client instance for caching and pub/sub functionality
  * @returns The configured logger instance with a success message
  */
-<<<<<<< HEAD
 export async function createObserver(
   serverAdapter: IServerAdapter,
   options: any,
-=======
-export async function NodeObserver(
-  serverAdapter: any,
->>>>>>> ee8ae814172fe3eb70daa563f8d52c2200af9c5d
   driver: StoreDriver,
   connection: Connection | PromiseConnection,
   redisClient: ReturnType<typeof createClient>,
@@ -128,11 +108,6 @@ export async function NodeObserver(
     viewWatcherInstance,
     modelWatcherInstance,
   } = instanceCreator(driver, connection, redisClient, serverAdapter);
-<<<<<<< HEAD
-=======
-
-  serverAdapter.setApiRoutes(apiRoutes);
->>>>>>> ee8ae814172fe3eb70daa563f8d52c2200af9c5d
 
   watchers.requests = requestWatcherInstance;
   process.env.NODE_OBSERVATORY_ERRORS &&
@@ -154,7 +129,6 @@ export async function NodeObserver(
   process.env.NODE_OBSERVATORY_VIEWS && (watchers.view = viewWatcherInstance);
   process.env.NODE_OBSERVATORY_MODELS &&
     (watchers.model = modelWatcherInstance);
-<<<<<<< HEAD
   
   // looks for the module in node modules and returns the path of the package in node modules. 
   const uiBasePath =
@@ -183,8 +157,6 @@ export async function NodeObserver(
     },
     }))
     .setApiRoutes(apiRoutes)
-=======
->>>>>>> ee8ae814172fe3eb70daa563f8d52c2200af9c5d
 }
 
 /**
