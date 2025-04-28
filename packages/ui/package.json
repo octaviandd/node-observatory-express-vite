@@ -1,22 +1,16 @@
 {
   "name": "@node-observatory/ui",
-<<<<<<< HEAD
-  "version": "1.0.0",
-=======
->>>>>>> ee8ae814172fe3eb70daa563f8d52c2200af9c5d
+  "version": "1.0.9",
   "private": false,
   "author": "Octavian David",
   "license": "MIT",
   "type": "module",
-  "main": "dist/main.umd.js",
-  "module": "dist/main.es.js",
   "files": [
     "dist"
   ],
   "exports": {
-    ".": {
-      "import": "./dist/main.es"
-    }
+    ".": "./package.json",
+    "./package.json": "./package.json"
   },
   "scripts": {
     "prepublish": "rm -rf ./dist && npm run build",

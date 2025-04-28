@@ -2,13 +2,8 @@
     "name": "node-observatory",
     "private": false,
     "version": "1.0.0",
-<<<<<<< HEAD
     "dependencies": {
       "@node-observatory/api": "^1.0.0",
       "@node-observatory/ui": "^1.0.0"
     }
-=======
-    "workspaces": ["packages/*"],
-    "dependencies": {}
->>>>>>> ee8ae814172fe3eb70daa563f8d52c2200af9c5d
   }

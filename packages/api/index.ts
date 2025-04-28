@@ -20,7 +20,7 @@ import { HTTPStatus, IServerAdapter, StoreDriver } from "./types";
 import { createClient } from "redis";
 import { Connection } from "mysql2";
 import { Connection as PromiseConnection } from "mysql2/promise";
-import apiRoutes from "src/routes/routes";
+import apiRoutes from "./src/routes/routes";
 import path from "path";
 import { AppViewRoute } from "./types";
 
@@ -129,32 +129,33 @@ export async function createObserver(
   process.env.NODE_OBSERVATORY_VIEWS && (watchers.view = viewWatcherInstance);
   process.env.NODE_OBSERVATORY_MODELS &&
     (watchers.model = modelWatcherInstance);
-  
+
   // looks for the module in node modules and returns the path of the package in node modules. 
   const uiBasePath =
     options.uiBasePath || path.dirname(eval(`require.resolve('@node-observatory/ui/package.json')`));
-  
+
   const uiEntryRoute : AppViewRoute = {
     method: 'get',
     route: '/',
     handler: ({ basePath }: { basePath: string }) => {
+      console.log(basePath)
       return {
         name: "index.html", params: { basePath }
       }
     }
   }
-  
+
   serverAdapter
-    .setViewsPath(path.join(uiBasePath, 'dist'))
-    .setStaticPath('static' , path.join(uiBasePath, 'dist/assets'))
+    .setStaticPath('/', path.join(uiBasePath, 'dist'))
+    .setStaticPath('/assets', path.join(uiBasePath, 'dist/assets'))
     .setEntryRoute(uiEntryRoute)
     .setErrorHandler((error : Error & { statusCode: HTTPStatus }) => ({
-    status: error.statusCode || 500,
-    body: {
-      error: 'Internal server error',
-      message: error.message,
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
-    },
+      status: error.statusCode || 500,
+      body: {
+        error: 'Internal server error',
+        message: error.message,
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+      },
     }))
     .setApiRoutes(apiRoutes)
 }

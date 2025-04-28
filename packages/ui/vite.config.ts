@@ -7,7 +7,7 @@ import dts from 'vite-plugin-dts';
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss(), dts()],
-  base: process.env.NODE_ENV === "production" ? "/static" : "/",
+  base: '/ui/',
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -23,11 +23,11 @@ export default defineConfig({
     // }
   },
   server: {
-    open: 'http://localhost:3000/ui',
-    port: 9000,
+    open: 'http://localhost:9999/ui',
+    port: 5173,
     proxy: {
       "*": {
-        target: "http://localhost:3000",
+        target: "http://localhost:9999",
         changeOrigin: true,
       },
     },

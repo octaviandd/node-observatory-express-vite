@@ -21,6 +21,17 @@ export class ExpressAdapter {
   public setStaticPath(staticsRoute: string, staticsPath: string): ExpressAdapter {
     this.app.use(staticsRoute, express.static(staticsPath));
 
+    console.log(`Setting static path: ${staticsRoute} -> ${staticsPath}`);
+    console.log(`Path exists: ${require('fs').existsSync(staticsPath)}`);
+
+    return this;
+  }
+
+  public serveHtmlFile(route: string, filePath: string): ExpressAdapter {
+    this.app.get(route, (_req: Request, res: Response) => {
+      res.sendFile(filePath);
+    });
+
     return this;
   }
 
