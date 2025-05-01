@@ -71,7 +71,7 @@ class ExceptionWatcher extends BaseWatcher {
     if (!item.request_id && !item.schedule_id && !item.job_id) {
       return {
         body: this.groupItemsByType(results),
-        status: 200
+        statusCode: 200
       };
     }
 
@@ -85,7 +85,7 @@ class ExceptionWatcher extends BaseWatcher {
 
     return {
       body: this.groupItemsByType(relatedItems.concat(results)),
-      status: 200
+      statusCode: 200
     };
   }
 
@@ -117,7 +117,7 @@ class ExceptionWatcher extends BaseWatcher {
 
     if (!requestId && !jobId && !scheduleId) {
       return {
-        status: 504
+        statusCode: 504
       };
     }
 
@@ -127,7 +127,7 @@ class ExceptionWatcher extends BaseWatcher {
 
     return {
       body: this.groupItemsByType(results),
-      status: 200
+      statusCode: 200
     };
   }
 
@@ -157,7 +157,7 @@ class ExceptionWatcher extends BaseWatcher {
 
     return {
       body: { results, count: countResult[0].total },
-      status: 200
+      statusCode: 200
     };
   }
 
@@ -188,7 +188,7 @@ class ExceptionWatcher extends BaseWatcher {
     );
 
     return {
-      status: 200,
+      statusCode: 200,
       body: { results, count: this.formatValue(countResult[0].total, true) }
     };
   }
@@ -223,7 +223,7 @@ class ExceptionWatcher extends BaseWatcher {
     )) as [any[]];
 
     return {
-      status: 200,
+      statusCode: 200,
       body: { results, count: this.formatValue(countResult[0].total, true) }
     };
   }
@@ -275,7 +275,7 @@ class ExceptionWatcher extends BaseWatcher {
     const countFormattedData = this.countGraphData(results, period as string);
 
     return {
-      status: 200,
+      statusCode: 200,
       body: {
         countFormattedData,
         count: this.formatValue(aggregateResults.total, true),

@@ -87,11 +87,7 @@ class CacheWatcher extends BaseWatcher {
       [...params, this.type],
     );
 
-    const data = this.groupItemsByType(relatedItems.concat(results));
-    return {
-      status: 200,
-      body: data
-    }
+    return this.groupItemsByType(relatedItems.concat(results));
   }
 
   /**
@@ -130,11 +126,7 @@ class CacheWatcher extends BaseWatcher {
       this.type,
     ]);
     
-    const data = this.groupItemsByType(results);
-    return {
-      status: 200,
-      body: data
-    }
+    return this.groupItemsByType(results);
   }
 
   /**
@@ -160,8 +152,7 @@ class CacheWatcher extends BaseWatcher {
     )) as [any[]];
 
     return {
-      body: { results, count: this.formatValue(countResult[0].total, true) },
-      status: 200
+      results, count: this.formatValue(countResult[0].total, true),
     };
   }
 
@@ -214,8 +205,7 @@ class CacheWatcher extends BaseWatcher {
     )) as [any[]];
 
     return {
-      body: { results, count: this.formatValue(countResult[0].total, true) },
-      status: 200
+      results, count: this.formatValue(countResult[0].total, true)
     };
   }
 
@@ -298,19 +288,16 @@ class CacheWatcher extends BaseWatcher {
     );
 
     return {
-      body: {
-        countFormattedData,
-        durationFormattedData,
-        count: this.formatValue(aggregateResults.total, true),
-        indexCountOne: this.formatValue(aggregateResults.hits, true),
-        indexCountTwo: this.formatValue(aggregateResults.writes, true),
-        indexCountThree: this.formatValue(aggregateResults.misses, true),
-        shortest: this.formatValue(aggregateResults.shortest),
-        longest: this.formatValue(aggregateResults.longest),
-        average: this.formatValue(aggregateResults.average),
-        p95: this.formatValue(aggregateResults.p95),
-      },
-      status: 200
+      countFormattedData,
+      durationFormattedData,
+      count: this.formatValue(aggregateResults.total, true),
+      indexCountOne: this.formatValue(aggregateResults.hits, true),
+      indexCountTwo: this.formatValue(aggregateResults.writes, true),
+      indexCountThree: this.formatValue(aggregateResults.misses, true),
+      shortest: this.formatValue(aggregateResults.shortest),
+      longest: this.formatValue(aggregateResults.longest),
+      average: this.formatValue(aggregateResults.average),
+      p95: this.formatValue(aggregateResults.p95),
     };
   }
 

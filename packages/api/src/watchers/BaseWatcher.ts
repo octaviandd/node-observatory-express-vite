@@ -61,29 +61,39 @@ export abstract class BaseWatcher implements Watcher {
    * Public API Methods
    * --------------------------------------------------------------------------
    */
-  async getIndex(req: Request, res: Response): Promise<Response> {
+  async getIndex(req: Request, res: Response): Promise<{body?: any, statusCode: number}> {
     try {
       const filters = this.extractFiltersFromRequest(req);
       const data = await this.handleIndexTableOrGraph(filters);
-      return res.status(200).json(data);
+      return {
+        body: data,
+        statusCode: 200
+      }
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ error });
+      return {
+        statusCode: 500
+      }
     }
   }
 
-  async getView(req: Request, res: Response): Promise<Response> {
+  async getView(req: Request, res: Response): Promise<{body?: any, statusCode: number}> {
     try {
       const id = req.params.id;
       const data = await this.handleView(id);
-      return res.status(200).json(data);
+      return {
+        body: data,
+        statusCode: 200
+      }
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ error });
+      return {
+        statusCode: 500
+      }
     }
   }
 
-  async getRelatedData(req: Request, res: Response): Promise<Response> {
+  async getRelatedData(req: Request, res: Response): Promise<{body?: any, statusCode: number}> {
     try {
       const modelId = req.params.id;
       const { requestId, jobId, scheduleId } = req.body;
@@ -93,10 +103,16 @@ export abstract class BaseWatcher implements Watcher {
         jobId,
         scheduleId,
       );
-      return res.status(200).json(data);
+      
+      return {
+        body: data, 
+        statusCode: 200
+      }
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ error });
+      return {
+        statusCode: 500
+      }
     }
   }
 

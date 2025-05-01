@@ -22,8 +22,8 @@ export interface WatcherFilters {
 interface Watcher {
   readonly type: string;
   refreshInterval: NodeJS.Timeout | undefined;
-  getIndex(req: Request, res: Response): Promise<Response>;
-  getView(req: Request, res: Response): Promise<Response>;
+  getIndex(req: Request, res: Response): Promise<{body?: any, statusCode: number}>;
+  getView(req: Request, res: Response): Promise<{body?: any, statusCode: number}>;
   addContent(content: unknown): Promise<void>;
   handleAdd(entry: WatcherEntry): Promise<void>;
   handleView(id: string): Promise<any>;

@@ -53,10 +53,7 @@ class ViewWatcher extends BaseWatcher {
       [...params, this.type],
     );
 
-    return {
-      body: this.groupItemsByType(relatedItems.concat(results)),
-      status: 200
-    }
+    return this.groupItemsByType(relatedItems.concat(results));
   }
 
   /**
@@ -78,7 +75,7 @@ class ViewWatcher extends BaseWatcher {
       [requestId, this.type],
     );
 
-    return { body: this.groupItemsByType(results), status: 200 }
+    return this.groupItemsByType(results);
   }
 
   /**
@@ -109,14 +106,11 @@ class ViewWatcher extends BaseWatcher {
     );
 
     return {
-      body: {
-        results,
-        count:
-          countResult[0].total > 999
-            ? (countResult[0].total / 1000).toFixed(2) + "K"
-            : countResult[0].total,
-      },
-      status: 200
+      results,
+      count:
+        countResult[0].total > 999
+          ? (countResult[0].total / 1000).toFixed(2) + "K"
+          : countResult[0].total,
     };
   }
 
@@ -242,7 +236,6 @@ class ViewWatcher extends BaseWatcher {
     );
 
     return {
-      body: {
         results,
         countFormattedData,
         durationFormattedData,
@@ -253,8 +246,6 @@ class ViewWatcher extends BaseWatcher {
         longest: this.formatValue(aggregateResults.longest),
         average: this.formatValue(aggregateResults.average),
         p95: this.formatValue(aggregateResults.p95),
-      },
-      status: 200
     };
   }
 

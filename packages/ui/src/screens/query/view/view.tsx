@@ -47,7 +47,7 @@ export default function QueryPreview() {
     try {
       setData((prev) => ({ ...prev, loading: true, error: null }));
       const response = await fetch(
-        `/observatory-api/data/queries/${params.id}`,
+        `/ui/queries/${params.id}`,
       );
       if (!response.ok) {
         throw new Error("Failed to fetch query data");

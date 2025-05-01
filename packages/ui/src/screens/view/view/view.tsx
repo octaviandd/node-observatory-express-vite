@@ -34,7 +34,7 @@ export default function ViewPreview() {
   const getItem = async () => {
     try {
       setData((prev) => ({ ...prev, loading: true }));
-      const response = await fetch(`/observatory-api/data/views/${params.id}`);
+      const response = await fetch(`/ui/views/${params.id}`);
       const { request, view } = await response.json();
 
       setData((prev) => ({

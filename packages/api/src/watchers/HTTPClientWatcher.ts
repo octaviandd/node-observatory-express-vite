@@ -79,7 +79,7 @@ class HTTPClientWatcher extends BaseWatcher {
     if (!item.request_id && !item.schedule_id && !item.job_id) {
       return {
         body: this.groupItemsByType(results),
-        status: 200
+        statusCode: 200
       };
     }
 
@@ -93,7 +93,7 @@ class HTTPClientWatcher extends BaseWatcher {
 
     return {
       body: this.groupItemsByType(relatedItems.concat(results)),
-      status: 200
+      statusCode: 200
     };
   }
 
@@ -135,7 +135,7 @@ class HTTPClientWatcher extends BaseWatcher {
     
     return {
       body: this.groupItemsByType(results),
-      status: 200
+      statusCode: 200
     };
   }
 
@@ -168,7 +168,7 @@ class HTTPClientWatcher extends BaseWatcher {
     );
 
     return {
-      status: 200,
+      statusCode: 200,
       body: { results, count: this.formatValue(countResult[0].total, true) }
     };
   }
@@ -226,7 +226,7 @@ class HTTPClientWatcher extends BaseWatcher {
     );
 
     return {
-      status: 200,
+      statusCode: 200,
       body: { results, count: this.formatValue(countResult[0].total, true) }
     };
   }
@@ -313,7 +313,7 @@ class HTTPClientWatcher extends BaseWatcher {
     );
 
     return {
-      status: 200,
+      statusCode: 200,
       body: {
         countFormattedData,
         durationFormattedData,

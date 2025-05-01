@@ -91,7 +91,7 @@ class LogWatcher extends BaseWatcher {
 
     if (!item.request_id && !item.schedule_id && !item.job_id) {
       return {
-        status: 200,
+        statusCode: 200,
         body: this.groupItemsByType(results)
       };
     }
@@ -105,7 +105,7 @@ class LogWatcher extends BaseWatcher {
     );
 
     return {
-        status: 200,
+        statusCode: 200,
         body: this.groupItemsByType(relatedItems.concat(results))
     };
   }
@@ -146,7 +146,7 @@ class LogWatcher extends BaseWatcher {
       this.type,
     ]);
     return {
-        status: 200,
+        statusCode: 200,
         body: this.groupItemsByType(results)
     };
   }
@@ -183,7 +183,7 @@ class LogWatcher extends BaseWatcher {
     )) as [any[]];
 
     return {
-      status: 200,
+      statusCode: 200,
       body: { results, count: this.formatValue(countResults[0].total, true) }
     };
   }
@@ -225,7 +225,7 @@ class LogWatcher extends BaseWatcher {
     )) as [any];
 
     return {
-      status: 200,
+      statusCode: 200,
       body: { results, count: this.formatValue(countResult[0].total, true) }
     };
   }
@@ -301,7 +301,7 @@ class LogWatcher extends BaseWatcher {
     const countFormattedData = this.countGraphData(results, period as string);
 
     return {
-      status: 200,
+      statusCode: 200,
       body: {
         results,
         countFormattedData,

@@ -51,7 +51,7 @@ class JobWatcher extends BaseWatcher {
 
     results = results.concat(relatedItems);
     return {
-      status: 200,
+      statusCode: 200,
       body: this.groupItemsByType(results)
     };
   }
@@ -97,7 +97,7 @@ class JobWatcher extends BaseWatcher {
     );
 
     return {
-        status: 200,
+        statusCode: 200,
         body: this.groupItemsByType(results)
     };
   }
@@ -144,7 +144,7 @@ class JobWatcher extends BaseWatcher {
         ? (countResult[0].total / 1000).toFixed(2) + "K"
         : countResult[0].total;
     return {
-      status: 200,
+      statusCode: 200,
       body: { results, count }
     };
   }
@@ -204,7 +204,7 @@ class JobWatcher extends BaseWatcher {
     )) as [any[]];
 
     return {
-      status: 200,
+      statusCode: 200,
       body: { results, count: this.formatValue(countResult[0].total, true) }
     };
   }
@@ -291,7 +291,7 @@ class JobWatcher extends BaseWatcher {
     );
 
     return {
-      status: 200,
+      statusCode: 200,
       body: {
         countFormattedData,
         durationFormattedData,

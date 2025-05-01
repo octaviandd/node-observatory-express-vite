@@ -75,10 +75,7 @@ class QueryWatcher extends BaseWatcher {
       [...params, this.type],
     );
 
-    return {
-      status: 200,
-      body: this.groupItemsByType(relatedItems.concat(results))
-    };
+    return this.groupItemsByType(relatedItems.concat(results));
   }
 
   /**
@@ -114,10 +111,7 @@ class QueryWatcher extends BaseWatcher {
       [sourceId],
     );
 
-    return {
-      status: 200,
-      body: this.groupItemsByType(results)
-    };
+    return this.groupItemsByType(results);
   }
 
   /**
@@ -148,14 +142,11 @@ class QueryWatcher extends BaseWatcher {
     );
 
     return {
-      status: 200,
-      body: {
-        results,
-        count:
-          countResult[0].total > 999
-            ? (countResult[0].total / 1000).toFixed(2) + "K"
-            : countResult[0].total,
-      }
+      results,
+      count:
+        countResult[0].total > 999
+          ? (countResult[0].total / 1000).toFixed(2) + "K"
+          : countResult[0].total,
     };
   }
 
@@ -210,14 +201,11 @@ class QueryWatcher extends BaseWatcher {
     );
 
     return {
-      status: 200,
-      body: {
-        results,
-        count:
-          countResult[0].total > 999
-            ? (countResult[0].total / 1000).toFixed(2) + "K"
-            : countResult[0].total,
-      }
+      results,
+      count:
+        countResult[0].total > 999
+          ? (countResult[0].total / 1000).toFixed(2) + "K"
+          : countResult[0].total,
     };
   }
 
@@ -287,18 +275,15 @@ class QueryWatcher extends BaseWatcher {
     );
 
     return {
-      status: 200,
-      body: {
-        countFormattedData,
-        durationFormattedData,
-        count: this.formatValue(aggregateResults.total, true),
-        indexCountOne: this.formatValue(aggregateResults.completed, true),
-        indexCountTwo: this.formatValue(aggregateResults.failed, true),
-        shortest: this.formatValue(aggregateResults.shortest),
-        longest: this.formatValue(aggregateResults.longest),
-        average: this.formatValue(aggregateResults.average),
-        p95: this.formatValue(aggregateResults.p95),
-      }
+      countFormattedData,
+      durationFormattedData,
+      count: this.formatValue(aggregateResults.total, true),
+      indexCountOne: this.formatValue(aggregateResults.completed, true),
+      indexCountTwo: this.formatValue(aggregateResults.failed, true),
+      shortest: this.formatValue(aggregateResults.shortest),
+      longest: this.formatValue(aggregateResults.longest),
+      average: this.formatValue(aggregateResults.average),
+      p95: this.formatValue(aggregateResults.p95),
     };
   }
 

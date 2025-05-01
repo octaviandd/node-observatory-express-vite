@@ -41,7 +41,7 @@ export default function CachePreview() {
   const getItem = async () => {
     setData({ ...data, loading: true });
     try {
-      const response = await fetch(`/observatory-api/data/cache/${params.id}`);
+      const response = await fetch(`/ui/cache/${params.id}`);
       if (!response.ok) {
         throw new Error("Failed to fetch cache data");
       }

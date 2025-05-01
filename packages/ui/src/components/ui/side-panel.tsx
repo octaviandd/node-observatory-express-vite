@@ -81,7 +81,7 @@ export default function SidePanel({
   const getRelatedData = async () => {
     setLoading(true);
     const response = await fetch(
-      `/observatory-api/data/${type}/${modelId}/related`,
+      `/ui/${type}/${modelId}/related`,
       {
         method: "POST",
         headers: {

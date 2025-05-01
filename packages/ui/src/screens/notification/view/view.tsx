@@ -43,7 +43,7 @@ export default function NotificationView() {
     try {
       setData((prev) => ({ ...prev, loading: true }));
       const response = await fetch(
-        `/observatory-api/data/notifications/${params.id}`,
+        `/ui/notifications/${params.id}`,
       );
       if (!response.ok) {
         throw new Error("Failed to fetch notification data");

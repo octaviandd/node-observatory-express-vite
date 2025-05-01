@@ -64,7 +64,7 @@ export default function RequestPreview() {
     setError(null);
     try {
       const response = await fetch(
-        `/observatory-api/data/requests/${params.id}`,
+        `/ui/requests/${params.id}`,
       );
       if (!response.ok) {
         throw new Error("Failed to fetch request data");

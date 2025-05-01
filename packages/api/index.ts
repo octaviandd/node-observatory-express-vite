@@ -85,7 +85,9 @@ export const watchers: any = {
  */
 export async function createObserver(
   serverAdapter: IServerAdapter,
-  options: any,
+  options: {
+    uiBasePath?: string,
+  },
   driver: StoreDriver,
   connection: Connection | PromiseConnection,
   redisClient: ReturnType<typeof createClient>,
@@ -110,25 +112,17 @@ export async function createObserver(
   } = instanceCreator(driver, connection, redisClient, serverAdapter);
 
   watchers.requests = requestWatcherInstance;
-  process.env.NODE_OBSERVATORY_ERRORS &&
-    (watchers.errors = exceptionWatcherInstance);
-  process.env.NODE_OBSERVATORY_HTTP &&
-    (watchers.http = httpClientWatcherInstance);
-  process.env.NODE_OBSERVATORY_JOBS && (watchers.jobs = jobWatcherInstance);
-  process.env.NODE_OBSERVATORY_LOGGING &&
-    (watchers.logging = logWatcherInstance);
-  process.env.NODE_OBSERVATORY_SCHEDULER &&
-    (watchers.scheduler = scheduleWatcherInstance);
-  process.env.NODE_OBSERVATORY_MAILER &&
-    (watchers.mailer = mailWatcherInstance);
-  process.env.NODE_OBSERVATORY_CACHE && (watchers.cache = cacheWatcherInstance);
-  process.env.NODE_OBSERVATORY_NOTIFICATIONS &&
-    (watchers.notifications = notificationWatcherInstance);
-  process.env.NODE_OBSERVATORY_QUERIES &&
-    (watchers.query = queryWatcherInstance);
-  process.env.NODE_OBSERVATORY_VIEWS && (watchers.view = viewWatcherInstance);
-  process.env.NODE_OBSERVATORY_MODELS &&
-    (watchers.model = modelWatcherInstance);
+  watchers.errors = exceptionWatcherInstance;
+  watchers.http = httpClientWatcherInstance;
+  watchers.jobs = jobWatcherInstance;
+  watchers.logging = logWatcherInstance;
+  watchers.scheduler = scheduleWatcherInstance;
+  watchers.mailer = mailWatcherInstance;
+  watchers.cache = cacheWatcherInstance;
+  watchers.notifications = notificationWatcherInstance;
+  watchers.query = queryWatcherInstance;
+  watchers.view = viewWatcherInstance;
+  watchers.model = modelWatcherInstance;
 
   // looks for the module in node modules and returns the path of the package in node modules. 
   const uiBasePath =
@@ -136,9 +130,46 @@ export async function createObserver(
 
   const uiEntryRoute : AppViewRoute = {
     method: 'get',
-    route: '/',
+    route: [
+      '/',
+      '/mails',
+      '/mails/:key',
+      '/mail/:id',
+      '/exceptions',
+      '/exceptions/:key',
+      '/exception/:id',
+      '/logs',
+      '/logs/:key',
+      '/log/:id',
+      '/notifications',
+      '/notifications/:key',
+      '/notification/:id',
+      '/jobs',
+      '/jobs/:key',
+      '/job/:id',
+      '/caches',
+      '/caches/:key',
+      '/cache/:id',
+      '/queries',
+      '/queries/:key',
+      '/query/:id',
+      '/models',
+      '/models/:key',
+      '/model/:id',
+      '/requests',
+      '/requests/:key',
+      '/request/:id',
+      '/schedules',
+      '/schedules/:key',
+      '/schedule/:id',
+      '/https',
+      '/https/:key',
+      '/http/:id',
+      '/views',
+      '/views/:key',
+      '/view/:id'
+    ],
     handler: ({ basePath }: { basePath: string }) => {
-      console.log(basePath)
       return {
         name: "index.html", params: { basePath }
       }
@@ -149,6 +180,7 @@ export async function createObserver(
     .setStaticPath('/', path.join(uiBasePath, 'dist'))
     .setStaticPath('/assets', path.join(uiBasePath, 'dist/assets'))
     .setEntryRoute(uiEntryRoute)
+    .setApiRoutes(apiRoutes)
     .setErrorHandler((error : Error & { statusCode: HTTPStatus }) => ({
       status: error.statusCode || 500,
       body: {
@@ -157,7 +189,6 @@ export async function createObserver(
         details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
       },
     }))
-    .setApiRoutes(apiRoutes)
 }
 
 /**

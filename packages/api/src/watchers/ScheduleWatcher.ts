@@ -47,10 +47,7 @@ class ScheduleWatcher extends BaseWatcher {
     );
 
     results = results.concat(relatedItems);
-    return {
-      status: 200,
-      body: this.groupItemsByType(results)
-    };
+    return this.groupItemsByType(results);
   }
 
   /**
@@ -62,21 +59,11 @@ class ScheduleWatcher extends BaseWatcher {
     jobId: string,
     scheduleId: string,
   ): Promise<any> {
-
-    if (!requestId && !jobId && !scheduleId) {
-      return {
-        status: 504
-      };
-    }
-
     const [results]: [any[], any] = await this.storeConnection.query(
       "SELECT * FROM observatory_entries WHERE request_id = ? AND job_id = ? AND schedule_id = ? AND type != ?",
       [requestId, jobId, scheduleId, this.type],
     );
-    return {
-      status: 200,
-      body: this.groupItemsByType(results)
-    };
+    return this.groupItemsByType(results);
   }
 
   /**
@@ -100,10 +87,7 @@ class ScheduleWatcher extends BaseWatcher {
       `SELECT COUNT(*) AS total FROM observatory_entries WHERE type = 'schedule' ${statusSql} ${querySql} ${periodSql} ${scheduleSql}`,
     )) as [any[]];
 
-    return {
-      status: 200,
-      body: { results, count: this.formatValue(countResult[0].total, true) }
-    };
+    return { results, count: this.formatValue(countResult[0].total, true) };
   }
 
   /**
@@ -162,10 +146,7 @@ class ScheduleWatcher extends BaseWatcher {
           WHERE type = 'schedule' ${timeSql} ${querySql} AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed');`,
     )) as [any];
 
-    return {
-      status: 200,
-      body: { results, count: this.formatValue(countResult[0].total, true) }
-    };
+    return { results, count: this.formatValue(countResult[0].total, true) };
   }
 
   /**
@@ -248,18 +229,15 @@ class ScheduleWatcher extends BaseWatcher {
     );
 
     return {
-      status: 200,
-      body: {
-        countFormattedData,
-        durationFormattedData,
-        count: this.formatValue(countResult[0].total, true),
-        indexCountOne: this.formatValue(aggregateResults.completed, true),
-        indexCountTwo: this.formatValue(aggregateResults.failed, true),
-        shortest: this.formatValue(aggregateResults.shortest),
-        longest: this.formatValue(aggregateResults.longest),
-        average: this.formatValue(aggregateResults.average),
-        p95: this.formatValue(aggregateResults.p95),
-      }
+      countFormattedData,
+      durationFormattedData,
+      count: this.formatValue(countResult[0].total, true),
+      indexCountOne: this.formatValue(aggregateResults.completed, true),
+      indexCountTwo: this.formatValue(aggregateResults.failed, true),
+      shortest: this.formatValue(aggregateResults.shortest),
+      longest: this.formatValue(aggregateResults.longest),
+      average: this.formatValue(aggregateResults.average),
+      p95: this.formatValue(aggregateResults.p95),
     };
   }
 

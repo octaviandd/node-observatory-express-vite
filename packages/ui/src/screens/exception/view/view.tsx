@@ -45,7 +45,7 @@ export default function ExceptionView() {
       loading: true,
     });
     try {
-      const response = await fetch(`/observatory-api/data/exceptions/${params.id}`);
+      const response = await fetch(`/ui/exceptions/${params.id}`);
       if (!response.ok) {
         throw new Error("Failed to fetch exception data");
       }

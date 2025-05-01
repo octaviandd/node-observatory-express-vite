@@ -65,7 +65,7 @@ export default function JobPreview() {
   const getItem = async () => {
     setData((prevState) => ({ ...prevState, loading: true }));
     try {
-      const response = await fetch(`/observatory-api/data/jobs/${params.id}`);
+      const response = await fetch(`/ui/jobs/${params.id}`);
       if (!response.ok) {
         throw new Error("Failed to fetch job data");
       }

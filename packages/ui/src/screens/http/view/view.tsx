@@ -41,7 +41,7 @@ export default function HTTPView() {
   const getItem = async () => {
     setData((prevState) => ({ ...prevState, loading: true }));
     try {
-      const response = await fetch(`/observatory-api/data/http/${params.id}`);
+      const response = await fetch(`/ui/http/${params.id}`);
       if (!response.ok) {
         throw new Error("Failed to fetch HTTP data");
       }

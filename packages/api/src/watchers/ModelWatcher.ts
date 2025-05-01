@@ -68,7 +68,7 @@ class ModelWatcher extends BaseWatcher {
 
     if (!item.request_id && !item.schedule_id && !item.job_id) {
       return {
-        status: 200,
+        statusCode: 200,
         body: this.groupItemsByType(results)
       };
     }
@@ -82,7 +82,7 @@ class ModelWatcher extends BaseWatcher {
     );
 
     return {
-      status: 200,
+      statusCode: 200,
       body: this.groupItemsByType(relatedItems.concat(results))
     };
   }
@@ -124,7 +124,7 @@ class ModelWatcher extends BaseWatcher {
       this.type,
     ]);
     return {
-      status: 200,
+      statusCode: 200,
       body: this.groupItemsByType(results)
     };
   }
@@ -156,7 +156,7 @@ class ModelWatcher extends BaseWatcher {
     );
 
     return {
-      status: 200,
+      statusCode: 200,
       body: { results, count: this.formatValue(countResult[0].total, true) }
     };
   }
@@ -211,7 +211,7 @@ class ModelWatcher extends BaseWatcher {
     );
 
     return {
-      status: 200,
+      statusCode: 200,
       body: { results, count: this.formatValue(countResult[0].total, true) }
     };
   }
@@ -290,7 +290,7 @@ class ModelWatcher extends BaseWatcher {
     );
 
     return {
-      status: 200,
+      statusCode: 200,
       body: {
         results,
         countFormattedData,

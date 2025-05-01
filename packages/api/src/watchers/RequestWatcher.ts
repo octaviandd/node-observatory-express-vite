@@ -31,10 +31,7 @@ class RequestWatcher extends BaseWatcher {
       [id, id],
     );
 
-    return {
-      status: 200,
-      body: this.groupItemsByType(results)
-    };
+    return this.groupItemsByType(results);
   }
 
   /**
@@ -47,10 +44,7 @@ class RequestWatcher extends BaseWatcher {
       [requestId],
     );
 
-    return {
-      status: 200,
-      body: this.groupItemsByType(results)
-    };
+    return this.groupItemsByType(results);
   }
 
   /**
@@ -74,10 +68,7 @@ class RequestWatcher extends BaseWatcher {
       `SELECT COUNT(*) AS total FROM observatory_entries WHERE type = 'request' ${routeSql} ${querySql} ${periodSql} ${statusSql} AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0'`,
     )) as [any[]];
 
-    return {
-      status: 200,
-      body: { results, count: this.formatValue(countResult[0].total, true) }
-    };
+    return { results, count: this.formatValue(countResult[0].total, true) };
   }
 
   /**
@@ -129,10 +120,7 @@ class RequestWatcher extends BaseWatcher {
       `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.route'))) as total FROM observatory_entries WHERE type = 'request' ${routeSQL} ${timeSQL} ${querySQL} AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0'`,
     )) as [any[]];
 
-    return {
-      status: 200,
-      body: { results, count: this.formatValue(countResult[0].total, true) }
-    };
+    return { results, count: this.formatValue(countResult[0].total, true) };
   }
 
   /**
@@ -215,19 +203,16 @@ class RequestWatcher extends BaseWatcher {
     );
 
     return {
-      status: 200,
-      body: {
-        countFormattedData,
-        durationFormattedData,
-        indexCountOne: this.formatValue(aggregateResults.count_200, true),
-        indexCountTwo: this.formatValue(aggregateResults.count_400, true),
-        indexCountThree: this.formatValue(aggregateResults.count_500, true),
-        count: this.formatValue(aggregateResults.total, true),
-        shortest: this.formatValue(aggregateResults.shortest),
-        longest: this.formatValue(aggregateResults.longest),
-        average: this.formatValue(aggregateResults.average),
-        p95: this.formatValue(aggregateResults.p95),
-      }
+      countFormattedData,
+      durationFormattedData,
+      indexCountOne: this.formatValue(aggregateResults.count_200, true),
+      indexCountTwo: this.formatValue(aggregateResults.count_400, true),
+      indexCountThree: this.formatValue(aggregateResults.count_500, true),
+      count: this.formatValue(aggregateResults.total, true),
+      shortest: this.formatValue(aggregateResults.shortest),
+      longest: this.formatValue(aggregateResults.longest),
+      average: this.formatValue(aggregateResults.average),
+      p95: this.formatValue(aggregateResults.p95),
     };
   }
 

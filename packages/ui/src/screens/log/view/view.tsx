@@ -42,7 +42,7 @@ export default function LogView() {
   const getItem = async () => {
     try {
       setData((prevState) => ({ ...prevState, loading: true }));
-      const response = await fetch(`/observatory-api/data/logs/${params.id}`);
+      const response = await fetch(`/ui/logs/${params.id}`);
       const { request, log, job, schedule } = await response.json();
 
       setData((prevState) => ({

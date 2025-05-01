@@ -186,7 +186,7 @@ http://your-app-host/observatory
 
 
 The API for retrieving observability data is available at:
-http://your-app-host/observatory-api/data
+http://your-app-host/ui
 
 ## 📦 Package Structure
 

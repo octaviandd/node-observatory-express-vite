@@ -66,10 +66,7 @@ class NotificationWatcher extends BaseWatcher {
     }
 
     if (!item.request_id && !item.schedule_id && !item.job_id) {
-      return {
-        status: 200,
-        body: this.groupItemsByType(results)
-      };
+      return this.groupItemsByType(results);
     }
 
     const [relatedItems]: [any[], any] = await this.storeConnection.query(
@@ -80,10 +77,7 @@ class NotificationWatcher extends BaseWatcher {
       [...params, this.type],
     );
 
-    return {
-      status: 200,
-      body: this.groupItemsByType(relatedItems.concat(results))
-    };
+    return this.groupItemsByType(relatedItems.concat(results));
   }
 
   /**
@@ -113,18 +107,13 @@ class NotificationWatcher extends BaseWatcher {
     }
 
     if (!requestId && !jobId && !scheduleId) {
-      return {
-        status: 504
-      };
+      return {};
     }
 
     const [results]: [any[], any] = await this.storeConnection.query(query, [
       this.type,
     ]);
-    return {
-      status: 200,
-      body: this.groupItemsByType(results)
-    };
+    return this.groupItemsByType(results);
   }
 
   /**
@@ -154,10 +143,7 @@ class NotificationWatcher extends BaseWatcher {
        AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) != 'pending'`,
     );
 
-    return {
-      status: 200,
-      body: { results, count: this.formatValue(countResult[0].total, true) }
-    };
+    return { results, count: this.formatValue(countResult[0].total, true) };
   }
 
   /**
@@ -208,10 +194,7 @@ class NotificationWatcher extends BaseWatcher {
       `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.channel'))) as total FROM observatory_entries WHERE type = 'notification' ${channelSql} ${timeSql}`,
     )) as [any[]];
 
-    return {
-      status: 200,
-      body: { results, count: this.formatValue(countResult[0].total, true) }
-    };
+    return { results, count: this.formatValue(countResult[0].total, true) };
   }
 
   /**
@@ -290,18 +273,15 @@ class NotificationWatcher extends BaseWatcher {
     );
 
     return {
-      status: 200,
-      body: {
-        countFormattedData,
-        durationFormattedData,
-        count: this.formatValue(aggregateResults.total, true),
-        indexCountOne: this.formatValue(aggregateResults.completed, true),
-        indexCountTwo: this.formatValue(aggregateResults.failed, true),
-        shortest: this.formatValue(aggregateResults.shortest),
-        longest: this.formatValue(aggregateResults.longest),
-        average: this.formatValue(aggregateResults.average),
-        p95: this.formatValue(aggregateResults.p95),
-      }
+      countFormattedData,
+      durationFormattedData,
+      count: this.formatValue(aggregateResults.total, true),
+      indexCountOne: this.formatValue(aggregateResults.completed, true),
+      indexCountTwo: this.formatValue(aggregateResults.failed, true),
+      shortest: this.formatValue(aggregateResults.shortest),
+      longest: this.formatValue(aggregateResults.longest),
+      average: this.formatValue(aggregateResults.average),
+      p95: this.formatValue(aggregateResults.p95),
     };
   }
 

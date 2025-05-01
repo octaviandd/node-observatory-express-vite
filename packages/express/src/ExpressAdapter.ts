@@ -21,9 +21,6 @@ export class ExpressAdapter {
   public setStaticPath(staticsRoute: string, staticsPath: string): ExpressAdapter {
     this.app.use(staticsRoute, express.static(staticsPath));
 
-    console.log(`Setting static path: ${staticsRoute} -> ${staticsPath}`);
-    console.log(`Path exists: ${require('fs').existsSync(staticsPath)}`);
-
     return this;
   }
 
