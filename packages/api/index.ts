@@ -179,6 +179,7 @@ export async function createObserver(
   serverAdapter
     .setStaticPath('/', path.join(uiBasePath, 'dist'))
     .setStaticPath('/assets', path.join(uiBasePath, 'dist/assets'))
+    .setViewsPath(path.join(uiBasePath, 'dist'))
     .setEntryRoute(uiEntryRoute)
     .setApiRoutes(apiRoutes)
     .setErrorHandler((error : Error & { statusCode: HTTPStatus }) => ({

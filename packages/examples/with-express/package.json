@@ -9,8 +9,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@node-observatory/api": "^1.1.5",
-    "@node-observatory/express": "^1.0.4",
+    "@node-observatory/api": "^1.1.8",
+    "@node-observatory/express": "^1.0.8",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "mysql2": "^3.14.0",

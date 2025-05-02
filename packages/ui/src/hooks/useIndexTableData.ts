@@ -59,7 +59,7 @@ export const useIndexTableData = <TInstance, TGroup>({
   const getDataByGroup = async (addedNewItems = false) => {
     if (addedNewItems) offsetRef.current += 20;
 
-    const url = `/ui/${key}?table=true&offset=${offsetRef.current}&index=${index}&period=${
+    const url = `/ui/api/${key}?table=true&offset=${offsetRef.current}&index=${index}&period=${
       state.period
     }${inputValue ? `&q=${inputValue}` : ""}${
       instanceStatusType
@@ -76,7 +76,7 @@ export const useIndexTableData = <TInstance, TGroup>({
   const getDataByInstance = async (addedNewItems = false) => {
     if (addedNewItems) offsetRef.current += 20;
 
-    const url = `/ui/${key}?table=true&offset=${offsetRef.current}&index=${index}&period=${
+    const url = `/ui/api/${key}?table=true&offset=${offsetRef.current}&index=${index}&period=${
       state.period
     }${inputValue ? `&q=${inputValue}` : ""}${
       modelKey ? `&key=${modelKey}` : ""

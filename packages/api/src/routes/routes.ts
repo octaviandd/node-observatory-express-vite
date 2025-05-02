@@ -11,247 +11,247 @@ export interface ObservatoryBoardRequest {
 const apiRoutes : AppControllerRoute[] = [
   {
     method: 'get',
-    route: '/',
+    route: '/api/',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.dashboard.getIndex(request)
   },
   {
     method: 'get',
-    route: '/requests',
+    route: '/api/requests',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.requests.getIndex(request)
   },
   {
     method: 'get',
-    route: '/requests/:id',
+    route: '/api/requests/:id',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.requests.getView(request)
   },
   {
     method: 'post',
-    route: '/requests/:id/related',
+    route: '/api/requests/:id/related',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.requests.getRelatedData(request)
   },
   {
     method: 'get',
-    route: '/requests/refresh',
+    route: '/api/requests/refresh',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.requests.refreshData(request)
   },
   {
     method: 'get',
-    route: '/queries',
+    route: '/api/queries',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.query.getIndex(request)
   },
   {
     method: 'get',
-    route: '/queries/:id',
+    route: '/api/queries/:id',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.query.getView(request)
   },
   {
     method: 'post',
-    route: '/queries/:id/related',
+    route: '/api/queries/:id/related',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.query.getRelatedData(request)
   },
   {
     method: 'get',
-    route: '/queries/refresh',
+    route: '/api/queries/refresh',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.query.refreshData(request)
   },
   {
     method: 'get',
-    route: '/notifications',
+    route: '/api/notifications',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.notifications.getIndex(request)
   },
   {
     method: 'get',
-    route: '/notifications/:id',
+    route: '/api/notifications/:id',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.notifications.getView(request)
   },
   {
     method: 'post',
-    route: '/notifications/:id/related',
+    route: '/api/notifications/:id/related',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.notifications.getRelatedData(request)
   },
   {
     method: 'get',
-    route: '/notifications/refresh',
+    route: '/api/notifications/refresh',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.notifications.refreshData(request)
   },
   {
     method: 'get',
-    route: '/mails',
+    route: '/api/mails',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.mailer.getIndex(request)
   },
   {
     method: 'get',
-    route: '/mails/:id',
+    route: '/api/mails/:id',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.mailer.getView(request)
   },
   {
     method: 'post',
-    route: '/mails/:id/related',
+    route: '/api/mails/:id/related',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.mailer.getRelatedData(request)
   },
   {
     method: 'get',
-    route: '/mails/refresh',
+    route: '/api/mails/refresh',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.mailer.refreshData(request)
   },
   {
     method: 'get',
-    route: '/exceptions',
+    route: '/api/exceptions',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.errors.getIndex(request)
   },
   {
     method: 'get',
-    route: '/exceptions/:id',
+    route: '/api/exceptions/:id',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.errors.getView(request)
   },
   {
     method: 'post',
-    route: '/exceptions/:id/related',
+    route: '/api/exceptions/:id/related',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.errors.getRelatedData(request)
   },
   {
     method: 'get',
-    route: '/exceptions/refresh',
+    route: '/api/exceptions/refresh',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.errors.refreshData(request)
   },
   {
     method: 'get',
-    route: '/jobs',
+    route: '/api/jobs',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.jobs.getIndex(request)
   },
   {
     method: 'get',
-    route: '/jobs/:id',
+    route: '/api/jobs/:id',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.jobs.getView(request)
   },
   {
     method: 'post',
-    route: '/jobs/:id/related',
+    route: '/api/jobs/:id/related',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.jobs.getRelatedData(request)
   },
   {
     method: 'get',
-    route: '/jobs/refresh',
+    route: '/api/jobs/refresh',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.jobs.refreshData(request)
   },
   {
     method: 'get',
-    route: '/schedules',
+    route: '/api/schedules',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.scheduler.getIndex(request)
   },
   {
     method: 'get',
-    route: '/schedules/:id',
+    route: '/api/schedules/:id',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.scheduler.getView(request)
   },
   {
     method: 'post',
-    route: '/schedules/:id/related',
+    route: '/api/schedules/:id/related',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.scheduler.getRelatedData(request)
   },
   {
     method: 'get',
-    route: '/schedules/refresh',
+    route: '/api/schedules/refresh',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.scheduler.refreshData(request)
   },
   {
     method: 'get',
-    route: '/https',
+    route: '/api/https',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.http.getIndex(request)
   },
   {
     method: 'get',
-    route: '/http/:id',
+    route: '/api/http/:id',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.http.getView(request)
   },
   {
     method: 'post',
-    route: '/http/:id/related',
+    route: '/api/http/:id/related',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.http.getRelatedData(request)
   },
   {
     method: 'get',
-    route: '/http/refresh',
+    route: '/api/http/refresh',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.http.refreshData(request)
   },
   {
     method: 'get',
-    route: '/cache',
+    route: '/api/cache',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.cache.getIndex(request)
   },
   {
     method: 'get',
-    route: '/cache/:id',
+    route: '/api/cache/:id',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.cache.getView(request)
   },
   {
     method: 'post',
-    route: '/cache/:id/related',
+    route: '/api/cache/:id/related',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.cache.getRelatedData(request)
   },
   {
     method: 'get',
-    route: '/cache/refresh',
+    route: '/api/cache/refresh',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.cache.refreshData(request)
   },
   {
     method: 'get',
-    route: '/logs',
+    route: '/api/logs',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.logging.getIndex(request)
   },
   {
     method: 'get',
-    route: '/logs/:id',
+    route: '/api/logs/:id',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.logging.getView(request)
   },
   {
     method: 'post',
-    route: '/logs/:id/related',
+    route: '/api/logs/:id/related',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.logging.getRelatedData(request)
   },
   {
     method: 'get',
-    route: '/logs/refresh',
+    route: '/api/logs/refresh',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.logging.refreshData(request)
   },
   {
     method: 'get',
-    route: '/views',
+    route: '/api/views',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.view.getIndex(request)
   },
   {
     method: 'get',
-    route: '/views/:id',
+    route: '/api/views/:id',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.view.getView(request)
   },
   {
     method: 'get', 
-    route: '/views/refresh',
+    route: '/api/views/refresh',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.view.refreshData(request)
   },
   {
     method: 'post',
-    route: '/views/:id/related',
+    route: '/api/views/:id/related',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.view.getRelatedData(request)
   },
   {
     method: 'get',
-    route: '/models',
+    route: '/api/models',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.model.getIndex(request)
   },
   {
     method: 'get',
-    route: '/models/:id',
+    route: '/api/models/:id',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.model.getView(request)
   },
   {
     method: 'post',
-    route: '/models/:id/related',
+    route: '/api/models/:id/related',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.model.getRelatedData(request)
   },
   {
     method: 'get',
-    route: '/models/refresh',
+    route: '/api/models/refresh',
     handler: (request?: ObservatoryBoardRequest) : Promisify<ControllerHandlerReturnType> => watchers.model.refreshData(request)
   }
 ];

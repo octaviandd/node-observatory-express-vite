@@ -2,6 +2,7 @@ import ejs from 'ejs';
 import express, { Express, Request, Response, Router } from 'express';
 import { wrapAsync } from './helpers/wrapAsync';
 import { AppControllerRoute, AppViewRoute, ControllerHandlerReturnType, HTTPMethod, HTTPStatus } from "../../api/dist/types"
+import path from "path";
 
 export class ExpressAdapter {
   protected readonly app: Express;
@@ -33,7 +34,7 @@ export class ExpressAdapter {
   }
 
   public setViewsPath(viewPath: string): ExpressAdapter {
-    this.app.set('view engine', 'ejs').set('views', viewPath);
+    this.app.set('views', viewPath);
     this.app.engine('ejs', ejs.renderFile);
 
     return this;
@@ -83,14 +84,26 @@ export class ExpressAdapter {
 
   public setEntryRoute(routeDef: AppViewRoute): ExpressAdapter {
     const viewHandler = (_req: Request, res: Response) => {
-      const { name, params } = routeDef.handler({
-        basePath: this.basePath,
-      });
+      const { name } = routeDef.handler({
+      basePath: this.basePath,
+    });
 
-      res.render(name, params);
+    const fullPath = path.join(this.app.get('views'), name);
+      res.sendFile(fullPath, (err) => {
+        if (err) {
+          console.error(`Failed to serve ${fullPath}:`, err);
+          res.status(500).send('Error serving the application');
+        }
+      });
     };
 
-    this.app[routeDef.method](routeDef.route, viewHandler);
+    if (Array.isArray(routeDef.route)) {
+      routeDef.route.forEach(route => {
+        this.app[routeDef.method](route, viewHandler);
+      });
+    } else {
+      this.app[routeDef.method](routeDef.route, viewHandler);
+    }
     return this;
   }
 

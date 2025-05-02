@@ -151,7 +151,7 @@ export const AppSidebar = memo(
             to="/"
             className="flex items-center gap-2 px-4 py-5 text-2xl font-semibold border-b"
           >
-            <img src="/neural-network.png" alt="" className="w-8" />
+            <img src="/ui/neural-network.png" alt="" className="w-8" />
             <span className="ml-2">Observatory</span>
           </Link>
           <Link to="/" className="flex items-center text-lg gap-2 px-2 py-2">
