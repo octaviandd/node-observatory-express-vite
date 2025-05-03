@@ -1,6 +1,4 @@
 /** @format */
-
-// Essential imports for patching and types
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
 import type {
@@ -10,22 +8,19 @@ import type {
 } from "express";
 import { v4 as uuidv4 } from "uuid";
 import path from "path";
+import { watchers } from "../../index";
+import { requestLocalStorage } from "./store";
 
-// Imports for application-specific logic (Assume these exist)
-import { watchers } from "../../index"; // Your logging mechanism
-import { requestLocalStorage } from "./store"; // Your AsyncLocalStorage instance
+const OBSERVATORY_SKIP_MARKER = Symbol.for("node-observatory:skip-logging");
 
 // Symbol to prevent double patching
 const EXPRESS_PATCHED_SYMBOL = Symbol.for("node-observer:express-patched");
 const MAX_PAYLOAD_SIZE = 1024 * 50; // 50KB
 
-// --- Main Patching Logic ---
-
 if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
   (global as any)[EXPRESS_PATCHED_SYMBOL] = true;
 
   new Hook(["express"], function (exports: any, name, basedir) {
-    // Pre-checks for essential Express exports
     if (!exports?.application?.handle) {
       return exports;
     }
@@ -42,9 +37,15 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
         res: ExpressResponse,
         next: NextFunction,
       ) {
-        if (req.url && req.url.includes("observatory-api")) {
+
+        if (req.originalUrl && (
+          req.originalUrl.includes("/ui/") || 
+          // Observatory-specific API paths
+          /\/api\/(requests|queries|notifications|mails|exceptions|jobs|schedules|https?|cache|logs|views|models)/.test(req.originalUrl)
+        )) {
           return originalAppHandle.call(this, req, res, next);
         }
+
         const isSSEConnection =
           res.getHeader("Content-Type") === "text/event-stream" ||
           (req.headers.accept &&
@@ -234,7 +235,9 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
 
               // Send to your logging system
               if (watchers?.requests) {
-                watchers.requests.addContent(logContent);
+                if (req.originalUrl && !(req.originalUrl.includes("/ui/"))) {
+                  watchers.requests.addContent(logContent);
+                }
               }
             }
 

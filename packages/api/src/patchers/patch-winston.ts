@@ -8,6 +8,9 @@ import { getCallerInfo } from "../../utils";
 // Create a global symbol to track if winston has been patched
 const WINSTON_PATCHED_SYMBOL = Symbol.for("node-observer:winston-patched");
 
+const winstonModule = require.resolve('winston');
+console.log(winstonModule)
+
 if (
   process.env.NODE_OBSERVATORY_LOGGING &&
   JSON.parse(process.env.NODE_OBSERVATORY_LOGGING).includes("winston")
@@ -22,12 +25,8 @@ if (
       name: string,
       basedir: string | undefined,
     ) {
-      // `exports` is the Winston module
-      // We can patch Winston's logger creation functions or the default logger.
+      console.log('Patching winston..')
 
-      //
-      // 2. Patch `createLogger`, so every logger instance gets patched
-      //
       shimmer.wrap(exports, "createLogger", function (originalCreateLogger) {
         return function patchedCreateLogger(this: any, ...loggerArgs: any[]) {
           const loggerInstance = originalCreateLogger.apply(this, loggerArgs);

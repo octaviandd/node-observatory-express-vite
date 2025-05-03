@@ -69,10 +69,7 @@ class ExceptionWatcher extends BaseWatcher {
     }
 
     if (!item.request_id && !item.schedule_id && !item.job_id) {
-      return {
-        body: this.groupItemsByType(results),
-        statusCode: 200
-      };
+      return this.groupItemsByType(results);
     }
 
     const [relatedItems]: [any[], any] = await this.storeConnection.query(
@@ -83,10 +80,7 @@ class ExceptionWatcher extends BaseWatcher {
       [...params, this.type],
     );
 
-    return {
-      body: this.groupItemsByType(relatedItems.concat(results)),
-      statusCode: 200
-    };
+    return this.groupItemsByType(relatedItems.concat(results));
   }
 
   /**
@@ -116,19 +110,14 @@ class ExceptionWatcher extends BaseWatcher {
     }
 
     if (!requestId && !jobId && !scheduleId) {
-      return {
-        statusCode: 504
-      };
+      return null;
     }
 
     const [results]: [any[], any] = await this.storeConnection.query(query, [
       this.type,
     ]);
 
-    return {
-      body: this.groupItemsByType(results),
-      statusCode: 200
-    };
+    return this.groupItemsByType(results);
   }
 
   /**

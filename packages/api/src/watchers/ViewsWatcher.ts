@@ -43,7 +43,7 @@ class ViewWatcher extends BaseWatcher {
     }
 
     if (!item.request_id && !item.schedule_id && !item.job_id) {
-      return { body: this.groupItemsByType(results), status: 200 }
+      return this.groupItemsByType(results);
     }
 
     const [relatedItems]: [any[], any] = await this.storeConnection.query(

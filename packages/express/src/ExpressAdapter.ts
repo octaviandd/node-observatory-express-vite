@@ -75,7 +75,7 @@ export class ExpressAdapter {
       }
 
       const response = this.errorHandler(err);
-      return res.status(response.status as 500).send(response.body);
+      return res.status(response.status as number).send(response.body);
     });
 
     this.app.use(router);

@@ -1,6 +1,6 @@
 {
   "name": "@node-observatory/api",
-  "version": "1.1.8",
+  "version": "1.2.4",
   "license": "proprietary",
   "private": false,
   "description": "A Nodejs application that provides live monitoring of your application",

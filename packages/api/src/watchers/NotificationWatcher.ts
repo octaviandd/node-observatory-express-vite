@@ -107,7 +107,7 @@ class NotificationWatcher extends BaseWatcher {
     }
 
     if (!requestId && !jobId && !scheduleId) {
-      return {};
+      return null;
     }
 
     const [results]: [any[], any] = await this.storeConnection.query(query, [

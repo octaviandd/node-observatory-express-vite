@@ -67,10 +67,7 @@ class ModelWatcher extends BaseWatcher {
     }
 
     if (!item.request_id && !item.schedule_id && !item.job_id) {
-      return {
-        statusCode: 200,
-        body: this.groupItemsByType(results)
-      };
+      return this.groupItemsByType(results);
     }
 
     const [relatedItems]: [any[], any] = await this.storeConnection.query(
@@ -81,10 +78,7 @@ class ModelWatcher extends BaseWatcher {
       [...params, this.type],
     );
 
-    return {
-      statusCode: 200,
-      body: this.groupItemsByType(relatedItems.concat(results))
-    };
+    return this.groupItemsByType(relatedItems.concat(results));
   }
 
   /**
@@ -115,18 +109,13 @@ class ModelWatcher extends BaseWatcher {
     }
 
     if (!requestId && !jobId && !scheduleId) {
-      return {
-        status: 504
-      };
+      return null;
     }
 
     const [results]: [any[], any] = await this.storeConnection.query(query, [
       this.type,
     ]);
-    return {
-      statusCode: 200,
-      body: this.groupItemsByType(results)
-    };
+    return this.groupItemsByType(results);
   }
 
   /**
@@ -156,8 +145,8 @@ class ModelWatcher extends BaseWatcher {
     );
 
     return {
-      statusCode: 200,
-      body: { results, count: this.formatValue(countResult[0].total, true) }
+      results,
+      count: this.formatValue(countResult[0].total, true)
     };
   }
 
@@ -211,8 +200,8 @@ class ModelWatcher extends BaseWatcher {
     );
 
     return {
-      statusCode: 200,
-      body: { results, count: this.formatValue(countResult[0].total, true) }
+      results,
+      count: this.formatValue(countResult[0].total, true)
     };
   }
 
@@ -290,19 +279,16 @@ class ModelWatcher extends BaseWatcher {
     );
 
     return {
-      statusCode: 200,
-      body: {
-        results,
-        countFormattedData,
-        durationFormattedData,
-        indexCountOne: this.formatValue(aggregateResults.count_completed, true),
-        indexCountTwo: this.formatValue(aggregateResults.count_failed, true),
-        count: this.formatValue(aggregateResults.total, true),
-        shortest: this.formatValue(aggregateResults.shortest),
-        longest: this.formatValue(aggregateResults.longest),
-        average: this.formatValue(aggregateResults.average),
-        p95: this.formatValue(aggregateResults.p95),
-      }
+      results,
+      countFormattedData,
+      durationFormattedData,
+      count: this.formatValue(aggregateResults.total, true),
+      indexCountOne: this.formatValue(aggregateResults.count_completed, true),
+      indexCountTwo: this.formatValue(aggregateResults.count_failed, true),
+      shortest: this.formatValue(aggregateResults.shortest),
+      longest: this.formatValue(aggregateResults.longest),
+      average: this.formatValue(aggregateResults.average),
+      p95: this.formatValue(aggregateResults.p95),
     };
   }
 

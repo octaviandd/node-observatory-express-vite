@@ -41,7 +41,7 @@ export default function ModelPreview() {
   const getItem = async () => {
     try {
       setData((prev) => ({ ...prev, loading: true }));
-      const response = await fetch(`/ui/models/${params.id}`);
+      const response = await fetch(`/ui/api/models/${params.id}`);
       if (!response.ok) {
         throw new Error("Failed to fetch model data");
       }

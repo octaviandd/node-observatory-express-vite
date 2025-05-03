@@ -81,7 +81,7 @@ export default function SidePanel({
   const getRelatedData = async () => {
     setLoading(true);
     const response = await fetch(
-      `/ui/${type}/${modelId}/related`,
+      `/ui/api/${type}/${modelId}/related`,
       {
         method: "POST",
         headers: {

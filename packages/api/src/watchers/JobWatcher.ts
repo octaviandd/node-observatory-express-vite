@@ -50,10 +50,7 @@ class JobWatcher extends BaseWatcher {
     );
 
     results = results.concat(relatedItems);
-    return {
-      statusCode: 200,
-      body: this.groupItemsByType(results)
-    };
+    return this.groupItemsByType(results);
   }
   /**
    * Related Data Methods
@@ -96,10 +93,7 @@ class JobWatcher extends BaseWatcher {
       params,
     );
 
-    return {
-        statusCode: 200,
-        body: this.groupItemsByType(results)
-    };
+    return this.groupItemsByType(results);
   }
 
   /**
@@ -139,14 +133,7 @@ class JobWatcher extends BaseWatcher {
       `SELECT COUNT(*) as total FROM observatory_entries WHERE type = 'job' ${typeSql} ${periodSql} ${queueSql}`,
     )) as [any[]];
 
-    const count =
-      countResult[0].total > 999
-        ? (countResult[0].total / 1000).toFixed(2) + "K"
-        : countResult[0].total;
-    return {
-      statusCode: 200,
-      body: { results, count }
-    };
+    return { results, count: this.formatValue(countResult[0].total, true) };
   }
 
   /**
@@ -204,8 +191,7 @@ class JobWatcher extends BaseWatcher {
     )) as [any[]];
 
     return {
-      statusCode: 200,
-      body: { results, count: this.formatValue(countResult[0].total, true) }
+      results, count: this.formatValue(countResult[0].total, true)
     };
   }
 
@@ -291,19 +277,16 @@ class JobWatcher extends BaseWatcher {
     );
 
     return {
-      statusCode: 200,
-      body: {
-        countFormattedData,
-        durationFormattedData,
-        count: this.formatValue(countResult[0].total, true),
-        indexCountOne: this.formatValue(aggregateResults.completed, true),
-        indexCountTwo: this.formatValue(aggregateResults.released, true),
-        indexCountThree: this.formatValue(aggregateResults.failed, true),
-        shortest: this.formatValue(aggregateResults.shortest),
-        longest: this.formatValue(aggregateResults.longest),
-        average: this.formatValue(aggregateResults.average),
-        p95: this.formatValue(aggregateResults.p95),
-      }
+      countFormattedData,
+      durationFormattedData,
+      count: this.formatValue(countResult[0].total, true),
+      indexCountOne: this.formatValue(aggregateResults.completed, true),
+      indexCountTwo: this.formatValue(aggregateResults.released, true),
+      indexCountThree: this.formatValue(aggregateResults.failed, true),
+      shortest: this.formatValue(aggregateResults.shortest),
+      longest: this.formatValue(aggregateResults.longest),
+      average: this.formatValue(aggregateResults.average),
+      p95: this.formatValue(aggregateResults.p95),
     };
   }
 

@@ -131,6 +131,7 @@ function patchHttpMethod(
 ) {
   shimmer.wrap(module, methodName, function (original) {
     return function patchedMethod(this: any, ...args: any[]) {
+
       const start = performance.now();
       const argsCopy = [...args];
       let loggingObject: { [key: string]: any } = {};

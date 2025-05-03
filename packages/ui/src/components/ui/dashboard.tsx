@@ -44,7 +44,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetch(
-      `/ui/requests?table=true&offset=0&index=group&period=${state.period}`,
+      `/ui/api/requests?table=true&offset=0&index=group&period=${state.period}`,
     )
       .then((res) => res.json())
       .then((data) => {
@@ -54,7 +54,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetch(
-      `/ui/queries?table=true&offset=0&index=group&period=${state.period}`,
+      `/ui/api/queries?table=true&offset=0&index=group&period=${state.period}`,
     )
       .then((res) => res.json())
       .then((data) => {

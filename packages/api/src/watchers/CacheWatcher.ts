@@ -73,10 +73,7 @@ class CacheWatcher extends BaseWatcher {
     }
 
     if (!item.request_id && !item.schedule_id && !item.job_id) {
-      return {
-        body: this.groupItemsByType(results),
-        status: 200
-      }
+      return this.groupItemsByType(results);
     }
 
     const [relatedItems]: [any[], any] = await this.storeConnection.query(
@@ -117,9 +114,7 @@ class CacheWatcher extends BaseWatcher {
     }
 
     if (!requestId && !jobId && !scheduleId) {
-      return {
-        status: 504
-      };
+      return null;
     }
 
     const [results]: [any[], any] = await this.storeConnection.query(query, [
@@ -151,9 +146,7 @@ class CacheWatcher extends BaseWatcher {
       `SELECT COUNT(*) as total FROM observatory_entries WHERE type = 'cache' ${periodSql} ${querySql} ${statusSql} ${keySql}`,
     )) as [any[]];
 
-    return {
-      results, count: this.formatValue(countResult[0].total, true),
-    };
+    return { results, count: this.formatValue(countResult[0].total, true) };
   }
 
   /**

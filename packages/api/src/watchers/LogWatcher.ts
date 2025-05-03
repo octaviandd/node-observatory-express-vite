@@ -90,10 +90,7 @@ class LogWatcher extends BaseWatcher {
     }
 
     if (!item.request_id && !item.schedule_id && !item.job_id) {
-      return {
-        statusCode: 200,
-        body: this.groupItemsByType(results)
-      };
+      return this.groupItemsByType(results);
     }
 
     const [relatedItems]: [any[], any] = await this.storeConnection.query(
@@ -104,10 +101,7 @@ class LogWatcher extends BaseWatcher {
       [...params, this.type],
     );
 
-    return {
-        statusCode: 200,
-        body: this.groupItemsByType(relatedItems.concat(results))
-    };
+    return this.groupItemsByType(relatedItems.concat(results));
   }
 
   /**
@@ -137,18 +131,13 @@ class LogWatcher extends BaseWatcher {
     }
 
     if (!requestId && !jobId && !scheduleId) {
-      return {
-        status: 504
-      };
+      return null;
     }
 
     const [results]: [any[], any] = await this.storeConnection.query(query, [
       this.type,
     ]);
-    return {
-        statusCode: 200,
-        body: this.groupItemsByType(results)
-    };
+    return this.groupItemsByType(results);
   }
 
   /**
@@ -182,10 +171,7 @@ class LogWatcher extends BaseWatcher {
        WHERE type = 'log' ${typeSql} ${querySql} ${messageSql} ${periodSql}`,
     )) as [any[]];
 
-    return {
-      statusCode: 200,
-      body: { results, count: this.formatValue(countResults[0].total, true) }
-    };
+    return { results, count: this.formatValue(countResults[0].total, true) };
   }
 
   /**
@@ -224,10 +210,7 @@ class LogWatcher extends BaseWatcher {
        WHERE type = 'log' ${querySql} ${periodSql}`,
     )) as [any];
 
-    return {
-      statusCode: 200,
-      body: { results, count: this.formatValue(countResult[0].total, true) }
-    };
+    return { results, count: this.formatValue(countResult[0].total, true) };
   }
 
   /**
@@ -299,21 +282,19 @@ class LogWatcher extends BaseWatcher {
       log: number;
     } = results.shift();
     const countFormattedData = this.countGraphData(results, period as string);
+    const durationFormattedData = this.durationGraphData(results, period as string);
 
     return {
-      statusCode: 200,
-      body: {
-        results,
-        countFormattedData,
-        count: this.formatValue(aggregateResults.total, true),
-        indexCountOne: this.formatValue(aggregateResults.info, true),
-        indexCountTwo: this.formatValue(aggregateResults.warn, true),
-        indexCountThree: this.formatValue(aggregateResults.error, true),
-        indexCountFive: this.formatValue(aggregateResults.debug, true),
-        indexCountSix: this.formatValue(aggregateResults.trace, true),
-        indexCountSeven: this.formatValue(aggregateResults.fatal, true),
-        indexCountEight: this.formatValue(aggregateResults.log, true),
-      }
+      countFormattedData,
+      durationFormattedData,
+      count: this.formatValue(aggregateResults.total, true),
+      indexCountOne: this.formatValue(aggregateResults.info, true),
+      indexCountTwo: this.formatValue(aggregateResults.warn, true),
+      indexCountThree: this.formatValue(aggregateResults.error, true),
+      indexCountFive: this.formatValue(aggregateResults.debug, true),
+      indexCountSix: this.formatValue(aggregateResults.trace, true),
+      indexCountSeven: this.formatValue(aggregateResults.fatal, true),
+      indexCountEight: this.formatValue(aggregateResults.log, true),
     };
   }
 

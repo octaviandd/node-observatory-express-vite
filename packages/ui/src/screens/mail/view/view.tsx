@@ -42,7 +42,7 @@ export default function MailPreview() {
   const getItem = async () => {
     setData((prevState) => ({ ...prevState, loading: true }));
     try {
-      const response = await fetch(`/ui/mails/${params.id}`);
+      const response = await fetch(`/ui/api/mails/${params.id}`);
       if (!response.ok) {
         throw new Error("Failed to fetch mail data");
       }

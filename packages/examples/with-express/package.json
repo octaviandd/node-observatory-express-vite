@@ -9,12 +9,14 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@node-observatory/api": "^1.1.8",
+    "@node-observatory/api": "^1.2.4",
     "@node-observatory/express": "^1.0.8",
+    "axios": "^1.9.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "mysql2": "^3.14.0",
-    "redis": "^4.7.0"
+    "redis": "^4.7.0",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

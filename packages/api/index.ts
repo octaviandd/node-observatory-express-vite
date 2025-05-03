@@ -85,9 +85,7 @@ export const watchers: any = {
  */
 export async function createObserver(
   serverAdapter: IServerAdapter,
-  options: {
-    uiBasePath?: string,
-  },
+  options: { uiBasePath?: string },
   driver: StoreDriver,
   connection: Connection | PromiseConnection,
   redisClient: ReturnType<typeof createClient>,
