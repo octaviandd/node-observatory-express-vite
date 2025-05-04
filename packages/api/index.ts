@@ -122,6 +122,7 @@ export async function createObserver(
   watchers.view = viewWatcherInstance;
   watchers.model = modelWatcherInstance;
 
+
   // looks for the module in node modules and returns the path of the package in node modules. 
   const uiBasePath =
     options.uiBasePath || path.dirname(eval(`require.resolve('@node-observatory/ui/package.json')`));
@@ -188,6 +189,8 @@ export async function createObserver(
         details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
       },
     }))
+  
+  console.log('Finish setup observatory')
 }
 
 /**

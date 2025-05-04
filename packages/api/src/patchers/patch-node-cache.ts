@@ -9,6 +9,10 @@ import { getCallerInfo } from "../../utils";
 // Create a global symbol to track if node-cache has been patched
 const NODECACHE_PATCHED_SYMBOL = Symbol.for("node-observer:nodecache-patched");
 
+console.log('hit node-cache')
+console.log(process.env.NODE_OBSERVATORY_CACHE &&
+  JSON.parse(process.env.NODE_OBSERVATORY_CACHE).includes("node-cache"))
+
 if (
   process.env.NODE_OBSERVATORY_CACHE &&
   JSON.parse(process.env.NODE_OBSERVATORY_CACHE).includes("node-cache")

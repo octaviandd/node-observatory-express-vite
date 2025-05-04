@@ -1,4 +1,5 @@
 /** @format */
+// import { createObserver } from "@node-observatory/api"
 import { ExpressAdapter } from "@node-observatory/express";
 import { createObserver } from "../../api/dist/index.js"
 import express from "express";
@@ -7,11 +8,25 @@ import mysql2 from "mysql2/promise";
 import { createClient } from "redis";
 import axios from "axios";
 import winston from "winston";
+import NodeCache from "node-cache"
+
+const myCache = new NodeCache();
 
 export const app = express();
 app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
+
+ let logger = winston.createLogger({
+    level: 'info',
+    format: winston.format.combine(
+      winston.format.timestamp(),
+      winston.format.json() 
+    ),
+    transports: [
+      new winston.transports.Console()
+    ]
+  });
 
 
 app.get('/home', async (req, res) => {
@@ -23,18 +38,12 @@ app.get('/home', async (req, res) => {
     res.status(500).json({ error: String(error) });
   }
 
-  let logger = winston.createLogger({
-    level: 'info',
-    format: winston.format.combine(
-      winston.format.timestamp(),
-      winston.format.json()
-    ),
-    transports: [
-      new winston.transports.Console()
-    ]
-  });
+  myCache.set('index', 'test')
+  myCache.get('index');
 
-  logger.info('This is an info log message from Winston');
+  console.log(myCache.get('index'))
+
+  logger.info('This is an info log message from Winston in user app');
 })
 
 const PORT = 9999;

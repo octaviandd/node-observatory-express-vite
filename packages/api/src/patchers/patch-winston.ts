@@ -8,8 +8,12 @@ import { getCallerInfo } from "../../utils";
 // Create a global symbol to track if winston has been patched
 const WINSTON_PATCHED_SYMBOL = Symbol.for("node-observer:winston-patched");
 
-const winstonModule = require.resolve('winston');
-console.log(winstonModule)
+try {
+  console.log('[Patcher Winston] Resolved Winston:', require.resolve('winston'));
+  console.log('[Patcher Winston] Resolved RITM:', require.resolve('require-in-the-middle'));
+} catch (e) {
+  console.error('[Patcher Winston] Error resolving paths:', e);
+}
 
 if (
   process.env.NODE_OBSERVATORY_LOGGING &&
