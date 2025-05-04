@@ -10,7 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@node-observatory/api": "^1.3.2",
+    "@node-observatory/api": "^1.3.3",
     "@node-observatory/express": "^1.0.8",
     "axios": "^1.9.0",
     "cors": "^2.8.5",
