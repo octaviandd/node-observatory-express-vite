@@ -1,0 +1,39 @@
+{
+  "name": "@node-observatory/express",
+  "version": "1.1.0",
+  "description": "A Express.js server adapter for Node Observatory dashboard.",
+  "keywords": [
+    "express",
+    "adapter",
+    "queue",
+    "monitoring",
+    "dashboard"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/octaviandd/node-observatory-vite-express.git",
+    "directory": "packages/express"
+  },
+  "license": "MIT",
+  "author": "octavian david",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@node-observatory/api": "^1.1.7",
+    "ejs": "^3.1.10",
+    "express": "^4.21.1 || ^5.0.0"
+  },
+  "devDependencies": {
+    "@types/ejs": "^3.1.5",
+    "@types/express": "^4.17.21 || ^5.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -1,8 +1,18 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-client/node_modules
-/node_modules
+packages/ui/node_modules
+packages/api/node_modules
+packages/examples/with-express/node_modules
+packages/express/node_modules
+
+
+packages/ui/dist
+packages/api/dist
+packages/examples/with-express/dist
+packages/express/dist
+
+
 /.pnp
 .pnp.js
 dist
@@ -13,16 +23,15 @@ client/stats.html
 # testing
 /coverage
 
-# production
-/build
-
 # misc
-.env
+packages/api/.env
+packages/api/package-lock.json
+packages/express/package-lock.json
+packages/examples/with-express/package-lock.json
+packages/ui/package-lock.json
+
+
 .DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
 
 npm-debug.log*
 yarn-debug.log*
