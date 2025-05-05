@@ -1,6 +1,6 @@
 {
   "name": "@node-observatory/api",
-  "version": "1.3.3",
+  "version": "1.3.5",
   "license": "proprietary",
   "private": false,
   "description": "A Nodejs application that provides live monitoring of your application",
@@ -24,7 +24,7 @@
   },
   "author": "Octavian David",
   "dependencies": {
-    "@node-observatory/ui": "^1.2.2",
+    "@node-observatory/ui": "^1.2.5",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "http-proxy-middleware": "^3.0.5",

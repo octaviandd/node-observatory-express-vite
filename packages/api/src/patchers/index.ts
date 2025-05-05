@@ -1,6 +1,4 @@
 /** @format */
-
-console.log('Import patcher files.')
 // LOGS
 import "./patch-winston";
 import "./patch-bunyan";

@@ -41,7 +41,7 @@ export default function HTTPView() {
   const getItem = async () => {
     setData((prevState) => ({ ...prevState, loading: true }));
     try {
-      const response = await fetch(`/ui/api/http/${params.id}`);
+      const response = await fetch(`${window.SERVER_CONFIG.base}/api/http/${params.id}`);
       if (!response.ok) {
         throw new Error("Failed to fetch HTTP data");
       }

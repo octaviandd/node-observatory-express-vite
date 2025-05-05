@@ -54,7 +54,6 @@ async function startServer() {
   let mysql2Connection = await mysql2.createConnection({
     host: "localhost",
     user: "root",
-    password: "Database.123",
     database: "observatory",
     timezone: "UTC",
   });

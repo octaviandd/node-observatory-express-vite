@@ -42,7 +42,7 @@ export const usePreviewData = () => {
   }, []);
 
   const getItem = async () => {
-    const response = await fetch(`/ui/api/requests/${params.id}`);
+    const response = await fetch(`${window.SERVER_CONFIG.base}/api/requests/${params.id}`);
     const result = await response.json();
 
     const { request, query, http, job, cache, notification, mail, logs } =

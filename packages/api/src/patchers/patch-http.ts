@@ -549,8 +549,5 @@ if (
     // patchServerEmit(http);
     // patchServerEmit(https);
 
-    console.log("[node-observer] HTTP/HTTPS successfully patched");
-  } else {
-    console.log("[node-observer] HTTP/HTTPS already patched, skipping");
   }
 }

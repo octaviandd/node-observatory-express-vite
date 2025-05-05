@@ -63,7 +63,7 @@ export const useIndexData = ({ type }: { type: string }) => {
   const getItems = async (addedNewItems = false) => {
     try {
       const response = await fetch(
-        `/ui/api/${type}?period=${state.period}${
+        `${window.SERVER_CONFIG.base}/api/${type}?period=${state.period}${
           param ? `&key=${encodeURIComponent(param)}` : ""
         }`,
       );

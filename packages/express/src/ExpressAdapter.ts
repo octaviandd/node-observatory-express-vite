@@ -3,6 +3,7 @@ import express, { Express, Request, Response, Router } from 'express';
 import { wrapAsync } from './helpers/wrapAsync';
 import { AppControllerRoute, AppViewRoute, ControllerHandlerReturnType, HTTPMethod, HTTPStatus } from "../../api/dist/types"
 import path from "path";
+import fs from "node:fs"
 
 export class ExpressAdapter {
   protected readonly app: Express;
@@ -83,18 +84,42 @@ export class ExpressAdapter {
   }
 
   public setEntryRoute(routeDef: AppViewRoute): ExpressAdapter {
-    const viewHandler = (_req: Request, res: Response) => {
+    const viewHandler = async (_req: Request, res: Response) => {
       const { name } = routeDef.handler({
-      basePath: this.basePath,
-    });
-
-    const fullPath = path.join(this.app.get('views'), name);
-      res.sendFile(fullPath, (err) => {
-        if (err) {
-          console.error(`Failed to serve ${fullPath}:`, err);
-          res.status(500).send('Error serving the application');
-        }
+        basePath: this.basePath,
       });
+
+      const configData = {
+        base: this.basePath,
+      };
+
+      const scriptToInject = `
+        <script>
+          window.SERVER_CONFIG = ${JSON.stringify(configData)};
+        </script>
+        `;
+
+      const fullPath = path.join(this.app.get('views'), name);
+
+      let htmlContent = await fs.promises.readFile(fullPath, 'utf-8')
+      if (htmlContent.includes('</body>')) {
+        htmlContent = htmlContent.replace('</body>', `${scriptToInject}</body>`);
+      } else {
+        console.warn(`Could not find </body> tag in ${fullPath}. Appending config script.`);
+        htmlContent += scriptToInject;
+      }
+
+      console.log(htmlContent)
+
+      res.setHeader('Content-Type', 'text/html');
+      res.status(200).send(htmlContent);
+      
+      // res.sendFile(fullPath, (err) => {
+      //   if (err) {
+      //     console.error(`Failed to serve ${fullPath}:`, err);
+      //     res.status(500).send('Error serving the application');
+      //   }
+      // });
     };
 
     if (Array.isArray(routeDef.route)) {

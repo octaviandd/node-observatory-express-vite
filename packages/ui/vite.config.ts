@@ -20,15 +20,8 @@ export default defineConfig({
   },
   build: {
     manifest: true,
-    // lib: {
-    //   entry: path.resolve(__dirname, 'src/main.tsx'),
-    //   name: "@node-observatory/ui",
-    //   fileName: (format) => `main.${format}.js`,
-    //   formats: ['es', 'umd'],
-    // }
   },
   server: {
-    open: `http://localhost:${JSON.stringify(process.env.SERVER_PORT)}/ui`,
     port: 5173,
     proxy: {
       "*": {

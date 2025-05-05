@@ -66,15 +66,15 @@ const PeriodSelector = () => {
     if (window.localStorage.getItem("theme")) {
       window.localStorage.setItem("theme", window.localStorage.getItem("theme") as string);
       document.documentElement.classList.add(window.localStorage.getItem("theme") as string);
-      setIsDarkMode(window.localStorage.getItem("theme") === 'light')
+      setIsDarkMode(window.localStorage.getItem("theme") === 'dark')
     }
   }, []);
 
   const updateDarkMode = (checked: boolean) => {
     setIsDarkMode(checked);
-    window.localStorage.setItem("theme", checked ? 'light' : 'dark');
-    document.documentElement.classList.remove(checked ? 'dark' : 'light');
-    document.documentElement.classList.add(checked ? 'light' : 'dark');
+    window.localStorage.setItem("theme", checked ? 'dark' : 'light');
+    document.documentElement.classList.remove(checked ? 'light' : 'dark');
+    document.documentElement.classList.add(checked ? 'dark' : 'light');
   }
 
   const timePeriods: TimePeriod[] = ["1h", "24h", "7d", "14d", "30d"];

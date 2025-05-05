@@ -144,10 +144,7 @@ class ExceptionWatcher extends BaseWatcher {
        WHERE type = 'exception' ${typeSQL} ${querySQL}`,
     );
 
-    return {
-      body: { results, count: countResult[0].total },
-      statusCode: 200
-    };
+    return { results, count: countResult[0].total };
   }
 
   /**
@@ -176,10 +173,7 @@ class ExceptionWatcher extends BaseWatcher {
        WHERE type = 'exception' ${typeSQL} ${querySQL} ${keySQL}`,
     );
 
-    return {
-      statusCode: 200,
-      body: { results, count: this.formatValue(countResult[0].total, true) }
-    };
+    return { results, count: this.formatValue(countResult[0].total, true) }
   }
 
   /**
@@ -212,8 +206,7 @@ class ExceptionWatcher extends BaseWatcher {
     )) as [any[]];
 
     return {
-      statusCode: 200,
-      body: { results, count: this.formatValue(countResult[0].total, true) }
+      results, count: this.formatValue(countResult[0].total, true)
     };
   }
 
@@ -264,16 +257,13 @@ class ExceptionWatcher extends BaseWatcher {
     const countFormattedData = this.countGraphData(results, period as string);
 
     return {
-      statusCode: 200,
-      body: {
-        countFormattedData,
-        count: this.formatValue(aggregateResults.total, true),
-        indexCountOne: this.formatValue(
-          aggregateResults.unhandledRejection,
-          true,
-        ),
-        indexCountTwo: this.formatValue(aggregateResults.uncaughtException, true),
-      }
+      countFormattedData,
+      count: this.formatValue(aggregateResults.total, true),
+      indexCountOne: this.formatValue(
+        aggregateResults.unhandledRejection,
+        true,
+      ),
+      indexCountTwo: this.formatValue(aggregateResults.uncaughtException, true),
     };
   }
 

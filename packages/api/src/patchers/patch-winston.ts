@@ -7,14 +7,6 @@ import { getCallerInfo } from "../../utils";
 
 // Create a global symbol to track if winston has been patched
 const WINSTON_PATCHED_SYMBOL = Symbol.for("node-observer:winston-patched");
-
-try {
-  console.log('[Patcher Winston] Resolved Winston:', require.resolve('winston'));
-  console.log('[Patcher Winston] Resolved RITM:', require.resolve('require-in-the-middle'));
-} catch (e) {
-  console.error('[Patcher Winston] Error resolving paths:', e);
-}
-
 if (
   process.env.NODE_OBSERVATORY_LOGGING &&
   JSON.parse(process.env.NODE_OBSERVATORY_LOGGING).includes("winston")
@@ -29,8 +21,6 @@ if (
       name: string,
       basedir: string | undefined,
     ) {
-      console.log('Patching winston..')
-
       shimmer.wrap(exports, "createLogger", function (originalCreateLogger) {
         return function patchedCreateLogger(this: any, ...loggerArgs: any[]) {
           const loggerInstance = originalCreateLogger.apply(this, loggerArgs);

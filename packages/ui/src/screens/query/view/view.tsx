@@ -47,7 +47,7 @@ export default function QueryPreview() {
     try {
       setData((prev) => ({ ...prev, loading: true, error: null }));
       const response = await fetch(
-        `/ui/api/queries/${params.id}`,
+        `${window.SERVER_CONFIG.base}/api/queries/${params.id}`,
       );
       if (!response.ok) {
         throw new Error("Failed to fetch query data");

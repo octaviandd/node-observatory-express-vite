@@ -43,7 +43,7 @@ export default function NotificationView() {
     try {
       setData((prev) => ({ ...prev, loading: true }));
       const response = await fetch(
-        `/ui/api/notifications/${params.id}`,
+        `${window.SERVER_CONFIG.base}/api/notifications/${params.id}`,
       );
       if (!response.ok) {
         throw new Error("Failed to fetch notification data");

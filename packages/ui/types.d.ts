@@ -1,6 +1,14 @@
 /** @format */
 // use enums instead of strings
 
+declare global {
+  interface Window {
+    SERVER_CONFIG: {
+      base: string
+    }
+  }
+}
+
 /**
  * Supported logging libraries
  * @typedef {string} Logger
