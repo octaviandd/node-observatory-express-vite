@@ -189,7 +189,7 @@ export async function createObserver(
         details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
       },
     }))
-  
+
   console.log('Finish setup observatory')
 }
 

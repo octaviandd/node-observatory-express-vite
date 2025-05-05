@@ -63,14 +63,19 @@ const PeriodSelector = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
-    if (window.localStorage.getItem("theme") !== "dark") {
-      window.localStorage.setItem("theme", "dark");
-      document.documentElement.classList.add("dark");
-    } else {
-      window.localStorage.setItem("theme", "light");
-      document.documentElement.classList.remove("dark");
+    if (window.localStorage.getItem("theme")) {
+      window.localStorage.setItem("theme", window.localStorage.getItem("theme") as string);
+      document.documentElement.classList.add(window.localStorage.getItem("theme") as string);
+      setIsDarkMode(window.localStorage.getItem("theme") === 'light')
     }
-  }, [isDarkMode]);
+  }, []);
+
+  const updateDarkMode = (checked: boolean) => {
+    setIsDarkMode(checked);
+    window.localStorage.setItem("theme", checked ? 'light' : 'dark');
+    document.documentElement.classList.remove(checked ? 'dark' : 'light');
+    document.documentElement.classList.add(checked ? 'light' : 'dark');
+  }
 
   const timePeriods: TimePeriod[] = ["1h", "24h", "7d", "14d", "30d"];
   return (
@@ -93,7 +98,7 @@ const PeriodSelector = () => {
         <Switch
           id="dark-mode"
           checked={isDarkMode}
-          onCheckedChange={setIsDarkMode}
+          onCheckedChange={(checked: boolean) => updateDarkMode(checked)}
         />
         <Moon className="h-4 w-4" />
         <Label htmlFor="dark-mode" className="sr-only">
