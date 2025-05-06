@@ -16,16 +16,16 @@ app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 
- let logger = winston.createLogger({
-    level: 'info',
-    format: winston.format.combine(
-      winston.format.timestamp(),
-      winston.format.json() 
-    ),
-    transports: [
-      new winston.transports.Console()
-    ]
-  });
+let logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json() 
+  ),
+  transports: [
+    new winston.transports.Console()
+  ]
+});
 
 
 app.get('/home', async (req, res) => {

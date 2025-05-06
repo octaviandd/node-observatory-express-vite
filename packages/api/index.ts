@@ -16,13 +16,12 @@ import {
   ViewWatcher,
   ModelWatcher,
 } from "./src/watchers/index";
-import { HTTPStatus, IServerAdapter, StoreDriver } from "./types";
+import { HTTPStatus, IServerAdapter, StoreDriver, AppViewRoute } from "./types";
 import { createClient } from "redis";
 import { Connection } from "mysql2";
 import { Connection as PromiseConnection } from "mysql2/promise";
 import apiRoutes from "./src/routes/routes";
 import path from "path";
-import { AppViewRoute } from "./types";
 
 export const instanceCreator = (
   driver: StoreDriver,
