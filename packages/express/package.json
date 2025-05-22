@@ -1,6 +1,6 @@
 {
   "name": "@node-observatory/express",
-  "version": "1.1.6",
+  "version": "1.1.9",
   "description": "A Express.js server adapter for Node Observatory dashboard.",
   "keywords": [
     "express",

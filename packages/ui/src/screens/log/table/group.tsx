@@ -33,7 +33,7 @@ export const GroupTable = memo(
           <TableHeader>
             <TableRow>
               <TableHead className="w-[60%]">Details</TableHead>
-              <TableHead>Count</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>

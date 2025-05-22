@@ -32,6 +32,7 @@ export const GroupTable = memo(
               <TableHead className="w-[50%]">Details</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Duration</TableHead>
+              <TableHead>P95</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
@@ -77,6 +78,17 @@ export const GroupTable = memo(
                     }
                   >
                     {formatDuration(channel.average ?? 0)}
+                  </p>
+                </TableCell>
+                <TableCell>
+                  <p
+                    className={
+                      channel.p95 && channel.p95 > 999
+                        ? "text-yellow-600"
+                        : "text-black dark:text-white"
+                    }
+                  >
+                    {formatDuration(channel.p95 ?? 0)}
                   </p>
                 </TableCell>
                 <TableCell>

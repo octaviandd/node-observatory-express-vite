@@ -25,6 +25,7 @@ export const GroupTable = memo(
               <TableHead className="w-[50%]">Details</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Duration</TableHead>
+              <TableHead>P95</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
@@ -74,6 +75,17 @@ export const GroupTable = memo(
                     }
                   >
                     {formatDuration(cache.average as number)}
+                  </p>
+                </TableCell>
+                <TableCell>
+                  <p
+                    className={
+                      (cache.p95 as number) > 999
+                        ? "text-yellow-600"
+                        : "text-black dark:text-white"
+                    }
+                  >
+                    {formatDuration(cache.p95 as number)}
                   </p>
                 </TableCell>
                 <TableCell>

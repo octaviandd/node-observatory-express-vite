@@ -21,7 +21,9 @@ export class ExpressAdapter {
   }
 
   public setStaticPath(staticsRoute: string, staticsPath: string): ExpressAdapter {
-    this.app.use(staticsRoute, express.static(staticsPath));
+    this.app.use(staticsRoute, express.static(staticsPath, {
+      redirect: false
+    }));
 
     return this;
   }
@@ -109,25 +111,25 @@ export class ExpressAdapter {
         htmlContent += scriptToInject;
       }
 
-      console.log(htmlContent)
-
       res.setHeader('Content-Type', 'text/html');
       res.status(200).send(htmlContent);
-      
-      // res.sendFile(fullPath, (err) => {
-      //   if (err) {
-      //     console.error(`Failed to serve ${fullPath}:`, err);
-      //     res.status(500).send('Error serving the application');
-      //   }
-      // });
     };
 
     if (Array.isArray(routeDef.route)) {
       routeDef.route.forEach(route => {
         this.app[routeDef.method](route, viewHandler);
+
+        if (route === '/') {
+          // This will handle trailing slash case when mounted
+          this.app[routeDef.method]('', viewHandler);
+        }
       });
     } else {
       this.app[routeDef.method](routeDef.route, viewHandler);
+
+      if (routeDef.route === '/') {
+        this.app[routeDef.method]('', viewHandler);
+      }
     }
     return this;
   }

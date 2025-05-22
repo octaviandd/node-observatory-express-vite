@@ -113,8 +113,8 @@ export default function Dashboard() {
                   <CountGraph
                     data={requests.countFormattedData}
                     barData={[
-                      { dataKey: "200", stackId: "a", fill: "#808080" },
-                      { dataKey: "400", stackId: "b", fill: "#ffc658" },
+                      { dataKey: "200", stackId: "a", fill: "#ffc658" },
+                      { dataKey: "400", stackId: "b", fill: "#808080" },
                       { dataKey: "500", stackId: "c", fill: "#ff8042" },
                     ]}
                     period={period}

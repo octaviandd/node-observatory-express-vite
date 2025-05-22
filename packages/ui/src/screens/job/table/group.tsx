@@ -34,7 +34,7 @@ export const GroupTable = memo(({ data, children }: Props) => {
         <TableHeader>
           <TableRow>
             <TableHead className="w-[50%]">Details</TableHead>
-            <TableHead>Events</TableHead>
+            <TableHead>Status</TableHead>
             <TableHead>Avg</TableHead>
             <TableHead>P95</TableHead>
             <TableHead className="w-[50px]"></TableHead>

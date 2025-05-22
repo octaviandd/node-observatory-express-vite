@@ -65,7 +65,7 @@ export default function HttpIndexTable() {
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
           <Globe className="h-5 w-5 text-muted-foreground" />
-          <span className="font-medium text-sm text-dark dark:text-white">
+          <span className="font-medium text-black dark:text-white">
             {index === "instance" ? instanceDataCount : groupDataCount}{" "}
             {index === "instance" ? "Request" : "Route"}
             {index === "instance" && Number(instanceDataCount) > 1 && "s"}

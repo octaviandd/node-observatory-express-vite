@@ -39,8 +39,7 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
       ) {
 
         if (req.originalUrl && (
-          req.originalUrl.includes("/ui/") || 
-          // Observatory-specific API paths
+          req.originalUrl.includes("/ui") || 
           /\/api\/(requests|queries|notifications|mails|exceptions|jobs|schedules|https?|cache|logs|views|models)/.test(req.originalUrl)
         )) {
           return originalAppHandle.call(this, req, res, next);

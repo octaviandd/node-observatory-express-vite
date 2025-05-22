@@ -36,6 +36,7 @@ export const GroupTable = memo(({ data, children }: Props) => {
             <TableHead className="w-[50%]">Details</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Duration</TableHead>
+            <TableHead>P95</TableHead>
             <TableHead className="w-[50px]"></TableHead>
           </TableRow>
         </TableHeader>
@@ -83,6 +84,17 @@ export const GroupTable = memo(({ data, children }: Props) => {
                   }
                 >
                   {formatDuration(request.average)}
+                </p>
+              </TableCell>
+              <TableCell>
+                <p
+                  className={
+                    request.p95 > 999
+                      ? "text-yellow-600"
+                      : "text-black dark:text-white"
+                  }
+                >
+                  {formatDuration(request.p95)}
                 </p>
               </TableCell>
               <TableCell>

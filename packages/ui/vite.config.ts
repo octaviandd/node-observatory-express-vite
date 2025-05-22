@@ -12,7 +12,7 @@ export default defineConfig({
     'import.meta.env.SERVER_PORT': JSON.stringify(process.env.SERVER_PORT),
     'import.meta.env.BASE_PATH': JSON.stringify(process.env.BASE_PATH)
   },
-  base: '/ui/',
+  base: '/ui',
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
