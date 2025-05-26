@@ -3,10 +3,21 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Outlet, useLocation } from "react-router";
 import { useContext, useEffect, useState } from "react";
 import { StoreContext } from "@/store";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, CalendarDays, CalendarIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 type TimePeriod = "1h" | "24h" | "7d" | "14d" | "30d";
 
@@ -61,6 +72,7 @@ const PeriodSelector = () => {
   };
 
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isCustomRangeModalOpen, setIsCustomRangeModalOpen] = useState(false);
 
   useEffect(() => {
     if (window.localStorage.getItem("theme")) {
@@ -87,11 +99,19 @@ const PeriodSelector = () => {
             variant={state.period === period ? "default" : "ghost"}
             size="sm"
             onClick={() => setPeriod(period)}
-            className={`px-3 rounded-none ${index === 0 ? "rounded-l-md" : index === timePeriods.length - 1 ? "rounded-r-md" : ""}`}
+            className={`px-3 rounded-none ${index === 0 ? "rounded-l-md" : ""}`}
           >
             {period.toUpperCase()}
           </Button>
         ))}
+        <Button
+          variant={typeof state.period === 'object' && state.period.label === 'custom' ? "default" : "ghost"}
+          size="sm"
+          onClick={() => setIsCustomRangeModalOpen(true)}
+          className="px-3 rounded-none rounded-r-md border-l border-muted-foreground/20"
+        >
+          <CalendarDays className="h-4 w-4 mr-1" /> Custom
+        </Button>
       </div>
       <div className="flex items-center space-x-2">
         <Sun className="h-4 w-4" />
@@ -105,6 +125,221 @@ const PeriodSelector = () => {
           Toggle dark mode
         </Label>
       </div>
+
+      {isCustomRangeModalOpen && (
+        <CustomDateRangeModal
+          isOpen={isCustomRangeModalOpen}
+          onClose={() => setIsCustomRangeModalOpen(false)}
+          onApply={(startDate, endDate) => {
+            dispatch({
+              type: "setPeriod",
+              payload: {
+                startDate: startDate.toISOString(),
+                endDate: endDate.toISOString(),
+                label: "custom",
+              },
+            });
+            setIsCustomRangeModalOpen(false);
+          }}
+        />
+      )}
     </>
+  );
+};
+
+interface CustomDateRangeModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onApply: (startDate: Date, endDate: Date) => void;
+}
+
+const CustomDateRangeModal: React.FC<CustomDateRangeModalProps> = ({
+  isOpen,
+  onClose,
+  onApply,
+}) => {
+  const { state: appState, dispatch: appDispatch } = useContext(StoreContext);
+  const [startDate, setStartDate] = useState<Date | undefined>();
+  const [endDate, setEndDate] = useState<Date | undefined>();
+  const [dateError, setDateError] = useState<string | null>(null);
+
+  const [isStartDatePickerOpen, setIsStartDatePickerOpen] = useState(false);
+  const [isEndDatePickerOpen, setIsEndDatePickerOpen] = useState(false);
+
+  useEffect(() => {
+    const knownPresets = ["1h", "24h", "7d", "14d", "30d"];
+    if (typeof appState.period === 'string' && knownPresets.includes(appState.period)) {
+        setStartDate(undefined);
+        setEndDate(undefined);
+    } else if (appState.period && typeof appState.period === 'object' && appState.period.label === 'custom') {
+        setStartDate(new Date(appState.period.startDate));
+        setEndDate(new Date(appState.period.endDate));
+    } else {
+        setStartDate(undefined);
+        setEndDate(undefined);
+    }
+  }, [appState.period]);
+
+  if (!isOpen) return null;
+
+  const handlePresetSelect = (period: TimePeriod) => {
+    window.localStorage.setItem("period", period);
+    appDispatch({ type: "setPeriod", payload: period });
+    onClose();
+  };
+
+  const handleApplyCustomRange = () => {
+    if (startDate && endDate) {
+      if (endDate < startDate) {
+        setDateError("End date cannot be before start date.");
+        return;
+      }
+      setDateError(null);
+      onApply(startDate, endDate);
+    }
+  };
+
+  const timePeriods: TimePeriod[] = ["1h", "24h", "7d", "14d", "30d"];
+
+  const getCurrentlyShowingText = () => {
+    if (startDate && endDate) {
+        return `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
+    } else if (typeof appState.period === 'object' && appState.period.label === 'custom') {
+        return `${new Date(appState.period.startDate).toLocaleDateString()} - ${new Date(appState.period.endDate).toLocaleDateString()}`;
+    } else if (typeof appState.period === 'string' && timePeriods.includes(appState.period as TimePeriod)) {
+        return `Preset: ${appState.period.toUpperCase()}`;
+    }
+    return "No range selected";
+  };
+
+  // Handler for Dialog's onOpenChange to sync with parent control
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      onClose();
+    }
+    // We don't control opening from here, only closing via onOpenChange
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogContent 
+        className="max-w-lg"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={onClose}
+      >
+        <DialogHeader>
+          <DialogTitle className="text-xl font-semibold">Date Range</DialogTitle>
+        </DialogHeader>
+
+        <div className="py-4 space-y-6">
+          {/* Quick Select */}
+          <div>
+            <Label className="mb-2 block text-sm font-medium">Quick Select</Label>
+            <div className="inline-flex h-9 items-center justify-center rounded-md bg-muted text-muted-foreground w-full">
+              {timePeriods.map((period, index) => (
+                <Button
+                  key={period}
+                  variant={appState.period === period ? "default" : "ghost"}
+                  className={`flex-1 px-3 rounded-none ${index === 0 ? "rounded-l-md" : index === timePeriods.length - 1 ? "rounded-r-md" : ""}`}
+                  size="sm"
+                  onClick={() => handlePresetSelect(period)}
+                >
+                  {period.toUpperCase()}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Custom Range */}
+          <div>
+            <Label className="mb-2 block text-sm font-medium">Custom Range</Label>
+            <div className="flex space-x-4">
+              <div className="flex-1">
+                <Popover open={isStartDatePickerOpen} onOpenChange={setIsStartDatePickerOpen}>
+                  <PopoverTrigger asChild id="startDatePopover">
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !startDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {startDate ? startDate.toLocaleDateString() : <span>Start date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={startDate}
+                      onSelect={(date) => {
+                        setStartDate(date);
+                        setIsStartDatePickerOpen(false);
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="flex-1">
+                <Popover open={isEndDatePickerOpen} onOpenChange={setIsEndDatePickerOpen}>
+                  <PopoverTrigger asChild id="endDatePopover">
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !endDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {endDate ? endDate.toLocaleDateString() : <span>End date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={endDate}
+                      onSelect={(date) => {
+                        setEndDate(date);
+                        setIsEndDatePickerOpen(false);
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+            {dateError && (
+              <p className="text-sm text-destructive mt-2">{dateError}</p>
+            )}
+          </div>
+
+          {/* Currently Showing */}
+          <div className="p-3 bg-muted rounded-md">
+            <p className="text-sm text-center text-muted-foreground">
+              Currently showing: <span className="font-semibold text-foreground">{getCurrentlyShowingText()}</span>
+            </p>
+          </div>
+        </div>
+
+        <DialogFooter className="sm:justify-end">
+          <DialogClose asChild>
+            <Button 
+              type="button" 
+              variant="outline" 
+            >
+              Cancel
+            </Button>
+          </DialogClose>
+          <Button 
+            type="button" 
+            onClick={handleApplyCustomRange} 
+            disabled={!startDate || !endDate}
+          >
+            Apply Custom Range
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
