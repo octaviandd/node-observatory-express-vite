@@ -2,8 +2,8 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index";
+import { getCallerInfo } from "../../../utils";
 
 const TYPEORM_PATCHED_SYMBOL = Symbol.for("node-observer:typeorm-patched");
 

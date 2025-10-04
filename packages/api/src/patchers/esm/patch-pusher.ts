@@ -1,9 +1,9 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index.js";
+import { getCallerInfo } from "../../../utils.js";
 
 // Create a global symbol to track if pusher has been patched
 const PUSHER_PATCHED_SYMBOL = Symbol.for("node-observer:pusher-patched");
@@ -20,12 +20,20 @@ if (
     /**
      * Hook the "pusher" module so we can patch the prototype methods (like trigger/triggerBatch).
      */
-    new Hook(["pusher"], function (exports, name, basedir) {
-      if (exports && (exports as any).prototype) {
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'pusher' module
+      // if (name !== 'pusher') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const pusherModule = exports.default || exports;
+
+      if (pusherModule && pusherModule.prototype) {
         // Patch pusher.trigger
-        if (typeof (exports as any).prototype.trigger === "function") {
+        if (typeof pusherModule.prototype.trigger === "function") {
           shimmer.wrap(
-            (exports as any).prototype,
+            pusherModule.prototype,
             "trigger",
             function (originalTrigger) {
               return function patchedTrigger(
@@ -159,9 +167,9 @@ if (
         }
 
         // Patch pusher.triggerBatch with similar error handling
-        if (typeof (exports as any).prototype.triggerBatch === "function") {
+        if (typeof pusherModule.prototype.triggerBatch === "function") {
           shimmer.wrap(
-            (exports as any).prototype,
+            pusherModule.prototype,
             "triggerBatch",
             function (originalTriggerBatch) {
               return function patchedTriggerBatch(

@@ -1,14 +1,5 @@
 import { Request } from "express";
-import { StoreDriver } from "../../types";
 import { BaseWatcher } from "./BaseWatcher";
-import { WatcherFilters } from "./Watcher";
-
-interface NotificationFilters extends WatcherFilters {
-  type?: string;
-  channel?: string;
-  status: string;
-  index: "instance" | "group";
-}
 
 class NotificationWatcher extends BaseWatcher {
   readonly type = "notification";
@@ -290,7 +281,7 @@ class NotificationWatcher extends BaseWatcher {
    * --------------------------------------------------------------------------
    */
   protected countGraphData(data: any, period: string) {
-    const totalDuration = this.periods[period as keyof typeof this.periods];
+    const totalDuration = this.periods[period as keyof typeof this.periods].duration;
     const intervalDuration = totalDuration / 120;
     const now = new Date().getTime();
     const startDate = now - totalDuration * 60 * 1000;

@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { WatcherEntry, WatcherFilters } from "types";
 
 interface Watcher {
   readonly type: string;

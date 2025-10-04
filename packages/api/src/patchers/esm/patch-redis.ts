@@ -1,10 +1,10 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { redisCommandArgs } from "../../constants";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index.js";
+import { redisCommandArgs } from "../../../constants.js";
+import { getCallerInfo } from "../../../utils.js";
 
 const REDIS_PATCHED_SYMBOL = Symbol.for("node-observer:redis-patched");
 
@@ -15,9 +15,17 @@ if (
   if (!(global as any)[REDIS_PATCHED_SYMBOL]) {
     (global as any)[REDIS_PATCHED_SYMBOL] = true;
 
-    new Hook(["redis"], function (exports, name, basedir) {
-      if (typeof (exports as any).createClient === "function") {
-        shimmer.wrap(exports as any, "createClient", function (originalCreate) {
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'redis' module
+      // if (name !== 'redis') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const redisModule = exports.default || exports;
+
+      if (typeof redisModule.createClient === "function") {
+        shimmer.wrap(redisModule, "createClient", function (originalCreate) {
           return function patchedCreateClient(this: any, ...args: any[]) {
             const client = originalCreate.apply(this, args);
             patchRedisClient(client);

@@ -1,9 +1,9 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index.js";
+import { getCallerInfo } from "../../../utils.js";
 
 // Create a global symbol to track if mailgun has been patched
 const MAILGUN_PATCHED_SYMBOL = Symbol.for("node-observer:mailgun-patched");
@@ -17,7 +17,12 @@ if (
     // Mark mailgun as patched
     (global as any)[MAILGUN_PATCHED_SYMBOL] = true;
 
-    new Hook(["mailgun.js"], function (exports: any, name, basedir) {
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'mailgun.js' module
+      // if (name !== 'mailgun.js') {
+      //   return exports;
+      // }
+
       if (!exports || typeof exports.default !== "function") {
         return exports;
       }

@@ -1,9 +1,9 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index.js";
+import { getCallerInfo } from "../../../utils.js";
 
 const NODEMAILER_PATCHED_SYMBOL = Symbol.for(
   "node-observer:nodemailer-patched",
@@ -16,8 +16,16 @@ if (
   if (!(global as any)[NODEMAILER_PATCHED_SYMBOL]) {
     (global as any)[NODEMAILER_PATCHED_SYMBOL] = true;
 
-    new Hook(["nodemailer"], function (exports: any, name, basedir) {
-      shimmer.wrap(exports as any, "createTransport", function (originalFn) {
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'nodemailer' module
+      // if (name !== 'nodemailer') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const nodemailerModule = exports.default || exports;
+
+      shimmer.wrap(nodemailerModule, "createTransport", function (originalFn) {
         return function patchedCreateTransport(this: any, ...args: any[]) {
           const transporter = originalFn.apply(this, args);
           if (transporter && typeof transporter.sendMail === "function") {

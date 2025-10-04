@@ -1,33 +1,33 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
-import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { addHook, Namespace } from 'import-in-the-middle';
+import shimmer from 'shimmer';
+import { watchers } from '../../../index.js';
+import { getCallerInfo } from '../../../utils.js';
 
 // Create a global symbol to track if ably has been patched
-const ABLY_PATCHED_SYMBOL = Symbol.for("node-observer:ably-patched");
+const ABLY_PATCHED_SYMBOL = Symbol.for('node-observer:ably-patched');
 
 const channelMethodsToPatch = [
-  "publish",
+  'publish',
   // 'subscribe',
   // 'unsubscribe',
   // 'presence',
 ] as const;
 
 const presenceMethodsToPatch = [
-  "enter",
-  "update",
-  "leave",
-  "get",
-  "subscribe",
+  'enter',
+  'update',
+  'leave',
+  'get',
+  'subscribe',
 ] as const;
 
-const historyMethodsToPatch = ["history", "presenceHistory"] as const;
+const historyMethodsToPatch = ['history', 'presenceHistory'] as const;
 
 if (
   process.env.NODE_OBSERVATORY_NOTIFICATIONS &&
-  JSON.parse(process.env.NODE_OBSERVATORY_NOTIFICATIONS).includes("ably")
+  JSON.parse(process.env.NODE_OBSERVATORY_NOTIFICATIONS).includes('ably')
 ) {
   // Check if ably has already been patched
   if (!(global as any)[ABLY_PATCHED_SYMBOL]) {
@@ -35,28 +35,36 @@ if (
     (global as any)[ABLY_PATCHED_SYMBOL] = true;
 
     /**
-     * Hook "ably" to patch its connection and event handling.
+     * Hook "ably" to patch its connection and event handling (ESM version).
      */
-    new Hook(["ably"], function (exports: any, name, basedir) {
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'ably' module
+      // if (name !== 'ably') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const ablyExports = exports.default || exports;
+
       if (
-        !exports ||
-        (typeof exports.Realtime !== "function" &&
-          typeof exports.Rest !== "function")
+        !ablyExports ||
+        (typeof ablyExports.Realtime !== 'function' &&
+          typeof ablyExports.Rest !== 'function')
       ) {
         return exports;
       }
 
       // Patch the Realtime constructor
-      if (typeof exports.Realtime === "function") {
-        shimmer.wrap(exports, "Realtime", function (OriginalRealtime) {
+      if (typeof ablyExports.Realtime === 'function') {
+        shimmer.wrap(ablyExports, 'Realtime', function (OriginalRealtime) {
           return function PatchedRealtime(this: any, options: any) {
             const realtime = new OriginalRealtime(options);
 
             if (
               realtime.channels &&
-              typeof realtime.channels.get === "function"
+              typeof realtime.channels.get === 'function'
             ) {
-              shimmer.wrap(realtime.channels, "get", function (originalGet) {
+              shimmer.wrap(realtime.channels, 'get', function (originalGet) {
                 return function patchedGet(
                   this: any,
                   channelName: string,
@@ -68,7 +76,7 @@ if (
                       : originalGet.call(this, channelName);
 
                   patchObject(channel, channelMethodsToPatch, {
-                    mode: "realtime",
+                    mode: 'realtime',
                     channel: channelName,
                   });
 
@@ -83,13 +91,13 @@ if (
       }
 
       // Patch the Rest constructor
-      if (typeof exports.Rest === "function") {
-        shimmer.wrap(exports, "Rest", function (OriginalRest) {
+      if (typeof ablyExports.Rest === 'function') {
+        shimmer.wrap(ablyExports, 'Rest', function (OriginalRest) {
           return function PatchedRest(this: any, options: any) {
             const rest = new OriginalRest(options);
 
-            if (rest.channels && typeof rest.channels.get === "function") {
-              shimmer.wrap(rest.channels, "get", function (originalGet) {
+            if (rest.channels && typeof rest.channels.get === 'function') {
+              shimmer.wrap(rest.channels, 'get', function (originalGet) {
                 return function patchedGet(
                   this: any,
                   channelName: string,
@@ -101,7 +109,7 @@ if (
                       : originalGet.call(this, channelName);
 
                   patchObject(channel, channelMethodsToPatch, {
-                    mode: "rest",
+                    mode: 'rest',
                     channel: channelName,
                   });
 
@@ -115,9 +123,17 @@ if (
         });
       }
 
-      return exports;
+      // Return the modified exports
+      // If original had default export, preserve that structure
+      if (exports.default) {
+        return {
+          ...exports,
+          default: ablyExports,
+        };
+      }
+
+      return ablyExports;
     });
-  } else {
   }
 }
 
@@ -127,13 +143,13 @@ function wrapMethod(original: Function, methodName: string, context: any = {}) {
     const callerInfo = getCallerInfo(__filename);
 
     const logData: { [key: string]: any } = {
-      package: "ably",
+      package: 'ably',
       method: methodName,
-      mode: context.mode || "realtime",
+      mode: context.mode || 'realtime',
       channel: context.channel,
-      event: methodName === "publish" && args.length > 0 ? args[0] : undefined,
-      data: methodName === "publish" && args.length > 1 ? args[1] : args[0],
-      options: methodName === "publish" && args.length > 2 ? args[2] : null,
+      event: methodName === 'publish' && args.length > 0 ? args[0] : undefined,
+      data: methodName === 'publish' && args.length > 1 ? args[1] : args[0],
+      options: methodName === 'publish' && args.length > 2 ? args[2] : null,
       file: callerInfo.file,
       line: callerInfo.line,
     };
@@ -144,7 +160,7 @@ function wrapMethod(original: Function, methodName: string, context: any = {}) {
 
       watchers.notifications.addContent({
         ...logData,
-        status: "completed",
+        status: 'completed',
         response: result,
         duration: parseFloat((endTime - startTime).toFixed(2)),
         error: null,
@@ -156,7 +172,7 @@ function wrapMethod(original: Function, methodName: string, context: any = {}) {
 
       watchers.notifications.addContent({
         ...logData,
-        status: "failed",
+        status: 'failed',
         error: error instanceof Error ? error.message : String(error),
         response: null,
         duration: parseFloat((endTime - startTime).toFixed(2)),
@@ -169,9 +185,9 @@ function wrapMethod(original: Function, methodName: string, context: any = {}) {
 
 function patchObject(obj: any, methods: readonly string[], context: any = {}) {
   for (const method of methods) {
-    if (typeof obj[method] === "function" && !obj[`_${method}Patched`]) {
+    if (typeof obj[method] === 'function' && !obj[`_${method}Patched`]) {
       shimmer.wrap(obj, method, function (original) {
-        if (typeof original !== "function") return original;
+        if (typeof original !== 'function') return original;
         return wrapMethod(original, method, context);
       });
       obj[`_${method}Patched`] = true;

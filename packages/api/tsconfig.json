@@ -20,6 +20,6 @@
       "undici-types": ["./node_modules/undici-types/index.d.ts"]
     }
   },
-  "include": ["src/**/*.ts", "src/types.d.ts", "index.ts"],
+  "include": ["src/**/*.ts", "*.ts"],
   "exclude": ["dist", "node_modules", "**/*.test.ts"]
 }

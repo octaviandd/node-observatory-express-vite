@@ -1,10 +1,10 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
+import { watchers } from "../../../index.js";
 import { v4 as uuidv4 } from "uuid";
-import { getCallerInfo } from "../../utils";
+import { getCallerInfo } from "../../../utils.js";
 
 const NODECRON_PATCHED_SYMBOL = Symbol.for("node-observer:nodecron-patched");
 
@@ -17,9 +17,17 @@ if (
   if (!(global as any)[NODECRON_PATCHED_SYMBOL]) {
     (global as any)[NODECRON_PATCHED_SYMBOL] = true;
 
-    new Hook(["node-cron"], function (exports, name, basedir) {
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'node-cron' module
+      // if (name !== 'node-cron') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const nodeCronModule = exports.default || exports;
+
       shimmer.wrap(
-        exports as any,
+        nodeCronModule,
         "schedule",
         function (originalSchedule: Function) {
           return function patchedSchedule(
@@ -136,9 +144,9 @@ if (
       METHODS.forEach((method) => {
         if (
           method !== "schedule" &&
-          typeof (exports as any)[method] === "function"
+          typeof nodeCronModule[method] === "function"
         ) {
-          shimmer.wrap(exports as any, method, function (originalFn: Function) {
+          shimmer.wrap(nodeCronModule, method, function (originalFn: Function) {
             return function patchedMethod(this: any, ...args: any[]) {
               const callerInfo = getCallerInfo(__filename);
               watchers.scheduler.addContent({

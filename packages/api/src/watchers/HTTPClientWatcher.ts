@@ -1,16 +1,8 @@
 /** @format */
 
 import { Request } from "express";
-import { StoreDriver, HttpRequestData } from "../../types";
 import { BaseWatcher } from "./BaseWatcher";
-import { WatcherFilters } from "./Watcher";
 import { standardizeHttpRequestData } from "../../utils";
-
-interface HTTPClientFilters extends WatcherFilters {
-  key?: string;
-  index: "instance" | "group";
-  status: "all" | "2xx" | "4xx" | "5xx";
-}
 
 class HTTPClientWatcher extends BaseWatcher {
   /**
@@ -314,7 +306,7 @@ class HTTPClientWatcher extends BaseWatcher {
    * --------------------------------------------------------------------------
    */
   protected countGraphData(data: any, period: string) {
-    const totalDuration = this.periods[period as keyof typeof this.periods];
+    const totalDuration = this.periods[period as keyof typeof this.periods].duration;
     const intervalDuration = totalDuration / 120;
     const now = new Date().getTime();
     const startDate = now - totalDuration * 60 * 1000;

@@ -1,9 +1,9 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index.js";
+import { getCallerInfo } from "../../../utils.js";
 
 // Create a global symbol to track if memjs has been patched
 const MEMJS_PATCHED_SYMBOL = Symbol.for("node-observer:memjs-patched");
@@ -29,16 +29,24 @@ if (
     /**
      * Hook "memjs" to patch its cache operations.
      */
-    new Hook(["memjs"], function (exports: any, name, basedir) {
-      // `exports` is the MemJS client module.
-      if (!exports || typeof exports.Client !== "function") {
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'memjs' module
+      // if (name !== 'memjs') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const memjsModule = exports.default || exports;
+
+      // `memjsModule` is the MemJS client module.
+      if (!memjsModule || typeof memjsModule.Client !== "function") {
         return exports;
       }
 
       // Patch the prototype methods instead of individual instances
       Object.entries(MEMJS_METHODS).forEach(([method, displayName]) => {
-        if (typeof exports.Client.prototype[method] === "function") {
-          shimmer.wrap(exports.Client.prototype, method, function (original) {
+        if (typeof memjsModule.Client.prototype[method] === "function") {
+          shimmer.wrap(memjsModule.Client.prototype, method, function (original) {
             return async function patched(
               this: any,
               key: string,

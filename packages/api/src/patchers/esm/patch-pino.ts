@@ -1,9 +1,9 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index.js";
+import { getCallerInfo } from "../../../utils.js";
 
 const PINO_PATCHED_SYMBOL = Symbol.for("node-observer:pino-patched");
 
@@ -14,15 +14,19 @@ if (
   if (!(global as any)[PINO_PATCHED_SYMBOL]) {
     (global as any)[PINO_PATCHED_SYMBOL] = true;
 
-    new Hook(["pino"], function (
-      exports: any,
-      name: string,
-      basedir: string | undefined,
-    ): any {
-      // The `exports` here is the top-level function from "pino".
+    addHook((exports: any, name: Namespace, baseDir?: string): any => {
+      // Only patch 'pino' module
+      // if (name !== 'pino') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const pinoModule = exports.default || exports;
+
+      // The `pinoModule` here is the top-level function from "pino".
       // We can wrap that function to intercept any Pino logger creation.
 
-      const originalPino = exports;
+      const originalPino = pinoModule;
 
       function patchLoggerMethods(loggerInstance: any, contextMetadata = {}) {
         ["info", "warn", "error", "debug", "trace", "fatal"].forEach(

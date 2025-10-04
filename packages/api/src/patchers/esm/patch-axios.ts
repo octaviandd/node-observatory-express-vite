@@ -1,13 +1,13 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
-import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
-import { URL } from "url";
+import { addHook, Namespace } from 'import-in-the-middle';
+import shimmer from 'shimmer';
+import { watchers } from '../../../index.js';
+import { getCallerInfo } from '../../../utils.js';
+import { URL } from 'url';
 
 // Create a global symbol to track if axios has been patched
-const AXIOS_PATCHED_SYMBOL = Symbol.for("node-observer:axios-patched");
+const AXIOS_PATCHED_SYMBOL = Symbol.for('node-observer:axios-patched');
 
 // Maximum size of request/response body to capture (1MB)
 const MAX_BODY_SIZE = 1024 * 1024;
@@ -30,15 +30,15 @@ function createLoggingObject(
     urlObj = new URL(config.url, config.baseURL);
   } catch (e) {
     urlObj = {
-      hostname: "unknown",
-      pathname: config.url || "unknown",
-      path: config.url || "unknown",
-      href: config.url || "unknown",
-      hash: "",
-      host: "unknown",
-      origin: "unknown",
-      search: "",
-      protocol: "http:",
+      hostname: 'unknown',
+      pathname: config.url || 'unknown',
+      path: config.url || 'unknown',
+      href: config.url || 'unknown',
+      hash: '',
+      host: 'unknown',
+      origin: 'unknown',
+      search: '',
+      protocol: 'http:',
     };
   }
 
@@ -53,9 +53,9 @@ function createLoggingObject(
     origin: urlObj.origin,
     search: urlObj.search,
     protocol: urlObj.protocol,
-    method: (config.method || "get").toUpperCase(),
+    method: (config.method || 'get').toUpperCase(),
     headers: config.headers || {},
-    library: "axios",
+    library: 'axios',
     file: callerInfo.file,
     line: callerInfo.line,
   };
@@ -63,11 +63,11 @@ function createLoggingObject(
   // Add request body if present
   if (config.data) {
     try {
-      if (typeof config.data === "string") {
+      if (typeof config.data === 'string') {
         loggingObject.requestBody = config.data.substring(0, MAX_BODY_SIZE);
       } else if (Buffer.isBuffer(config.data)) {
         loggingObject.requestBody = config.data
-          .toString("utf-8")
+          .toString('utf-8')
           .substring(0, MAX_BODY_SIZE);
       } else {
         loggingObject.requestBody = JSON.stringify(config.data).substring(
@@ -84,7 +84,7 @@ function createLoggingObject(
   // Add response data if present
   if (response) {
     loggingObject.statusCode = response.status;
-    loggingObject.statusMessage = response.statusText || "OK";
+    loggingObject.statusMessage = response.statusText || 'OK';
     loggingObject.headers = response.headers || {};
 
     // Calculate duration
@@ -96,14 +96,14 @@ function createLoggingObject(
     // Add response body if present
     if (response.data) {
       try {
-        if (typeof response.data === "string") {
+        if (typeof response.data === 'string') {
           loggingObject.responseBody = response.data.substring(
             0,
             MAX_BODY_SIZE,
           );
         } else if (Buffer.isBuffer(response.data)) {
           loggingObject.responseBody = response.data
-            .toString("utf-8")
+            .toString('utf-8')
             .substring(0, MAX_BODY_SIZE);
         } else {
           loggingObject.responseBody = JSON.stringify(response.data).substring(
@@ -118,12 +118,12 @@ function createLoggingObject(
     }
 
     // Check if response is media
-    const contentType = response.headers && response.headers["content-type"];
+    const contentType = response.headers && response.headers['content-type'];
     loggingObject.isMedia =
       contentType &&
-      (contentType.includes("image") ||
-        contentType.includes("video") ||
-        contentType.includes("audio"));
+      (contentType.includes('image') ||
+        contentType.includes('video') ||
+        contentType.includes('audio'));
 
     // Check if this is a redirect
     loggingObject.isRedirect = response.status >= 300 && response.status < 400;
@@ -148,20 +148,20 @@ function createLoggingObject(
     // If error has a response, add that data
     if (error.response) {
       loggingObject.statusCode = error.response.status;
-      loggingObject.statusMessage = error.response.statusText || "Error";
+      loggingObject.statusMessage = error.response.statusText || 'Error';
       loggingObject.headers = error.response.headers || {};
 
       // Add response body from error if present
       if (error.response.data) {
         try {
-          if (typeof error.response.data === "string") {
+          if (typeof error.response.data === 'string') {
             loggingObject.responseBody = error.response.data.substring(
               0,
               MAX_BODY_SIZE,
             );
           } else if (Buffer.isBuffer(error.response.data)) {
             loggingObject.responseBody = error.response.data
-              .toString("utf-8")
+              .toString('utf-8')
               .substring(0, MAX_BODY_SIZE);
           } else {
             loggingObject.responseBody = JSON.stringify(
@@ -176,12 +176,12 @@ function createLoggingObject(
     } else {
       // No response in error, use generic error status
       loggingObject.statusCode = error.status || 500;
-      loggingObject.statusMessage = error.message || "Error";
+      loggingObject.statusMessage = error.message || 'Error';
     }
 
     // Check if request was aborted
     loggingObject.aborted =
-      error.name === "AbortError" || error.name === "CanceledError";
+      error.name === 'AbortError' || error.name === 'CanceledError';
   }
 
   // Calculate duration if not already set
@@ -198,8 +198,8 @@ function createLoggingObject(
  */
 function patchAxiosInstance(instance: any) {
   // Patch instance.request
-  if (typeof instance.request === "function") {
-    shimmer.wrap(instance, "request", function (originalRequest: Function) {
+  if (typeof instance.request === 'function') {
+    shimmer.wrap(instance, 'request', function (originalRequest: Function) {
       return function patchedRequest(
         this: any,
         configOrUrl: string | {},
@@ -209,13 +209,13 @@ function patchAxiosInstance(instance: any) {
 
         // Normalize config
         let requestConfig =
-          typeof configOrUrl === "string"
+          typeof configOrUrl === 'string'
             ? { url: configOrUrl, ...(config || {}) }
             : configOrUrl;
 
         const result = originalRequest.apply(this, arguments);
 
-        if (result && typeof result.then === "function") {
+        if (result && typeof result.then === 'function') {
           result
             .then((response: any) => {
               const loggingObject = createLoggingObject(
@@ -245,9 +245,9 @@ function patchAxiosInstance(instance: any) {
   }
 
   // Patch instance.<method> (get, post, put, etc.)
-  ["get", "post", "put", "patch", "delete", "head", "options"].forEach(
+  ['get', 'post', 'put', 'patch', 'delete', 'head', 'options'].forEach(
     (method) => {
-      if (typeof instance[method] === "function") {
+      if (typeof instance[method] === 'function') {
         shimmer.wrap(instance, method, function (originalMethod: Function) {
           return function patchedInstanceMethod(
             this: any,
@@ -265,7 +265,7 @@ function patchAxiosInstance(instance: any) {
 
             const result = originalMethod.apply(this, arguments);
 
-            if (result && typeof result.then === "function") {
+            if (result && typeof result.then === 'function') {
               result
                 .then((response: any) => {
                   const loggingObject = createLoggingObject(
@@ -299,24 +299,28 @@ function patchAxiosInstance(instance: any) {
 
 if (
   process.env.NODE_OBSERVATORY_HTTP &&
-  JSON.parse(process.env.NODE_OBSERVATORY_HTTP).includes("axios")
+  JSON.parse(process.env.NODE_OBSERVATORY_HTTP).includes('axios')
 ) {
   // Check if axios has already been patched
   if (!(global as any)[AXIOS_PATCHED_SYMBOL]) {
     // Mark axios as patched
     (global as any)[AXIOS_PATCHED_SYMBOL] = true;
 
-    // Intercepts any require("axios") call
-    new Hook(["axios"], function (
-      exports: any,
-      name: string,
-      basedir: string | undefined,
-    ) {
+    // Intercepts any import of "axios" (ESM version)
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'axios' module
+      // if (name !== 'axios') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const axiosExports = exports.default || exports;
+
       //
       // Patch `axios.request`
       //
-      if (typeof exports.request === "function") {
-        shimmer.wrap(exports, "request", function (originalRequest: Function) {
+      if (typeof axiosExports.request === 'function') {
+        shimmer.wrap(axiosExports, 'request', function (originalRequest: Function) {
           return function patchedRequest(
             this: any,
             configOrUrl: string | {},
@@ -326,13 +330,13 @@ if (
 
             // Normalize config
             let requestConfig =
-              typeof configOrUrl === "string"
+              typeof configOrUrl === 'string'
                 ? { url: configOrUrl, ...(config || {}) }
                 : configOrUrl;
 
             const result = originalRequest.apply(this, arguments);
 
-            if (result && typeof result.then === "function") {
+            if (result && typeof result.then === 'function') {
               result
                 .then((response: any) => {
                   const loggingObject = createLoggingObject(
@@ -364,10 +368,10 @@ if (
       //
       // Patch common convenience methods: get, post, put, patch, delete, head, options
       //
-      ["get", "post", "put", "patch", "delete", "head", "options"].forEach(
+      ['get', 'post', 'put', 'patch', 'delete', 'head', 'options'].forEach(
         (method) => {
-          if (typeof exports[method] === "function") {
-            shimmer.wrap(exports, method, function (originalMethod: Function) {
+          if (typeof axiosExports[method] === 'function') {
+            shimmer.wrap(axiosExports, method, function (originalMethod: Function) {
               return function patchedMethod(
                 this: any,
                 url: string,
@@ -384,7 +388,7 @@ if (
 
                 const result = originalMethod.apply(this, arguments);
 
-                if (result && typeof result.then === "function") {
+                if (result && typeof result.then === 'function') {
                   result
                     .then((response: any) => {
                       const loggingObject = createLoggingObject(
@@ -418,8 +422,8 @@ if (
       //
       // Patch axios.create if you use custom Axios instances
       //
-      if (typeof exports.create === "function") {
-        shimmer.wrap(exports, "create", function (originalCreate: Function) {
+      if (typeof axiosExports.create === 'function') {
+        shimmer.wrap(axiosExports, 'create', function (originalCreate: Function) {
           return function patchedCreate(this: any, ...args: any[]) {
             const instance = originalCreate.apply(this, args);
             patchAxiosInstance(instance);
@@ -428,8 +432,15 @@ if (
         });
       }
 
-      // Return the patched module so that subsequent require("axios") calls use it
-      return exports;
+      // Return the patched module with proper export structure
+      if (exports.default) {
+        return {
+          ...exports,
+          default: axiosExports,
+        };
+      }
+
+      return axiosExports;
     });
   }
 }

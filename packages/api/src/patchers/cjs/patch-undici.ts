@@ -2,8 +2,8 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index";
+import { getCallerInfo } from "../../../utils";
 import { PassThrough } from "stream";
 
 const UNDICI_PATCHED_SYMBOL = Symbol.for("node-observer:undici-patched");

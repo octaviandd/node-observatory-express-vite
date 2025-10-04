@@ -1,9 +1,9 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index.js";
+import { getCallerInfo } from "../../../utils.js";
 
 const SIGNALE_PATCHED_SYMBOL = Symbol.for("node-observer:signale-patched");
 
@@ -14,12 +14,20 @@ if (
   if (!(global as any)[SIGNALE_PATCHED_SYMBOL]) {
     (global as any)[SIGNALE_PATCHED_SYMBOL] = true;
 
-    new Hook(["signale"], function (exports: any, name, basedir) {
-      if (!exports || typeof exports !== "object") {
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'signale' module
+      // if (name !== 'signale') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const signaleModule = exports.default || exports;
+
+      if (!signaleModule || typeof signaleModule !== "object") {
         return exports;
       }
 
-      const OriginalSignale = exports.Signale;
+      const OriginalSignale = signaleModule.Signale;
 
       shimmer.wrap(
         OriginalSignale.prototype,

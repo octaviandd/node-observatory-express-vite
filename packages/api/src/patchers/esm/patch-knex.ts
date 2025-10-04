@@ -1,16 +1,16 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index.js";
+import { getCallerInfo } from "../../../utils.js";
 
 // Create a global symbol to track if knex has been patched
 const KNEX_PATCHED_SYMBOL = Symbol.for("node-observer:knex-patched");
 
 if (
-  (process.env.NODE_OBSERVATORY_QUERIES &&
-    JSON.parse(process.env.NODE_OBSERVATORY_QUERIES).includes("knex"))
+  process.env.NODE_OBSERVATORY_QUERIES &&
+  JSON.parse(process.env.NODE_OBSERVATORY_QUERIES).includes("knex")
 ) {
   // Check if knex has already been patched
   if (!(global as any)[KNEX_PATCHED_SYMBOL]) {
@@ -23,13 +23,17 @@ if (
      * - This can vary by Knex version and dialect. For example, MySQL vs. Postgres clients might differ.
      * - You may need to adjust for your specific version or dialect if `_query` isn't present.
      */
-    new Hook(["knex"], function (exports, name, basedir) {
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'knex' module
+      // if (name !== 'knex') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const knexModule = exports.default || exports;
+
       // Check if we have a Knex Client base class to patch
-      if (
-        !exports ||
-        !(exports as any).Client ||
-        !(exports as any).Client.prototype
-      ) {
+      if (!knexModule || !knexModule.Client || !knexModule.Client.prototype) {
         return exports;
       }
 
@@ -78,9 +82,9 @@ if (
       }
 
       // Attempt to patch `_query` if it exists (common internal method)
-      if (typeof (exports as any).Client.prototype._query === "function") {
+      if (typeof knexModule.Client.prototype._query === "function") {
         shimmer.wrap(
-          (exports as any).Client.prototype,
+          knexModule.Client.prototype,
           "_query",
           function (originalQuery) {
             return async function patchedQuery(this: any, obj: any) {
@@ -110,12 +114,10 @@ if (
             };
           },
         );
-      } else if (
-        typeof (exports as any).Client.prototype.query === "function"
-      ) {
+      } else if (typeof knexModule.Client.prototype.query === "function") {
         // If `_query` doesn't exist, try patching `.query()` instead
         shimmer.wrap(
-          (exports as any).Client.prototype,
+          knexModule.Client.prototype,
           "query",
           function (originalQuery) {
             return async function patchedQuery(

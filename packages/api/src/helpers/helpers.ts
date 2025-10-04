@@ -81,49 +81,48 @@ export const sanitizeContent = <T>(content: T): T => {
   return sanitize(content);
 }
 
-const getDurationGraphValues = (totalDuration) => {
-  const totalDuration = this.periods[period].duration;
-  const slotsCount = 120; // how many time slots (bars) we want
-  const intervalDuration = totalDuration / slotsCount;
+// const getDurationGraphValues = (totalDuration: number) => {
+//   const slotsCount = 120; // how many time slots (bars) we want
+//   const intervalDuration = totalDuration / slotsCount;
 
-  const now = Date.now();
-  const startDate = now - totalDuration * 60 * 1000;
+//   const now = Date.now();
+//   const startDate = now - totalDuration * 60 * 1000;
 
-  const groupedData = Array.from({ length: slotsCount }, (_, index) => ({
-    durations: [] as number[],
-    avgDuration: 0,
-    p95: 0,
-    count: 0,
-    label: this.getLabel(index, period),
-  }));
+//   const groupedData = Array.from({ length: slotsCount }, (_, index) => ({
+//     durations: [] as number[],
+//     avgDuration: 0,
+//     p95: 0,
+//     count: 0,
+//     label: this.getLabel(index, period),
+//   }));
 
-  data.forEach((request: any) => {
-    const requestTime = new Date(request.created_at).getTime();
-    const duration = parseFloat(request.content.duration); // assume it's in ms
+//   data.forEach((request: any) => {
+//     const requestTime = new Date(request.created_at).getTime();
+//     const duration = parseFloat(request.content.duration); // assume it's in ms
 
-    // Figure out which interval slot this request belongs to
-    const intervalIndex = Math.floor(
-      (requestTime - startDate) / (intervalDuration * 60 * 1000),
-    );
+//     // Figure out which interval slot this request belongs to
+//     const intervalIndex = Math.floor(
+//       (requestTime - startDate) / (intervalDuration * 60 * 1000),
+//     );
 
-    if (intervalIndex >= 0 && intervalIndex < slotsCount) {
-      groupedData[intervalIndex].durations.push(duration);
-    }
-  });
+//     if (intervalIndex >= 0 && intervalIndex < slotsCount) {
+//       groupedData[intervalIndex].durations.push(duration);
+//     }
+//   });
 
-  groupedData.forEach((slot) => {
-    const len = slot.durations.length;
-    if (len > 0) {
-      slot.durations.sort((a, b) => a - b);
-      slot.count = len;
+//   groupedData.forEach((slot) => {
+//     const len = slot.durations.length;
+//     if (len > 0) {
+//       slot.durations.sort((a, b) => a - b);
+//       slot.count = len;
 
-      const sum = slot.durations.reduce((acc, val) => acc + val, 0);
-      slot.avgDuration = parseFloat((sum / len).toFixed(2));
+//       const sum = slot.durations.reduce((acc, val) => acc + val, 0);
+//       slot.avgDuration = parseFloat((sum / len).toFixed(2));
 
-      const p95Index = Math.floor(0.95 * len);
-      slot.p95 = slot.durations[p95Index];
-    }
-  });
+//       const p95Index = Math.floor(0.95 * len);
+//       slot.p95 = slot.durations[p95Index];
+//     }
+//   });
 
-  return groupedData;
-}
+//   return groupedData;
+// }

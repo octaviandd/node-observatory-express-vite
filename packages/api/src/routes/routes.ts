@@ -1,4 +1,3 @@
-import { AppControllerRoute, ControllerHandlerReturnType, Promisify } from "../../types";
 import { watchers } from "../../index";
 
 export interface ObservatoryBoardRequest {

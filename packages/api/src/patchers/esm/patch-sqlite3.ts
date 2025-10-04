@@ -1,7 +1,9 @@
-import { Hook } from "require-in-the-middle";
+/** @format */
+
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index.js";
+import { getCallerInfo } from "../../../utils.js";
 
 const SQLITE3_PATCHED_SYMBOL = Symbol.for("node-observer:sqlite3-patched");
 
@@ -12,17 +14,25 @@ if (
   if (!(global as any)[SQLITE3_PATCHED_SYMBOL]) {
     (global as any)[SQLITE3_PATCHED_SYMBOL] = true;
 
-    new Hook(["sqlite3"], function (exports: any) {
-      if (!exports || !exports.Database) {
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'sqlite3' module
+      // if (name !== 'sqlite3') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const sqlite3Module = exports.default || exports;
+
+      if (!sqlite3Module || !sqlite3Module.Database) {
         return exports;
       }
 
       const methodsToPatch = ["all", "get", "run", "each", "exec", "prepare"];
 
       methodsToPatch.forEach((method) => {
-        if (typeof exports.Database.prototype[method] === "function") {
+        if (typeof sqlite3Module.Database.prototype[method] === "function") {
           shimmer.wrap(
-            exports.Database.prototype,
+            sqlite3Module.Database.prototype,
             method,
             function (originalMethod) {
               return function patchedMethod(

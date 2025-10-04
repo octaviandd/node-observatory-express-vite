@@ -1,11 +1,11 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
+import { watchers } from "../../../index.js";
 import type { Connection, Pool } from "mysql";
 import type { QueryOptions } from "mysql";
-import { getCallerInfo } from "../../utils";
+import { getCallerInfo } from "../../../utils.js";
 
 // Create a global symbol to track if mysql has been patched
 const MYSQL_PATCHED_SYMBOL = Symbol.for("node-observer:mysql-patched");
@@ -20,13 +20,21 @@ if (
     (global as any)[MYSQL_PATCHED_SYMBOL] = true;
 
     /**
-     * Hook the "mysql" module so that when it's first required,
+     * Hook the "mysql" module so that when it's first imported,
      * we can patch its connection and pool prototypes.
      */
-    new Hook(["mysql"], function (exports, name, basedir) {
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'mysql' module
+      // if (name !== 'mysql') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const mysqlModule = exports.default || exports;
+
       // 1) Patch createConnection
       shimmer.wrap(
-        exports as any,
+        mysqlModule,
         "createConnection",
         function (originalCreateConnection) {
           return function patchedCreateConnection(this: any, ...args: any[]) {
@@ -38,7 +46,7 @@ if (
       );
 
       // 2) Patch createPool
-      shimmer.wrap(exports as any, "createPool", function (originalCreatePool) {
+      shimmer.wrap(mysqlModule, "createPool", function (originalCreatePool) {
         return function patchedCreatePool(this: any, ...args: any[]) {
           const pool = originalCreatePool.apply(this, args);
           patchPoolQuery(pool, "Pool");

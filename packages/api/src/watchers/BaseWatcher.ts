@@ -1,12 +1,11 @@
 import { Request, Response } from "express";
-import { StoreDriver, WatcherEntry, WatcherFilters } from "../../types";
 import Watcher from "./Watcher";
 import { v4 as uuidv4 } from "uuid";
 import {
   requestLocalStorage,
   jobLocalStorage,
   scheduleLocalStorage,
-} from "../patchers/store";
+} from "../patchers/cjs/store";
 import { Connection as PromiseConnection } from "mysql2/promise";
 import { PERIODS } from "src/helpers/constants";
 import { groupItemsByType, formatValue, sanitizeContent } from "src/helpers/helpers";

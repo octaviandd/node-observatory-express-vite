@@ -1,9 +1,9 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index.js";
+import { getCallerInfo } from "../../../utils.js";
 
 const SENDGRID_PATCHED_SYMBOL = Symbol.for("node-observer:sendgrid-patched");
 
@@ -14,9 +14,17 @@ if (
   if (!(global as any)[SENDGRID_PATCHED_SYMBOL]) {
     (global as any)[SENDGRID_PATCHED_SYMBOL] = true;
 
-    new Hook(["@sendgrid/mail"], function (exports, name, basedir) {
-      if (typeof (exports as any).send === "function") {
-        shimmer.wrap(exports as any, "send", function (originalSend) {
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch '@sendgrid/mail' module
+      // if (name !== '@sendgrid/mail') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const sendgridModule = exports.default || exports;
+
+      if (typeof sendgridModule.send === "function") {
+        shimmer.wrap(sendgridModule, "send", function (originalSend) {
           return async function patchedSend(this: any, mailData: any) {
             const startTime = performance.now();
             const callerInfo = getCallerInfo(__filename);
@@ -81,9 +89,9 @@ if (
       }
 
       // 2. Patch the `sendMultiple` function (shortcut for multiple emails)
-      if (typeof (exports as any).sendMultiple === "function") {
+      if (typeof sendgridModule.sendMultiple === "function") {
         shimmer.wrap(
-          exports as any,
+          sendgridModule,
           "sendMultiple",
           function (originalSendMultiple) {
             return async function patchedSendMultiple(

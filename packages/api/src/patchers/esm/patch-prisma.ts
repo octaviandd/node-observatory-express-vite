@@ -1,7 +1,9 @@
-import { Hook } from "require-in-the-middle";
+/** @format */
+
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index.js";
+import { getCallerInfo } from "../../../utils.js";
 
 const PRISMA_PATCHED_SYMBOL = Symbol.for("node-observer:prisma-patched");
 
@@ -82,12 +84,20 @@ if (
   if (!(global as any)[PRISMA_PATCHED_SYMBOL]) {
     (global as any)[PRISMA_PATCHED_SYMBOL] = true;
 
-    new Hook(["@prisma/client"], (exports: any, name, basedir) => {
-      if (!exports || !exports.PrismaClient) {
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch '@prisma/client' module
+      // if (name !== '@prisma/client') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const prismaModule = exports.default || exports;
+
+      if (!prismaModule || !prismaModule.PrismaClient) {
         return exports;
       }
 
-      const OriginalPrismaClient = exports.PrismaClient;
+      const OriginalPrismaClient = prismaModule.PrismaClient;
 
       function PatchedPrismaClient(...args: any[]) {
         const instance = new OriginalPrismaClient(...args);
@@ -98,7 +108,15 @@ if (
       PatchedPrismaClient.prototype = OriginalPrismaClient.prototype;
       Object.setPrototypeOf(PatchedPrismaClient, OriginalPrismaClient);
 
-      exports.PrismaClient = PatchedPrismaClient;
+      prismaModule.PrismaClient = PatchedPrismaClient;
+      
+      // Update exports to reflect changes
+      if (exports.default) {
+        exports.default.PrismaClient = PatchedPrismaClient;
+      } else {
+        exports.PrismaClient = PatchedPrismaClient;
+      }
+      
       return exports;
     });
   }

@@ -1,9 +1,9 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index.js";
+import { getCallerInfo } from "../../../utils.js";
 import { PassThrough } from "stream";
 
 const UNDICI_PATCHED_SYMBOL = Symbol.for("node-observer:undici-patched");
@@ -17,12 +17,20 @@ if (
   if (!(global as any)[UNDICI_PATCHED_SYMBOL]) {
     (global as any)[UNDICI_PATCHED_SYMBOL] = true;
 
-    new Hook(["undici"], function (exports: any, name, basedir) {
-      if (!exports || typeof exports.request !== "function") {
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'undici' module
+      // if (name !== 'undici') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const undiciModule = exports.default || exports;
+
+      if (!undiciModule || typeof undiciModule.request !== "function") {
         return exports;
       }
 
-      shimmer.wrap(exports, "request", function (originalRequest) {
+      shimmer.wrap(undiciModule, "request", function (originalRequest) {
         return async function patchedRequest(
           this: any,
           url: string,
@@ -223,8 +231,8 @@ if (
       });
 
       // Patch the fetch function if it exists
-      if (typeof exports.fetch === "function") {
-        shimmer.wrap(exports, "fetch", function (originalFetch) {
+      if (typeof undiciModule.fetch === "function") {
+        shimmer.wrap(undiciModule, "fetch", function (originalFetch) {
           return async function patchedFetch(
             this: any,
             input: RequestInfo | URL,

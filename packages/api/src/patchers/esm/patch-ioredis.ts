@@ -1,17 +1,17 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
-import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { ioRedisCommandsArgs } from "../../constants";
-import { getCallerInfo } from "../../utils";
+import { addHook, Namespace } from 'import-in-the-middle';
+import shimmer from 'shimmer';
+import { watchers } from '../../../index.js';
+import { ioRedisCommandsArgs } from '../../../constants.js';
+import { getCallerInfo } from '../../../utils.js';
 
 // Create a global symbol to track if ioredis has been patched
-const IOREDIS_PATCHED_SYMBOL = Symbol.for("node-observer:ioredis-patched");
+const IOREDIS_PATCHED_SYMBOL = Symbol.for('node-observer:ioredis-patched');
 
 if (
   process.env.NODE_OBSERVATORY_CACHE &&
-  JSON.parse(process.env.NODE_OBSERVATORY_CACHE).includes("ioredis")
+  JSON.parse(process.env.NODE_OBSERVATORY_CACHE).includes('ioredis')
 ) {
   // Check if ioredis has already been patched
   if (!(global as any)[IOREDIS_PATCHED_SYMBOL]) {
@@ -19,22 +19,30 @@ if (
     (global as any)[IOREDIS_PATCHED_SYMBOL] = true;
 
     /**
-     * Hook "ioredis" so we can patch its prototype methods.
+     * Hook "ioredis" so we can patch its prototype methods (ESM version).
      */
-    new Hook(["ioredis"], function (exports, name, basedir) {
-      // `exports` is the default class returned by require("ioredis").
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'ioredis' module
+      // if (name !== 'ioredis') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const ioRedisExport = exports.default || exports;
+
+      // `ioRedisExport` is the default class returned by import "ioredis".
       // Typically: class IORedis extends EventEmitter { ... }
       // We want to patch the prototype of that class to intercept commands (e.g., get, set, etc.).
 
-      if (!exports || !(exports as any).prototype) {
+      if (!ioRedisExport || !ioRedisExport.prototype) {
         return exports;
       }
 
       // Only patch methods defined in our constants
       Object.keys(ioRedisCommandsArgs).forEach((command) => {
-        if (typeof (exports as any).prototype[command] === "function") {
+        if (typeof ioRedisExport.prototype[command] === 'function') {
           shimmer.wrap(
-            (exports as any).prototype,
+            ioRedisExport.prototype,
             command,
             function (originalFn) {
               return async function patchedCommand(this: any, ...args: any[]) {
@@ -42,7 +50,7 @@ if (
 
                 const logContent: { [key: string]: any } = {
                   type: command,
-                  package: "ioredis",
+                  package: 'ioredis',
                   host: this.options?.host,
                   port: this.options?.port,
                   file: callerInfo.file,
@@ -54,18 +62,18 @@ if (
                 try {
                   const result = await originalFn.apply(this, args);
                   const endTime = performance.now();
-                  logContent["duration"] = parseFloat(
+                  logContent['duration'] = parseFloat(
                     (endTime - startTime).toFixed(2),
                   );
 
                   // Standard metrics for all cache operations
-                  if (command === "get") {
+                  if (command === 'get') {
                     // Regular get operation
                     const isHit = result !== undefined && result !== null;
-                    logContent["hits"] = isHit ? 1 : 0;
-                    logContent["misses"] = isHit ? 0 : 1;
-                    logContent["value"] = result;
-                    logContent["key"] = args[0];
+                    logContent['hits'] = isHit ? 1 : 0;
+                    logContent['misses'] = isHit ? 0 : 1;
+                    logContent['value'] = result;
+                    logContent['key'] = args[0];
                     // } else if (command === "mget") {
                     //   // Multiple get operation
                     //   const keys = Array.isArray(args[0]) ? args[0] : args;
@@ -75,17 +83,17 @@ if (
                     //   logContent["hits"] = hits;
                     //   logContent["misses"] = misses;
                     //   logContent["value"] = result;
-                  } else if (command === "exists") {
+                  } else if (command === 'exists') {
                     // Exists operation
                     const isHit = !!result;
-                    logContent["hits"] = isHit ? 1 : 0;
-                    logContent["misses"] = isHit ? 0 : 1;
-                    logContent["key"] = args[0];
-                  } else if (command === "set") {
+                    logContent['hits'] = isHit ? 1 : 0;
+                    logContent['misses'] = isHit ? 0 : 1;
+                    logContent['key'] = args[0];
+                  } else if (command === 'set') {
                     // Standard set operation
-                    logContent["writes"] = 1;
-                    logContent["key"] = args[0];
-                    logContent["value"] = args[1];
+                    logContent['writes'] = 1;
+                    logContent['key'] = args[0];
+                    logContent['value'] = args[1];
                     // } else if (command === "mset") {
                     //   // Multiple set operation
                     //   // Could be in the form of mset(key1, val1, key2, val2) or mset({key1: val1, key2: val2})
@@ -96,22 +104,22 @@ if (
                     //     writeCount = Math.floor(args.length / 2);
                     //   }
                     //   logContent["writes"] = writeCount;
-                  } else if (command === "del") {
+                  } else if (command === 'del') {
                     // Delete operation
-                    logContent["writes"] = 1;
-                    logContent["key"] = args[0];
+                    logContent['writes'] = 1;
+                    logContent['key'] = args[0];
                   }
 
                   watchers.cache.addContent(logContent);
                   return result;
                 } catch (error) {
                   const endTime = performance.now();
-                  logContent["duration"] = parseFloat(
+                  logContent['duration'] = parseFloat(
                     (endTime - startTime).toFixed(2),
                   );
-                  logContent["error"] =
+                  logContent['error'] =
                     error instanceof Error ? error.message : String(error);
-                  logContent["stack"] =
+                  logContent['stack'] =
                     error instanceof Error ? error.stack : String(error);
                   watchers.cache.addContent(logContent);
                   throw error;
@@ -121,7 +129,16 @@ if (
           );
         }
       });
-      return exports;
+
+      // Return exports with proper structure
+      if (exports.default) {
+        return {
+          ...exports,
+          default: ioRedisExport,
+        };
+      }
+
+      return ioRedisExport;
     });
   }
 }

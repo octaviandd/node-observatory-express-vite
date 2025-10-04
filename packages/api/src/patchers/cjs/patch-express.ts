@@ -8,7 +8,7 @@ import type {
 } from "express";
 import { v4 as uuidv4 } from "uuid";
 import path from "path";
-import { watchers } from "../../index";
+import { watchers } from "../../../index";
 import { requestLocalStorage } from "./store";
 
 const OBSERVATORY_SKIP_MARKER = Symbol.for("node-observatory:skip-logging");

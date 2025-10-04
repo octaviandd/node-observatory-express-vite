@@ -1,9 +1,9 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index.js";
+import { getCallerInfo } from "../../../utils.js";
 
 const TYPEORM_PATCHED_SYMBOL = Symbol.for("node-observer:typeorm-patched");
 
@@ -15,9 +15,17 @@ if (
     // Mark typeorm as patched
     (global as any)[TYPEORM_PATCHED_SYMBOL] = true;
 
-    new Hook(["typeorm"], function (exports: any, name, basedir) {
-      // `exports` is the TypeORM module.
-      if (!exports || typeof exports.Repository !== "function") {
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'typeorm' module
+      // if (name !== 'typeorm') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const typeormModule = exports.default || exports;
+
+      // `typeormModule` is the TypeORM module.
+      if (!typeormModule || typeof typeormModule.Repository !== "function") {
         return exports;
       }
 
@@ -38,9 +46,9 @@ if (
       ];
 
       methodsToPatch.forEach((method) => {
-        if (typeof exports.Repository.prototype[method] === "function") {
+        if (typeof typeormModule.Repository.prototype[method] === "function") {
           shimmer.wrap(
-            exports.Repository.prototype,
+            typeormModule.Repository.prototype,
             method,
             function (originalMethod) {
               return async function patchedMethod(this: any, ...args: any[]) {
@@ -77,7 +85,7 @@ if (
       });
 
       shimmer.wrap(
-        exports.BaseEntity.prototype,
+        typeormModule.BaseEntity.prototype,
         "save",
         function (originalSave) {
           return async function patchedSave(this: any, ...args: any[]) {

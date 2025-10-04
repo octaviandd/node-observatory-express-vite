@@ -1,10 +1,10 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
+import { watchers } from "../../../index.js";
 import { v4 as uuidv4 } from "uuid";
-import { getCallerInfo } from "../../utils";
+import { getCallerInfo } from "../../../utils.js";
 
 const NODESCHEDULE_PATCHED_SYMBOL = Symbol.for(
   "node-observer:nodeschedule-patched",
@@ -19,9 +19,17 @@ if (
   if (!(global as any)[NODESCHEDULE_PATCHED_SYMBOL]) {
     (global as any)[NODESCHEDULE_PATCHED_SYMBOL] = true;
 
-    new Hook(["node-schedule"], function (exports, name, basedir) {
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'node-schedule' module
+      // if (name !== 'node-schedule') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const nodeScheduleModule = exports.default || exports;
+
       shimmer.wrap(
-        exports as any,
+        nodeScheduleModule,
         "scheduleJob",
         function (originalScheduleJob: Function) {
           return function patchedScheduleJob(
@@ -185,9 +193,9 @@ if (
       METHODS.forEach((method) => {
         if (
           method !== "scheduleJob" &&
-          typeof (exports as any)[method] === "function"
+          typeof nodeScheduleModule[method] === "function"
         ) {
-          shimmer.wrap(exports as any, method, function (originalFn: Function) {
+          shimmer.wrap(nodeScheduleModule, method, function (originalFn: Function) {
             return function patchedMethod(this: any, ...args: any[]) {
               const callerInfo = getCallerInfo(__filename);
               watchers.scheduler.addContent({

@@ -1,9 +1,9 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index.js";
+import { getCallerInfo } from "../../../utils.js";
 
 // Create a global symbol to track if mongoose has been patched
 const MONGOOSE_PATCHED_SYMBOL = Symbol.for("node-observer:mongoose-patched");
@@ -20,9 +20,17 @@ if (
     /**
      * Hook "mongoose" to patch its query and document methods.
      */
-    new Hook(["mongoose"], function (exports: any, name, basedir) {
-      // `exports` is the Mongoose module.
-      if (!exports || typeof exports.Model !== "function") {
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'mongoose' module
+      // if (name !== 'mongoose') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const mongooseModule = exports.default || exports;
+
+      // `mongooseModule` is the Mongoose module.
+      if (!mongooseModule || typeof mongooseModule.Model !== "function") {
         return exports;
       }
 
@@ -42,7 +50,7 @@ if (
         "findOneAndDelete",
       ];
 
-      shimmer.wrap(exports.Model.prototype, "save", function (originalSave) {
+      shimmer.wrap(mongooseModule.Model.prototype, "save", function (originalSave) {
         return async function patchedSave(this: any, ...args: any[]) {
           const startTime = performance.now();
 
@@ -68,10 +76,10 @@ if (
 
       staticMethodsToPatch.forEach((method) => {
         if (
-          typeof exports.Model[method] === "function" &&
-          !exports.Model[method].__patched
+          typeof mongooseModule.Model[method] === "function" &&
+          !mongooseModule.Model[method].__patched
         ) {
-          shimmer.wrap(exports.Model, method, function (originalMethod) {
+          shimmer.wrap(mongooseModule.Model, method, function (originalMethod) {
             async function patchedMethod(this: any, ...args: any[]) {
               const startTime = performance.now();
 

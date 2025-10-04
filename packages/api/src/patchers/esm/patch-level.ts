@@ -1,9 +1,9 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index.js";
+import { getCallerInfo } from "../../../utils.js";
 
 // Create a global symbol to track if level has been patched
 const LEVEL_PATCHED_SYMBOL = Symbol.for("node-observer:level-patched");
@@ -20,14 +20,22 @@ if (
     /**
      * Hook "level" to patch its cache operations.
      */
-    new Hook(["level"], function (exports: any, name, basedir) {
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'level' module
+      // if (name !== 'level') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const levelModule = exports.default || exports;
+
       // The level package exports a function that creates a database instance
-      if (!exports.Level || typeof exports.Level !== "function") {
+      if (!levelModule.Level || typeof levelModule.Level !== "function") {
         return exports;
       }
 
       // Patch the main export function
-      shimmer.wrap(exports, "Level", function (originalLevel) {
+      shimmer.wrap(levelModule, "Level", function (originalLevel) {
         return function patchedLevel(
           this: any,
           location: string,

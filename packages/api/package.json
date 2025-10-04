@@ -6,7 +6,7 @@
   "type": "commonjs",
   "description": "A Nodejs application that provides live monitoring of your application",
   "main": "dist/index.js",
-  "module": "./dist/esm/index.js",
+  "module": "dist/esm/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist",
@@ -15,10 +15,10 @@
   ],
   "exports": {
     ".": {
-      "import" : {
+      "import": {
         "types": "./dist/esm/index.d.ts",
         "default": "./dist/esm/index.js"
-      }, 
+      },
       "require": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
@@ -30,13 +30,12 @@
     "lint": "eslint --fix .",
     "prepublishOnly": "npm run build",
     "cleanup": "npm run format && npm run lint && npm run deps-check",
-    "build": "npm run clean && tsc && npm run build:types && cp types.d.ts dist/",
-    "build:types": "tsc --declaration --emitDeclarationOnly --outDir dist",
+    "build": "npm run clean && npm run build:cjs && npm run build:esm && npm run copy:types",
     "build:cjs": "tsc -p tsconfig.json --outDir dist",
     "build:esm": "tsc -p tsconfig.esm.json --outDir dist/esm",
     "start": "node dist/index.js",
     "clean": "rm -rf dist",
-    "dev": "npx ts-node-dev example.ts"
+    "copy:types": "cp types.d.ts dist/types.d.ts && cp types.d.ts dist/esm/types.d.ts"
   },
   "author": "Octavian David",
   "dependencies": {
@@ -45,6 +44,7 @@
     "dotenv": "^16.4.5",
     "http-proxy-middleware": "^3.0.5",
     "require-in-the-middle": "^7.4.0",
+    "import-in-the-middle": "^1.14.4",
     "shimmer": "^1.2.1",
     "uuid": "^11.0.3",
     "ws": "^8.18.0"

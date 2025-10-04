@@ -1,9 +1,9 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index.js";
+import { getCallerInfo } from "../../../utils.js";
 
 // Create a global symbol to track if winston has been patched
 const WINSTON_PATCHED_SYMBOL = Symbol.for("node-observer:winston-patched");
@@ -16,12 +16,16 @@ if (
     // Mark winston as patched
     (global as any)[WINSTON_PATCHED_SYMBOL] = true;
 
-    new Hook(["winston"], function (
-      exports: any,
-      name: string,
-      basedir: string | undefined,
-    ) {
-      shimmer.wrap(exports, "createLogger", function (originalCreateLogger) {
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'winston' module
+      // if (name !== 'winston') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const winstonModule = exports.default || exports;
+
+      shimmer.wrap(winstonModule, "createLogger", function (originalCreateLogger) {
         return function patchedCreateLogger(this: any, ...loggerArgs: any[]) {
           const loggerInstance = originalCreateLogger.apply(this, loggerArgs);
 
@@ -57,12 +61,12 @@ if (
       //
       // 4. Patch the default logger (e.g., `winston.info(...)`) if needed
       //
-      if (exports.default && typeof exports.default === "object") {
+      if (winstonModule.default && typeof winstonModule.default === "object") {
         // Winston exports a default logger with methods like info, warn, error, etc.
         ["info", "warn", "error", "debug", "verbose", "silly", "log"].forEach(
           (method) => {
-            if (typeof exports.default[method] === "function") {
-              shimmer.wrap(exports.default, method, function (originalMethod) {
+            if (typeof winstonModule.default[method] === "function") {
+              shimmer.wrap(winstonModule.default, method, function (originalMethod) {
                 return function patchedMethod(this: any, ...args: any) {
                   const callerInfo = getCallerInfo(__filename);
 

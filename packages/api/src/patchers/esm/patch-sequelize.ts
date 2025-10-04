@@ -1,21 +1,29 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index.js";
+import { getCallerInfo } from "../../../utils.js";
 
 const SEQUELIZE_PATCHED_SYMBOL = Symbol.for("node-observer:sequelize-patched");
 
 if (
-  (process.env.NODE_OBSERVATORY_MODELS &&
-    JSON.parse(process.env.NODE_OBSERVATORY_MODELS).includes("sequelize"))
+  process.env.NODE_OBSERVATORY_MODELS &&
+  JSON.parse(process.env.NODE_OBSERVATORY_MODELS).includes("sequelize")
 ) {
   if (!(global as any)[SEQUELIZE_PATCHED_SYMBOL]) {
     (global as any)[SEQUELIZE_PATCHED_SYMBOL] = true;
 
-    new Hook(["sequelize"], function (exports: any, name, basedir) {
-      if (!exports || typeof exports !== "function") {
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'sequelize' module
+      // if (name !== 'sequelize') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const sequelizeModule = exports.default || exports;
+
+      if (!sequelizeModule || typeof sequelizeModule !== "function") {
         return exports;
       }
 
@@ -29,7 +37,7 @@ if (
       ];
 
       modelMethods.forEach((method) => {
-        shimmer.wrap(exports.Model, method, function (original: Function) {
+        shimmer.wrap(sequelizeModule.Model, method, function (original: Function) {
           return async function patchedMethod(this: any, ...args: any[]) {
             const startTime = performance.now();
 

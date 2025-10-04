@@ -1,6 +1,5 @@
 /** @format */
 import "dotenv/config";
-import "./src/patchers/cjs/index";
 import "./src/patchers/esm/index";
 import Database from "src/database";
 import { setupMigrations } from "./src/migrations/index";

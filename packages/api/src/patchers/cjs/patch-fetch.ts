@@ -1,7 +1,7 @@
 /** @format */
 
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index";
+import { getCallerInfo } from "../../../utils";
 
 // Create a global symbol to track if fetch has been patched
 const FETCH_PATCHED_SYMBOL = Symbol.for("node-observer:fetch-patched");

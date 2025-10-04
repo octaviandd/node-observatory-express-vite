@@ -1,9 +1,9 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index.js";
+import { getCallerInfo } from "../../../utils.js";
 
 if (
   process.env.NODE_OBSERVATORY_QUERIES &&
@@ -19,10 +19,18 @@ if (
     /**
      * Hook into the "mysql2/promise" module to patch its connection and pool prototypes.
      */
-    new Hook(["mysql2/promise"], (exports: any) => {
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'mysql2/promise' module
+      // if (name !== 'mysql2/promise') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const mysql2Module = exports.default || exports;
+
       // Patch createConnection
       shimmer.wrap(
-        exports,
+        mysql2Module,
         "createConnection",
         (originalCreateConnection: Function) => {
           return async function patchedCreateConnection(
@@ -40,7 +48,7 @@ if (
       );
 
       // Patch createPool
-      shimmer.wrap(exports, "createPool", (originalCreatePool: Function) => {
+      shimmer.wrap(mysql2Module, "createPool", (originalCreatePool: Function) => {
         return function patchedCreatePool(this: any, ...args: any[]) {
           const pool = originalCreatePool.apply(this, args);
           patchQuery(pool, "Pool");

@@ -1,6 +1,5 @@
 import type { RequestOptions } from "node:http";
 import * as url from "url";
-import { HttpRequestData } from "./types";
 
 /**
  * Check for installed packages

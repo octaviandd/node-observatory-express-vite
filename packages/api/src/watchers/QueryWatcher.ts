@@ -1,15 +1,7 @@
 /** @format */
 
 import { Request } from "express";
-import { StoreDriver } from "../../types";
 import { BaseWatcher } from "./BaseWatcher";
-import { WatcherFilters } from "./Watcher";
-
-interface QueryFilters extends WatcherFilters {
-  index: "instance" | "group";
-  status: string;
-  key: string;
-}
 
 class QueryWatcher extends BaseWatcher {
   readonly type = "query";
@@ -292,7 +284,7 @@ class QueryWatcher extends BaseWatcher {
    * --------------------------------------------------------------------------
    */
   protected countGraphData(data: any, period: string) {
-    const totalDuration = this.periods[period as keyof typeof this.periods];
+    const totalDuration = this.periods[period as keyof typeof this.periods].duration;
     const intervalDuration = totalDuration / 120;
     const now = new Date().getTime();
     const startDate = now - totalDuration * 60 * 1000;

@@ -1,9 +1,9 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index.js";
+import { getCallerInfo } from "../../../utils.js";
 
 // Create a global symbol to track if log4js has been patched
 const LOG4JS_PATCHED_SYMBOL = Symbol.for("node-observer:log4js-patched");
@@ -17,14 +17,22 @@ if (
     // Mark log4js as patched
     (global as any)[LOG4JS_PATCHED_SYMBOL] = true;
 
-    // Intercepts `require("log4js")`
-    new Hook(["log4js"], function (exports, name, basedir) {
-      // `exports` is the log4js module.
+    // Intercepts `import log4js from "log4js"`
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'log4js' module
+      // if (name !== 'log4js') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const log4jsModule = exports.default || exports;
+
+      // `log4jsModule` is the log4js module.
       // We'll patch `getLogger` so that we can intercept the returned logger instance.
 
       // Wrap the getLogger function
       shimmer.wrap(
-        exports as any,
+        log4jsModule,
         "getLogger",
         function (originalFn: Function) {
           return function patchedGetLogger(this: any, ...loggerArgs: any[]) {

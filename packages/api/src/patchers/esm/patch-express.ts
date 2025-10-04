@@ -1,36 +1,44 @@
 /** @format */
-import { Hook } from "require-in-the-middle";
-import shimmer from "shimmer";
+import { addHook, Namespace } from 'import-in-the-middle';
+import shimmer from 'shimmer';
 import type {
   Request as ExpressRequest,
   Response as ExpressResponse,
   NextFunction,
-} from "express";
-import { v4 as uuidv4 } from "uuid";
-import path from "path";
-import { watchers } from "../../index";
-import { requestLocalStorage } from "./store";
+} from 'express';
+import { v4 as uuidv4 } from 'uuid';
+import path from 'path';
+import { watchers } from '../../../index.js';
+import { requestLocalStorage } from './store.js';
 
-const OBSERVATORY_SKIP_MARKER = Symbol.for("node-observatory:skip-logging");
+const OBSERVATORY_SKIP_MARKER = Symbol.for('node-observatory:skip-logging');
 
 // Symbol to prevent double patching
-const EXPRESS_PATCHED_SYMBOL = Symbol.for("node-observer:express-patched");
+const EXPRESS_PATCHED_SYMBOL = Symbol.for('node-observer:express-patched');
 const MAX_PAYLOAD_SIZE = 1024 * 50; // 50KB
 
 if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
   (global as any)[EXPRESS_PATCHED_SYMBOL] = true;
 
-  new Hook(["express"], function (exports: any, name, basedir) {
-    if (!exports?.application?.handle) {
+  addHook((exports: any, name: Namespace, baseDir?: string) => {
+    // Only patch 'express' module
+    // if (name !== 'express') {
+    //   return exports;
+    // }
+
+    // Handle both default and named exports
+    const expressExports = exports.default || exports;
+
+    if (!expressExports?.application?.handle) {
       return exports;
     }
-    if (!exports?.response) {
+    if (!expressExports?.response) {
       return exports;
     }
 
     // --- Patch 1: Central Request Handling Entry Point ---
     // Wraps the main request handler to set up context, start timers, and patch instance-specific methods.
-    shimmer.wrap(exports.application, "handle", function (originalAppHandle) {
+    shimmer.wrap(expressExports.application, 'handle', function (originalAppHandle) {
       return function wrappedAppHandle(
         this: any,
         req: ExpressRequest,
@@ -39,17 +47,17 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
       ) {
 
         if (req.originalUrl && (
-          req.originalUrl.includes("/ui") || 
+          req.originalUrl.includes('/ui') || 
           /\/api\/(requests|queries|notifications|mails|exceptions|jobs|schedules|https?|cache|logs|views|models)/.test(req.originalUrl)
         )) {
           return originalAppHandle.call(this, req, res, next);
         }
 
         const isSSEConnection =
-          res.getHeader("Content-Type") === "text/event-stream" ||
+          res.getHeader('Content-Type') === 'text/event-stream' ||
           (req.headers.accept &&
-            req.headers.accept.includes("text/event-stream")) ||
-          res.getHeader("Cache-Control") === "no-transform";
+            req.headers.accept.includes('text/event-stream')) ||
+          res.getHeader('Cache-Control') === 'no-transform';
 
         if (isSSEConnection) {
           return originalAppHandle.call(this, req, res, next);
@@ -66,39 +74,39 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
           const startTime = performance.now();
 
           // Initialize request-specific data in the store
-          store.set("requestId", requestId);
-          store.set("startTime", startTime);
-          store.set("payload", ""); // Captured request body
-          store.set("totalWrittenBytes", 0); // Accumulated response size via write/send
-          store.set("responseSizeMeasuredBySend", false); // Flag if send() determined initial size
-          store.set("logged", false); // Flag to prevent double logging
+          store.set('requestId', requestId);
+          store.set('startTime', startTime);
+          store.set('payload', ''); // Captured request body
+          store.set('totalWrittenBytes', 0); // Accumulated response size via write/send
+          store.set('responseSizeMeasuredBySend', false); // Flag if send() determined initial size
+          store.set('logged', false); // Flag to prevent double logging
 
           // --- Request Payload Capture ---
           const originalReqOn = req.on;
           req.on = function (event, listener) {
             if (
-              event === "data" &&
-              (store.get("payload").length || 0) < MAX_PAYLOAD_SIZE
+              event === 'data' &&
+              (store.get('payload').length || 0) < MAX_PAYLOAD_SIZE
             ) {
               // Wrap the data listener to capture payload
               return originalReqOn.call(this, event, (chunk: any) => {
                 const currentStore = requestLocalStorage.getStore();
                 if (currentStore) {
-                  let currentPayload = currentStore.get("payload") || "";
+                  let currentPayload = currentStore.get('payload') || '';
                   if (chunk) {
                     try {
                       if (Buffer.isBuffer(chunk)) {
-                        currentPayload += chunk.toString("utf8");
-                      } else if (typeof chunk === "string") {
+                        currentPayload += chunk.toString('utf8');
+                      } else if (typeof chunk === 'string') {
                         currentPayload += chunk;
                       } else {
                         currentPayload += JSON.stringify(chunk); // Best effort for objects
                       }
                       // Optional: Add payload size limit here
-                      currentStore.set("payload", currentPayload);
+                      currentStore.set('payload', currentPayload);
                     } catch (e) {
-                      currentPayload += "[Error converting chunk]";
-                      currentStore.set("payload", currentPayload); // Store error indicator
+                      currentPayload += '[Error converting chunk]';
+                      currentStore.set('payload', currentPayload); // Store error indicator
                     }
                   }
                 }
@@ -126,18 +134,18 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
             const currentStore = requestLocalStorage.getStore();
             if (currentStore) {
               let currentTotalBytes =
-                currentStore.get("totalWrittenBytes") || 0;
+                currentStore.get('totalWrittenBytes') || 0;
               try {
                 const size = Buffer.byteLength(
-                  typeof chunk === "string"
+                  typeof chunk === 'string'
                     ? chunk
                     : Buffer.isBuffer(chunk)
                       ? chunk
                       : JSON.stringify(chunk || {}), // Best effort
-                  typeof encoding === "string" ? encoding : "utf8",
+                  typeof encoding === 'string' ? encoding : 'utf8',
                 );
                 currentTotalBytes += size;
-                currentStore.set("totalWrittenBytes", currentTotalBytes);
+                currentStore.set('totalWrittenBytes', currentTotalBytes);
               } catch (e) {
                 /* Ignore size calculation errors */
               }
@@ -163,28 +171,28 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
             const finalStore = requestLocalStorage.getStore();
 
             // Ensure logging happens only once per request
-            if (finalStore && !finalStore.get("logged")) {
-              finalStore.set("logged", true); // Mark as logged
+            if (finalStore && !finalStore.get('logged')) {
+              finalStore.set('logged', true); // Mark as logged
 
               const endTime = performance.now();
-              const storedStartTime = finalStore.get("startTime") || endTime; // Fallback
-              const finalPayload = finalStore.get("payload") || "";
-              let finalResponseSize = finalStore.get("totalWrittenBytes") || 0;
+              const storedStartTime = finalStore.get('startTime') || endTime; // Fallback
+              const finalPayload = finalStore.get('payload') || '';
+              let finalResponseSize = finalStore.get('totalWrittenBytes') || 0;
               const wasSendUsed =
-                finalStore.get("responseSizeMeasuredBySend") || false;
-              const storedRequestId = finalStore.get("requestId") || "unknown";
+                finalStore.get('responseSizeMeasuredBySend') || false;
+              const storedRequestId = finalStore.get('requestId') || 'unknown';
 
               // Final size calculation based on end chunk and previous writes/sends
               let endChunkSize = 0;
               if (chunk) {
                 try {
                   endChunkSize = Buffer.byteLength(
-                    typeof chunk === "string"
+                    typeof chunk === 'string'
                       ? chunk
                       : Buffer.isBuffer(chunk)
                         ? chunk
                         : JSON.stringify(chunk || {}),
-                    typeof encoding === "string" ? encoding : "utf8",
+                    typeof encoding === 'string' ? encoding : 'utf8',
                   );
                 } catch (e) {
                   /* Ignore errors */
@@ -206,7 +214,7 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
                 route: req.originalUrl || req.url,
                 statusCode: res.statusCode,
                 duration: (endTime - storedStartTime).toFixed(2),
-                requestSize: parseFloat(req.headers["content-length"] || "0"),
+                requestSize: parseFloat(req.headers['content-length'] || '0'),
                 responseSize: finalResponseSize,
                 payload: finalPayload, // Include captured request body
                 headers: req.headers, // Request headers
@@ -216,7 +224,7 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
                 memoryUsage: process.memoryUsage(), // Snapshot at end
                 //@ts-ignore Add session if available
                 session: req.session || {},
-                package: "express",
+                package: 'express',
               };
 
               // Add error details if an error handler put them in res.locals
@@ -234,7 +242,7 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
 
               // Send to your logging system
               if (watchers?.requests) {
-                if (req.originalUrl && !(req.originalUrl.includes("/ui/"))) {
+                if (req.originalUrl && !(req.originalUrl.includes('/ui/'))) {
                   watchers.requests.addContent(logContent);
                 }
               }
@@ -257,12 +265,12 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
             // --- Synchronous Error Handling ---
             // Catch errors thrown directly during middleware/route execution BEFORE res.end
             const errorStore = requestLocalStorage.getStore();
-            if (errorStore && !errorStore.get("logged")) {
+            if (errorStore && !errorStore.get('logged')) {
               // Check if not already logged
-              errorStore.set("logged", true);
+              errorStore.set('logged', true);
               const errorEndTime = performance.now();
               const storedStartTime =
-                errorStore.get("startTime") || errorEndTime;
+                errorStore.get('startTime') || errorEndTime;
 
               const errorLogContent: { [key: string]: any } = {
                 method: req.method?.toLowerCase(),
@@ -273,14 +281,14 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
                 query: req.query,
                 params: req.params,
                 ip: req.ip,
-                payload: errorStore.get("payload") || "", // Log captured payload on error too
+                payload: errorStore.get('payload') || '', // Log captured payload on error too
                 error: {
                   message: error.message,
                   name: error.name,
                   stack: error.stack,
                 },
                 memoryUsage: process.memoryUsage(),
-                package: "express",
+                package: 'express',
               };
 
               if (watchers?.requests) {
@@ -295,10 +303,10 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
     }); // End of shimmer.wrap for app.handle
 
     // --- Patch 2: View Rendering (On Prototype) ---
-    if (exports.response && typeof exports.response.render === "function") {
+    if (expressExports.response && typeof expressExports.response.render === 'function') {
       shimmer.wrap(
-        exports.response,
-        "render",
+        expressExports.response,
+        'render',
         function (originalRender: Function) {
           return function patchedRender(
             this: ExpressResponse,
@@ -310,11 +318,11 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
 
             // Handle arguments flexibility (options is optional)
             let actualOptions: object | undefined =
-              typeof options === "object" ? options : undefined;
+              typeof options === 'object' ? options : undefined;
             let actualCallback:
               | ((err: Error, html: string) => void)
               | undefined =
-              typeof options === "function"
+              typeof options === 'function'
                 ? (options as (err: Error, html: string) => void)
                 : (callback as
                     | ((err: Error, html: string) => void)
@@ -322,21 +330,21 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
 
             const wrappedCallback = (err: any, html: string) => {
               const duration = (performance.now() - renderStartTime).toFixed(2);
-              const size = html ? Buffer.byteLength(html, "utf8") : 0;
+              const size = html ? Buffer.byteLength(html, 'utf8') : 0;
 
               // Resolve view details
               let extension = path.extname(view);
-              const viewEngine = this.req?.app?.get("view engine");
+              const viewEngine = this.req?.app?.get('view engine');
               if (!extension && viewEngine) {
-                extension = "." + viewEngine;
+                extension = '.' + viewEngine;
               }
               const viewName =
                 !view.endsWith(extension) && extension
                   ? view + extension
                   : view;
-              const packageType = viewEngine || "unknown"; // e.g., 'pug', 'ejs'
+              const packageType = viewEngine || 'unknown'; // e.g., 'pug', 'ejs'
               const viewCacheEnabled =
-                this.req?.app?.enabled("view cache") || false;
+                this.req?.app?.enabled('view cache') || false;
 
               // Check if logging for this view type is enabled (example condition)
               const logViewEnabled =
@@ -348,7 +356,7 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
                   options: actualOptions, // Log options passed to render
                   duration,
                   size,
-                  status: !err ? "completed" : "failed",
+                  status: !err ? 'completed' : 'failed',
                   error: err ? { message: err.message, name: err.name } : null,
                   package: packageType,
                   cacheInfo: {
@@ -359,7 +367,7 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
               }
 
               // Execute original callback or proceed with response flow
-              if (typeof actualCallback === "function") {
+              if (typeof actualCallback === 'function') {
                 return actualCallback(err, html);
               } else {
                 if (err) {
@@ -384,23 +392,23 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
     }
     // --- Patch 3: Response Sending (On Prototype) ---
     // Patches response.send to capture size if res.write wasn't used first
-    if (exports.response && typeof exports.response.send === "function") {
-      shimmer.wrap(exports.response, "send", function (originalSend) {
+    if (expressExports.response && typeof expressExports.response.send === 'function') {
+      shimmer.wrap(expressExports.response, 'send', function (originalSend) {
         return function wrappedSend(this: ExpressResponse, body: any) {
           const store = requestLocalStorage.getStore();
           if (store) {
-            let currentTotalBytes = store.get("totalWrittenBytes") || 0;
+            let currentTotalBytes = store.get('totalWrittenBytes') || 0;
             // Only measure 'send' body size if 'write' hasn't already started accumulating
             if (currentTotalBytes === 0) {
-              store.set("responseSizeMeasuredBySend", true); // Mark that send initiated size measurement
+              store.set('responseSizeMeasuredBySend', true); // Mark that send initiated size measurement
               try {
                 currentTotalBytes = Buffer.byteLength(
-                  typeof body === "string" ? body : JSON.stringify(body || {}),
-                  "utf8",
+                  typeof body === 'string' ? body : JSON.stringify(body || {}),
+                  'utf8',
                 );
-                store.set("totalWrittenBytes", currentTotalBytes);
+                store.set('totalWrittenBytes', currentTotalBytes);
               } catch (e) {
-                store.set("totalWrittenBytes", 0); // Reset on error
+                store.set('totalWrittenBytes', 0); // Reset on error
               }
             }
           }
@@ -410,6 +418,15 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
         };
       });
     }
-    return exports; // IMPORTANT: Return exports to allow Express to load normally
+
+    // Return exports with proper structure
+    if (exports.default) {
+      return {
+        ...exports,
+        default: expressExports,
+      };
+    }
+
+    return expressExports; // IMPORTANT: Return exports to allow Express to load normally
   });
 }

@@ -1,13 +1,5 @@
 import { Request } from "express";
-import { StoreDriver } from "../../types";
 import { BaseWatcher } from "./BaseWatcher";
-import { WatcherFilters } from "./Watcher";
-
-interface ViewFilters extends WatcherFilters {
-  index: "instance" | "group";
-  path?: string;
-  status: "all" | "completed" | "failed";
-}
 
 class ViewWatcher extends BaseWatcher {
   readonly type = "view";

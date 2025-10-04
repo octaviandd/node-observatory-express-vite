@@ -3,12 +3,12 @@
 import shimmer from "shimmer";
 import http from "http";
 import https from "https";
-import { watchers } from "../../index";
+import { watchers } from "../../../index";
 import {
   getCallerInfo,
   getRequestInfo,
   httpRequestToRequestData,
-} from "../../utils";
+} from "../../../utils";
 import zlib from "zlib";
 
 // Create a global symbol to track if http has been patched

@@ -9,7 +9,7 @@ declare global {
   }
 }
 
-export interface WatcherEntry {
+interface WatcherEntry {
   uuid: string;
   // closureId: string
   requestId?: string;
@@ -20,7 +20,7 @@ export interface WatcherEntry {
   created_at: number | Date;
 }
 
-export interface WatcherFilters {
+interface WatcherFilters {
   period?: "1h" | "24h" | "7d" | "14d" | "30d";
   offset: number;
   limit: number;
@@ -29,12 +29,98 @@ export interface WatcherFilters {
   index: string;
 }
 
+interface ViewFilters extends WatcherFilters {
+  index: "instance" | "group";
+  path?: string;
+  status: "all" | "completed" | "failed";
+}
+
+
+interface ScheduleFilters extends WatcherFilters {
+  index: "instance" | "group";
+  key?: string;
+  status: "all" | "completed" | "failed";
+  groupFilter: "all" | "errors" | "slow";
+}
+
+interface RequestFilters extends WatcherFilters {
+  index: "instance" | "group";
+  key?: string;
+  status: "all" | "2xx" | "4xx" | "5xx";
+}
+
+interface QueryFilters extends WatcherFilters {
+  index: "instance" | "group";
+  status: string;
+  key: string;
+}
+
+interface NotificationFilters extends WatcherFilters {
+  type?: string;
+  channel?: string;
+  status: string;
+  index: "instance" | "group";
+}
+
+interface ExceptionFilters extends WatcherFilters {
+  type: "all" | "unhandled" | "uncaught";
+  key?: string;
+  query?: string;
+}
+
+interface CacheFilters extends WatcherFilters {
+  index: "instance" | "group";
+  cacheType: "all" | "misses" | "hits" | "writes";
+  key?: string;
+}
+
+interface HTTPClientFilters extends WatcherFilters {
+  key?: string;
+  index: "instance" | "group";
+  status: "all" | "2xx" | "4xx" | "5xx";
+}
+
+interface ModelFilters extends WatcherFilters {
+  index: "instance" | "group";
+  model?: string;
+  status?: "all" | "completed" | "failed";
+}
+
+interface MailFilters extends WatcherFilters {
+  index: "instance" | "group";
+  status: "completed" | "failed" | "all";
+  key?: string;
+}
+
+interface JobFilters extends WatcherFilters {
+  index: "instance" | "group";
+  jobStatus: "all" | "released" | "failed" | "completed";
+  queueFilter: "all" | "errors" | "slow";
+  key?: string;
+}
+
+interface LogFilters extends WatcherFilters {
+  logType:
+    | "All"
+    | "Info"
+    | "Warn"
+    | "Error"
+    | "Debug"
+    | "Trace"
+    | "Fatal"
+    | "Complete"
+    | "Log";
+  key?: string;
+  index: "instance" | "group";
+}
+
+
 
 /**
  * Supported logging libraries
  * @typedef {string} Logger
  */
-export type Logger =
+type Logger =
   | "winston"
   | "pino"
   | "bunyan"
@@ -46,13 +132,13 @@ export type Logger =
  * Supported scheduler libraries
  * @typedef {string} Scheduler
  */
-export type Scheduler = "node-schedule" | "node-cron" | "bree";
+type Scheduler = "node-schedule" | "node-cron" | "bree";
 
 /**
  * Supported email sending libraries
  * @typedef {string} Mailer
  */
-export type Mailer =
+type Mailer =
   | "nodemailer"
   | "@sendgrid/mail"
   | "mailgun.js"
@@ -63,7 +149,7 @@ export type Mailer =
  * Supported caching libraries
  * @typedef {string} Cache
  */
-export type Cache =
+type Cache =
   | "redis"
   | "ioredis"
   | "node-cache"
@@ -76,7 +162,7 @@ export type Cache =
  * Supported notification libraries
  * @typedef {string} Notifications
  */
-export type Notifications =
+type Notifications =
   | "pusher"
   | "ably";
 
@@ -84,7 +170,7 @@ export type Notifications =
  * Supported HTTP client libraries
  * @typedef {string} Http
  */
-export type Http =
+type Http =
   | "axios"
   | "http"
   | "https"
@@ -101,19 +187,19 @@ export type Http =
  * Supported job processing libraries
  * @typedef {string} Jobs
  */
-export type Jobs = "bull" | "agenda";
+type Jobs = "bull" | "agenda";
 
 /**
  * Types of error handling to observe
  * @typedef {string} Errors
  */
-export type Errors = "uncaught" | "unhandled";
+type Errors = "uncaught" | "unhandled";
 
 /**
  * Supported database query libraries
  * @typedef {string} Queries
  */
-export type Queries =
+type Queries =
   | "knex"
   | "sequelize"
   | "sqlite3"
@@ -128,25 +214,25 @@ export type Queries =
  * Supported ORM/model libraries
  * @typedef {string} Model
  */
-export type Model = "typeorm" | "sequelize" | "prisma" | "knex" | "sqlite3";
+type Model = "typeorm" | "sequelize" | "prisma" | "knex" | "sqlite3";
 
 /**
  * Supported view libraries
  * @typedef {string} Views
  */
-export type Views = "ejs" | "pug" | "handlebars";
+type Views = "ejs" | "pug" | "handlebars";
 
 /**
  * Supported database drivers for storing logs and metrics
  * @typedef {string} StoreDriver
  */
-export type StoreDriver = "mysql2";
+type StoreDriver = "mysql2";
 
 /**
  * Interface representing standardized HTTP request data across different libraries
  * Common fields are required, library-specific fields are optional
  */
-export interface HttpRequestData {
+interface HttpRequestData {
   // Common required fields
   method: string;
   origin: string;
@@ -228,7 +314,7 @@ export interface HttpRequestData {
   [key: string]: any;
 }
 
-export interface ExceptionContent {
+interface ExceptionContent {
   type: "exception";
   message: string;
   stack: string;
@@ -243,7 +329,7 @@ export interface ExceptionContent {
   fullError: string;
 }
 
-export interface ViewContent {
+interface ViewContent {
   type: "view";
   view: string;
   cacheInfo: {
@@ -263,7 +349,7 @@ export interface ViewContent {
   options: Record<string, any>;
 }
 
-export interface ScheduleContent {
+interface ScheduleContent {
   type: "schedule";
   package: "node-schedule" | "node-cron" | "bree";
   scheduleId: string;
@@ -285,7 +371,7 @@ export interface ScheduleContent {
   duration?: number;
 }
 
-export interface JobContent {
+interface JobContent {
   type: "job";
   method:
     | "process"
@@ -314,7 +400,7 @@ export interface JobContent {
   } | null;
 }
 
-export interface LogContent {
+interface LogContent {
   package: "bunyan" | "log4js" | "signale" | "loglevel";
   type: "log";
   level: "info" | "warn" | "error" | "debug" | "verbose" | "silly" | "log";
@@ -324,7 +410,7 @@ export interface LogContent {
   duration?: number;
 }
 
-export interface NotificationContent {
+interface NotificationContent {
   type: "notification";
   method: "trigger" | "triggerBatch";
   status: "completed" | "failed";
@@ -343,7 +429,7 @@ export interface NotificationContent {
   response?: Record<string, any>;
 }
 
-export interface MailContent {
+interface MailContent {
   type: "mail";
   status: "completed" | "failed";
   file: string;
@@ -373,7 +459,7 @@ export interface MailContent {
   body?: string;
 }
 
-export interface CacheContent {
+interface CacheContent {
   type: "cache";
   package:
     | "redis"
@@ -399,7 +485,7 @@ export interface CacheContent {
   checkPeriod?: number;
   stdTTL?: number;
 }
-export interface QueryContent {
+interface QueryContent {
   type: "query";
   context: string;
   sql: string;
@@ -425,7 +511,7 @@ export interface QueryContent {
   sqlType: string;
   params?: any;
 }
-export interface ModelContent {
+interface ModelContent {
   type: "model";
   method:
     | "create"
@@ -464,7 +550,7 @@ export interface ModelContent {
     name: string;
   } | null;
 }
-export interface RequestContent {
+interface RequestContent {
   type: "request";
   method: string;
   route: string;
@@ -489,7 +575,7 @@ export interface RequestContent {
   line: string;
 }
 
-export interface HttpClientContent {
+interface HttpClientContent {
   type: "http";
   method: string;
   route: string;
@@ -520,7 +606,7 @@ export interface HttpClientContent {
   package: string;
 }
 
-export interface ClientResponse {
+interface ClientResponse {
   uuid: string;
   request_id?: string;
   job_id?: string;
@@ -555,7 +641,7 @@ export interface ClientResponse {
     | HttpClientContent;
 }
 
-export interface BaseGroupResponse {
+interface BaseGroupResponse {
   count: number;
   shortest?: number;
   longest?: number;
@@ -563,69 +649,69 @@ export interface BaseGroupResponse {
   p95?: number;
 }
 
-export interface CacheGroupResponse extends BaseGroupResponse {
+interface CacheGroupResponse extends BaseGroupResponse {
   misses: number;
   hits: number;
   writes: number;
   cache_key: string;
 }
 
-export interface ExceptionGroupResponse extends BaseGroupResponse {
+interface ExceptionGroupResponse extends BaseGroupResponse {
   header: string;
   total: number;
 }
 
-export interface CacheInstanceResponse extends ClientResponse {
+interface CacheInstanceResponse extends ClientResponse {
   content: CacheContent;
 }
 
-export interface RequestInstanceResponse extends ClientResponse {
+interface RequestInstanceResponse extends ClientResponse {
   content: RequestContent;
 }
 
-export interface JobInstanceResponse extends ClientResponse {
+interface JobInstanceResponse extends ClientResponse {
   content: JobContent;
 }
 
-export interface ScheduleInstanceResponse extends ClientResponse {
+interface ScheduleInstanceResponse extends ClientResponse {
   content: ScheduleContent;
 }
 
-export interface ViewInstanceResponse extends ClientResponse {
+interface ViewInstanceResponse extends ClientResponse {
   content: ViewContent;
 }
 
-export interface ExceptionInstanceResponse extends ClientResponse {
+interface ExceptionInstanceResponse extends ClientResponse {
   content: ExceptionContent;
 }
 
-export interface HttpClientInstanceResponse extends ClientResponse {
+interface HttpClientInstanceResponse extends ClientResponse {
   content: HttpClientContent;
 }
 
-export interface MailInstanceResponse extends ClientResponse {
+interface MailInstanceResponse extends ClientResponse {
   content: MailContent;
 }
 
-export interface LogInstanceResponse extends ClientResponse {
+interface LogInstanceResponse extends ClientResponse {
   content: LogContent;
 }
 
-export interface NotificationInstanceResponse extends ClientResponse {
+interface NotificationInstanceResponse extends ClientResponse {
   content: NotificationContent;
 }
 
-export interface QueryInstanceResponse extends ClientResponse {
+interface QueryInstanceResponse extends ClientResponse {
   content: QueryContent;
   average: number;
   p95: number;
 }
 
-export interface ModelInstanceResponse extends ClientResponse {
+interface ModelInstanceResponse extends ClientResponse {
   content: ModelContent;
 }
 
-export interface HttpClientGroupResponse extends BaseGroupResponse {
+interface HttpClientGroupResponse extends BaseGroupResponse {
   route: string;
   average: number;
   p95: number;
@@ -634,14 +720,14 @@ export interface HttpClientGroupResponse extends BaseGroupResponse {
   count_500: number;
 }
 
-export interface JobGroupResponse extends BaseGroupResponse {
+interface JobGroupResponse extends BaseGroupResponse {
   queue: string;
   completed: number;
   released: number;
   failed: number;
 }
 
-export interface RequestGroupResponse extends BaseGroupResponse {
+interface RequestGroupResponse extends BaseGroupResponse {
   route: string;
   count_200: number;
   count_400: number;
@@ -650,7 +736,7 @@ export interface RequestGroupResponse extends BaseGroupResponse {
   p95: number;
 }
 
-export interface LogGroupResponse extends BaseGroupResponse {
+interface LogGroupResponse extends BaseGroupResponse {
   level: string;
   message: string;
   info: number;
@@ -661,23 +747,23 @@ export interface LogGroupResponse extends BaseGroupResponse {
   fatal: number;
   log: number;
 }
-export interface MailGroupResponse extends BaseGroupResponse {
+interface MailGroupResponse extends BaseGroupResponse {
   mail_to: string;
   success_count: number;
   failed_count: number;
 }
 
-export interface ModelGroupResponse extends BaseGroupResponse {
+interface ModelGroupResponse extends BaseGroupResponse {
   modelName: string;
 }
 
-export interface NotificationGroupResponse extends BaseGroupResponse {
+interface NotificationGroupResponse extends BaseGroupResponse {
   channel: string;
   completed: number;
   failed: number;
 }
 
-export interface QueryGroupResponse extends BaseGroupResponse {
+interface QueryGroupResponse extends BaseGroupResponse {
   endpoint: string;
   completed: number;
   failed: number;
@@ -685,22 +771,22 @@ export interface QueryGroupResponse extends BaseGroupResponse {
   average: number;
 }
 
-export interface ViewGroupResponse extends BaseGroupResponse {
+interface ViewGroupResponse extends BaseGroupResponse {
   size: string;
   view: string;
   completed: number;
   failed: number;
 }
 
-export interface ScheduleGroupResponse extends BaseGroupResponse {
+interface ScheduleGroupResponse extends BaseGroupResponse {
   scheduleId: string;
   cronExpression: string;
   completed: number;
   failed: number;
 }
 
-export type HTTPMethod = 'get' | 'post' | 'put' | 'patch';
-export type HTTPStatus = number;
+type HTTPMethod = 'get' | 'post' | 'put' | 'patch';
+type HTTPStatus = number;
 
 interface AppControllerRoute {
   method: HTTPMethod | HTTPMethod[];
@@ -709,33 +795,33 @@ interface AppControllerRoute {
   handler(request?: ObservatoryBoardRequest): Promisify<ControllerHandlerReturnType>;
 }
 
-export type ViewHandlerReturnType = {
+type ViewHandlerReturnType = {
   name: string;
   params: Record<string, string>;
 };
 
-export interface AppViewRoute {
+interface AppViewRoute {
   method: HTTPMethod;
   route: string | string[];
 
   handler(params: { basePath: string }): ViewHandlerReturnType;
 }
 
-export type Promisify<T> = T | Promise<T>
+type Promisify<T> = T | Promise<T>
 
-export type ControllerHandlerReturnType = {
+type ControllerHandlerReturnType = {
   status?: HTTPStatus;
   body: string | Record<string, any>;
 };
 
-export interface ObservatoryBoardRequest {
+interface ObservatoryBoardRequest {
   requestData: any;
   query: Record<string, any>;
   params: Record<string, any>;
   body: Record<string, any>;
 }
 
-export interface SidePanelState {
+interface SidePanelState {
   requestId?: string;
   jobId?: string;
   scheduleId?: string;
@@ -743,7 +829,7 @@ export interface SidePanelState {
   isOpen: boolean;
 }
 
-export interface IServerAdapter {
+interface IServerAdapter {
   setStaticPath(staticsRoute: string, staticsPath: string): IServerAdapter;
   setEntryRoute(route: AppViewRoute): IServerAdapter;
   setErrorHandler(handler: (error: Error & { statusCode : HTTPStatus }) => ControllerHandlerReturnType): IServerAdapter;

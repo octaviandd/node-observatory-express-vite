@@ -2,9 +2,9 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { nodeCacheCommandsArgs } from "../../constants";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index";
+import { nodeCacheCommandsArgs } from "../../../constants";
+import { getCallerInfo } from "../../../utils";
 
 // Create a global symbol to track if node-cache has been patched
 const NODECACHE_PATCHED_SYMBOL = Symbol.for("node-observer:nodecache-patched");

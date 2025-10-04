@@ -1,33 +1,33 @@
 /** @format */
 
-import shimmer from "shimmer";
-import http from "http";
-import https from "https";
-import { watchers } from "../../index";
+import shimmer from 'shimmer';
+import http from 'http';
+import https from 'https';
+import { watchers } from '../../../index.js';
 import {
   getCallerInfo,
   getRequestInfo,
   httpRequestToRequestData,
-} from "../../utils";
-import zlib from "zlib";
+} from '../../../utils.js';
+import zlib from 'zlib';
 
 // Create a global symbol to track if http has been patched
-const HTTP_PATCHED_SYMBOL = Symbol.for("node-observer:http-patched");
+const HTTP_PATCHED_SYMBOL = Symbol.for('node-observer:http-patched');
 
 // Maximum size of request/response body to capture (1MB)
 const MAX_BODY_SIZE = 1024 * 1024;
 
 const skipDomains = [
-  "amazonaws.com", // AWS services
-  "api.sendgrid.com", // SendGrid
-  "api.mailgun.net", // Mailgun
-  "api.postmarkapp.com", // Postmark
-  "api.pusher.com", // Pusher
-  "api-eu.pusher.com", // Pusher
-  "ethereal.email", // Nodemailer test
-  "smtp.", // SMTP servers
-  "rest.ably.io", // Ably REST
-  "realtime.ably.io", // Ably Realtime
+  'amazonaws.com', // AWS services
+  'api.sendgrid.com', // SendGrid
+  'api.mailgun.net', // Mailgun
+  'api.postmarkapp.com', // Postmark
+  'api.pusher.com', // Pusher
+  'api-eu.pusher.com', // Pusher
+  'ethereal.email', // Nodemailer test
+  'smtp.', // SMTP servers
+  'rest.ably.io', // Ably REST
+  'realtime.ably.io', // Ably Realtime
 ];
 
 /**
@@ -35,14 +35,14 @@ const skipDomains = [
  */
 const detectLibrary = (defaultLibrary: string, stackLines: string[]) => {
   const libraries = [
-    { pattern: "node_modules/axios", name: "axios" },
-    { pattern: "node_modules/got", name: "got" },
-    { pattern: "node_modules/node-fetch", name: "node-fetch" },
-    { pattern: "node_modules/superagent", name: "superagent" },
-    { pattern: "node_modules/phin", name: "phin" },
-    { pattern: "node_modules/ky", name: "ky" },
-    { pattern: "node_modules/needle", name: "needle" },
-    { pattern: "node_modules/undici", name: "undici" },
+    { pattern: 'node_modules/axios', name: 'axios' },
+    { pattern: 'node_modules/got', name: 'got' },
+    { pattern: 'node_modules/node-fetch', name: 'node-fetch' },
+    { pattern: 'node_modules/superagent', name: 'superagent' },
+    { pattern: 'node_modules/phin', name: 'phin' },
+    { pattern: 'node_modules/ky', name: 'ky' },
+    { pattern: 'node_modules/needle', name: 'needle' },
+    { pattern: 'node_modules/undici', name: 'undici' },
   ];
 
   for (const line of stackLines) {
@@ -58,19 +58,19 @@ const detectLibrary = (defaultLibrary: string, stackLines: string[]) => {
 
 const isInternalFrameworkRequest = (stackLines: string[]) => {
   const internalPatterns = [
-    "node_modules/express",
-    "node_modules/connect",
-    "node_modules/koa",
-    "node_modules/fastify",
-    "node_modules/hapi",
-    "node_modules/@hapi",
-    "node_modules/restify",
-    "node_modules/next",
-    "node_modules/nuxt",
-    "node_modules/apollo-server",
-    "node_modules/graphql-http",
-    "node_modules/socket.io",
-    "node_modules/ws",
+    'node_modules/express',
+    'node_modules/connect',
+    'node_modules/koa',
+    'node_modules/fastify',
+    'node_modules/hapi',
+    'node_modules/@hapi',
+    'node_modules/restify',
+    'node_modules/next',
+    'node_modules/nuxt',
+    'node_modules/apollo-server',
+    'node_modules/graphql-http',
+    'node_modules/socket.io',
+    'node_modules/ws',
   ];
 
   return stackLines.some((line) =>
@@ -84,40 +84,40 @@ const isInternalFrameworkRequest = (stackLines: string[]) => {
 const shouldSkip = (options: any, scheme: string) => {
   const url =
     options.url ||
-    `${scheme}://${options.hostname || options.host || ""}${options.path || ""}`;
+    `${scheme}://${options.hostname || options.host || ''}${options.path || ''}`;
 
-  let host = options.hostname || options.host || "";
+  let host = options.hostname || options.host || '';
 
   if (
-    host === "localhost" ||
-    host === "127.0.0.1" ||
-    host === "::1" ||
+    host === 'localhost' ||
+    host === '127.0.0.1' ||
+    host === '::1' ||
     // Also check for other local references
-    host === "host.docker.internal" ||
-    host.startsWith("192.168.") ||
-    host.startsWith("10.") ||
-    host.startsWith("172.16.") ||
-    host.startsWith("172.17.") ||
-    host.startsWith("172.18.") ||
-    host.startsWith("172.19.") ||
-    host.startsWith("172.20.") ||
-    host.startsWith("172.21.") ||
-    host.startsWith("172.22.") ||
-    host.startsWith("172.23.") ||
-    host.startsWith("172.24.") ||
-    host.startsWith("172.25.") ||
-    host.startsWith("172.26.") ||
-    host.startsWith("172.27.") ||
-    host.startsWith("172.28.") ||
-    host.startsWith("172.29.") ||
-    host.startsWith("172.30.") ||
-    host.startsWith("172.31.")
+    host === 'host.docker.internal' ||
+    host.startsWith('192.168.') ||
+    host.startsWith('10.') ||
+    host.startsWith('172.16.') ||
+    host.startsWith('172.17.') ||
+    host.startsWith('172.18.') ||
+    host.startsWith('172.19.') ||
+    host.startsWith('172.20.') ||
+    host.startsWith('172.21.') ||
+    host.startsWith('172.22.') ||
+    host.startsWith('172.23.') ||
+    host.startsWith('172.24.') ||
+    host.startsWith('172.25.') ||
+    host.startsWith('172.26.') ||
+    host.startsWith('172.27.') ||
+    host.startsWith('172.28.') ||
+    host.startsWith('172.29.') ||
+    host.startsWith('172.30.') ||
+    host.startsWith('172.31.')
   ) {
     return true;
   }
 
   return skipDomains.some((domain) => {
-    return (host || "").includes(domain);
+    return (host || '').includes(domain);
   });
 };
 
@@ -126,8 +126,8 @@ const shouldSkip = (options: any, scheme: string) => {
  */
 function patchHttpMethod(
   module: typeof http | typeof https,
-  methodName: "request" | "get",
-  scheme: "http" | "https",
+  methodName: 'request' | 'get',
+  scheme: 'http' | 'https',
 ) {
   shimmer.wrap(module, methodName, function (original) {
     return function patchedMethod(this: any, ...args: any[]) {
@@ -137,15 +137,15 @@ function patchHttpMethod(
       let loggingObject: { [key: string]: any } = {};
 
       const stack = new Error().stack;
-      const stackLines = stack?.split("\n") || [];
+      const stackLines = stack?.split('\n') || [];
       const callerInfo = getCallerInfo(__filename);
 
       // Try-catch block to handle URL parsing errors
       try {
         const options = argsCopy.shift() as URL | http.RequestOptions | string;
         const extraOptions =
-          typeof argsCopy[0] === "object" &&
-          (typeof options === "string" || options instanceof URL)
+          typeof argsCopy[0] === 'object' &&
+          (typeof options === 'string' || options instanceof URL)
             ? (argsCopy.shift() as http.RequestOptions)
             : undefined;
 
@@ -196,7 +196,7 @@ function patchHttpMethod(
         let hasLogged = false;
 
         // Handle request errors
-        request.on("error", (error: any) => {
+        request.on('error', (error: any) => {
           if (hasLogged) return; // Prevent duplicate logging
           hasLogged = true;
 
@@ -208,14 +208,14 @@ function patchHttpMethod(
           };
 
           loggingObject.aborted =
-            error.name === "AbortError" ||
+            error.name === 'AbortError' ||
             request.aborted === true ||
-            error.code === "ABORT_ERR";
+            error.code === 'ABORT_ERR';
 
           loggingObject.duration =
             parseFloat((performance.now() - start).toFixed(2)) || 0;
           loggingObject.library = detectLibrary(
-            request.protocol.split(":")[0],
+            request.protocol.split(':')[0],
             stackLines,
           );
 
@@ -233,7 +233,7 @@ function patchHttpMethod(
           }
           if (Buffer.isBuffer(chunk)) {
             requestBodyChunks.push(chunk);
-          } else if (typeof chunk === "string") {
+          } else if (typeof chunk === 'string') {
             requestBodyChunks.push(Buffer.from(chunk));
           } else if (chunk instanceof Uint8Array) {
             requestBodyChunks.push(Buffer.from(chunk));
@@ -254,7 +254,7 @@ function patchHttpMethod(
             const chunk = endArgs[0];
             if (Buffer.isBuffer(chunk)) {
               requestBodyChunks.push(chunk);
-            } else if (typeof chunk === "string") {
+            } else if (typeof chunk === 'string') {
               requestBodyChunks.push(Buffer.from(chunk));
             } else if (chunk instanceof Uint8Array) {
               requestBodyChunks.push(Buffer.from(chunk));
@@ -268,14 +268,14 @@ function patchHttpMethod(
             loggingObject.requestBodySize =
               Buffer.concat(requestBodyChunks).length;
             loggingObject.requestBody =
-              Buffer.concat(requestBodyChunks).toString("utf-8");
+              Buffer.concat(requestBodyChunks).toString('utf-8');
           }
 
           return originalEnd.apply(this, arguments as any);
         };
 
         // Handle response
-        request.prependListener("response", (res: http.IncomingMessage) => {
+        request.prependListener('response', (res: http.IncomingMessage) => {
           if (hasLogged) return; // Skip if we've already logged an error
           let hasLoggedResponse = false;
 
@@ -289,7 +289,7 @@ function patchHttpMethod(
                 // needle package makes use on events multiple times
                 const [event, listener, ...restArgs] = args;
 
-                if (event === "data") {
+                if (event === 'data') {
                   const wrappedListener = new Proxy(listener, {
                     apply: (target, thisArg, args: any[]) => {
                       if (hasLoggedResponse) {
@@ -302,11 +302,11 @@ function patchHttpMethod(
                           if (Buffer.concat(chunks).length < MAX_BODY_SIZE) {
                             chunks.push(chunk);
                           }
-                        } else if (typeof chunk === "string") {
+                        } else if (typeof chunk === 'string') {
                           chunks.push(Buffer.from(chunk));
                         }
                       } catch (error) {
-                        console.error("Error capturing response data:", error);
+                        console.error('Error capturing response data:', error);
                       }
                       return Reflect.apply(target, thisArg, args);
                     },
@@ -320,26 +320,26 @@ function patchHttpMethod(
                   ]);
                 }
 
-                if (event === "end") {
+                if (event === 'end') {
                   const wrappedListener = new Proxy(listener, {
                     apply: (target, thisArg, args: any[]) => {
                       if (hasLoggedResponse) {
                         return Reflect.apply(target, thisArg, args);
                       }
 
-                      const contentEncoding = res.headers["content-encoding"];
-                      let responseText = "";
+                      const contentEncoding = res.headers['content-encoding'];
+                      let responseText = '';
                       try {
                         const responseBody = Buffer.concat(chunks);
 
                         if (contentEncoding) {
-                          if (contentEncoding === "gzip") {
+                          if (contentEncoding === 'gzip') {
                             responseText = zlib
                               .gunzipSync(responseBody)
-                              .toString("utf-8");
+                              .toString('utf-8');
                           }
                         } else {
-                          responseText = responseBody.toString("utf-8");
+                          responseText = responseBody.toString('utf-8');
                         }
 
                         loggingObject.responseBodySize = responseBody.length;
@@ -347,7 +347,7 @@ function patchHttpMethod(
                         loggingObject.statusMessage = res.statusMessage;
                         loggingObject.headers = res.headers;
                         loggingObject.library = detectLibrary(
-                          request.protocol.split(":")[0],
+                          request.protocol.split(':')[0],
                           stackLines,
                         );
                         loggingObject.duration =
@@ -357,16 +357,16 @@ function patchHttpMethod(
                         loggingObject.aborted = false;
                         loggingObject.error = undefined;
                         loggingObject.isMedia =
-                          res.headers["content-type"]?.includes("image") ||
-                          res.headers["content-type"]?.includes("video") ||
-                          res.headers["content-type"]?.includes("audio");
+                          res.headers['content-type']?.includes('image') ||
+                          res.headers['content-type']?.includes('video') ||
+                          res.headers['content-type']?.includes('audio');
                         loggingObject.redirectFrom =
-                          res.headers["x-previous-redirect-url"];
+                          res.headers['x-previous-redirect-url'];
 
                         watchers.http.addContent(loggingObject);
                         hasLoggedResponse = true;
                       } catch (error) {
-                        console.error("Error processing response:", error);
+                        console.error('Error processing response:', error);
                       }
                       return Reflect.apply(target, thisArg, args);
                     },
@@ -384,7 +384,7 @@ function patchHttpMethod(
               },
             });
 
-            if (typeof res.removeListener === "function") {
+            if (typeof res.removeListener === 'function') {
               const originalRemoveListener = res.removeListener;
               res.removeListener = new Proxy(originalRemoveListener, {
                 apply: (target, thisArg, args: any[]) => {
@@ -403,7 +403,7 @@ function patchHttpMethod(
             }
 
             if (
-              typeof res.off === "function" &&
+              typeof res.off === 'function' &&
               res.off !== res.removeListener
             ) {
               const originalOff = res.off;
@@ -429,13 +429,13 @@ function patchHttpMethod(
             let hasEndListener = false;
 
             // Check if there's already an end listener
-            if (typeof res.listenerCount === "function") {
-              hasEndListener = res.listenerCount("end") > 0;
+            if (typeof res.listenerCount === 'function') {
+              hasEndListener = res.listenerCount('end') > 0;
             }
 
             // If no end listener, add our own
             if (!hasEndListener) {
-              originalAddListener.call(res, "end", function () {
+              originalAddListener.call(res, 'end', function () {
                 try {
                   const responseBody = Buffer.concat(chunks);
                   loggingObject.responseBodySize = responseBody.length;
@@ -443,7 +443,7 @@ function patchHttpMethod(
                   loggingObject.statusMessage = res.statusMessage;
                   loggingObject.headers = res.headers;
                   loggingObject.library = detectLibrary(
-                    request.protocol.split(":")[0],
+                    request.protocol.split(':')[0],
                     stackLines,
                   );
                   loggingObject.duration =
@@ -453,12 +453,12 @@ function patchHttpMethod(
                   watchers.http.addContent(loggingObject);
                   hasLoggedResponse = true;
                 } catch (error) {
-                  console.error("Error in fallback end listener:", error);
+                  console.error('Error in fallback end listener:', error);
                 }
               });
             }
           } catch (error) {
-            console.error("Error patching response:", error);
+            console.error('Error patching response:', error);
           }
         });
 
@@ -483,13 +483,13 @@ function patchHttpMethod(
  * Patch incoming HTTP/HTTPS server requests
  */
 function patchServerEmit(module: typeof http | typeof https) {
-  shimmer.wrap(module.Server.prototype, "emit", function (original) {
+  shimmer.wrap(module.Server.prototype, 'emit', function (original) {
     return function patchedEmit(
       this: unknown,
       event: string,
       ...args: unknown[]
     ) {
-      if (event === "request") {
+      if (event === 'request') {
         const req = args[0] as http.IncomingMessage;
         const res = args[1] as http.ServerResponse;
 
@@ -509,13 +509,13 @@ function patchServerEmit(module: typeof http | typeof https) {
               // Log the server request
               watchers.requests.addContent({
                 ...normalizedRequest,
-                type: "server",
+                type: 'server',
                 statusCode,
                 duration,
                 ipAddress,
               });
             } catch (error) {
-              console.error("Error logging server request:", error);
+              console.error('Error logging server request:', error);
             }
 
             return originalEnd.apply(this, endArgs as any);
@@ -530,7 +530,7 @@ function patchServerEmit(module: typeof http | typeof https) {
 
 if (
   process.env.NODE_OBSERVATORY_HTTP &&
-  JSON.parse(process.env.NODE_OBSERVATORY_HTTP).includes("http")
+  JSON.parse(process.env.NODE_OBSERVATORY_HTTP).includes('http')
 ) {
   // Check if http has already been patched
   if (!(global as any)[HTTP_PATCHED_SYMBOL]) {
@@ -538,12 +538,12 @@ if (
     (global as any)[HTTP_PATCHED_SYMBOL] = true;
 
     // Apply patches to HTTP methods
-    patchHttpMethod(http, "request", "http");
-    patchHttpMethod(http, "get", "http");
+    patchHttpMethod(http, 'request', 'http');
+    patchHttpMethod(http, 'get', 'http');
 
     // Apply patches to HTTPS methods
-    patchHttpMethod(https, "request", "https");
-    patchHttpMethod(https, "get", "https");
+    patchHttpMethod(https, 'request', 'https');
+    patchHttpMethod(https, 'get', 'https');
 
     // Patch server request handling
     // patchServerEmit(http);

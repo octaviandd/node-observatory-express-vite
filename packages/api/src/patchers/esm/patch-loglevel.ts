@@ -1,9 +1,9 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index.js";
+import { getCallerInfo } from "../../../utils.js";
 
 // Create a global symbol to track if loglevel has been patched
 const LOGLEVEL_PATCHED_SYMBOL = Symbol.for("node-observer:loglevel-patched");
@@ -20,21 +20,29 @@ if (
     /**
      * Hook "loglevel" to patch its logging functionality.
      */
-    new Hook(["loglevel"], function (exports: any, name, basedir) {
-      // `exports` is the object returned by require("loglevel").
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'loglevel' module
+      // if (name !== 'loglevel') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const loglevelModule = exports.default || exports;
+
+      // `loglevelModule` is the object returned by import loglevel.
       //@ts-ignore
       if (
-        !exports ||
-        typeof exports !== "object" ||
-        typeof exports.getLogger !== "function"
+        !loglevelModule ||
+        typeof loglevelModule !== "object" ||
+        typeof loglevelModule.getLogger !== "function"
       ) {
         return exports;
       }
 
       // Wrap default log methods (trace, debug, info, warn, error)
       ["trace", "debug", "info", "warn", "error"].forEach((method) => {
-        if (typeof exports[method] === "function") {
-          shimmer.wrap(exports, method, function (originalMethod) {
+        if (typeof loglevelModule[method] === "function") {
+          shimmer.wrap(loglevelModule, method, function (originalMethod) {
             return function patchedMethod(this: any, ...args: any[]) {
               const callerInfo = getCallerInfo(__filename);
               const logContent = {
@@ -56,7 +64,7 @@ if (
       });
 
       // Wrap custom loggers if needed
-      shimmer.wrap(exports, "getLogger", function (originalGetLoggerFn) {
+      shimmer.wrap(loglevelModule, "getLogger", function (originalGetLoggerFn) {
         return function patchedGetLogger(this: any, ...args: any[]) {
           const logger = originalGetLoggerFn.apply(this, args);
 

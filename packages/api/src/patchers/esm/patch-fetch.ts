@@ -1,14 +1,14 @@
 /** @format */
 
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from '../../../index.js';
+import { getCallerInfo } from '../../../utils.js';
 
 // Create a global symbol to track if fetch has been patched
-const FETCH_PATCHED_SYMBOL = Symbol.for("node-observer:fetch-patched");
+const FETCH_PATCHED_SYMBOL = Symbol.for('node-observer:fetch-patched');
 
 if (
   process.env.NODE_OBSERVATORY_HTTP &&
-  JSON.parse(process.env.NODE_OBSERVATORY_HTTP).includes("fetch")
+  JSON.parse(process.env.NODE_OBSERVATORY_HTTP).includes('fetch')
 ) {
   // Check if fetch has already been patched
   if (!(global as any)[FETCH_PATCHED_SYMBOL]) {
@@ -17,7 +17,7 @@ if (
 
     // Only patch if fetch exists
     // @ts-ignore
-    if (typeof globalThis.fetch === "function") {
+    if (typeof globalThis.fetch === 'function') {
       const originalFetch = globalThis.fetch;
       globalThis.fetch = async function patchedFetch(url, options = {}) {
         const startTime = performance.now();
@@ -41,7 +41,7 @@ if (
           protocol: urlObj.protocol,
           method: req.method,
           headers: Object.fromEntries(req.headers.entries()) || {},
-          library: "fetch",
+          library: 'fetch',
           file: callerInfo.file,
           line: callerInfo.line,
         };
@@ -54,11 +54,11 @@ if (
             get: function (target, prop) {
               // Handle special methods that consume the body
               if (
-                prop === "json" ||
-                prop === "text" ||
-                prop === "arrayBuffer" ||
-                prop === "blob" ||
-                prop === "formData"
+                prop === 'json' ||
+                prop === 'text' ||
+                prop === 'arrayBuffer' ||
+                prop === 'blob' ||
+                prop === 'formData'
               ) {
                 const originalMethod = target[prop];
 
@@ -76,7 +76,7 @@ if (
 
                     // Add response details to logging object
                     loggingObject.statusCode = target.status;
-                    loggingObject.statusMessage = target.statusText || "OK";
+                    loggingObject.statusMessage = target.statusText || 'OK';
                     loggingObject.headers =
                       Object.fromEntries(target.headers.entries()) || {};
                     loggingObject.duration = parseFloat(
@@ -84,12 +84,12 @@ if (
                     );
 
                     // Check if response is media
-                    const contentType = target.headers.get("content-type");
+                    const contentType = target.headers.get('content-type');
                     loggingObject.isMedia =
                       contentType &&
-                      (contentType.includes("image") ||
-                        contentType.includes("video") ||
-                        contentType.includes("audio"));
+                      (contentType.includes('image') ||
+                        contentType.includes('video') ||
+                        contentType.includes('audio'));
 
                     watchers.http.addContent(loggingObject);
 
@@ -118,9 +118,9 @@ if (
             stack: error.stack,
           };
           loggingObject.statusCode = 500;
-          loggingObject.statusMessage = error.message || "Error";
+          loggingObject.statusMessage = error.message || 'Error';
           loggingObject.duration = duration;
-          loggingObject.aborted = error.name === "AbortError";
+          loggingObject.aborted = error.name === 'AbortError';
 
           watchers.http.addContent(loggingObject);
           throw error;

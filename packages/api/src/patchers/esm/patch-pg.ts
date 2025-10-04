@@ -1,9 +1,9 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index.js";
+import { getCallerInfo } from "../../../utils.js";
 
 const PG_PATCHED_SYMBOL = Symbol.for("node-observer:pg-patched");
 
@@ -22,13 +22,21 @@ if (
   if (!(global as any)[PG_PATCHED_SYMBOL]) {
     (global as any)[PG_PATCHED_SYMBOL] = true;
 
-    new Hook(["pg"], function (exports: any, name, basedir) {
-      if (!exports || typeof exports.Client !== "function") {
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'pg' module
+      // if (name !== 'pg') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const pgModule = exports.default || exports;
+
+      if (!pgModule || typeof pgModule.Client !== "function") {
         return exports;
       }
 
       // Patch the `query` method on the Client class
-      shimmer.wrap(exports.Client.prototype, "query", function (originalQuery) {
+      shimmer.wrap(pgModule.Client.prototype, "query", function (originalQuery) {
         return function patchedQuery(
           this: any,
           config: any,
@@ -63,8 +71,8 @@ if (
       });
 
       // Patch the `query` method on the Pool class
-      if (typeof exports.Pool === "function") {
-        shimmer.wrap(exports.Pool.prototype, "query", function (originalQuery) {
+      if (typeof pgModule.Pool === "function") {
+        shimmer.wrap(pgModule.Pool.prototype, "query", function (originalQuery) {
           return function patchedQuery(
             this: any,
             config: any,

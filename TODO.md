@@ -24,3 +24,7 @@ Remove the datezone from mysql connection, try to normalize it inside the packag
 Allow for zooming into graph dates, similar to nightwatch.
 Implement search based on page ling rather than direct requests.
 Implement a user friendly package selector, route blocker inside the ui.
+Clean types.d.ts
+
+Today:
+Make sure that the package works with both cjs or that it works with import and require. 

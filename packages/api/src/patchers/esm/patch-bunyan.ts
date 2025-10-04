@@ -1,41 +1,46 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
-import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { addHook, Namespace } from 'import-in-the-middle';
+import shimmer from 'shimmer';
+import { watchers } from '../../../index.js';
+import { getCallerInfo } from '../../../utils.js';
 
 // Create a global symbol to track if bunyan has been patched
-const BUNYAN_PATCHED_SYMBOL = Symbol.for("node-observer:bunyan-patched");
+const BUNYAN_PATCHED_SYMBOL = Symbol.for('node-observer:bunyan-patched');
 
 if (
   process.env.NODE_OBSERVATORY_LOGGING &&
-  JSON.parse(process.env.NODE_OBSERVATORY_LOGGING).includes("bunyan")
+  JSON.parse(process.env.NODE_OBSERVATORY_LOGGING).includes('bunyan')
 ) {
   // Check if bunyan has already been patched
   if (!(global as any)[BUNYAN_PATCHED_SYMBOL]) {
     // Mark bunyan as patched
     (global as any)[BUNYAN_PATCHED_SYMBOL] = true;
 
-    // Intercepts loading of "bunyan"
-    new Hook(["bunyan"], function (exports, name, basedir) {
-      // The `exports` object is the "bunyan" module.
-      // We'll wrap "createLogger" to patch its returned loggers.
+    // Intercepts loading of "bunyan" (ESM version)
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'bunyan' module
+      // if (name !== 'bunyan') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const bunyanExports = exports.default || exports;
 
       function patchLoggerMethods(loggerInstance: any, contextMetadata = {}) {
-        ["info", "warn", "error", "debug", "trace", "fatal"].forEach(
+        ['info', 'warn', 'error', 'debug', 'trace', 'fatal'].forEach(
           (method) => {
-            if (typeof loggerInstance[method] === "function") {
+            if (typeof loggerInstance[method] === 'function') {
               shimmer.wrap(loggerInstance, method, function (originalMethod) {
                 return function patchedMethod(this: any, ...args: any[]) {
                   const callerInfo = getCallerInfo(__filename);
 
                   watchers.logging.addContent({
                     level: method,
-                    package: "bunyan",
+                    package: 'bunyan',
                     message: args[0],
                     metadata:
-                      typeof args[0] === "object" ? args[0] : args[1] || {},
+                      typeof args[0] === 'object' ? args[0] : args[1] || {},
                     context: contextMetadata,
                     file: callerInfo.file,
                     line: callerInfo.line,
@@ -49,8 +54,8 @@ if (
         );
 
         // Patch child method for nested loggers
-        if (typeof loggerInstance.child === "function") {
-          shimmer.wrap(loggerInstance, "child", function (originalChild) {
+        if (typeof loggerInstance.child === 'function') {
+          shimmer.wrap(loggerInstance, 'child', function (originalChild) {
             return function patchedChild(this: any, childBindings: any) {
               const childLogger = originalChild.call(this, childBindings);
               const mergedContext = {
@@ -64,10 +69,10 @@ if (
         }
       }
 
-      // 2. Patch createLogger
+      // Patch createLogger
       shimmer.wrap(
-        exports as any,
-        "createLogger",
+        bunyanExports as any,
+        'createLogger',
         function (originalFn: Function) {
           return function patchedCreateLogger(this: any, ...loggerArgs: any[]) {
             // Call the original createLogger
@@ -78,7 +83,15 @@ if (
         },
       );
 
-      return exports;
+      // Return exports with proper structure
+      if (exports.default) {
+        return {
+          ...exports,
+          default: bunyanExports,
+        };
+      }
+
+      return bunyanExports;
     });
   }
 }

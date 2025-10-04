@@ -1,10 +1,10 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { nodeCacheCommandsArgs } from "../../constants";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index.js";
+import { nodeCacheCommandsArgs } from "../../../constants.js";
+import { getCallerInfo } from "../../../utils.js";
 
 // Create a global symbol to track if node-cache has been patched
 const NODECACHE_PATCHED_SYMBOL = Symbol.for("node-observer:nodecache-patched");
@@ -18,15 +18,23 @@ if (
     // Mark node-cache as patched
     (global as any)[NODECACHE_PATCHED_SYMBOL] = true;
 
-    new Hook(["node-cache"], function (exports, name, basedir) {
-      // `exports` is the NodeCache constructor (class).
-      // e.g., const NodeCache = require("node-cache");
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'node-cache' module
+      // if (name !== 'node-cache') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const nodeCacheModule = exports.default || exports;
+
+      // `nodeCacheModule` is the NodeCache constructor (class).
+      // e.g., import NodeCache from "node-cache";
       // We will patch the prototype methods so that new NodeCache() instances are patched.
 
       Object.keys(nodeCacheCommandsArgs).forEach((method) => {
-        if (typeof (exports as any).prototype[method] === "function") {
+        if (typeof nodeCacheModule.prototype[method] === "function") {
           shimmer.wrap(
-            (exports as any).prototype,
+            nodeCacheModule.prototype,
             method,
             function (originalFn) {
               return function patchedMethod(this: any, ...args: any[]) {

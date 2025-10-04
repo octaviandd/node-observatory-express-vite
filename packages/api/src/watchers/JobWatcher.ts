@@ -1,16 +1,7 @@
 /** @format */
 
 import { Request } from "express";
-import { StoreDriver } from "../../types";
 import { BaseWatcher } from "./BaseWatcher";
-import { WatcherFilters } from "./Watcher";
-
-interface JobFilters extends WatcherFilters {
-  index: "instance" | "group";
-  jobStatus: "all" | "released" | "failed" | "completed";
-  queueFilter: "all" | "errors" | "slow";
-  key?: string;
-}
 
 class JobWatcher extends BaseWatcher {
   /**
@@ -295,7 +286,7 @@ class JobWatcher extends BaseWatcher {
    * --------------------------------------------------------------------------
    */
   protected countGraphData(data: any, period: string) {
-    const totalDuration = this.periods[period as keyof typeof this.periods];
+    const totalDuration = this.periods[period as keyof typeof this.periods].duration;
     const intervalDuration = totalDuration / 120;
     const now = new Date().getTime();
     const startDate = now - totalDuration * 60 * 1000;

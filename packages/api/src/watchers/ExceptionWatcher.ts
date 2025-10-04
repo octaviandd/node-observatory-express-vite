@@ -1,15 +1,7 @@
 /** @format */
 
 import { Request } from "express";
-import { StoreDriver } from "../../types";
 import { BaseWatcher } from "./BaseWatcher";
-import { WatcherFilters } from "./Watcher";
-
-interface ExceptionFilters extends WatcherFilters {
-  type: "all" | "unhandled" | "uncaught";
-  key?: string;
-  query?: string;
-}
 
 class ExceptionWatcher extends BaseWatcher {
   /**
@@ -272,7 +264,7 @@ class ExceptionWatcher extends BaseWatcher {
    * --------------------------------------------------------------------------
    */
   protected countGraphData(data: any, period: string) {
-    const totalDuration = this.periods[period as keyof typeof this.periods]; // Total duration in minutes
+    const totalDuration = this.periods[period as keyof typeof this.periods].duration; // Total duration in minutes
     const intervalDuration = totalDuration / 120; // Duration of each bar in minutes
 
     const now = new Date().getTime(); // Current timestamp in ms

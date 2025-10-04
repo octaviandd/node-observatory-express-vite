@@ -2,7 +2,6 @@ import { up as mysql2Up, down as mysql2Down } from "./mysql2";
 import { up as mongodbUp, down as mongodbDown } from "./mongodb";
 import { up as prismaUp, down as prismaDown } from "./prisma";
 import { Connection as PromiseConnection } from "mysql2/promise";
-import { StoreDriver } from "types";
 
 /**
  * Setup the migrations depending on the database/storage driver.

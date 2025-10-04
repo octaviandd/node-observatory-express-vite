@@ -2,8 +2,8 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index";
+import { getCallerInfo } from "../../../utils";
 import { v4 as uuidv4 } from "uuid";
 
 // Create a global symbol to track if agenda has been patched

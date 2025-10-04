@@ -1,9 +1,9 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
+import { watchers } from "../../../index.js";
+import { getCallerInfo } from "../../../utils.js";
 
 const POSTMARK_PATCHED_SYMBOL = Symbol.for("node-observer:postmark-patched");
 
@@ -17,13 +17,21 @@ if (
     /**
      * Hook "postmark" to patch its mail sending functionality.
      */
-    new Hook(["postmark"], function (exports: any, name, basedir) {
-      // `exports` is the object returned by require("postmark").
-      if (!exports || typeof exports.ServerClient !== "function") {
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'postmark' module
+      // if (name !== 'postmark') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const postmarkModule = exports.default || exports;
+
+      // `postmarkModule` is the object returned by import postmark.
+      if (!postmarkModule || typeof postmarkModule.ServerClient !== "function") {
         return exports;
       }
 
-      shimmer.wrap(exports, "ServerClient", function (OriginalServerClient) {
+      shimmer.wrap(postmarkModule, "ServerClient", function (OriginalServerClient) {
         return function PatchedServerClient(this: any, ...args: any[]) {
           const client = new OriginalServerClient(...args);
 

@@ -1,10 +1,10 @@
 /** @format */
 
-import { Hook } from "require-in-the-middle";
+import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../index";
-import { getCallerInfo } from "../../utils";
-import { LRUCacheCommandArgsMapping } from "../../constants";
+import { watchers } from "../../../index.js";
+import { getCallerInfo } from "../../../utils.js";
+import { LRUCacheCommandArgsMapping } from "../../../constants.js";
 
 // Create a global symbol to track if lrucache has been patched
 const LRUCACHE_PATCHED_SYMBOL = Symbol.for("node-observer:lrucache-patched");
@@ -19,11 +19,19 @@ if (
     (global as any)[LRUCACHE_PATCHED_SYMBOL] = true;
 
     /**
-     * Hook 'lru-cache' so that the first time it's required, we can patch the LRUCache class.
+     * Hook 'lru-cache' so that the first time it's imported, we can patch the LRUCache class.
      */
-    new Hook(["lru-cache"], function (exports, name, basedir) {
+    addHook((exports: any, name: Namespace, baseDir?: string) => {
+      // Only patch 'lru-cache' module
+      // if (name !== 'lru-cache') {
+      //   return exports;
+      // }
+
+      // Handle both default and named exports
+      const lruCacheModule = exports.default || exports;
+
       // Check if the exported object contains the LRUCache class
-      const LRUCacheClass = (exports as any).LRUCache || exports;
+      const LRUCacheClass = lruCacheModule.LRUCache || lruCacheModule;
 
       if (!LRUCacheClass || !LRUCacheClass.prototype) {
         return exports;
