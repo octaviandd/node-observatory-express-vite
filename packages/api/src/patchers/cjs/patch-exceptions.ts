@@ -76,7 +76,7 @@ function formatCodeContext(filePath: string, line: number) {
 function uncaughtPatcher() {
   process.on("uncaughtException", (error) => {
     const details = extractErrorDetails(error);
-    if (watchers.errors) {
+    if (watchers?.errors) {
       watchers?.errors.addContent({
         type: "uncaughtException",
         ...details,

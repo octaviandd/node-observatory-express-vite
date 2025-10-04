@@ -1,7 +1,7 @@
 /** @format */
 import "dotenv/config";
 import "./src/patchers/index";
-import { mysql2Up } from "./src/migrations/index";
+import { setupMigrations } from "./src/migrations/index";
 import {
   LogWatcher,
   MailWatcher,
@@ -23,7 +23,7 @@ import { Connection as PromiseConnection } from "mysql2/promise";
 import apiRoutes from "./src/routes/routes";
 import path from "path";
 
-export const instanceCreator = (
+const instanceCreator = (
   driver: StoreDriver,
   connection: Connection | PromiseConnection,
   redisClient: ReturnType<typeof createClient>,
@@ -121,7 +121,7 @@ export async function createObserver(
   watchers.view = viewWatcherInstance;
   watchers.model = modelWatcherInstance;
 
-  // looks for the module in node modules and returns the path of the package in node modules. 
+  // looks for the module in node modules and returns the path of the package in node modules.
   const uiBasePath =
     options.uiBasePath || path.dirname(eval(`require.resolve('@node-observatory/ui/package.json')`));
 
@@ -176,7 +176,6 @@ export async function createObserver(
   serverAdapter
     .setStaticPath('/', path.join(uiBasePath, 'dist'))
     .setStaticPath('/assets', path.join(uiBasePath, 'dist/assets'))
-    .setViewsPath(path.join(uiBasePath, 'dist'))
     .setEntryRoute(uiEntryRoute)
     .setApiRoutes(apiRoutes)
     .setErrorHandler((error : Error & { statusCode: HTTPStatus }) => ({
@@ -189,22 +188,4 @@ export async function createObserver(
     }))
 
   console.log('Finish setup observatory')
-}
-
-/**
- * Setup the migrations depending on the database/storage driver.
- * @param driver - The database/storage driver to use.
- * @param connection - The connection details for the database/storage driver.
- */
-async function setupMigrations(
-  driver: StoreDriver,
-  connection: PromiseConnection,
-): Promise<void> {
-  switch (driver) {
-    case "mysql2":
-      await mysql2Up(connection);
-      break
-    default:
-      break
-  }
 }

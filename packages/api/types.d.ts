@@ -8,6 +8,28 @@ declare global {
     }
   }
 }
+
+export interface WatcherEntry {
+  uuid: string;
+  // closureId: string
+  requestId?: string;
+  jobId?: string;
+  scheduleId?: string;
+  type: string;
+  content: string;
+  created_at: number | Date;
+}
+
+export interface WatcherFilters {
+  period?: "1h" | "24h" | "7d" | "14d" | "30d";
+  offset: number;
+  limit: number;
+  isTable: boolean;
+  query?: string;
+  index: string;
+}
+
+
 /**
  * Supported logging libraries
  * @typedef {string} Logger
@@ -722,7 +744,6 @@ export interface SidePanelState {
 }
 
 export interface IServerAdapter {
-  setViewsPath(viewPath: string): IServerAdapter;
   setStaticPath(staticsRoute: string, staticsPath: string): IServerAdapter;
   setEntryRoute(route: AppViewRoute): IServerAdapter;
   setErrorHandler(handler: (error: Error & { statusCode : HTTPStatus }) => ControllerHandlerReturnType): IServerAdapter;

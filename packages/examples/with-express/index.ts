@@ -55,21 +55,20 @@ async function startServer() {
     host: "localhost",
     user: "root",
     database: "observatory",
-    timezone: "UTC",
   });
 
   let redisConnection = createClient({
     url: "redis://localhost:6379",
   });
 
+  await redisConnection.connect();
+
   let expressAdapter = new ExpressAdapter();
   expressAdapter.setBasePath('/ui');
-
-  await redisConnection.connect();
+  app.use('/ui', expressAdapter.getRouter());
 
   await createObserver(expressAdapter, {}, "mysql2", mysql2Connection, redisConnection);
 
-  app.use('/ui', expressAdapter.getRouter());
   console.log("Server started");
 }
 

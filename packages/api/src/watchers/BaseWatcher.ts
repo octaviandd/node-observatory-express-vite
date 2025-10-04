@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { StoreDriver } from "../../types";
-import Watcher, { WatcherEntry, WatcherFilters } from "./Watcher";
+import { StoreDriver, WatcherEntry, WatcherFilters } from "../../types";
+import Watcher from "./Watcher";
 import { v4 as uuidv4 } from "uuid";
 import {
   requestLocalStorage,
@@ -8,40 +8,25 @@ import {
   scheduleLocalStorage,
 } from "../patchers/store";
 import { Connection as PromiseConnection } from "mysql2/promise";
+import { PERIODS } from "src/helpers/constants";
+import { groupItemsByType, formatValue, sanitizeContent } from "src/helpers/helpers";
 
 export abstract class BaseWatcher implements Watcher {
-  protected readonly storeDriver: StoreDriver;
-  protected storeConnection: any;
-  protected redisClient: any;
-  protected serverAdapter: any;
-  protected isMigrating: boolean = false;
   abstract readonly type: string;
-  refreshInterval: NodeJS.Timeout | undefined;
-  refreshIntervalDuration: number;
-  /**
-   * Constants
-   * --------------------------------------------------------------------------
-   */
-  protected readonly periods = {
-    "1h": 60,
-    "24h": 24 * 60,
-    "7d": 7 * 24 * 60,
-    "14d": 14 * 24 * 60,
-    "30d": 30 * 24 * 60,
-  } as const;
 
-  protected readonly timeMap = {
-    "1h": "INTERVAL 1 HOUR",
-    "24h": "INTERVAL 1 DAY",
-    "7d": "INTERVAL 7 DAY",
-    "14d": "INTERVAL 14 DAY",
-    "30d": "INTERVAL 30 DAY",
-  } as const;
+  protected readonly storeDriver: StoreDriver;
+  protected readonly storeConnection: any;
+  protected readonly redisClient: any;
+  protected readonly serverAdapter: any;
+  protected readonly periods = PERIODS;
 
-  /**
-   * Constructor & Initialization
-   * --------------------------------------------------------------------------
-   */
+  protected formatValue = formatValue;
+  protected groupItemsByType = groupItemsByType;
+
+  protected isMigrating: boolean = false;
+  protected refreshInterval: NodeJS.Timeout | undefined;
+  protected refreshIntervalDuration: number;
+
   constructor(
     storeDriver: StoreDriver,
     storeConnection: PromiseConnection,
@@ -57,18 +42,12 @@ export abstract class BaseWatcher implements Watcher {
     this.migrateToDatabase();
   }
 
-  /**
-   * Public API Methods
-   * --------------------------------------------------------------------------
-   */
   async getIndex(req: Request, res: Response): Promise<{body?: any, statusCode: number}> {
     try {
       const filters = this.extractFiltersFromRequest(req);
       const data = await this.handleIndexTableOrGraph(filters);
-      return {
-        body: data,
-        statusCode: 200
-      }
+  
+      return { body: data, statusCode: 200 }
     } catch (error) {
       console.error(error);
       return {
@@ -122,7 +101,7 @@ export abstract class BaseWatcher implements Watcher {
       type: this.type,
       content: JSON.stringify(
         this.type === "request" || this.type === "http"
-          ? this.sanitizeContent(content)
+          ? sanitizeContent(content)
           : content,
       ),
       created_at: Date.now(),
@@ -385,11 +364,11 @@ export abstract class BaseWatcher implements Watcher {
   }
 
   /**
-   * Protected Helper Methods
+   * Helper Methods
    * --------------------------------------------------------------------------
    */
   protected getPeriodSQL = (period: string) => {
-    return `AND created_at >= UTC_TIMESTAMP() - ${this.timeMap[period as keyof typeof this.timeMap]}`;
+    return `AND created_at >= UTC_TIMESTAMP() - ${this.periods[period].interval}`;
   };
 
   protected getEqualitySQL = (value: string, type: string) => {
@@ -400,94 +379,22 @@ export abstract class BaseWatcher implements Watcher {
     return `AND LOWER(JSON_UNQUOTE(JSON_EXTRACT(content, '$.${type}'))) LIKE '%${value.toLowerCase()}%'`;
   };
 
-  public setRefreshIntervalDuration = (interval: number) => {
-    if (this.refreshInterval) {
-      clearInterval(this.refreshInterval);
-      this.refreshInterval = undefined;
-    }
-    this.refreshIntervalDuration = interval;
-    this.migrateToDatabase();
-  };
-
-  protected formatValue = (value: string | number | null, isCount = false) => {
-    if (!value) return "0" + (isCount ? "" : "ms");
-    const num = Number(value);
-    if (num > 999) {
-      return `${(num / 1000).toFixed(2)}${isCount ? "K" : "s"}`;
-    }
-    return `${num}${isCount ? "" : "ms"}`;
-  };
-
-  protected groupItemsByType(items: any): { [key: string]: any[] } {
-    return items.reduce((acc: { [key: string]: any[] }, item: any) => {
-      const type = item.type;
-      if (!acc[type]) {
-        acc[type] = [];
-      }
-      acc[type].push(item);
-      return acc;
-    }, {});
-  }
-
-  private sanitizeContent<T>(content: T): T {
-    const seen = new WeakSet();
-
-    const sanitize = (obj: any): any => {
-      // Handle non-object types
-      if (obj === null || typeof obj !== "object") {
-        return obj;
-      }
-
-      // Handle Date objects
-      if (obj instanceof Date) {
-        return obj.toISOString();
-      }
-
-      // Handle arrays
-      if (Array.isArray(obj)) {
-        return obj.map((item) => sanitize(item));
-      }
-
-      // Detect circular reference
-      if (seen.has(obj)) {
-        return "[Circular Reference]";
-      }
-
-      // Add object to seen set
-      seen.add(obj);
-
-      // Create new object to hold sanitized values
-      const sanitized: { [key: string]: any } = {};
-
-      // Process each property
-      for (const [key, value] of Object.entries(obj)) {
-        try {
-          // Skip functions
-          if (typeof value === "function") {
-            continue;
-          }
-          // Recursively sanitize value
-          sanitized[key] = sanitize(value);
-        } catch (error: any) {
-          // If any error occurs while processing a property, replace with error message
-          sanitized[key] = `[Error: ${error.message}]`;
-        }
-      }
-
-      return sanitized;
-    };
-
-    // Start sanitization from the root object
-    return sanitize(content);
-  }
+  // public setRefreshIntervalDuration = (interval: number) => {
+  //   if (this.refreshInterval) {
+  //     clearInterval(this.refreshInterval);
+  //     this.refreshInterval = undefined;
+  //   }
+  //   this.refreshIntervalDuration = interval;
+  //   this.migrateToDatabase();
+  // };
 
   protected durationGraphData(data: any, period: string) {
-    const totalDuration = this.periods[period as keyof typeof this.periods]; // in minutes
+    const totalDuration = this.periods[period].duration;
     const slotsCount = 120; // how many time slots (bars) we want
-    const intervalDuration = totalDuration / slotsCount; // each slot in minutes
+    const intervalDuration = totalDuration / slotsCount;
 
-    const now = Date.now(); // current timestamp (ms)
-    const startDate = now - totalDuration * 60 * 1000; // start time (ms)
+    const now = Date.now();
+    const startDate = now - totalDuration * 60 * 1000;
 
     const groupedData = Array.from({ length: slotsCount }, (_, index) => ({
       durations: [] as number[],
@@ -511,7 +418,7 @@ export abstract class BaseWatcher implements Watcher {
       }
     });
 
-    groupedData.forEach((slot, index) => {
+    groupedData.forEach((slot) => {
       const len = slot.durations.length;
       if (len > 0) {
         slot.durations.sort((a, b) => a - b);
@@ -529,91 +436,41 @@ export abstract class BaseWatcher implements Watcher {
   }
 
   protected getLabel(index: number, period: string) {
-    const totalDuration = this.periods[period as keyof typeof this.periods]; // Total duration in minutes
+    const totalDuration = this.periods[period].duration;
     const intervalDuration = totalDuration / 120; // Duration of each bar in minutes
 
-    if (period === "1h") {
-      let oneHourAgo = new Date().getTime() - 60 * 60 * 1000;
-      let interval = oneHourAgo + index * intervalDuration * 60 * 1000;
-      let label =
-        new Date(interval).toLocaleTimeString("en-US", {
-          minute: "2-digit",
-          second: "2-digit",
-        }) +
-        " - " +
-        new Date(interval + intervalDuration * 60 * 1000).toLocaleTimeString(
-          "en-US",
-          { minute: "2-digit", second: "2-digit" },
-        );
-      return label;
+    let timeAgo = 0;
+    let config = {};
+
+    switch (period) {
+      case '1h':
+        timeAgo = new Date().getTime() - 60 * 60 * 1000;
+        config = { minute: "2-digit", second: "2-digit" }
+        break;
+      case '24h':
+        timeAgo = new Date().getTime() - 24 * 60 * 60 * 1000;
+        config = { minute: "2-digit", second: "2-digit" }
+        break
+      case '7d':
+        timeAgo = new Date().getTime() - 7 * 24 * 60 * 60 * 1000;
+        config = { minute: "2-digit", second: "2-digit", weekday: 'short' }
+        break
+      case '14d':
+        timeAgo = new Date().getTime() - 14 * 24 * 60 * 60 * 1000;
+        config = { minute: "2-digit", second: "2-digit", weekday: 'short' }
+        break
+      case '30d':
+        timeAgo = new Date().getTime() - 30 * 24 * 60 * 60 * 1000;
+        config = { minute: "2-digit", second: "2-digit", weekday: 'short' }
+        break
+      default:
+        break
     }
 
-    if (period === "24h") {
-      let oneDayAgo = new Date().getTime() - 24 * 60 * 60 * 1000;
-      let interval = oneDayAgo + index * intervalDuration * 60 * 1000;
-      let label =
-        new Date(interval).toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-        }) +
-        " - " +
-        new Date(interval + intervalDuration * 60 * 1000).toLocaleTimeString(
-          "en-US",
-          { hour: "2-digit", minute: "2-digit" },
-        );
-      return label;
-    }
-
-    if (period === "7d") {
-      let oneWeekAgo = new Date().getTime() - 7 * 24 * 60 * 60 * 1000;
-      let interval = oneWeekAgo + index * intervalDuration * 60 * 1000;
-      let label =
-        new Date(interval).toLocaleTimeString("en-US", {
-          weekday: "short",
-          hour: "2-digit",
-          minute: "2-digit",
-        }) +
-        " - " +
-        new Date(interval + intervalDuration * 60 * 1000).toLocaleTimeString(
-          "en-US",
-          { weekday: "short", hour: "2-digit", minute: "2-digit" },
-        );
-      return label;
-    }
-
-    if (period === "14d") {
-      let twoWeeksAgo = new Date().getTime() - 14 * 24 * 60 * 60 * 1000;
-      let interval = twoWeeksAgo + index * intervalDuration * 60 * 1000;
-      let label =
-        new Date(interval).toLocaleTimeString("en-US", {
-          weekday: "short",
-          hour: "2-digit",
-          minute: "2-digit",
-        }) +
-        " - " +
-        new Date(interval + intervalDuration * 60 * 1000).toLocaleTimeString(
-          "en-US",
-          { weekday: "short", hour: "2-digit", minute: "2-digit" },
-        );
-      return label;
-    }
-
-    if (period === "30d") {
-      let oneMonthAgo = new Date().getTime() - 30 * 24 * 60 * 60 * 1000;
-      let interval = oneMonthAgo + index * intervalDuration * 60 * 1000;
-      let label =
-        new Date(interval).toLocaleTimeString("en-US", {
-          weekday: "short",
-          hour: "2-digit",
-          minute: "2-digit",
-        }) +
-        " - " +
-        new Date(interval + intervalDuration * 60 * 1000).toLocaleTimeString(
-          "en-US",
-          { weekday: "short", hour: "2-digit", minute: "2-digit" },
-        );
-      return label;
-    }
+    const interval = timeAgo + index * intervalDuration * 60 * 1000;
+    const startTime = new Date(interval).toLocaleTimeString("en-US", config);
+    const endTime = new Date(interval + intervalDuration * 60 * 1000).toLocaleTimeString("en-US", config);
+    return `${startTime} - ${endTime}`
   }
 
   /**
@@ -652,30 +509,17 @@ export abstract class BaseWatcher implements Watcher {
   }
 
   /**
-   * Abstract Methods To Be Implemented
+   * Abstract Methods
    * --------------------------------------------------------------------------
    */
   protected abstract countGraphData(data: any, period: string): any;
   protected abstract extractFiltersFromRequest(req: Request): WatcherFilters;
 
-  protected abstract handleRelatedDataSQL(
-    modelId: string,
-    requestId: string,
-    jobId: string,
-    scheduleId: string,
-  ): Promise<any>;
+  protected abstract handleRelatedDataSQL(modelId: string, requestId: string, jobId: string, scheduleId: string): Promise<any>;
 
-  protected abstract getIndexGraphDataSQL(
-    filters: WatcherFilters,
-  ): Promise<any>;
-
-  protected abstract getIndexTableDataByGroupSQL(
-    filters: WatcherFilters,
-  ): Promise<any>;
-
-  protected abstract getIndexTableDataByInstanceSQL(
-    filters: WatcherFilters,
-  ): Promise<any>;
+  protected abstract getIndexGraphDataSQL(filters: WatcherFilters): Promise<any>;
+  protected abstract getIndexTableDataByGroupSQL(filters: WatcherFilters): Promise<any>;
+  protected abstract getIndexTableDataByInstanceSQL(filters: WatcherFilters): Promise<any>;
 
   protected abstract handleViewSQL(id: string): Promise<any>;
 }

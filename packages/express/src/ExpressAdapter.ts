@@ -1,4 +1,3 @@
-import ejs from 'ejs';
 import express, { Express, Request, Response, Router } from 'express';
 import { wrapAsync } from './helpers/wrapAsync';
 import { AppControllerRoute, AppViewRoute, ControllerHandlerReturnType, HTTPMethod, HTTPStatus } from "../../api/dist/types"
@@ -32,13 +31,6 @@ export class ExpressAdapter {
     this.app.get(route, (_req: Request, res: Response) => {
       res.sendFile(filePath);
     });
-
-    return this;
-  }
-
-  public setViewsPath(viewPath: string): ExpressAdapter {
-    this.app.set('views', viewPath);
-    this.app.engine('ejs', ejs.renderFile);
 
     return this;
   }

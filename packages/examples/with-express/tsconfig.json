@@ -1,15 +1,15 @@
 {
   "compilerOptions": {
-    "target": "ES2016", // Or adjust as needed
-    "module": "CommonJS", // Set to CommonJS
-    "moduleResolution": "node", // Standard Node resolution
+    "target": "ES2016",
+    "module": "CommonJS",
+    "moduleResolution": "node",
     "outDir": "./dist",
-    "rootDir": "./",
+    // "rootDir": "./",
     "strict": true,
-    "esModuleInterop": true, // Usually needed for interop
+    "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["**/*.ts"],
+  "include": ["*.ts"],
   "exclude": ["node_modules"]
 }
