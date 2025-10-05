@@ -1,8 +1,8 @@
 /** @format */
+/// <reference path="./types.d.ts" />
 import "dotenv/config";
 import "./src/patchers/cjs/index";
-import "./src/patchers/esm/index";
-import Database from "src/database";
+import Database from "./src/database";
 import { setupMigrations } from "./src/migrations/index";
 import {
   LogWatcher,
@@ -115,6 +115,8 @@ export async function createObserver(
   // looks for the module in node modules and returns the path of the package in node modules.
   const uiBasePath =
     options.uiBasePath || path.dirname(eval(`require.resolve('@node-observatory/ui/package.json')`));
+  
+  console.log(uiBasePath)
 
   const uiEntryRoute : AppViewRoute = {
     method: 'get',
@@ -159,7 +161,7 @@ export async function createObserver(
     ],
     handler: ({ basePath }: { basePath: string }) => {
       return {
-        name: "index.html", params: { basePath }
+        name: path.join(uiBasePath, 'dist', 'index.html'), params: { basePath }
       }
     }
   }
@@ -178,5 +180,5 @@ export async function createObserver(
       },
     }))
 
-  // console.log('Finish setup observatory')
+  console.log('Finish setup observatory')
 }

@@ -1,7 +1,5 @@
 import express, { Express, Request, Response, Router } from 'express';
 import { wrapAsync } from './helpers/wrapAsync';
-import { AppControllerRoute, AppViewRoute, ControllerHandlerReturnType, HTTPMethod, HTTPStatus } from "../../api/dist/types"
-import path from "path";
 import fs from "node:fs"
 
 export class ExpressAdapter {
@@ -21,7 +19,8 @@ export class ExpressAdapter {
 
   public setStaticPath(staticsRoute: string, staticsPath: string): ExpressAdapter {
     this.app.use(staticsRoute, express.static(staticsPath, {
-      redirect: false
+      redirect: false,
+      index: false
     }));
 
     return this;
@@ -93,8 +92,9 @@ export class ExpressAdapter {
         </script>
         `;
 
-      const fullPath = path.join(this.app.get('views'), name);
+      const fullPath = name;
 
+      console.log(scriptToInject, fullPath)
       let htmlContent = await fs.promises.readFile(fullPath, 'utf-8')
       if (htmlContent.includes('</body>')) {
         htmlContent = htmlContent.replace('</body>', `${scriptToInject}</body>`);

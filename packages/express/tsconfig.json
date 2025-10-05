@@ -15,5 +15,5 @@
     "declaration": true,
     "skipLibCheck": true
   },
-  "include": ["./src", "./typings/*.d.ts"]
+  "include": ["./src", "./src/types.d.ts"]
 }

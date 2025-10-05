@@ -51,6 +51,7 @@ app.listen(PORT, () => {
 });
 
 async function startServer() {
+  console.log('hit')
   let mysql2Connection = await mysql2.createConnection({
     host: "localhost",
     user: "root",

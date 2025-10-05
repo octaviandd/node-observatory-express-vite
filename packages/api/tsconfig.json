@@ -16,10 +16,9 @@
     "emitDecoratorMetadata": true,
     "skipLibCheck": true,
     "paths": {
-      // This is solely to stop a bug with @types/node as of 12/15/2023
       "undici-types": ["./node_modules/undici-types/index.d.ts"]
     }
   },
-  "include": ["src/**/*.ts", "*.ts"],
-  "exclude": ["dist", "node_modules", "**/*.test.ts"]
+  "include": ["src/**/*.ts", "index.ts", "types.d.ts"],
+  "exclude": ["dist", "node_modules", "**/*.test.ts", "index.esm.ts"]
 }

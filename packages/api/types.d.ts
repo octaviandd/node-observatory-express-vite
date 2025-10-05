@@ -149,7 +149,7 @@ type Mailer =
  * Supported caching libraries
  * @typedef {string} Cache
  */
-type Cache =
+type CachePackages =
   | "redis"
   | "ioredis"
   | "node-cache"

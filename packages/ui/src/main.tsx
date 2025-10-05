@@ -34,6 +34,7 @@ import MainLayout from "./App";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 // scan({ enabled: !import.meta.env.PROD });
+const basePath = (window as any).SERVER_CONFIG?.base || '/ui';
 
 const router = createBrowserRouter(
   [
@@ -194,7 +195,7 @@ const router = createBrowserRouter(
     },
   ],
   {
-    basename: "/ui"
+    basename: basePath
   },
 );
 

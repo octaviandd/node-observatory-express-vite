@@ -1,16 +1,17 @@
 {
   "name": "with-express",
   "version": "1.0.0",
+  "type": "commonjs",
   "main": "index.ts",
   "scripts": {
     "build": "npm run build:deps && tsc",
     "build:deps": "cd ../../api && npm run build && cd ../express && npm run build",
-    "dev": "npm run install:dev && nodemon --watch ../../api --watch ../../express --watch . --ext ts,js,json --exec ts-node index.ts",
+    "dev": "npm run build:deps && nodemon --watch ../../api/src --watch ../../express/src --watch . --ext ts,js,json --exec ts-node index.ts",
     "start": "node dist/index.js",
+    "clean": "rm -rf node_modules package-lock.json",
+    "reinstall": "npm run clean && npm install",
     "install:dev": "npm install --save file:../../api file:../../express",
-    "install:prod": "npm install --save @node-observatory/api@^1.3.6 @node-observatory/express@^1.1.8",
-    "prepare:dev": "npm run install:dev",
-    "prepare:prod": "npm run install:prod"
+    "install:prod": "npm install --save @node-observatory/api@^1.3.6 @node-observatory/express@^1.1.8"
   },
   "author": "octavian david",
   "license": "ISC",
@@ -30,6 +31,7 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.1",
     "nodemon": "^3.1.10",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
   }
 }

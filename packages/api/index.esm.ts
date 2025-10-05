@@ -1,7 +1,8 @@
 /** @format */
+/// <reference path="./types.d.ts" />
 import "dotenv/config";
 import "./src/patchers/esm/index";
-import Database from "src/database";
+import Database from "./src/database";
 import { setupMigrations } from "./src/migrations/index";
 import {
   LogWatcher,
@@ -158,7 +159,7 @@ export async function createObserver(
     ],
     handler: ({ basePath }: { basePath: string }) => {
       return {
-        name: "index.html", params: { basePath }
+        name: path.join(uiBasePath, 'dist', 'index.html'), params: { basePath }
       }
     }
   }

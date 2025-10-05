@@ -7,8 +7,8 @@ import {
   scheduleLocalStorage,
 } from "../patchers/cjs/store";
 import { Connection as PromiseConnection } from "mysql2/promise";
-import { PERIODS } from "src/helpers/constants";
-import { groupItemsByType, formatValue, sanitizeContent } from "src/helpers/helpers";
+import { PERIODS } from "../helpers/constants";
+import { groupItemsByType, formatValue, sanitizeContent } from "../helpers/helpers";
 
 export abstract class BaseWatcher implements Watcher {
   abstract readonly type: string;
