@@ -2,29 +2,16 @@
 
 import { Request } from "express";
 import { BaseWatcher } from "./BaseWatcher";
+import Database from '../database-sql';
+import { RedisClientType } from "redis";
+
 
 class CacheWatcher extends BaseWatcher {
   readonly type = "cache";
+  private db: Database;
 
-  constructor(
-    storeDriver: StoreDriver,
-    storeConnection: any,
-    redisClient: any,
-    serverAdapter: any
-  ) {
-    super(storeDriver, storeConnection, redisClient, serverAdapter);
-  }
-
-  private getStatusSQL(type: string) {
-    if (type === "misses") {
-      return "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.misses')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.misses')) > 0)";
-    }
-    if (type === "hits") {
-      return "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.hits')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.hits')) > 0)";
-    }
-    if (type === "writes") {
-      return "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.writes')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.writes')) > 0)";
-    }
+  constructor(redisClient: RedisClientType, DBInstance: Database) {
+    super(redisClient, DBInstance);
   }
 
   /**

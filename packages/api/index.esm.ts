@@ -2,7 +2,7 @@
 /// <reference path="./types.d.ts" />
 import "dotenv/config";
 import "./src/patchers/esm/index";
-import Database from "./src/database";
+import Database from "./src/database-sql";
 import { setupMigrations } from "./src/migrations/index";
 import {
   LogWatcher,

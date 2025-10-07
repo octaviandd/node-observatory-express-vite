@@ -6,40 +6,68 @@ import {
   jobLocalStorage,
   scheduleLocalStorage,
 } from "../patchers/cjs/store";
-import { Connection as PromiseConnection } from "mysql2/promise";
 import { PERIODS } from "../helpers/constants";
 import { groupItemsByType, formatValue, sanitizeContent } from "../helpers/helpers";
+import Database from "src/database-sql";
+import { RedisClientType } from "redis";
 
 export abstract class BaseWatcher implements Watcher {
-  abstract readonly type: string;
-
-  protected readonly storeDriver: StoreDriver;
-  protected readonly storeConnection: any;
-  protected readonly redisClient: any;
-  protected readonly serverAdapter: any;
-  protected readonly periods = PERIODS;
-
-  protected formatValue = formatValue;
-  protected groupItemsByType = groupItemsByType;
-
+  readonly type: string;
+  protected redisClient: RedisClientType;
+  protected DBInstance: Database;
+  protected streamKey: string;
+  protected consumerGroup: string;
+  protected consumerName: string;
   protected isMigrating: boolean = false;
-  protected refreshInterval: NodeJS.Timeout | undefined;
-  protected refreshIntervalDuration: number;
+  protected refreshInterval?: NodeJS.Timeout;
+  protected refreshIntervalDuration: number = 5000;
 
-  constructor(
-    storeDriver: StoreDriver,
-    storeConnection: PromiseConnection,
-    redisClient: any,
-    serverAdapter: any
-  ) {
-    this.storeDriver = storeDriver;
-    this.redisClient = redisClient ? redisClient : null;
-    this.refreshInterval;
-    this.refreshIntervalDuration = 10000;
-    this.storeConnection = storeConnection;
-    this.serverAdapter = serverAdapter;
+  constructor(redisClient: RedisClientType,DBInstance: Database) {
+    this.redisClient = redisClient;
+    this.DBInstance = DBInstance;
+
+    this.streamKey = `observatory:stream:${this.type}`;
+    this.consumerGroup = `observatory:group:${this.type}`;
+    this.consumerName = `consumer:${process.pid}:${Date.now()}`;
+
+    this.initializeStream();
     this.migrateToDatabase();
   }
+
+  private async initializeStream() {
+    try {
+      await this.redisClient.xGroupCreate(this.streamKey, this.consumerGroup, '0', {
+        MKSTREAM: true
+      });
+      console.log(`Created consumer group for ${this.type}`);
+    } catch (error: any) {
+      if (!error.message?.includes('BUSYGROUP')) {
+        console.error(`Error creating consumer group for ${this.type}:`, error);
+      }
+    }
+  }
+
+  async addContent(content: WatcherEntry): Promise<void> {
+    try {
+      await this.redisClient.xAdd(
+        this.streamKey,
+        '*',
+        {
+          uuid: content.uuid,
+          request_id: content.requestId || 'null',
+          job_id: content.jobId || 'null',
+          schedule_id: content.scheduleId || 'null',
+          type: content.type,
+          content: JSON.stringify(content.content),
+          created_at: new Date(content.created_at).getTime().toString()
+        }
+      );
+    } catch (error) {
+      console.error(`Error adding to stream ${this.type}:`, error);
+      throw error;
+    }
+  }
+  
 
   async getIndex(req: Request, res: Response): Promise<{body?: any, statusCode: number}> {
     try {
@@ -94,61 +122,6 @@ export abstract class BaseWatcher implements Watcher {
     }
   }
 
-  async addContent(content: { [key: string]: any }): Promise<void> {
-    const entry: WatcherEntry = {
-      uuid: uuidv4(),
-      type: this.type,
-      content: JSON.stringify(
-        this.type === "request" || this.type === "http"
-          ? sanitizeContent(content)
-          : content,
-      ),
-      created_at: Date.now(),
-    };
-
-    if (requestLocalStorage.getStore()?.get("requestId")) {
-      entry.requestId = requestLocalStorage.getStore()?.get("requestId");
-    }
-
-    if (jobLocalStorage.getStore()?.get("jobId")) {
-      entry.jobId = jobLocalStorage.getStore()?.get("jobId");
-    }
-
-    if (scheduleLocalStorage.getStore()?.get("scheduleId")) {
-      entry.scheduleId = scheduleLocalStorage.getStore()?.get("scheduleId");
-    }
-
-    try {
-      await this.redisMiddleware(entry);
-    } catch (error) {
-      console.error(`Error in ${this.type} addContent:`, error);
-      throw error;
-    }
-  }
-
-  protected async redisMiddleware(entry: any): Promise<any> {
-    if (!this.redisClient) {
-      await this.handleAdd(entry);
-      return;
-    }
-
-    const key = `observatory_entries:${this.type}:${entry.uuid}:${entry.requestId ?? "null"}:${entry.jobId ?? "null"}:${entry.scheduleId ?? "null"}:${entry.created_at}`;
-
-    delete entry.uuid;
-    delete entry.requestId;
-    delete entry.jobId;
-    delete entry.scheduleId;
-    delete entry.created_at;
-    delete entry.type;
-
-    try {
-      await this.redisClient.set(key, JSON.stringify(entry.content));
-    } catch (error) {
-      console.error(`Error setting Redis key: ${key}`, error);
-      throw error;
-    }
-  }
-
   protected async refreshData(req: Request, res: Response): Promise<Response> {
     try {
       this.refreshInterval && clearInterval(this.refreshInterval);
@@ -166,122 +139,146 @@ export abstract class BaseWatcher implements Watcher {
       }
 
       this.isMigrating = true;
-      let cursor = "0";
-
-      const allKeys = [];
-      const pattern = `observatory_entries:${this.type}:*`;
-      const scanCount = 500;
 
       try {
-        do {
-          const reply = await this.redisClient.scan(cursor, {
-            MATCH: pattern,
-            COUNT: scanCount,
-          });
-
-          cursor = reply.cursor.toString();
-          const keysInBatch = reply.keys;
-
-          if (keysInBatch.length > 0) {
-            allKeys.push(...keysInBatch);
+        const messages = await this.redisClient.xReadGroup(
+          this.consumerGroup,
+          this.consumerName,
+          [
+            {
+              key: this.streamKey,
+              id: '>' // Only new messages
+            }
+          ],
+          {
+            COUNT: 500,
+            BLOCK: 1000 // Block for 1 second
           }
-        } while (cursor !== "0");
+        );
 
-        if (!allKeys || !allKeys.length) {
+        if (!messages || messages.length === 0) {
           this.isMigrating = false;
           return;
         }
 
         const parsedValues: any[] = [];
+        const messageIds: string[] = [];
 
-        const values = await this.redisClient.mGet(allKeys);
-        const keyValuePairs = allKeys.map((key: any, index: any) => ({
-          key: key,
-          value: values[index],
-        }));
-
-        const validKeyValuePairs = keyValuePairs.filter(
-          (kv) => kv.value !== null,
-        );
-
-        validKeyValuePairs.forEach(
-          ({ key, value }: { key: any; value: any }) => {
+        for (const stream of messages) {
+          for (const message of stream.messages) {
             try {
-              const timestamp = key.split(":").pop();
-              const date = new Date(parseInt(timestamp));
-              const formattedDate = date
-                .toISOString()
-                .replace("T", " ")
-                .substring(0, 19);
-
-              const keySegments = key.split(":");
-              const parsedEntry: { [key: string]: any } = {
-                type: keySegments[1],
-                uuid: keySegments[2],
-                content: typeof value === "string" ? JSON.parse(value) : value,
-                created_at: formattedDate,
+              const data = message.message;
+              
+              const parsedEntry: Record<string, any> = {
+                uuid: data.uuid,
+                type: data.type,
+                content: typeof data.content === 'string' ? JSON.parse(data.content) : data.content,
+                created_at: new Date(parseInt(data.created_at)).toISOString().replace('T', ' ').substring(0, 19),
+                request_id: data.reqest_id,
+                job_id: data.job_id,
+                schedule_id: data.schedule_id
               };
 
-              const requestIdSegment = keySegments[3];
-              const jobIdSegment = keySegments[4];
-              const scheduleIdSegment = keySegments[5];
-
-              const hasRequestId = requestIdSegment !== "null" ? true : false;
-              const hasJobId = jobIdSegment !== "null" ? true : false;
-              const hasScheduleId = scheduleIdSegment !== "null" ? true : false;
-
-              if (hasRequestId) parsedEntry.request_id = requestIdSegment;
-              if (hasJobId) parsedEntry.job_id = jobIdSegment;
-              if (hasScheduleId) parsedEntry.schedule_id = scheduleIdSegment;
-
               parsedValues.push(parsedEntry);
+              messageIds.push(message.id);
             } catch (error) {
-              console.error(`Error parsing value for key ${key}:`, error);
+              console.error(`Error parsing stream message ${message.id}:`, error);
             }
-          },
-        );
+          }
+        }
 
         if (parsedValues.length > 0) {
           try {
-            switch (this.storeDriver) {
-              case "mysql2":
-                try {
-                  await this.storeConnection.query("START TRANSACTION");
-                  await this.storeConnection.query(
-                    "INSERT INTO observatory_entries (uuid, request_id, job_id, schedule_id, type, content, created_at) VALUES ?",
-                    [
-                      parsedValues.map((entry) => [
-                        entry.uuid,
-                        entry.request_id,
-                        entry.job_id,
-                        entry.schedule_id,
-                        entry.type,
-                        entry.content,
-                        entry.created_at,
-                      ]),
-                    ],
-                  );
-                  await this.storeConnection.query("COMMIT");
-                } catch (error) {
-                  console.error(
-                    "Error inserting batch data:",
-                    error,
-                    this.type,
-                  );
-                }
-                break;
-            }
-            await this.redisClient.del(allKeys);
+            await this.DBInstance.addRedisEntries(parsedValues);
+
+            // Acknowledge messages (mark as processed)
+            await this.redisClient.xAck(
+              this.streamKey,
+              this.consumerGroup,
+              messageIds
+            );
+
+            await this.redisClient.xTrim(this.streamKey, 'MAXLEN', 1000, {strategyModifier: "~"});
+
+            console.log(`Migrated ${parsedValues.length} ${this.type} entries to database`);
           } catch (dbError) {
-            console.error("Error inserting batch data:", dbError, this.type);
+            console.error(`Error inserting batch data for ${this.type}:`, dbError);
+            // Don't ACK if DB insert failed - messages will be retried
           }
         }
-      } catch (scanError) {
-        console.error("Error in Redis watcher", scanError);
+      } catch (error) {
+        console.error(`Error in Redis stream migration for ${this.type}:`, error);
       } finally {
         this.isMigrating = false;
       }
     }, this.refreshIntervalDuration);
+  }
+
+  async processPendingMessages() {
+    try {
+      const pending = await this.redisClient.xPendingRange(
+        this.streamKey,
+        this.consumerGroup,
+        '-',    // start
+        '+',    // end
+        100     // count
+      );
+
+      if (!pending || !Array.isArray(pending) || pending.length === 0) {
+        return;
+      }
+
+      const messageIds = pending.map((msg: any) => msg.id);
+
+      // Claim these messages
+      const claimed = await this.redisClient.xClaim(
+        this.streamKey,
+        this.consumerGroup,
+        this.consumerName,
+        60000, // Min idle time: 60 seconds
+        messageIds
+      );
+
+      if (claimed && claimed.length > 0) {
+        const parsedValues: any[] = [];
+        const claimedIds: string[] = [];
+
+        for (const message of claimed) {
+          if (!message?.message) continue;
+
+          try {
+            const data = message.message;
+            
+            const parsedEntry: { [key: string]: any } = {
+              uuid: data.uuid,
+              type: data.type,
+              content: typeof data.content === 'string' ? JSON.parse(data.content) : data.content,
+              created_at: new Date(parseInt(data.created_at)).toISOString().replace('T', ' ').substring(0, 19),
+              request_id: data.request_id,
+              job_id: data.job_id,
+              schedule_id: data.schedule_id
+            };
+
+            parsedValues.push(parsedEntry);
+            claimedIds.push(message.id);
+          } catch (error) {
+            console.error(`Error parsing claimed message:`, error);
+          }
+        }
+
+        if (parsedValues.length > 0) {
+          await this.DBInstance.addRedisEntries(parsedValues);
+          await this.redisClient.xAck(this.streamKey, this.consumerGroup, claimedIds);
+        }
+      }
+    } catch (error) {
+      console.error(`Error processing pending messages for ${this.type}:`, error);
+    }
+  }
+
+  async cleanup() {
+    if (this.refreshInterval) clearInterval(this.refreshInterval);
+    await this.processPendingMessages();
   }
 
   /**
@@ -289,44 +286,19 @@ export abstract class BaseWatcher implements Watcher {
    * --------------------------------------------------------------------------
    */
   async handleAdd(entry: WatcherEntry): Promise<void> {
-    try {
-      switch (this.storeDriver) {
-        case "mysql2":
-          await this.handleAddSQL(entry);
-          break;
-        default:
-          throw new Error(`Unsupported store driver: ${this.storeDriver}`);
-      }
-    } catch (error) {
-      console.error(`Error in ${this.type} handleAdd:`, error);
-      throw error;
-    }
+   await this.DBInstance.insert(entry)
   }
 
   async handleView(id: string): Promise<any> {
-    switch (this.storeDriver) {
-      case "mysql2":
-        return this.handleViewSQL(id);
-      default:
-        throw new Error(`Unsupported store driver: ${this.storeDriver}`);
-    }
+    return this.handleViewSQL(id);
   }
 
   async getAllEntries(): Promise<any> {
-    switch (this.storeDriver) {
-      case "mysql2":
-        return this.getAllEntriesSQL();
-      default:
-        throw new Error(`Unsupported store driver: ${this.storeDriver}`);
-    }
+    return this.getAllEntriesSQL();
   }
 
   protected async getAllEntriesSQL(): Promise<any> {
-    const [results] = await this.storeConnection.query(
-      "SELECT * FROM observatory_entries WHERE type = ?",
-      [this.type],
-    );
-    return results;
+    this.DBInstance.getAllEntriesByType(this.type)
   }
 
   protected handleRelatedData(
@@ -335,48 +307,8 @@ export abstract class BaseWatcher implements Watcher {
     jobId: string,
     scheduleId: string,
   ): Promise<any> {
-    switch (this.storeDriver) {
-      case "mysql2":
-        return this.handleRelatedDataSQL(modelId, requestId, jobId, scheduleId);
-      default:
-        throw new Error(`Unsupported store driver: ${this.storeDriver}`);
-    }
+    return this.handleRelatedDataSQL(modelId, requestId, jobId, scheduleId);
   }
-
-  /**
-   * Protected Database Implementation Methods
-   * --------------------------------------------------------------------------
-   */
-  protected async handleAddSQL(entry: WatcherEntry): Promise<void> {
-    await this.storeConnection.query(
-      "INSERT INTO observatory_entries (uuid, request_id, job_id, schedule_id, type, content, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [
-        entry.uuid,
-        entry.requestId,
-        entry.jobId,
-        entry.scheduleId,
-        entry.type,
-        entry.content,
-        new Date(),
-      ],
-    );
-  }
-
-  /**
-   * Helper Methods
-   * --------------------------------------------------------------------------
-   */
-  protected getPeriodSQL = (period: string) => {
-    return `AND created_at >= UTC_TIMESTAMP() - ${this.periods[period].interval}`;
-  };
-
-  protected getEqualitySQL = (value: string, type: string) => {
-    return `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.${type}')) = '${value}'`;
-  };
-
-  protected getInclusionSQL = (value: string, type: string) => {
-    return `AND LOWER(JSON_UNQUOTE(JSON_EXTRACT(content, '$.${type}'))) LIKE '%${value.toLowerCase()}%'`;
-  };
 
   // public setRefreshIntervalDuration = (interval: number) => {
   //   if (this.refreshInterval) {
