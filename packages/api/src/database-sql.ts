@@ -76,7 +76,7 @@ class Database {
     }
   }
 
-  async addRedisEntries(redisEntry: any) {
+  async insert(redisEntry: any) {
     try {
       await this.storeConnection.query("START TRANSACTION");
       await this.storeConnection.query(
@@ -97,6 +97,10 @@ class Database {
     } catch (error) {
       console.error("Error inserting batch data:", error);
     }
+  }
+
+  async delete(redistEntryId: string) {
+    
   }
 
   private getPeriodSQL(period: string) {
@@ -170,7 +174,7 @@ class Database {
       }
     };
 
-    return mapping[watcherType] || { sql: '', key: '' };
+    return mapping[watcherType];
   }
 
   private getWatcherSpecificStatements(watcherType: string) {
@@ -186,13 +190,13 @@ class Database {
     return statement
   }
 
-  getP95(watcherType: string) {
+  private getP95(watcherType: string) {
     if (watcherType === 'exception' || watcherType === 'log') {
       return ''
     }
 
     return `
-    CAST(
+      CAST(
         SUBSTRING_INDEX(
           SUBSTRING_INDEX(
             GROUP_CONCAT(
@@ -325,7 +329,6 @@ class Database {
     return conditions.join(' ');
   }
 
-  // Add method for getting instance data (individual entries)
   async getInstanceData(filters: any, watcherType: string) {
     const { period, limit, offset, query } = filters;
     
@@ -355,17 +358,11 @@ class Database {
   async getIndexData(filters: any, watcherType: string) {
     const { period, limit, offset, query } = filters;
     
-    // Build WHERE clauses
     const periodSql = period ? this.getPeriodSQL(period) : "";
     const querySql = query ? this.getInclusionSQL(query, "stats") : "";
     const watcherFilters = this.getWatcherSpecificFilters(watcherType, filters);
     
-    // Get group key info
     const { sql: groupMainKeySql, key: watcherKey } = this.getGroupMainKey(watcherType);
-
-    if (!watcherKey) {
-      throw new Error(`Could not extract watcherKey for watcherType: ${watcherType}`);
-    }
 
     try {
       const [results] = await this.storeConnection.query(
@@ -390,6 +387,37 @@ class Database {
     } catch (e) {
       console.error('getIndexData error:', e);
       throw e;
+    }
+  }
+
+  // adjust type
+  async getEntry(entryId: string): Promise<any> {
+    try {
+      let [ results ]: [any[], any] = await this.storeConnection.query(
+        "SELECT * FROM observatory_entries WHERE uuid = ?",
+        [entryId],
+      );
+
+      return results[0];
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  //adjust type
+  async getRelatedViewData(conditions: string[], params: string[], type: string, extraCondition: string): Promise<any> {
+    try {
+      const [ relatedItems ]: [any[], any] = await this.storeConnection.query(
+        "SELECT * FROM observatory_entries WHERE " +
+          conditions.join(" OR ") +
+          " AND type != ? " +
+          extraCondition,
+        [...params, type],
+      );
+      
+      return relatedItems;
+    } catch (e) {
+      console.log(e)
     }
   }
 
@@ -425,23 +453,22 @@ class Database {
     }
   }
 
-  async insert(entry: any) {
+  async getEntriesCount(filters: any, watcherType: string) {
+    const { period, query } = filters;
+
+    const watcherFilters = this.getWatcherSpecificFilters(watcherType, filters);
+    const periodSql = period ? this.getPeriodSQL(period) : "";
+    const querySql = query ? this.getInclusionSQL(query, "stats") : "";
+    // const statusSql = something
+
     try {
-      await this.storeConnection.query(
-        "INSERT INTO observatory_entries (uuid, request_id, job_id, schedule_id, type, content, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        [
-          entry.uuid,
-          entry.requestId,
-          entry.jobId,
-          entry.scheduleId,
-          entry.type,
-          entry.content,
-          new Date(),
-        ],
-      );
-    } catch (error) {
-      console.error('insert error:', error);
-      throw error;
+      const [countResult] = (await this.storeConnection.query(
+        `SELECT COUNT(*) as total FROM observatory_entries WHERE type = 'cache' ${periodSql} ${querySql} ${watcherFilters}`,
+      )) as [QueryResult, FieldPacket[]];
+
+      return countResult;
+    } catch (e) {
+      throw e
     }
   }
 }

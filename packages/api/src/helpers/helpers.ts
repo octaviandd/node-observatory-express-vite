@@ -1,10 +1,12 @@
+import { PERIODS } from "./constants";
+
 /**
  * The format for values that indicate entries for each watcher.
  * @param value 
  * @param isCount 
  * @returns 
  */
-export const formatValue = (value: string | number | null, isCount = false) => {
+export const formatValue = (value: string | number | null, isCount = false): string => {
   if (!value) return "0" + (isCount ? "" : "ms");
   const num = Number(value);
   if (num > 999) {
@@ -18,16 +20,10 @@ export const formatValue = (value: string | number | null, isCount = false) => {
  * @param items 
  * @returns 
  */
-export const groupItemsByType = (items: any): { [key: string]: any[] } => {
-  return items.reduce((acc: { [key: string]: any[] }, item: any) => {
-    const type = item.type;
-    if (!acc[type]) {
-      acc[type] = [];
-    }
-    acc[type].push(item);
-    return acc;
-  }, {});
-}
+
+
+
+export const groupItemsByType = <T extends { type: string }>(items: T[]): Partial<Record<T['type'], T[]>> => Object.groupBy(items, ({ type }) => type);
 
 /**
  * Cleans the request from values that can't be added to redis because of circularity or size.
@@ -81,48 +77,122 @@ export const sanitizeContent = <T>(content: T): T => {
   return sanitize(content);
 }
 
-// const getDurationGraphValues = (totalDuration: number) => {
-//   const slotsCount = 120; // how many time slots (bars) we want
-//   const intervalDuration = totalDuration / slotsCount;
+export const durationGraphData = (data: any, period: string) => {
+  const totalDuration = PERIODS[period].duration; // in minutes
+  const slotsCount = 120; // how many time slots (bars) we want
+  const intervalDuration = totalDuration / slotsCount; // each slot in minutes
 
-//   const now = Date.now();
-//   const startDate = now - totalDuration * 60 * 1000;
+  const now = Date.now(); // current timestamp (ms)
+  const startDate = now - totalDuration * 60 * 1000; // start time (ms)
 
-//   const groupedData = Array.from({ length: slotsCount }, (_, index) => ({
-//     durations: [] as number[],
-//     avgDuration: 0,
-//     p95: 0,
-//     count: 0,
-//     label: this.getLabel(index, period),
-//   }));
+  const groupedData = Array.from({ length: slotsCount }, (_, index) => ({
+    durations: [] as number[],
+    avgDuration: 0,
+    p95: 0,
+    count: 0,
+    label: getLabel(index, period),
+  }));
 
-//   data.forEach((request: any) => {
-//     const requestTime = new Date(request.created_at).getTime();
-//     const duration = parseFloat(request.content.duration); // assume it's in ms
+  data.forEach((request: any) => {
+    const requestTime = new Date(request.created_at).getTime();
+    const duration = parseFloat(request.content.duration); // assume it's in ms
 
-//     // Figure out which interval slot this request belongs to
-//     const intervalIndex = Math.floor(
-//       (requestTime - startDate) / (intervalDuration * 60 * 1000),
-//     );
+    // Figure out which interval slot this request belongs to
+    const intervalIndex = Math.floor(
+      (requestTime - startDate) / (intervalDuration * 60 * 1000),
+    );
 
-//     if (intervalIndex >= 0 && intervalIndex < slotsCount) {
-//       groupedData[intervalIndex].durations.push(duration);
-//     }
-//   });
+    if (intervalIndex >= 0 && intervalIndex < slotsCount) {
+      groupedData[intervalIndex].durations.push(duration);
+    }
+  });
 
-//   groupedData.forEach((slot) => {
-//     const len = slot.durations.length;
-//     if (len > 0) {
-//       slot.durations.sort((a, b) => a - b);
-//       slot.count = len;
+  groupedData.forEach((slot, index) => {
+    const len = slot.durations.length;
+    if (len > 0) {
+      slot.durations.sort((a, b) => a - b);
+      slot.count = len;
 
-//       const sum = slot.durations.reduce((acc, val) => acc + val, 0);
-//       slot.avgDuration = parseFloat((sum / len).toFixed(2));
+      const sum = slot.durations.reduce((acc, val) => acc + val, 0);
+      slot.avgDuration = parseFloat((sum / len).toFixed(2));
 
-//       const p95Index = Math.floor(0.95 * len);
-//       slot.p95 = slot.durations[p95Index];
-//     }
-//   });
+      const p95Index = Math.floor(0.95 * len);
+      slot.p95 = slot.durations[p95Index];
+    }
+  });
 
-//   return groupedData;
-// }
+  return groupedData;
+}
+
+export const countGraphData = (data: any, period: string) => {
+  const totalDuration = PERIODS[period].duration;
+  const intervalDuration = totalDuration / 120;
+  const now = new Date().getTime();
+  const startDate = now - totalDuration * 60 * 1000;
+
+  const groupedData = Array.from({ length: 120 }, (_, index) => ({
+    misses: 0,
+    hits: 0,
+    writes: 0,
+    label: getLabel(index, period),
+  }));
+
+  data.forEach((cache: any) => {
+    const cacheTime = new Date(cache.created_at).getTime();
+    const hits = cache.content.hits ? 1 : 0;
+    const misses = cache.content.misses ? 1 : 0;
+    const writes = cache.content.writes ? 1 : 0;
+    const intervalIndex = Math.floor(
+      (cacheTime - startDate) / (intervalDuration * 60 * 1000),
+    );
+
+    if (intervalIndex >= 0 && intervalIndex < 120) {
+      groupedData[intervalIndex] = {
+        ...groupedData[intervalIndex],
+        misses: groupedData[intervalIndex].misses + misses,
+        hits: groupedData[intervalIndex].hits + hits,
+        writes: groupedData[intervalIndex].writes + writes,
+      };
+    }
+  });
+
+  return groupedData;
+}
+
+export const getLabel = (index: number, period: string) =>  {
+  const totalDuration = PERIODS[period].duration;
+  const intervalDuration = totalDuration / 120; // Duration of each bar in minutes
+
+  let timeAgo = 0;
+  let config = {};
+
+  switch (period) {
+    case '1h':
+      timeAgo = new Date().getTime() - 60 * 60 * 1000;
+      config = { minute: "2-digit", second: "2-digit" }
+      break;
+    case '24h':
+      timeAgo = new Date().getTime() - 24 * 60 * 60 * 1000;
+      config = { minute: "2-digit", second: "2-digit" }
+      break
+    case '7d':
+      timeAgo = new Date().getTime() - 7 * 24 * 60 * 60 * 1000;
+      config = { minute: "2-digit", second: "2-digit", weekday: 'short' }
+      break
+    case '14d':
+      timeAgo = new Date().getTime() - 14 * 24 * 60 * 60 * 1000;
+      config = { minute: "2-digit", second: "2-digit", weekday: 'short' }
+      break
+    case '30d':
+      timeAgo = new Date().getTime() - 30 * 24 * 60 * 60 * 1000;
+      config = { minute: "2-digit", second: "2-digit", weekday: 'short' }
+      break
+    default:
+      break
+  }
+
+  const interval = timeAgo + index * intervalDuration * 60 * 1000;
+  const startTime = new Date(interval).toLocaleTimeString("en-US", config);
+  const endTime = new Date(interval + intervalDuration * 60 * 1000).toLocaleTimeString("en-US", config);
+  return `${startTime} - ${endTime}`
+}
