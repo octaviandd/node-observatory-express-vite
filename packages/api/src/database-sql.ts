@@ -94,7 +94,7 @@ class Database {
 
   async delete(uuid: string): Promise<boolean> {
     try {
-      this.storeConnection.query(`DELETE FROM observatory_entries WHERE uuid = ${uuid}`)
+      this.storeConnection.query(`DELETE FROM observatory_entries WHERE uuid = ?`, [uuid])
       return true;
     } catch (error) {
       console.log(error)
@@ -368,12 +368,13 @@ class Database {
       const [results] = await this.storeConnection.query(
         `SELECT *
         FROM observatory_entries
-        WHERE type = '${watcherType}'
+        WHERE type = ?
         ${periodSql}
         ${querySql}
         ${watcherFilters}
         ORDER BY created_at DESC
-        LIMIT ${limit} OFFSET ${offset}`,
+        LIMIT ? OFFSET ?`,
+        [watcherType, limit, offset]
       ) as [QueryResult, FieldPacket[]];
 
       return results as unknown as WatcherEntry[];
@@ -401,13 +402,14 @@ class Database {
         ${this.getDurationParametersSQL()}
         ${this.getP95SQL(watcherType)}
         FROM observatory_entries
-        WHERE type = '${watcherType}' 
+        WHERE type = ? 
         ${periodSql} 
         ${querySql} 
         ${watcherFilters}
         GROUP BY JSON_UNQUOTE(JSON_EXTRACT(content, '$.${watcherKey}'))
         ORDER BY total DESC
-        LIMIT ${limit} OFFSET ${offset}`,
+        LIMIT ? OFFSET ?`,
+        [watcherType, limit, offset]
       ) as [QueryResult, FieldPacket[]];
 
       return results;
@@ -441,8 +443,9 @@ class Database {
       const [results] = await this.storeConnection.query(
         `SELECT COUNT(*) as count
         FROM observatory_entries
-        WHERE type = '${watcherType}'
+        WHERE type = ?
         ${periodSql}`,
+        [watcherType]
       ) as [QueryResult, FieldPacket[]];
 
       return Array.isArray(results) && results.length > 0 ? results[0] : { count: 0 };
@@ -462,7 +465,8 @@ class Database {
 
     try {
       const [countResult] = (await this.storeConnection.query(
-        `SELECT COUNT(*) as total FROM observatory_entries WHERE type = ${watcherType} ${periodSql} ${querySql} ${watcherFilters} ${extraCondition}`,
+        `SELECT COUNT(*) as total FROM observatory_entries WHERE type = ? ${periodSql} ${querySql} ${watcherFilters} ${extraCondition}`,
+        [watcherType]
       )) as [QueryResult, FieldPacket[]];
 
       return countResult as QueryResult & { total: number }
@@ -481,7 +485,8 @@ class Database {
 
     try {
       const [countResult] = (await this.storeConnection.query(
-        `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.key'))) as total FROM observatory_entries WHERE type = ${watcherType} ${periodSql} ${querySql} ${groupMainKeySql} ${extraCondition}`,
+        `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.key'))) as total FROM observatory_entries WHERE type = ? ${periodSql} ${querySql} ${groupMainKeySql} ${extraCondition}`,
+        [watcherType]
       )) as [QueryResult, FieldPacket[]];
       return countResult as QueryResult & { total: number }
 
@@ -496,70 +501,76 @@ class Database {
     const periodSql = period ? this.getPeriodSQL(period) : "";
     const keySql = key ? this.getEqualitySQL(key, "key") : "";
 
-    const [results] = (await this.storeConnection.query(
-      `(
-        SELECT
-          COUNT(*) as total,
-          ${this.getDurationParametersSQL()}
-          SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.misses')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.misses')) > 0 THEN 1 ELSE 0 END) as misses,
-          SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.hits')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.hits')) > 0 THEN 1 ELSE 0 END) as hits,
-          SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.writes')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.writes')) > 0 THEN 1 ELSE 0 END) as writes,
-          ${this.getP95SQL(watcherType)}
-          NULL as created_at,
-          NULL as content,
-          'aggregate' as type
-        FROM observatory_entries
-        WHERE type = ${watcherType} ${periodSql} ${keySql}
-      )
-      UNION ALL
-      (
-        SELECT
-          NULL as total,
-          NULL as shortest,
-          NULL as longest,
-          NULL as average,
-          NULL as p95,
-          NULL as misses,
-          NULL as hits,
-          NULL as writes,
-          created_at,
-          content,
-          'row' as type
-        FROM observatory_entries
-        WHERE type = ${watcherType} ${periodSql} ${keySql}
-        ORDER BY created_at DESC
-      );`,
-    )) as [QueryResult, FieldPacket[]];
+    try {
+      const [results] = (await this.storeConnection.query(
+        `(
+          SELECT
+            COUNT(*) as total,
+            ${this.getDurationParametersSQL()}
+            SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.misses')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.misses')) > 0 THEN 1 ELSE 0 END) as misses,
+            SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.hits')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.hits')) > 0 THEN 1 ELSE 0 END) as hits,
+            SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.writes')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.writes')) > 0 THEN 1 ELSE 0 END) as writes,
+            ${this.getP95SQL(watcherType)},
+            NULL as created_at,
+            NULL as content,
+            'aggregate' as type
+          FROM observatory_entries
+          WHERE type = ? ${periodSql} ${keySql}
+        )
+        UNION ALL
+        (
+          SELECT
+            NULL as total,
+            NULL as shortest,
+            NULL as longest,
+            NULL as average,
+            NULL as p95,
+            NULL as misses,
+            NULL as hits,
+            NULL as writes,
+            created_at,
+            content,
+            'row' as type
+          FROM observatory_entries
+          WHERE type = ? ${periodSql} ${keySql}
+          ORDER BY created_at DESC
+        );`,
+        [watcherType, watcherType]
+      )) as [QueryResult, FieldPacket[]];
 
-    //@ts-ignore
-    let cleanResults = results.shift();
+      //@ts-ignore
+      let cleanResults = results.shift();
 
-    const aggregateResults: {
-      total: number;
-      shortest: string | null;
-      longest: string | null;
-      average: string | null;
-      misses: string | null;
-      hits: string | null;
-      writes: string | null;
-      p95: string | null;
-    } = cleanResults;
+      const aggregateResults: {
+        total: number;
+        shortest: string | null;
+        longest: string | null;
+        average: string | null;
+        misses: string | null;
+        hits: string | null;
+        writes: string | null;
+        p95: string | null;
+      } = cleanResults;
 
-    const countFormattedData = formattCountGraphData(results as unknown as CacheContent[], period, keys);
-    const durationFormattedData = formattDurationGraphData(results, period);
+      const countFormattedData = formattCountGraphData(results as unknown as CacheContent[], period, keys);
+      const durationFormattedData = formattDurationGraphData(results, period);
 
-    return {
-      countFormattedData,
-      durationFormattedData,
-      count: formatValue(aggregateResults.total, true),
-      indexCountOne: formatValue(aggregateResults.hits, true),
-      indexCountTwo: formatValue(aggregateResults.writes, true),
-      indexCountThree: formatValue(aggregateResults.misses, true),
-      shortest: formatValue(aggregateResults.shortest),
-      longest: formatValue(aggregateResults.longest),
-      average: formatValue(aggregateResults.average),
-      p95: formatValue(aggregateResults.p95),
-    };
+      return {
+        countFormattedData,
+        durationFormattedData,
+        count: formatValue(aggregateResults.total, true),
+        indexCountOne: formatValue(aggregateResults.hits, true),
+        indexCountTwo: formatValue(aggregateResults.writes, true),
+        indexCountThree: formatValue(aggregateResults.misses, true),
+        shortest: formatValue(aggregateResults.shortest),
+        longest: formatValue(aggregateResults.longest),
+        average: formatValue(aggregateResults.average),
+        p95: formatValue(aggregateResults.p95),
+      };
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 }
 

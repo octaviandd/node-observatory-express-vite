@@ -43,7 +43,7 @@ class CacheWatcher extends BaseWatcher {
   }
 
   protected async getMetadata({ requestId, jobId, scheduleId }: { requestId: string, jobId: string, scheduleId: string}): Promise<any> {
-    const conditions = [...(requestId ? [`AND request_id = '?'`] : []), ...(jobId ? [`AND job_id = '?'`] : []), ...(scheduleId ? [`AND schedule_id = '?'`] : [])]
+    const conditions = [...(requestId ? [`AND request_id = ?`] : []), ...(jobId ? [`AND job_id = ?`] : []), ...(scheduleId ? [`AND schedule_id = ?`] : [])]
     const params = [...(requestId ? [requestId] : []), ...(scheduleId ? [scheduleId] : []), ...(jobId ? [jobId] : [])];
     const jobCondition = jobId ? "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')" : "";
 

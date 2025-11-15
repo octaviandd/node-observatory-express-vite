@@ -137,7 +137,7 @@ export const formattCountGraphData = <T extends readonly string[]>(data: CacheCo
     return obj;
   }
 
-  const groupedData: Array<Record<T[number], number> & {label: string}> = Array.from({ length: 120 }, (_, index) => ({
+  const groupedData = Array.from({ length: 120 }, (_, index) => ({
     ...initializeKeys(),
     label: getLabel(index, period),
   }) as Record<T[number], number> & {label: string});
