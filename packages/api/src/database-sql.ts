@@ -1,5 +1,12 @@
 import { Connection, FieldPacket, QueryResult } from "mysql2/promise";
 import { PERIODS } from "./helpers/constants";
+import { formattCountGraphData, formattDurationGraphData, formatValue } from "./helpers/helpers";
+
+interface IDatabase {
+  up: () => {}
+  down: () => {}
+}
+
 
 class Database {
   storeConnection!: Connection
@@ -41,10 +48,9 @@ class Database {
         `);
         console.log("observatory_entries table created via mysql2/promise");
       }
-    } catch (e: unknown) {
-      console.error(
-        `Failed to create observatory_entires table via mysql2/promise: ${e}`,
-      );
+    } catch (error) {
+      console.log(error)
+      throw error;
     }
   }
 
@@ -56,23 +62,9 @@ class Database {
         "DROP TABLE IF EXISTS observatory_entries;",
       );
       console.log("observatory_entries table droped via mysql2/promise");
-    } catch (e: unknown) {
-      console.error(
-        `Failed to drpop observatory_entires table via mysql2/promise: ${e}`,
-      );
-    }
-  }
-
-  async getAllEntriesByType(type: string): Promise<any> {
-    try {
-      const [results] = await this.storeConnection.query(
-        "SELECT * FROM observatory_entries WHERE type = ?",
-        [type],
-      );
-    
-    return results;
-    } catch (e) {
-      console.error(e)
+    } catch (error) {
+      console.log(error)
+      throw error;
     }
   }
 
@@ -95,33 +87,69 @@ class Database {
       );
       await this.storeConnection.query("COMMIT");
     } catch (error) {
-      console.error("Error inserting batch data:", error);
+      console.log(error)
+      throw error;
     }
   }
 
-  async delete(redistEntryId: string) {
-    
+  async delete(uuid: string): Promise<boolean> {
+    try {
+      this.storeConnection.query(`DELETE FROM observatory_entries WHERE uuid = ${uuid}`)
+      return true;
+    } catch (error) {
+      console.log(error)
+      throw error;
+    }
   }
 
-  private getPeriodSQL(period: string) {
+  async getEntry(uuid: string): Promise<WatcherEntry> {
+    try {
+      const results = await this.storeConnection.query(
+        `SELECT * FROM observatory_entries WHERE uuid = ?`,
+        [uuid]
+      ) as [QueryResult, FieldPacket[]];
+
+      return results[0] as unknown as WatcherEntry;
+    } catch (error) {
+      console.log(error)
+      throw error;
+    }
+  }
+
+  async getAllEntriesByType(type: string): Promise<WatcherEntry[]> {
+    try {
+      const [results] = await this.storeConnection.query(
+        "SELECT * FROM observatory_entries WHERE type = ?",
+        [type],
+      ) as [QueryResult, FieldPacket[]];
+    
+      return results as unknown as WatcherEntry[];
+    } catch (error) {
+      console.log(error)
+      throw error;
+    }
+  }
+
+  private getPeriodSQL(period: string): string {
     return `AND created_at >= UTC_TIMESTAMP() - ${PERIODS[period].interval}`;
   }
 
-  private getEqualitySQL = (value: string, type: string) => {
+  private getEqualitySQL = (value: string, type: string): string => {
     return `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.${type}')) = '${value}'`;
   };
 
-  private getInclusionSQL = (value: string, type: string) => {
+  private getInclusionSQL = (value: string, type: string): string => {
     return `AND LOWER(JSON_UNQUOTE(JSON_EXTRACT(content, '$.${type}'))) LIKE '%${value.toLowerCase()}%'`;
   };
 
-  private getDurationParameters() {
+  private getDurationParametersSQL(): string {
     return `MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10, 6))) as shortest,
       MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10, 6))) as longest,
       AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10, 6))) as average,
     `
   }
 
+  // reduce this to one key like: grouping_key
   private getGroupMainKey(watcherType: string): { sql: string; key: string } {
     const mapping: Record<string, { sql: string; key: string }> = {
       'cache': { 
@@ -177,7 +205,7 @@ class Database {
     return mapping[watcherType];
   }
 
-  private getWatcherSpecificStatements(watcherType: string) {
+  private getWatcherSpecificStatementsSQL(watcherType: string): string {
     let statement = ''
     if (watcherType === 'cache') {
       statement = `
@@ -190,7 +218,7 @@ class Database {
     return statement
   }
 
-  private getP95(watcherType: string) {
+  private getP95SQL(watcherType: string): string {
     if (watcherType === 'exception' || watcherType === 'log') {
       return ''
     }
@@ -214,7 +242,7 @@ class Database {
     `
   }
 
-  private getWatcherSpecificFilters(watcherType: string, filters: any): string {
+  private getWatcherSpecificFiltersSQL(watcherType: string, filters: any): string {
     let conditions: string[] = [];
 
     switch (watcherType) {
@@ -329,12 +357,12 @@ class Database {
     return conditions.join(' ');
   }
 
-  async getInstanceData(filters: any, watcherType: string) {
+  async getInstanceData(filters: any, watcherType: string, queryParameter: string): Promise<WatcherEntry[]> {
     const { period, limit, offset, query } = filters;
     
     const periodSql = period ? this.getPeriodSQL(period) : "";
-    const querySql = query ? this.getInclusionSQL(query, "stats") : "";
-    const watcherFilters = this.getWatcherSpecificFilters(watcherType, filters);
+    const querySql = query ? this.getInclusionSQL(query, queryParameter) : "";
+    const watcherFilters = this.getWatcherSpecificFiltersSQL(watcherType, filters);
 
     try {
       const [results] = await this.storeConnection.query(
@@ -348,19 +376,19 @@ class Database {
         LIMIT ${limit} OFFSET ${offset}`,
       ) as [QueryResult, FieldPacket[]];
 
-      return results;
-    } catch (e) {
-      console.error('getInstanceData error:', e);
-      throw e;
+      return results as unknown as WatcherEntry[];
+    } catch (error) {
+      console.log(error)
+      throw error;
     }
   }
 
-  async getIndexData(filters: any, watcherType: string) {
+  async getIndexData(filters: any, watcherType: string, queryParameter: string) {
     const { period, limit, offset, query } = filters;
     
     const periodSql = period ? this.getPeriodSQL(period) : "";
-    const querySql = query ? this.getInclusionSQL(query, "stats") : "";
-    const watcherFilters = this.getWatcherSpecificFilters(watcherType, filters);
+    const querySql = query ? this.getInclusionSQL(query, queryParameter) : "";
+    const watcherFilters = this.getWatcherSpecificFiltersSQL(watcherType, filters);
     
     const { sql: groupMainKeySql, key: watcherKey } = this.getGroupMainKey(watcherType);
 
@@ -369,69 +397,40 @@ class Database {
         `SELECT
         ${groupMainKeySql}
         COUNT(*) as total,
-        ${this.getWatcherSpecificStatements(watcherType)}
-        ${this.getDurationParameters()}
-        ${this.getP95(watcherType)}
+        ${this.getWatcherSpecificStatementsSQL(watcherType)}
+        ${this.getDurationParametersSQL()}
+        ${this.getP95SQL(watcherType)}
         FROM observatory_entries
         WHERE type = '${watcherType}' 
         ${periodSql} 
         ${querySql} 
         ${watcherFilters}
-        AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.wasSet')) IS NULL
         GROUP BY JSON_UNQUOTE(JSON_EXTRACT(content, '$.${watcherKey}'))
         ORDER BY total DESC
         LIMIT ${limit} OFFSET ${offset}`,
       ) as [QueryResult, FieldPacket[]];
 
       return results;
-    } catch (e) {
-      console.error('getIndexData error:', e);
-      throw e;
+    } catch (error) {
+      console.log(error)
+      throw error;
     }
   }
 
-  // adjust type
-  async getEntry(entryId: string): Promise<any> {
+  async getRelatedViewdata(conditions: string[], params: string[], type: string, extraCondition: string): Promise<WatcherEntry[]> {
     try {
-      let [ results ]: [any[], any] = await this.storeConnection.query(
-        "SELECT * FROM observatory_entries WHERE uuid = ?",
-        [entryId],
-      );
-
-      return results[0];
-    } catch (e) {
-      throw e;
-    }
-  }
-
-  //adjust type
-  async getRelatedViewData(conditions: string[], params: string[], type: string, extraCondition: string): Promise<any> {
-    try {
-      const [ relatedItems ]: [any[], any] = await this.storeConnection.query(
+      const [ relatedItems ] = await this.storeConnection.query(
         "SELECT * FROM observatory_entries WHERE " +
           conditions.join(" OR ") +
           " AND type != ? " +
           extraCondition,
         [...params, type],
-      );
-      
-      return relatedItems;
-    } catch (e) {
-      console.log(e)
-    }
-  }
-
-  async getEntryByUuid(uuid: string) {
-    try {
-      const [results] = await this.storeConnection.query(
-        `SELECT * FROM observatory_entries WHERE uuid = ?`,
-        [uuid]
       ) as [QueryResult, FieldPacket[]];
-
-      return Array.isArray(results) && results.length > 0 ? results[0] : null;
-    } catch (e) {
-      console.error('getEntryByUuid error:', e);
-      throw e;
+      
+      return relatedItems as unknown as WatcherEntry[];
+    } catch (error) {
+      console.log(error)
+      throw error;
     }
   }
 
@@ -453,23 +452,114 @@ class Database {
     }
   }
 
-  async getEntriesCount(filters: any, watcherType: string) {
+  async getEntriesCount(filters: any, watcherType: string, queryParameter: string, extraCondition: string) {
     const { period, query } = filters;
 
-    const watcherFilters = this.getWatcherSpecificFilters(watcherType, filters);
+    const watcherFilters = this.getWatcherSpecificFiltersSQL(watcherType, filters);
     const periodSql = period ? this.getPeriodSQL(period) : "";
-    const querySql = query ? this.getInclusionSQL(query, "stats") : "";
-    // const statusSql = something
+    const querySql = query ? this.getInclusionSQL(query, queryParameter) : "";
+    // const statusSql = this.getStatusSQL(status);
 
     try {
       const [countResult] = (await this.storeConnection.query(
-        `SELECT COUNT(*) as total FROM observatory_entries WHERE type = 'cache' ${periodSql} ${querySql} ${watcherFilters}`,
+        `SELECT COUNT(*) as total FROM observatory_entries WHERE type = ${watcherType} ${periodSql} ${querySql} ${watcherFilters} ${extraCondition}`,
       )) as [QueryResult, FieldPacket[]];
 
-      return countResult;
-    } catch (e) {
-      throw e
+      return countResult as QueryResult & { total: number }
+    } catch (error) {
+      console.log(error)
+      throw error;
     }
+  }
+
+  async getEntriesCountByGroup(filters: any, watcherType: string, queryParameter: string, extraCondition: string) {
+    const { period, query } = filters;
+
+    const { sql: groupMainKeySql } = this.getGroupMainKey(watcherType);
+    const periodSql = period ? this.getPeriodSQL(period) : "";
+    const querySql = query ? this.getInclusionSQL(query, queryParameter) : "";
+
+    try {
+      const [countResult] = (await this.storeConnection.query(
+        `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.key'))) as total FROM observatory_entries WHERE type = ${watcherType} ${periodSql} ${querySql} ${groupMainKeySql} ${extraCondition}`,
+      )) as [QueryResult, FieldPacket[]];
+      return countResult as QueryResult & { total: number }
+
+    } catch (error) {
+      console.log(error)
+      throw error;
+    }
+  }
+
+  async getGraphData(filters: any, watcherType: string, queryParameter: string, keys: string[]){
+    const { period, key } = filters;
+    const periodSql = period ? this.getPeriodSQL(period) : "";
+    const keySql = key ? this.getEqualitySQL(key, "key") : "";
+
+    const [results] = (await this.storeConnection.query(
+      `(
+        SELECT
+          COUNT(*) as total,
+          ${this.getDurationParametersSQL()}
+          SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.misses')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.misses')) > 0 THEN 1 ELSE 0 END) as misses,
+          SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.hits')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.hits')) > 0 THEN 1 ELSE 0 END) as hits,
+          SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.writes')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.writes')) > 0 THEN 1 ELSE 0 END) as writes,
+          ${this.getP95SQL(watcherType)}
+          NULL as created_at,
+          NULL as content,
+          'aggregate' as type
+        FROM observatory_entries
+        WHERE type = ${watcherType} ${periodSql} ${keySql}
+      )
+      UNION ALL
+      (
+        SELECT
+          NULL as total,
+          NULL as shortest,
+          NULL as longest,
+          NULL as average,
+          NULL as p95,
+          NULL as misses,
+          NULL as hits,
+          NULL as writes,
+          created_at,
+          content,
+          'row' as type
+        FROM observatory_entries
+        WHERE type = ${watcherType} ${periodSql} ${keySql}
+        ORDER BY created_at DESC
+      );`,
+    )) as [QueryResult, FieldPacket[]];
+
+    //@ts-ignore
+    let cleanResults = results.shift();
+
+    const aggregateResults: {
+      total: number;
+      shortest: string | null;
+      longest: string | null;
+      average: string | null;
+      misses: string | null;
+      hits: string | null;
+      writes: string | null;
+      p95: string | null;
+    } = cleanResults;
+
+    const countFormattedData = formattCountGraphData(results as unknown as CacheContent[], period, keys);
+    const durationFormattedData = formattDurationGraphData(results, period);
+
+    return {
+      countFormattedData,
+      durationFormattedData,
+      count: formatValue(aggregateResults.total, true),
+      indexCountOne: formatValue(aggregateResults.hits, true),
+      indexCountTwo: formatValue(aggregateResults.writes, true),
+      indexCountThree: formatValue(aggregateResults.misses, true),
+      shortest: formatValue(aggregateResults.shortest),
+      longest: formatValue(aggregateResults.longest),
+      average: formatValue(aggregateResults.average),
+      p95: formatValue(aggregateResults.p95),
+    };
   }
 }
 

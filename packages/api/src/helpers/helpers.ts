@@ -77,7 +77,7 @@ export const sanitizeContent = <T>(content: T): T => {
   return sanitize(content);
 }
 
-export const durationGraphData = (data: any, period: string) => {
+export const formattDurationGraphData = (data: any, period: string) => {
   const totalDuration = PERIODS[period].duration; // in minutes
   const slotsCount = 120; // how many time slots (bars) we want
   const intervalDuration = totalDuration / slotsCount; // each slot in minutes
@@ -107,7 +107,7 @@ export const durationGraphData = (data: any, period: string) => {
     }
   });
 
-  groupedData.forEach((slot, index) => {
+  groupedData.forEach((slot) => {
     const len = slot.durations.length;
     if (len > 0) {
       slot.durations.sort((a, b) => a - b);
@@ -124,40 +124,39 @@ export const durationGraphData = (data: any, period: string) => {
   return groupedData;
 }
 
-export const countGraphData = (data: any, period: string) => {
+export const formattCountGraphData = <T extends readonly string[]>(data: CacheContent[], period: string, keys: T): Array<Record<T[number], number> & {label: string}> => {
   const totalDuration = PERIODS[period].duration;
   const intervalDuration = totalDuration / 120;
   const now = new Date().getTime();
   const startDate = now - totalDuration * 60 * 1000;
 
-  const groupedData = Array.from({ length: 120 }, (_, index) => ({
-    misses: 0,
-    hits: 0,
-    writes: 0,
-    label: getLabel(index, period),
-  }));
+  const initializeKeys = (): Record<string, number> => {
+    let obj: Record<string, number> = {};
+    keys.forEach(key => obj[key] = 0);
+    
+    return obj;
+  }
 
-  data.forEach((cache: any) => {
-    const cacheTime = new Date(cache.created_at).getTime();
-    const hits = cache.content.hits ? 1 : 0;
-    const misses = cache.content.misses ? 1 : 0;
-    const writes = cache.content.writes ? 1 : 0;
-    const intervalIndex = Math.floor(
-      (cacheTime - startDate) / (intervalDuration * 60 * 1000),
-    );
+  const groupedData: Array<Record<T[number], number> & {label: string}> = Array.from({ length: 120 }, (_, index) => ({
+    ...initializeKeys(),
+    label: getLabel(index, period),
+  }) as Record<T[number], number> & {label: string});
+
+  data.forEach((row: any) => {
+    const createdAt = new Date(row.created_at).getTime();
+    const intervalIndex = Math.floor((createdAt - startDate) / (intervalDuration * 60 * 1000));
 
     if (intervalIndex >= 0 && intervalIndex < 120) {
-      groupedData[intervalIndex] = {
-        ...groupedData[intervalIndex],
-        misses: groupedData[intervalIndex].misses + misses,
-        hits: groupedData[intervalIndex].hits + hits,
-        writes: groupedData[intervalIndex].writes + writes,
-      };
+      keys.forEach((key: T[number]) => {
+        const value = row.content[key] ? 1 : 0;
+        (groupedData[intervalIndex] as any)[(key)] += value;
+      })
     }
   });
 
   return groupedData;
 }
+
 
 export const getLabel = (index: number, period: string) =>  {
   const totalDuration = PERIODS[period].duration;

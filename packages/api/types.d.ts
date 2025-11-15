@@ -11,7 +11,6 @@ declare global {
 
 interface WatcherEntry {
   uuid: string;
-  // closureId: string
   requestId?: string;
   jobId?: string;
   scheduleId?: string;

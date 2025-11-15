@@ -195,6 +195,27 @@ export abstract class BaseWatcher implements Watcher {
     }
   }
 
+  async insertRedisStream(content: WatcherEntry): Promise<void> {
+    try {
+      await this.RedisClient.xAdd(
+        this.streamKey,
+        '*',
+        {
+          uuid: content.uuid,
+          request_id: requestLocalStorage.getStore()?.get("requestId") || 'null',
+          job_id: jobLocalStorage.getStore()?.get("jobId") || 'null',
+          schedule_id: scheduleLocalStorage.getStore()?.get("scheduleId") || 'null',
+          type: content.type,
+          content: JSON.stringify(content.content),
+          created_at: new Date(content.created_at).toISOString().replace('T', ' ').substring(0, 19)
+        }
+      );
+    } catch (error) {
+      console.error(`Error adding to stream ${this.type}:`, error);
+      throw error;
+    }
+  }
+
   private async cleanup() {
     if (this.refreshInterval) clearInterval(this.refreshInterval);
     await this.processPendingMessages();
@@ -203,7 +224,7 @@ export abstract class BaseWatcher implements Watcher {
   async index(req: Request): Promise<{ body?: any, statusCode: number }> {
     try {
       const filters = this.extractFiltersFromRequest(req);
-      const body = await this.DBInstance.getIndexData(filters, this.type);
+      const body = await this.DBInstance.getIndexData(filters, this.type, '');
   
       return { body, statusCode: 200 }
     } catch (error) {
@@ -244,34 +265,15 @@ export abstract class BaseWatcher implements Watcher {
     }
   }
 
-  async insertRedisStream(content: WatcherEntry): Promise<void> {
-    try {
-      await this.RedisClient.xAdd(
-        this.streamKey,
-        '*',
-        {
-          uuid: content.uuid,
-          request_id: requestLocalStorage.getStore()?.get("requestId") || 'null',
-          job_id: jobLocalStorage.getStore()?.get("jobId") || 'null',
-          schedule_id: scheduleLocalStorage.getStore()?.get("scheduleId") || 'null',
-          type: content.type,
-          content: JSON.stringify(content.content),
-          created_at: new Date(content.created_at).toISOString().replace('T', ' ').substring(0, 19)
-        }
-      );
-    } catch (error) {
-      console.error(`Error adding to stream ${this.type}:`, error);
-      throw error;
-    }
-  }
-
-  protected async refresh(req: Request, res: Response): Promise<Response> {
+  protected async refresh(req: Request, res: Response): Promise<{ body?: any, statusCode: number }> {
     try {
       this.refreshInterval && clearInterval(this.refreshInterval);
-      this.ingestRedisStream();
-      return res.status(200).json({ message: "Data refreshed" });
+      await this.ingestRedisStream();
+      return { body: { message: "success" }, statusCode: 200 }
     } catch (error) {
-      return res.status(500).json({ error });
+      return {
+        statusCode: 500
+      }
     }
   }
 
@@ -288,15 +290,9 @@ export abstract class BaseWatcher implements Watcher {
    * Abstract Methods
    * --------------------------------------------------------------------------
    */
-  protected abstract countGraphData(data: any, period: string): any;
   protected abstract extractFiltersFromRequest(req: Request): WatcherFilters;
 
-  protected abstract handleRelatedDataSQL(modelId: string, requestId: string, jobId: string, scheduleId: string): Promise<any>;
-
-  protected abstract getIndexGraphDataSQL(filters: WatcherFilters): Promise<any>;
-  protected abstract getIndexTableDataByGroupSQL(filters: WatcherFilters): Promise<any>;
-  protected abstract getIndexTableDataByInstanceSQL(filters: WatcherFilters): Promise<any>;
-
   protected abstract getViewdata(id: string): Promise<any>;
-  protected abstract getMetadata(id: string): Promise<any>;
+  protected abstract getMetadata({ requestId, jobId, scheduleId }: { requestId: string, jobId: string, scheduleId: string }): Promise<any>;
+  protected abstract getGraphData(filters: any): Promise<any>
 }
