@@ -91,7 +91,7 @@ if (
                         contentType.includes("video") ||
                         contentType.includes("audio"));
 
-                    watchers.http.addContent(loggingObject);
+                    watchers.http.insertRedisStream(loggingObject);
 
                     // Call the original method
                     return originalMethod.apply(target);
@@ -122,7 +122,7 @@ if (
           loggingObject.duration = duration;
           loggingObject.aborted = error.name === "AbortError";
 
-          watchers.http.addContent(loggingObject);
+          watchers.http.insertRedisStream(loggingObject);
           throw error;
         }
       };

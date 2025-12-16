@@ -2,19 +2,13 @@ import { Connection, FieldPacket, QueryResult } from "mysql2/promise";
 import { PERIODS } from "./helpers/constants";
 import { formattCountGraphData, formattDurationGraphData, formatValue } from "./helpers/helpers";
 
-interface IDatabase {
-  up: () => {}
-  down: () => {}
-}
-
-
 class Database {
   storeConnection!: Connection
 
   constructor(storeConnection: Connection) {
     this.storeConnection = storeConnection;
   }
-  
+
   async up(
     connection: Connection,
   ): Promise<void> {
@@ -68,21 +62,21 @@ class Database {
     }
   }
 
+  // Insert, update, delete
+
   async insert(redisEntry: any) {
     try {
       await this.storeConnection.query("START TRANSACTION");
       await this.storeConnection.query(
-        "INSERT INTO observatory_entries (uuid, request_id, job_id, schedule_id, type, content, created_at) VALUES ?",
+        "INSERT INTO observatory_entries (uuid, request_id, job_id, schedule_id, type, content, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
         [
-          redisEntry.map((entry: any) => [
-            entry.uuid,
-            entry.request_id,
-            entry.job_id,
-            entry.schedule_id,
-            entry.type,
-            entry.content,
-            entry.created_at,
-          ]),
+          redisEntry.uuid,
+          redisEntry.request_id,
+          redisEntry.job_id,
+          redisEntry.schedule_id,
+          redisEntry.type,
+          redisEntry.content,
+          redisEntry.created_at,
         ],
       );
       await this.storeConnection.query("COMMIT");
@@ -101,6 +95,8 @@ class Database {
       throw error;
     }
   }
+
+  // Get entry/entries
 
   async getEntry(uuid: string): Promise<WatcherEntry> {
     try {
@@ -130,19 +126,14 @@ class Database {
     }
   }
 
-  private getPeriodSQL(period: string): string {
-    return `AND created_at >= UTC_TIMESTAMP() - ${PERIODS[period].interval}`;
-  }
+  // Basic Helpers
 
-  private getEqualitySQL = (value: string, type: string): string => {
-    return `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.${type}')) = '${value}'`;
-  };
+  private getStatusSQL = (status: string): string => status === 'all' ? "" : `AND JSON_EXTRACT(content, '$.statusCode') LIKE '${status.replace("xx", "%")}'`;
+  private getPeriodSQL = (period: string): string => period ? `AND created_at >= UTC_TIMESTAMP() - ${PERIODS[period].interval}` : '';
+  private getEqualitySQL = (value: string, type: string): string => value ? `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.${type}')) = '${value}'` : '';
+  private getInclusionSQL = (value: string, type: string): string => value ? `AND LOWER(JSON_UNQUOTE(JSON_EXTRACT(content, '$.${type}'))) LIKE '%${value.toLowerCase()}%'` : "";
 
-  private getInclusionSQL = (value: string, type: string): string => {
-    return `AND LOWER(JSON_UNQUOTE(JSON_EXTRACT(content, '$.${type}'))) LIKE '%${value.toLowerCase()}%'`;
-  };
-
-  private getDurationParametersSQL(): string {
+  private getDurationParametersSQL = (): string => {
     return `MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10, 6))) as shortest,
       MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10, 6))) as longest,
       AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10, 6))) as average,
@@ -160,7 +151,7 @@ class Database {
         sql: `JSON_UNQUOTE(JSON_EXTRACT(content, '$.message')) as header,`,
         key: 'message'
       },
-      'http-client': { 
+      'http': { 
         sql: `JSON_UNQUOTE(JSON_EXTRACT(content, '$.origin')) AS route,`,
         key: 'origin'
       },
@@ -205,23 +196,8 @@ class Database {
     return mapping[watcherType];
   }
 
-  private getWatcherSpecificStatementsSQL(watcherType: string): string {
-    let statement = ''
-    if (watcherType === 'cache') {
-      statement = `
-        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.misses')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.misses')) > 0 THEN 1 ELSE 0 END) as misses,
-        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.hits')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.hits')) > 0 THEN 1 ELSE 0 END) as hits,
-        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.writes')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.writes')) > 0 THEN 1 ELSE 0 END) as writes,
-      `
-    }
-
-    return statement
-  }
-
   private getP95SQL(watcherType: string): string {
-    if (watcherType === 'exception' || watcherType === 'log') {
-      return ''
-    }
+    if (watcherType === 'exception' || watcherType === 'log') return ''
 
     return `
       CAST(
@@ -242,27 +218,115 @@ class Database {
     `
   }
 
+  private getWatcherSpecificStatementsSQL(watcherType: string): string {
+    let statement = ''
+    if (watcherType === 'cache') {
+      statement = `
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.misses')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.misses')) > 0 THEN 1 ELSE 0 END) as misses,
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.hits')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.hits')) > 0 THEN 1 ELSE 0 END) as hits,
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.writes')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.writes')) > 0 THEN 1 ELSE 0 END) as writes,
+      `
+    } else if (watcherType === 'exception') {
+      statement = `
+        SUM(CASE WHEN JSON_EXTRACT(content, '$.type') = 'unhandledRejection' THEN 1 ELSE 0 END) as unhandledRejection,
+        SUM(CASE WHEN JSON_EXTRACT(content, '$.type') = 'uncaughtException' THEN 1 ELSE 0 END) as uncaughtException,
+      `
+    } else if (watcherType === 'http') {
+      
+    } else if (watcherType === 'log') {
+      statement = `
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.level')) LIKE 'info' THEN 1 ELSE 0 END) as info,
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.level')) LIKE 'warn' THEN 1 ELSE 0 END) as warn,
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.level')) LIKE 'error' THEN 1 ELSE 0 END) as error,
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.level')) LIKE 'debug' THEN 1 ELSE 0 END) as debug,
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.level')) LIKE 'trace' THEN 1 ELSE 0 END) as trace,
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.level')) LIKE 'fatal' THEN 1 ELSE 0 END) as fatal,
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.level')) LIKE 'log' THEN 1 ELSE 0 END) as log,
+      `;
+    } else if (watcherType === 'mail') {
+      statement = `
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed_count,
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as success_count,
+      `;
+    } else if (watcherType === 'model') {
+      statement = `
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as count_completed,
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as count_failed,
+      `;
+    } else if (watcherType === 'query') {
+      statement = `
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed,
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed,
+      `;
+    } else if (watcherType === 'notification') {
+      statement = `
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed,
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed,
+      `;
+    } else if (watcherType === 'request') {
+      statement = `
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) LIKE '2%' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) LIKE '3%' THEN 1 ELSE 0 END) as count_200,
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) LIKE '4%' THEN 1 ELSE 0 END) as count_400,
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) LIKE '5%' THEN 1 ELSE 0 END) as count_500,
+      `;
+    } else if (watcherType === 'schedule') {
+      statement = `
+        GROUP_CONCAT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.cronExpression'))) AS cronExpression,
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed,
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed,
+      `;
+    } else if (watcherType === 'view') {
+      statement = `
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed,
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed,
+        CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.size')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as size,
+      `;
+    }
+
+    return statement
+  }
+
+  
+
   private getWatcherSpecificFiltersSQL(watcherType: string, filters: any): string {
     let conditions: string[] = [];
 
     switch (watcherType) {
       case 'cache':
-        if (filters.cacheType && filters.cacheType !== 'all') {
-          conditions.push(`JSON_UNQUOTE(JSON_EXTRACT(content, '$.${filters.cacheType}')) IS NOT NULL`);
-        }
-        if (filters.key) {
-          conditions.push(this.getEqualitySQL(filters.key, 'key'));
-        }
+        conditions =
+          [
+            ...(filters.cacheType && filters.cacheType !== 'all') && `JSON_UNQUOTE(JSON_EXTRACT(content, '$.${filters.cacheType}')) IS NOT NULL`,
+            ...(filters.key && this.getEqualitySQL(filters.key, 'key'))
+          ];
+        break;
+      
+      case 'exception':
+        conditions =
+          [
+            ...(filters.type && filters.type !== 'all') && this.getEqualitySQL(filters.type, 'type'),
+            ...(filters.key && this.getInclusionSQL(filters.key, 'message'))
+          ];
         break;
 
       case 'request':
+        conditions.push("JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0'");
+        
+        if (filters.status && filters.status !== 'all') {
+          const statusPrefix = filters.status.charAt(0); // '2xx' -> '2'
+          conditions.push(`JSON_EXTRACT(content, '$.statusCode') LIKE '${statusPrefix}%'`);
+        }
+        if (filters.key) {
+          conditions.push(this.getEqualitySQL(filters.key, 'route'));
+        }
+        break;
+      
       case 'http-client':
         if (filters.status && filters.status !== 'all') {
-          const statusCode = filters.status.charAt(0); // '2', '4', or '5'
+          const statusCode = filters.status.charAt(0);
           conditions.push(`JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) LIKE '${statusCode}%'`);
         }
         if (filters.key) {
-          conditions.push(this.getEqualitySQL(filters.key, watcherType === 'request' ? 'route' : 'origin'));
+          conditions.push(this.getEqualitySQL(filters.key, 'origin'));
         }
         break;
 
@@ -298,40 +362,41 @@ class Database {
 
       case 'schedule':
         if (filters.status && filters.status !== 'all') {
-          conditions.push(this.getEqualitySQL(filters.status, 'status'));
+          conditions.push(`JSON_UNQUOTE(JSON_EXTRACT(content, '$.type')) = 'processJob'`);
+          conditions.push(`JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = '${filters.status}'`);
+        } else {
+          conditions.push(`JSON_UNQUOTE(JSON_EXTRACT(content, '$.type')) = 'processJob'`);
         }
         if (filters.key) {
           conditions.push(this.getEqualitySQL(filters.key, 'scheduleId'));
         }
         break;
-
-      case 'exception':
-        if (filters.type && filters.type !== 'all') {
-          conditions.push(this.getEqualitySQL(filters.type, 'type'));
-        }
-        if (filters.key) {
-          conditions.push(this.getInclusionSQL(filters.key, 'message'));
-        }
-        break;
-      
-        case 'notification':
-        if (filters.type) {
-          conditions.push(this.getEqualitySQL(filters.type, 'type'));
+    
+      case 'notification':
+        conditions.push("JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) != 'pending'");
+        
+        if (filters.status && filters.status !== 'all') {
+          conditions.push(`JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = '${filters.status}'`);
         }
         if (filters.channel) {
           conditions.push(this.getEqualitySQL(filters.channel, 'channel'));
-        }
-        if (filters.status && filters.status !== 'all') {
-          conditions.push(this.getEqualitySQL(filters.status, 'status'));
         }
         break;
 
       case 'query':
         if (filters.status && filters.status !== 'all') {
-          conditions.push(this.getEqualitySQL(filters.status, 'status'));
+          const statusMap: Record<string, string> = {
+            'select': "JSON_UNQUOTE(JSON_EXTRACT(content, '$.sql')) LIKE '%SELECT%'",
+            'insert': "JSON_UNQUOTE(JSON_EXTRACT(content, '$.sql')) LIKE '%INSERT%'",
+            'update': "JSON_UNQUOTE(JSON_EXTRACT(content, '$.sql')) LIKE '%UPDATE%'",
+            'delete': "JSON_UNQUOTE(JSON_EXTRACT(content, '$.sql')) LIKE '%DELETE%'"
+          };
+          if (statusMap[filters.status]) {
+            conditions.push(statusMap[filters.status]);
+          }
         }
         if (filters.key) {
-          conditions.push(this.getInclusionSQL(filters.key, 'sql'));
+          conditions.push(this.getEqualitySQL(filters.key, 'sql'));
         }
         break;
 
@@ -357,11 +422,11 @@ class Database {
     return conditions.join(' ');
   }
 
-  async getInstanceData(filters: any, watcherType: string, queryParameter: string): Promise<WatcherEntry[]> {
+  async getInstanceData(filters: any, watcherType: string): Promise<WatcherEntry[]> {
     const { period, limit, offset, query } = filters;
     
-    const periodSql = period ? this.getPeriodSQL(period) : "";
-    const querySql = query ? this.getInclusionSQL(query, queryParameter) : "";
+    const periodSql = this.getPeriodSQL(period);
+    const querySql = this.getInclusionSQL(query, "key");
     const watcherFilters = this.getWatcherSpecificFiltersSQL(watcherType, filters);
 
     try {
@@ -384,11 +449,11 @@ class Database {
     }
   }
 
-  async getIndexData(filters: any, watcherType: string, queryParameter: string) {
+  async getIndexData(filters: any, watcherType: string) {
     const { period, limit, offset, query } = filters;
     
-    const periodSql = period ? this.getPeriodSQL(period) : "";
-    const querySql = query ? this.getInclusionSQL(query, queryParameter) : "";
+    const periodSql = this.getPeriodSQL(period);
+    const querySql = this.getInclusionSQL(query, "key");
     const watcherFilters = this.getWatcherSpecificFiltersSQL(watcherType, filters);
     
     const { sql: groupMainKeySql, key: watcherKey } = this.getGroupMainKey(watcherType);
@@ -436,8 +501,8 @@ class Database {
     }
   }
 
-  async getCountByType(watcherType: string, period?: string) {
-    const periodSql = period ? this.getPeriodSQL(period) : "";
+  async getCountByType(watcherType: string, period: string) {
+    const periodSql = this.getPeriodSQL(period);
 
     try {
       const [results] = await this.storeConnection.query(
@@ -455,12 +520,12 @@ class Database {
     }
   }
 
-  async getEntriesCount(filters: any, watcherType: string, queryParameter: string, extraCondition: string) {
+  async getEntriesCount(filters: any, watcherType: string, extraCondition?: string) {
     const { period, query } = filters;
 
     const watcherFilters = this.getWatcherSpecificFiltersSQL(watcherType, filters);
-    const periodSql = period ? this.getPeriodSQL(period) : "";
-    const querySql = query ? this.getInclusionSQL(query, queryParameter) : "";
+    const periodSql = this.getPeriodSQL(period);
+    const querySql = this.getInclusionSQL(query, "key");
     // const statusSql = this.getStatusSQL(status);
 
     try {
@@ -476,12 +541,12 @@ class Database {
     }
   }
 
-  async getEntriesCountByGroup(filters: any, watcherType: string, queryParameter: string, extraCondition: string) {
+  async getEntriesCountByGroup(filters: any, watcherType: string, extraCondition?: string) {
     const { period, query } = filters;
 
     const { sql: groupMainKeySql } = this.getGroupMainKey(watcherType);
-    const periodSql = period ? this.getPeriodSQL(period) : "";
-    const querySql = query ? this.getInclusionSQL(query, queryParameter) : "";
+    const periodSql = this.getPeriodSQL(period);
+    const querySql = this.getInclusionSQL(query, "key");
 
     try {
       const [countResult] = (await this.storeConnection.query(
@@ -496,10 +561,10 @@ class Database {
     }
   }
 
-  async getGraphData(filters: any, watcherType: string, queryParameter: string, keys: string[]){
+  async getGraphData(filters: any, watcherType: string, keys: string[], hasDuration?: boolean){
     const { period, key } = filters;
-    const periodSql = period ? this.getPeriodSQL(period) : "";
-    const keySql = key ? this.getEqualitySQL(key, "key") : "";
+    const periodSql = this.getPeriodSQL(period);
+    const keySql = this.getEqualitySQL(key, "key");
 
     try {
       const [results] = (await this.storeConnection.query(
@@ -553,11 +618,11 @@ class Database {
       } = cleanResults;
 
       const countFormattedData = formattCountGraphData(results as unknown as CacheContent[], period, keys);
-      const durationFormattedData = formattDurationGraphData(results, period);
+      const durationFormattedData = hasDuration && formattDurationGraphData(results, period);
 
       return {
         countFormattedData,
-        durationFormattedData,
+        ...(hasDuration ? durationFormattedData : {}),
         count: formatValue(aggregateResults.total, true),
         indexCountOne: formatValue(aggregateResults.hits, true),
         indexCountTwo: formatValue(aggregateResults.writes, true),

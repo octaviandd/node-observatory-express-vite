@@ -112,6 +112,6 @@ if (
       error: error ? error.toString() : undefined,
     };
 
-    watchers.database.addContent(logEntry);
+    watchers.database.insertRedisStream(logEntry);
   }
 }

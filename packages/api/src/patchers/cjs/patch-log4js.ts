@@ -46,7 +46,7 @@ if (
                   return function patchedMethod(this: any, ...args: any[]) {
                     const callerInfo = getCallerInfo(__filename);
 
-                    watchers.logging.addContent({
+                    watchers.logging.insertRedisStream({
                       package: "log4js",
                       level: method,
                       message: args[0],

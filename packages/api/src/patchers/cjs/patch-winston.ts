@@ -33,7 +33,7 @@ if (
                   return function patchedMethod(this: any, ...args: any) {
                     const callerInfo = getCallerInfo(__filename);
 
-                    watchers.logging.addContent({
+                    watchers.logging.insertRedisStream({
                       level: method,
                       package: "winston",
                       message: args[0],
@@ -66,7 +66,7 @@ if (
                 return function patchedMethod(this: any, ...args: any) {
                   const callerInfo = getCallerInfo(__filename);
 
-                  watchers.logging.addContent({
+                  watchers.logging.insertRedisStream({
                     level: method,
                     package: "winston",
                     message: args[0],

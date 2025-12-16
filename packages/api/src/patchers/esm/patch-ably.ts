@@ -158,7 +158,7 @@ function wrapMethod(original: Function, methodName: string, context: any = {}) {
       const result = await original.apply(this, args);
       const endTime = performance.now();
 
-      watchers.notifications.addContent({
+      watchers.notifications.insertRedisStream({
         ...logData,
         status: 'completed',
         response: result,
@@ -170,7 +170,7 @@ function wrapMethod(original: Function, methodName: string, context: any = {}) {
     } catch (error: any) {
       const endTime = performance.now();
 
-      watchers.notifications.addContent({
+      watchers.notifications.insertRedisStream({
         ...logData,
         status: 'failed',
         error: error instanceof Error ? error.message : String(error),

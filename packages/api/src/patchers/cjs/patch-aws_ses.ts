@@ -68,7 +68,7 @@ if (
               const endTime = performance.now();
               const duration = parseFloat((endTime - startTime).toFixed(2));
 
-              watchers.mailer.addContent({
+              watchers.mailer.insertRedisStream({
                 status: "completed",
                 info: {
                   messageId: result.MessageId,
@@ -83,7 +83,7 @@ if (
               const endTime = performance.now();
               const duration = parseFloat((endTime - startTime).toFixed(2));
 
-              watchers.mailer.addContent({
+              watchers.mailer.insertRedisStream({
                 status: "failed",
                 error: {
                   name: err.name,
@@ -167,7 +167,7 @@ if (
                       (endTime - startTime).toFixed(2),
                     );
 
-                    watchers.mailer.addContent({
+                    watchers.mailer.insertRedisStream({
                       status: "completed",
                       info: {
                         messageId: result.MessageId,
@@ -184,7 +184,7 @@ if (
                       (endTime - startTime).toFixed(2),
                     );
 
-                    watchers.mailer.addContent({
+                    watchers.mailer.insertRedisStream({
                       status: "failed",
                       error: {
                         name: err.name,

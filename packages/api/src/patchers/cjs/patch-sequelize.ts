@@ -98,5 +98,5 @@ function logModelOperation(
     status: error ? "failed" : "completed",
   };
 
-  watchers.model.addContent(modelLogEntry);
+  watchers.model.insertRedisStream(modelLogEntry);
 }

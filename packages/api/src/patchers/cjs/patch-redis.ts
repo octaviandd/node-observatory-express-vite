@@ -118,7 +118,7 @@ if (
                 logContent["key"] = args[0];
               }
 
-              watchers.cache.addContent(logContent);
+              watchers.cache.insertRedisStream(logContent);
               return result;
             } catch (error) {
               const endTime = performance.now();
@@ -129,7 +129,7 @@ if (
                 error instanceof Error ? error.message : String(error);
               logContent["stack"] =
                 error instanceof Error ? error.stack : String(error);
-              watchers.cache.addContent(logContent);
+              watchers.cache.insertRedisStream(logContent);
               throw error;
             }
           };

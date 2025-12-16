@@ -77,7 +77,7 @@ function uncaughtPatcher() {
   process.on("uncaughtException", (error) => {
     const details = extractErrorDetails(error);
     if (watchers?.errors) {
-      watchers?.errors.addContent({
+      watchers?.errors.insertRedisStream({
         type: "uncaughtException",
         ...details,
       });
@@ -92,7 +92,7 @@ function unhandledRejectionPatcher() {
   process.on("unhandledRejection", (reason) => {
     const details = extractErrorDetails(reason);
     if (watchers?.errors) {
-      watchers?.errors.addContent({
+      watchers?.errors.insertRedisStream({
         type: "unhandledRejection",
         ...details,
       });

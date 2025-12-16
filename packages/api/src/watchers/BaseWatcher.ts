@@ -29,9 +29,10 @@ export abstract class BaseWatcher implements Watcher {
   protected refreshIntervalDuration: number = 5000;
   readonly type: string;
 
-  constructor(redisClient: RedisClientType, DBInstance: Database) {
+  constructor(redisClient: RedisClientType, DBInstance: Database, type: string) {
     this.RedisClient = redisClient;
     this.DBInstance = DBInstance;
+    this.type = type;
 
     this.streamKey = `observatory:stream:${this.type}`;
     this.consumerGroup = `observatory:group:${this.type}`;
@@ -39,6 +40,9 @@ export abstract class BaseWatcher implements Watcher {
 
     this.createRedisStream();
     this.ingestRedisStream();
+
+    process.on('SIGTERM', () => this.cleanup());
+    process.on('SIGINT', () => this.cleanup());
   }
 
   private async createRedisStream() {
@@ -224,11 +228,11 @@ export abstract class BaseWatcher implements Watcher {
   async index(req: Request): Promise<{ body?: any, statusCode: number }> {
     try {
       const filters = this.extractFiltersFromRequest(req);
-      const body = await this.DBInstance.getIndexData(filters, this.type, '');
+      const body = await this.DBInstance.getIndexData(filters, this.type);
   
       return { body, statusCode: 200 }
     } catch (error) {
-      console.error(error);
+      console.error(`[${this.type}] Index error:`, error);
       return {
         statusCode: 500,
       }
@@ -249,21 +253,21 @@ export abstract class BaseWatcher implements Watcher {
     }
   }
 
-  async metadata(req: Request): Promise<{ body?: any, statusCode: number }> {
-    try {
-      const data = await this.getMetadata(req.body.entry_ids)
+  // async metadata(req: Request): Promise<{ body?: any, statusCode: number }> {
+  //   try {
+  //     const data = await this.DBInstance.getRelatedViewdata(req.body.entry_ids)
       
-      return {
-        body: data, 
-        statusCode: 200
-      }
-    } catch (error) {
-      console.error(error);
-      return {
-        statusCode: 500
-      }
-    }
-  }
+  //     return {
+  //       body: data, 
+  //       statusCode: 200
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //     return {
+  //       statusCode: 500
+  //     }
+  //   }
+  // }
 
   protected async refresh(req: Request, res: Response): Promise<{ body?: any, statusCode: number }> {
     try {
@@ -276,6 +280,7 @@ export abstract class BaseWatcher implements Watcher {
       }
     }
   }
+ 
 
   protected updateRefreshInterval = (interval: number): void => {
     if (this.refreshInterval) {

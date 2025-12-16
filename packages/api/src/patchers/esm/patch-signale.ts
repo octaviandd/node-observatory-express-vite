@@ -44,7 +44,7 @@ if (
               line: callerInfo.line,
             };
 
-            watchers.logging.addContent(logContent);
+            watchers.logging.insertRedisStream(logContent);
             return originalLogger.call(this, type, ...args);
           };
         },

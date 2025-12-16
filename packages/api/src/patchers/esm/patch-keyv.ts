@@ -49,7 +49,7 @@ const patchMethod = (prototype: any, method: string) => {
           logContent['key'] = key;
         }
 
-        watchers.cache.addContent(logContent);
+        watchers.cache.insertRedisStream(logContent);
         return result;
       } catch (error) {
         const endTime = performance.now();
@@ -58,7 +58,7 @@ const patchMethod = (prototype: any, method: string) => {
           error instanceof Error ? error.message : String(error);
         logContent['stack'] =
           error instanceof Error ? error.stack : String(error);
-        watchers.cache.addContent(logContent);
+        watchers.cache.insertRedisStream(logContent);
         throw error;
       }
     };

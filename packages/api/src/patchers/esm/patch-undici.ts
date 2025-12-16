@@ -182,7 +182,7 @@ if (
                           contentType.includes("video") ||
                           contentType.includes("audio"));
 
-                      watchers.http.addContent(loggingObject);
+                      watchers.http.insertRedisStream(loggingObject);
                     });
 
                     // Return the original body to not interfere with user code
@@ -204,7 +204,7 @@ if (
               loggingObject.duration = parseFloat(
                 (performance.now() - startTime).toFixed(2),
               );
-              watchers.http.addContent(loggingObject);
+              watchers.http.insertRedisStream(loggingObject);
             }
 
             return responseProxy;
@@ -224,7 +224,7 @@ if (
             loggingObject.duration = duration;
             loggingObject.aborted = error.name === "AbortError";
 
-            watchers.http.addContent(loggingObject);
+            watchers.http.insertRedisStream(loggingObject);
             throw error;
           }
         };
@@ -356,7 +356,7 @@ if (
                             contentType.includes("video") ||
                             contentType.includes("audio"));
 
-                        watchers.http.addContent(loggingObject);
+                        watchers.http.insertRedisStream(loggingObject);
                         // Call the original method
                         return originalMethod.apply(target);
                       } catch (error) {
@@ -387,7 +387,7 @@ if (
               loggingObject.duration = duration;
               loggingObject.aborted = error.name === "AbortError";
 
-              watchers.http.addContent(loggingObject);
+              watchers.http.insertRedisStream(loggingObject);
               throw error;
             }
           };

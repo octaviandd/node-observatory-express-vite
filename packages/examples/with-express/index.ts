@@ -1,10 +1,11 @@
 /** @format */
+
 import { createObserver } from "@node-observatory/api"
 import { ExpressAdapter } from "@node-observatory/express";
 import express from "express";
 import cors from "cors";
 import mysql2 from "mysql2/promise";
-import { createClient } from "redis";
+import { createClient, RedisClientType } from "redis";
 import axios from "axios";
 import winston from "winston";
 import NodeCache from "node-cache"
@@ -68,7 +69,7 @@ async function startServer() {
   expressAdapter.setBasePath('/ui');
   app.use('/ui', expressAdapter.getRouter());
 
-  await createObserver(expressAdapter, {}, "mysql2", mysql2Connection, redisConnection);
+  await createObserver(expressAdapter, {}, "mysql2", mysql2Connection, redisConnection as RedisClientType);
 
   console.log("Server started");
 }

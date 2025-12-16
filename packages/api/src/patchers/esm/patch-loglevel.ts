@@ -54,7 +54,7 @@ if (
               };
 
               // Log the message content
-              watchers.logging.addContent(logContent);
+              watchers.logging.insertRedisStream(logContent);
 
               // Call the original method
               return originalMethod.apply(this, args);
@@ -83,7 +83,7 @@ if (
                   };
 
                   // Log the message content
-                  watchers.logging.addContent(logContent);
+                  watchers.logging.insertRedisStream(logContent);
 
                   // Call the original method
                   return originalMethod.apply(this, logArgs);

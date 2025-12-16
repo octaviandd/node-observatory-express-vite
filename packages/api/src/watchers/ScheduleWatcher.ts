@@ -1,270 +1,79 @@
 /** @format */
 import { Request } from "express";
 import { BaseWatcher } from "./BaseWatcher";
+import Database from '../database-sql';
+import { RedisClientType } from "redis";
+import { formatValue, groupItemsByType } from "../../src/helpers/helpers";
 
 class ScheduleWatcher extends BaseWatcher {
   readonly type = "schedule";
 
-  constructor(
-    storeDriver: StoreDriver,
-    storeConnection: any,
-    redisClient: any,
-    serverAdapter: any
-  ) {
-    super(storeDriver, storeConnection, redisClient, serverAdapter);
+  constructor(redisClient: RedisClientType, DBInstance: Database) {
+    super(redisClient, DBInstance, "schedule");
   }
 
-  private getStatusSQL(type: string): string {
-    return type === "all"
-      ? "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.type')) = 'processJob')"
-      : `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.type')) = 'processJob' AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = '${type}'`;
+  protected async getData(filters: ScheduleFilters): Promise<{ results: any, count: string }> {
+    if (filters.index === 'instance') {
+      const results = await this.DBInstance.getInstanceData(filters, this.type);
+      const countResults = await this.DBInstance.getEntriesCount(filters, this.type, '');
+
+      return { results, count: formatValue(countResults.total, true) };
+    } else {
+      const results = await this.DBInstance.getIndexData(filters, this.type);
+      const countResult = await this.DBInstance.getEntriesCountByGroup(filters, this.type, '');
+
+      return { results, count: formatValue(countResult.total, true) };
+    }
   }
 
-  /**
-   * View Methods
-   * --------------------------------------------------------------------------
-   */
-  protected async handleViewSQL(id: string): Promise<any> {
-    let [results]: [any[], any] = await this.storeConnection.query(
-      "SELECT * FROM observatory_entries WHERE uuid = ? AND type = ?",
-      [id, this.type],
+  protected async getViewdata(id: string): Promise<any> {
+    const entry = await this.DBInstance.getEntry(id);
+
+    if (!entry.requestId && !entry.scheduleId && !entry.jobId) {
+      return groupItemsByType([entry]);
+    }
+
+    // Schedule uses all three IDs together to find related entries
+    const conditions = [
+      ...(entry.requestId ? ["request_id = ?"] : []),
+      ...(entry.jobId ? ["job_id = ?"] : []),
+      ...(entry.scheduleId ? ["schedule_id = ?"] : [])
+    ];
+    const params = [
+      ...(entry.requestId ? [entry.requestId] : []),
+      ...(entry.jobId ? [entry.jobId] : []),
+      ...(entry.scheduleId ? [entry.scheduleId] : [])
+    ];
+
+    const relatedEntries = await this.DBInstance.getRelatedViewdata(conditions, params, this.type, '');
+    return groupItemsByType(relatedEntries.concat(entry));
+  }
+
+  protected async getMetadata({ requestId, jobId, scheduleId }: { requestId: string, jobId: string, scheduleId: string }): Promise<any> {
+    if (!requestId && !jobId && !scheduleId) return null;
+
+    const conditions = [
+      ...(requestId ? [`AND request_id = ?`] : []),
+      ...(jobId ? [`AND job_id = ?`] : []),
+      ...(scheduleId ? [`AND schedule_id = ?`] : [])
+    ];
+    const params = [
+      ...(requestId ? [requestId] : []),
+      ...(jobId ? [jobId] : []),
+      ...(scheduleId ? [scheduleId] : [])
+    ];
+
+    const results = await this.DBInstance.getRelatedViewdata(conditions, params, this.type, '');
+    return groupItemsByType(results);
+  }
+
+  protected async getGraphData(filters: ScheduleFilters): Promise<any> {
+    return await this.DBInstance.getGraphData(
+      filters,
+      this.type,
+      ['completed', 'failed'],
+      true // schedule has duration
     );
-
-    let item = results[0];
-
-    const [relatedItems]: [any[], any] = await this.storeConnection.query(
-      "SELECT * FROM observatory_entries WHERE request_id = ? AND job_id = ? AND schedule_id = ? AND type != ?",
-      [item.request_id, item.job_id, item.schedule_id, this.type],
-    );
-
-    results = results.concat(relatedItems);
-    return this.groupItemsByType(results);
-  }
-
-  /**
-   * Related Data Methods
-   * --------------------------------------------------------------------------
-   */
-  protected async handleRelatedDataSQL(
-    requestId: string,
-    jobId: string,
-    scheduleId: string,
-  ): Promise<any> {
-    const [results]: [any[], any] = await this.storeConnection.query(
-      "SELECT * FROM observatory_entries WHERE request_id = ? AND job_id = ? AND schedule_id = ? AND type != ?",
-      [requestId, jobId, scheduleId, this.type],
-    );
-    return this.groupItemsByType(results);
-  }
-
-  /**
-   * Instance Data Methods
-   * --------------------------------------------------------------------------
-   */
-  protected async getIndexTableDataByInstanceSQL(
-    filters: ScheduleFilters,
-  ): Promise<any> {
-    const { offset, limit, query, period, key, status } = filters;
-    const periodSql = period ? this.getPeriodSQL(period) : "";
-    const querySql = query ? this.getInclusionSQL(query, "scheduleId") : "";
-    const scheduleSql = key ? this.getEqualitySQL(key, "scheduleId") : "";
-    const statusSql = status ? this.getStatusSQL(status) : "";
-
-    const [results] = (await this.storeConnection.query(
-      `SELECT * FROM observatory_entries WHERE type = 'schedule' ${statusSql} ${querySql} ${periodSql} ${scheduleSql} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`,
-    )) as [any[]];
-
-    const [countResult] = (await this.storeConnection.query(
-      `SELECT COUNT(*) AS total FROM observatory_entries WHERE type = 'schedule' ${statusSql} ${querySql} ${periodSql} ${scheduleSql}`,
-    )) as [any[]];
-
-    return { results, count: this.formatValue(countResult[0].total, true) };
-  }
-
-  /**
-   * Group Data Methods
-   * --------------------------------------------------------------------------
-   */
-  protected async getIndexTableDataByGroupSQL(
-    filters: ScheduleFilters,
-  ): Promise<any> {
-    const { offset, limit, period, groupFilter, query } = filters;
-    const timeSql = period ? this.getPeriodSQL(period) : "";
-    const querySql = query ? this.getInclusionSQL(query, "jobId") : "";
-
-    let orderBySql =
-      groupFilter === "all"
-        ? "ORDER BY total DESC"
-        : groupFilter === "errors"
-          ? "ORDER BY failed DESC"
-          : "ORDER BY longest DESC";
-
-    const [results] = (await this.storeConnection.query(
-      `SELECT
-        JSON_UNQUOTE(JSON_EXTRACT(content, '$.scheduleId')) AS scheduleId,
-        COUNT(*) as total,
-        GROUP_CONCAT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.cronExpression'))) AS cronExpression,
-        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed,
-        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed,
-        CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest,
-        CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest,
-        CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average,
-        CAST(
-          SUBSTRING_INDEX(
-            SUBSTRING_INDEX(
-              GROUP_CONCAT(
-                CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))
-                ORDER BY CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))
-                SEPARATOR ','
-              ),
-              ',',
-              CEILING(COUNT(*) * 0.95)
-            ),
-            ',',
-            -1
-          ) AS DECIMAL(10,2)
-        ) AS p95
-      FROM observatory_entries
-      WHERE type = 'schedule' ${timeSql} ${querySql} AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')
-      GROUP BY JSON_UNQUOTE(JSON_EXTRACT(content, '$.scheduleId'))
-       ${orderBySql}
-      LIMIT ${limit} OFFSET ${offset};`,
-    )) as [any];
-
-    const [countResult] = (await this.storeConnection.query(
-      `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.scheduleId'))) as total
-        FROM observatory_entries
-          WHERE type = 'schedule' ${timeSql} ${querySql} AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed');`,
-    )) as [any];
-
-    return { results, count: this.formatValue(countResult[0].total, true) };
-  }
-
-  /**
-   * Graph Data Methods
-   * --------------------------------------------------------------------------
-   */
-
-  protected async getIndexGraphDataSQL(filters: ScheduleFilters): Promise<any> {
-    const { period, key } = filters;
-    let timeSql = period ? this.getPeriodSQL(period) : "";
-    let scheduleKeySql = key ? this.getEqualitySQL(key, "scheduleId") : "";
-
-    const [countResult] = (await this.storeConnection.query(
-      `SELECT COUNT(*) as total FROM observatory_entries WHERE type = 'schedule' AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed') ${timeSql} ${scheduleKeySql}`,
-    )) as [any[]];
-
-    const [results] = (await this.storeConnection.query(
-      `(
-        SELECT
-          COUNT(*) as total,
-          CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest,
-          CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest,
-          CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average,
-          SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed,
-          SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed,
-          CAST(
-            SUBSTRING_INDEX(
-              SUBSTRING_INDEX(
-                GROUP_CONCAT(
-                  CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))
-                  ORDER BY CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))
-                  SEPARATOR ','
-                ),
-                ',',
-                CEILING(COUNT(*) * 0.95)
-              ),
-              ',',
-              -1
-            ) AS DECIMAL(10,2)
-          ) AS p95,
-          NULL as created_at,
-          NULL as content,
-          'aggregate' as type
-        FROM observatory_entries
-        WHERE type = 'schedule'  AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed') ${timeSql} ${scheduleKeySql}
-      )
-      UNION ALL
-      (
-        SELECT
-          NULL as total,
-          NULL as shortest,
-          NULL as longest,
-          NULL as average,
-          NULL as p95,
-          NULL as completed,
-          NULL as failed,
-          created_at,
-          content,
-          'row' as type
-        FROM observatory_entries
-        WHERE type = 'schedule' ${timeSql} ${scheduleKeySql} AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')
-        ORDER BY created_at DESC
-      );`,
-    )) as [any[], any];
-
-    const aggregateResults: {
-      total: number;
-      shortest: string | null;
-      longest: string | null;
-      average: string | null;
-      p95: string | null;
-      completed: string | null;
-      failed: string | null;
-    } = results.shift();
-
-    const countFormattedData = this.countGraphData(results, period as string);
-    const durationFormattedData = this.durationGraphData(
-      results,
-      period as string,
-    );
-
-    return {
-      countFormattedData,
-      durationFormattedData,
-      count: this.formatValue(countResult[0].total, true),
-      indexCountOne: this.formatValue(aggregateResults.completed, true),
-      indexCountTwo: this.formatValue(aggregateResults.failed, true),
-      shortest: this.formatValue(aggregateResults.shortest),
-      longest: this.formatValue(aggregateResults.longest),
-      average: this.formatValue(aggregateResults.average),
-      p95: this.formatValue(aggregateResults.p95),
-    };
-  }
-
-  /**
-   * Helper Methods
-   * --------------------------------------------------------------------------
-   */
-  protected countGraphData(data: any, period: string) {
-    const totalDuration = this.periods[period as keyof typeof this.periods].duration;
-    const intervalDuration = totalDuration / 120;
-    const now = new Date().getTime();
-    const startDate = now - totalDuration * 60 * 1000;
-
-    const groupedData = Array.from({ length: 120 }, (_, index) => ({
-      completed: 0,
-      failed: 0,
-      label: this.getLabel(index, period),
-    }));
-
-    data.forEach((schedule: any) => {
-      const scheduleTime = new Date(schedule.created_at).getTime();
-      const status = schedule.content.status;
-      const intervalIndex = Math.floor(
-        (scheduleTime - startDate) / (intervalDuration * 60 * 1000),
-      );
-
-      if (intervalIndex >= 0 && intervalIndex < 120) {
-        groupedData[intervalIndex] = {
-          ...groupedData[intervalIndex],
-          // @ts-ignore
-          [status]: groupedData[intervalIndex][status] + 1,
-        };
-      }
-    });
-
-    return groupedData;
   }
 
   protected extractFiltersFromRequest(req: Request): ScheduleFilters {

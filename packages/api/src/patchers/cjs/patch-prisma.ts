@@ -41,7 +41,7 @@ function patchPrismaModels(prisma: any) {
               const result = await originalMethod.apply(this, args);
               const duration = (performance.now() - start).toFixed(2);
 
-              watchers.model.addContent({
+              watchers.model.insertRedisStream({
                 method,
                 modelName,
                 args,
@@ -55,7 +55,7 @@ function patchPrismaModels(prisma: any) {
             } catch (error: any) {
               const duration = (performance.now() - start).toFixed(2);
 
-              watchers.model.addContent({
+              watchers.model.insertRedisStream({
                 method,
                 modelName,
                 args,

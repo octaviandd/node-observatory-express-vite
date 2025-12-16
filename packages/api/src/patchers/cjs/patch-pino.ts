@@ -33,7 +33,7 @@ if (
                   const callerInfo = getCallerInfo(__filename);
 
                   // Include the context metadata in the log content
-                  watchers.logging.addContent({
+                  watchers.logging.insertRedisStream({
                     package: "pino",
                     level: method,
                     message: logArgs[0],

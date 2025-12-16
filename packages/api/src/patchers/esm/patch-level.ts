@@ -162,7 +162,7 @@ if (
                           (endTime - startTime).toFixed(2),
                         );
 
-                        watchers.cache.addContent(logContent);
+                        watchers.cache.insertRedisStream(logContent);
                         return result;
                       } catch (error: any) {
                         // LevelDB throws NotFoundError when key doesn't exist
@@ -179,7 +179,7 @@ if (
                         logContent["duration"] = parseFloat(
                           (endTime - startTime).toFixed(2),
                         );
-                        watchers.cache.addContent(logContent);
+                        watchers.cache.insertRedisStream(logContent);
                         throw error;
                       }
                     }
@@ -197,7 +197,7 @@ if (
                       logContent["duration"] = parseFloat(
                         (endTime - startTime).toFixed(2),
                       );
-                      watchers.cache.addContent(logContent);
+                      watchers.cache.insertRedisStream(logContent);
                       return result;
                     }
                   } catch (error: unknown) {
@@ -207,7 +207,7 @@ if (
                         error instanceof Error ? error.message : String(error);
                       logContent["stack"] =
                         error instanceof Error ? error.stack : String(error);
-                      watchers.cache.addContent(logContent);
+                      watchers.cache.insertRedisStream(logContent);
                     }
                     throw error;
                   }

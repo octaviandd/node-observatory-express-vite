@@ -190,7 +190,7 @@ if (
       params: values,
     };
 
-    watchers.query.addContent(logEntry);
+    watchers.query.insertRedisStream(logEntry);
   }
 
   function getSqlType(sql: string): string {

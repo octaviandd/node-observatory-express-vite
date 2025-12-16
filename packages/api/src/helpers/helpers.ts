@@ -21,9 +21,16 @@ export const formatValue = (value: string | number | null, isCount = false): str
  * @returns 
  */
 
-
-
-export const groupItemsByType = <T extends { type: string }>(items: T[]): Partial<Record<T['type'], T[]>> => Object.groupBy(items, ({ type }) => type);
+export const groupItemsByType = <T extends { type: string }>(items: T[]): Partial<Record<string, T[]>> => {
+  return items.reduce((acc, item) => {
+    const key = item.type;
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key]!.push(item);
+    return acc;
+  }, {} as Record<string, T[]>);
+};
 
 /**
  * Cleans the request from values that can't be added to redis because of circularity or size.

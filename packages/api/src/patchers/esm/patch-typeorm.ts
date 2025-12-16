@@ -155,6 +155,6 @@ if (
       error: error ? error.toString() : undefined,
       status: error ? "failed" : "completed",
     };
-    watchers.model.addContent(modelLogEntry);
+    watchers.model.insertRedisStream(modelLogEntry);
   }
 }

@@ -188,7 +188,7 @@ function patchHttpMethod(
           };
           loggingObject.duration = 0;
 
-          watchers.http.addContent(loggingObject);
+          watchers.http.insertRedisStream(loggingObject);
           throw error; // Re-throw to maintain original behavior
         }
 
@@ -219,7 +219,7 @@ function patchHttpMethod(
             stackLines,
           );
 
-          watchers.http.addContent(loggingObject);
+          watchers.http.insertRedisStream(loggingObject);
         });
 
         // Patch write method to capture request body
@@ -363,7 +363,7 @@ function patchHttpMethod(
                         loggingObject.redirectFrom =
                           res.headers["x-previous-redirect-url"];
 
-                        watchers.http.addContent(loggingObject);
+                        watchers.http.insertRedisStream(loggingObject);
                         hasLoggedResponse = true;
                       } catch (error) {
                         console.error("Error processing response:", error);
@@ -450,7 +450,7 @@ function patchHttpMethod(
                     parseFloat((performance.now() - start).toFixed(2)) || 0;
 
                   // Log the complete request/response
-                  watchers.http.addContent(loggingObject);
+                  watchers.http.insertRedisStream(loggingObject);
                   hasLoggedResponse = true;
                 } catch (error) {
                   console.error("Error in fallback end listener:", error);
@@ -472,7 +472,7 @@ function patchHttpMethod(
           code: error.code,
         };
         loggingObject.duration = 0;
-        watchers.http.addContent(loggingObject);
+        watchers.http.insertRedisStream(loggingObject);
         throw error; // Re-throw to maintain original behavior
       }
     };
@@ -507,7 +507,7 @@ function patchServerEmit(module: typeof http | typeof https) {
               const statusCode = res.statusCode;
 
               // Log the server request
-              watchers.requests.addContent({
+              watchers.requests.insertRedisStream({
                 ...normalizedRequest,
                 type: "server",
                 statusCode,

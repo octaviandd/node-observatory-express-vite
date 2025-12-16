@@ -82,7 +82,7 @@ if (
                 // Add other methods like 'peek' similarly if needed, usually as 'hits'/'misses'
 
                 if (watchers?.cache) {
-                  watchers.cache.addContent(logContent);
+                  watchers.cache.insertRedisStream(logContent);
                 }
                 return result;
               } catch (error: unknown) {
@@ -96,7 +96,7 @@ if (
                 logContent["stack"] =
                   error instanceof Error ? error.stack : undefined; // Include stack only if Error object
                 if (watchers?.cache) {
-                  watchers.cache.addContent(logContent);
+                  watchers.cache.insertRedisStream(logContent);
                 }
                 throw error; // Rethrow original error
               }

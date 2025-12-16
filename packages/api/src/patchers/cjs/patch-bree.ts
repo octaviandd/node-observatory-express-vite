@@ -38,7 +38,7 @@ if (
           breeInstance._observerId = breeId;
 
           // Log the creation of the Bree instance
-          watchers.scheduler.addContent({
+          watchers.scheduler.insertRedisStream({
             type: "create",
             package: "bree",
             breeId,
@@ -87,7 +87,7 @@ if (
             }
 
             // Log the method call
-            watchers.scheduler.addContent({
+            watchers.scheduler.insertRedisStream({
               type: method,
               package: "bree",
               breeId,
@@ -107,7 +107,7 @@ if (
                 return result
                   .then((value: any) => {
                     // Log successful completion
-                    watchers.scheduler.addContent({
+                    watchers.scheduler.insertRedisStream({
                       type: `${method}:completed`,
                       package: "bree",
                       breeId,
@@ -121,7 +121,7 @@ if (
                   })
                   .catch((error: any) => {
                     // Log failure
-                    watchers.scheduler.addContent({
+                    watchers.scheduler.insertRedisStream({
                       type: `${method}:failed`,
                       package: "bree",
                       breeId,
@@ -152,7 +152,7 @@ if (
               }
 
               // Log successful completion for synchronous methods
-              watchers.scheduler.addContent({
+              watchers.scheduler.insertRedisStream({
                 type: `${method}:completed`,
                 package: "bree",
                 breeId,
@@ -166,7 +166,7 @@ if (
               return result;
             } catch (error: any) {
               // Log failure for synchronous methods
-              watchers.scheduler.addContent({
+              watchers.scheduler.insertRedisStream({
                 type: `${method}:failed`,
                 package: "bree",
                 breeId,
@@ -199,7 +199,7 @@ if (
                 const startTime = performance.now();
 
                 // Log the job method call
-                watchers.scheduler.addContent({
+                watchers.scheduler.insertRedisStream({
                   type: `job:${method}`,
                   package: "bree",
                   breeId,
@@ -224,7 +224,7 @@ if (
                         );
 
                         // Log successful completion
-                        watchers.scheduler.addContent({
+                        watchers.scheduler.insertRedisStream({
                           type: `job:${method}:completed`,
                           package: "bree",
                           breeId,
@@ -245,7 +245,7 @@ if (
                         );
 
                         // Log failure
-                        watchers.scheduler.addContent({
+                        watchers.scheduler.insertRedisStream({
                           type: `job:${method}:failed`,
                           package: "bree",
                           breeId,
@@ -269,7 +269,7 @@ if (
                   const duration = parseFloat((endTime - startTime).toFixed(2));
 
                   // Log successful completion for synchronous methods
-                  watchers.scheduler.addContent({
+                  watchers.scheduler.insertRedisStream({
                     type: `job:${method}:completed`,
                     package: "bree",
                     breeId,
@@ -288,7 +288,7 @@ if (
                   const duration = parseFloat((endTime - startTime).toFixed(2));
 
                   // Log failure for synchronous methods
-                  watchers.scheduler.addContent({
+                  watchers.scheduler.insertRedisStream({
                     type: `job:${method}:failed`,
                     package: "bree",
                     breeId,
@@ -327,7 +327,7 @@ if (
             // Track worker creation
             this.on("worker created", (name: string) => {
               const jobId = uuidv4();
-              watchers.scheduler.addContent({
+              watchers.scheduler.insertRedisStream({
                 type: "worker:created",
                 package: "bree",
                 breeId,
@@ -347,7 +347,7 @@ if (
               if (!this._observerJobTimes) this._observerJobTimes = {};
               this._observerJobTimes[name] = { jobId, startTime };
 
-              watchers.scheduler.addContent({
+              watchers.scheduler.insertRedisStream({
                 type: "worker:started",
                 package: "bree",
                 breeId,
@@ -372,7 +372,7 @@ if (
                 (endTime - jobInfo.startTime).toFixed(2),
               );
 
-              watchers.scheduler.addContent({
+              watchers.scheduler.insertRedisStream({
                 type: "worker:completed",
                 package: "bree",
                 breeId,
@@ -402,7 +402,7 @@ if (
                 (endTime - jobInfo.startTime).toFixed(2),
               );
 
-              watchers.scheduler.addContent({
+              watchers.scheduler.insertRedisStream({
                 type: "worker:errored",
                 package: "bree",
                 breeId,

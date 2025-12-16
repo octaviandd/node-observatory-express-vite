@@ -82,7 +82,7 @@ if (
                   logContent["duration"] = parseFloat(
                     (endTime - startTime).toFixed(2),
                   );
-                  watchers.cache.addContent(logContent);
+                  watchers.cache.insertRedisStream(logContent);
                   return result;
                 }
                 // Group 2: WRITE operations
@@ -100,7 +100,7 @@ if (
                   logContent["duration"] = parseFloat(
                     (endTime - startTime).toFixed(2),
                   );
-                  watchers.cache.addContent(logContent);
+                  watchers.cache.insertRedisStream(logContent);
                   return result;
                 }
                 // Group 3: DELETE operations
@@ -117,7 +117,7 @@ if (
                   logContent["duration"] = parseFloat(
                     (endTime - startTime).toFixed(2),
                   );
-                  watchers.cache.addContent(logContent);
+                  watchers.cache.insertRedisStream(logContent);
                   return result;
                 }
                 // Group 4: INCREMENT/DECREMENT operations
@@ -135,7 +135,7 @@ if (
                   logContent["duration"] = parseFloat(
                     (endTime - startTime).toFixed(2),
                   );
-                  watchers.cache.addContent(logContent);
+                  watchers.cache.insertRedisStream(logContent);
                   return result;
                 }
                 // Fallback for any other methods
@@ -146,7 +146,7 @@ if (
                   logContent["duration"] = parseFloat(
                     (endTime - startTime).toFixed(2),
                   );
-                  watchers.cache.addContent(logContent);
+                  watchers.cache.insertRedisStream(logContent);
                   return result;
                 }
               } catch (error: unknown) {
@@ -158,7 +158,7 @@ if (
                   error instanceof Error ? error.message : String(error);
                 logContent["stack"] =
                   error instanceof Error ? error.stack : String(error);
-                watchers.cache.addContent(logContent);
+                watchers.cache.insertRedisStream(logContent);
                 throw error;
               }
             };

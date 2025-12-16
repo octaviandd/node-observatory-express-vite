@@ -145,7 +145,7 @@ if (
     };
 
     if (watchers?.query) {
-      watchers.query.addContent(logEntry);
+      watchers.query.insertRedisStream(logEntry);
     }
   }
 }

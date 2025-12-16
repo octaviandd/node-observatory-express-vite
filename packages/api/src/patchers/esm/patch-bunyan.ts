@@ -35,7 +35,7 @@ if (
                 return function patchedMethod(this: any, ...args: any[]) {
                   const callerInfo = getCallerInfo(__filename);
 
-                  watchers.logging.addContent({
+                  watchers.logging.insertRedisStream({
                     level: method,
                     package: 'bunyan',
                     message: args[0],

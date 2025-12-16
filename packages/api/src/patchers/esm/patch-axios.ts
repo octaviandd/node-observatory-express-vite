@@ -224,7 +224,7 @@ function patchAxiosInstance(instance: any) {
                 null,
                 startTime,
               );
-              watchers.http.addContent(loggingObject);
+              watchers.http.insertRedisStream(loggingObject);
               return response;
             })
             .catch((error: any) => {
@@ -234,7 +234,7 @@ function patchAxiosInstance(instance: any) {
                 error,
                 startTime,
               );
-              watchers.http.addContent(loggingObject);
+              watchers.http.insertRedisStream(loggingObject);
               throw error;
             });
         }
@@ -274,7 +274,7 @@ function patchAxiosInstance(instance: any) {
                     null,
                     startTime,
                   );
-                  watchers.http.addContent(loggingObject);
+                  watchers.http.insertRedisStream(loggingObject);
                   return response;
                 })
                 .catch((error: any) => {
@@ -284,7 +284,7 @@ function patchAxiosInstance(instance: any) {
                     error,
                     startTime,
                   );
-                  watchers.http.addContent(loggingObject);
+                  watchers.http.insertRedisStream(loggingObject);
                   throw error;
                 });
             }
@@ -345,7 +345,7 @@ if (
                     null,
                     startTime,
                   );
-                  watchers.http.addContent(loggingObject);
+                  watchers.http.insertRedisStream(loggingObject);
                   return response;
                 })
                 .catch((error: any) => {
@@ -355,7 +355,7 @@ if (
                     error,
                     startTime,
                   );
-                  watchers.http.addContent(loggingObject);
+                  watchers.http.insertRedisStream(loggingObject);
                   throw error;
                 });
             }
@@ -397,7 +397,7 @@ if (
                         null,
                         startTime,
                       );
-                      watchers.http.addContent(loggingObject);
+                      watchers.http.insertRedisStream(loggingObject);
                       return response;
                     })
                     .catch((error: any) => {
@@ -407,7 +407,7 @@ if (
                         error,
                         startTime,
                       );
-                      watchers.http.addContent(loggingObject);
+                      watchers.http.insertRedisStream(loggingObject);
                       throw error;
                     });
                 }

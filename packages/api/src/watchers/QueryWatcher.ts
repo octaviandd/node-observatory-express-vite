@@ -2,317 +2,86 @@
 
 import { Request } from "express";
 import { BaseWatcher } from "./BaseWatcher";
+import Database from '../database-sql';
+import { RedisClientType } from "redis";
+import { formatValue, groupItemsByType } from "../../src/helpers/helpers";
 
 class QueryWatcher extends BaseWatcher {
   readonly type = "query";
 
-  constructor(
-    storeDriver: StoreDriver,
-    storeConnection: any,
-    redisClient: any,
-    serverAdapter: any
-  ) {
-    super(storeDriver, storeConnection, redisClient, serverAdapter);
+  constructor(redisClient: RedisClientType, DBInstance: Database) {
+    super(redisClient, DBInstance, "query");
   }
 
-  protected getStatusSQL(status: string): string {
-    switch (status) {
-      case "select":
-        return "JSON_UNQUOTE(JSON_EXTRACT(content, '$.sql')) LIKE '%SELECT%'";
-      case "insert":
-        return "JSON_UNQUOTE(JSON_EXTRACT(content, '$.sql')) LIKE '%INSERT%'";
-      case "update":
-        return "JSON_UNQUOTE(JSON_EXTRACT(content, '$.sql')) LIKE '%UPDATE%'";
-      case "delete":
-        return "JSON_UNQUOTE(JSON_EXTRACT(content, '$.sql')) LIKE '%DELETE%'";
-      default:
-        return "";
+  protected async getData(filters: QueryFilters): Promise<{ results: any, count: string }> {
+    if (filters.index === 'instance') {
+      const results = await this.DBInstance.getInstanceData(filters, this.type);
+      const countResults = await this.DBInstance.getEntriesCount(filters, this.type, '');
+
+      return { results, count: formatValue(countResults.total, true) };
+    } else {
+      const results = await this.DBInstance.getIndexData(filters, this.type);
+      const countResult = await this.DBInstance.getEntriesCountByGroup(filters, this.type, '');
+
+      return { results, count: formatValue(countResult.total, true) };
     }
   }
 
-  /**
-   * View Methods
-   * --------------------------------------------------------------------------
-   */
-  protected async handleViewSQL(id: string): Promise<any> {
-    let [results]: [any[], any] = await this.storeConnection.query(
-      "SELECT * FROM observatory_entries WHERE uuid = ? AND type = ?",
-      [id, this.type],
-    );
+  protected async getViewdata(id: string): Promise<any> {
+    const entry = await this.DBInstance.getEntry(id);
 
-    let item = results[0];
-
-    let conditions = [];
-    let params = [];
-
-    if (item.request_id) {
-      conditions.push("request_id = ?");
-      params.push(item.request_id);
+    if (!entry.requestId && !entry.scheduleId && !entry.jobId) {
+      return groupItemsByType([entry]);
     }
 
-    if (item.schedule_id) {
-      conditions.push("schedule_id = ?");
-      params.push(item.schedule_id);
-    }
+    const conditions = [
+      ...(entry.requestId ? ["request_id = ?"] : []),
+      ...(entry.scheduleId ? ["schedule_id = ?"] : []),
+      ...(entry.jobId ? ["job_id = ?"] : [])
+    ];
+    const params = [
+      ...(entry.requestId ? [entry.requestId] : []),
+      ...(entry.scheduleId ? [entry.scheduleId] : []),
+      ...(entry.jobId ? [entry.jobId] : [])
+    ];
 
-    if (item.job_id) {
-      conditions.push("job_id = ?");
-      params.push(item.job_id);
-    }
+    const jobCondition = entry.jobId
+      ? "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')"
+      : "";
 
-    const [relatedItems]: [any[], any] = await this.storeConnection.query(
-      "SELECT * FROM observatory_entries WHERE " +
-        conditions.join(" OR ") +
-        " AND type != ?",
-      [...params, this.type],
-    );
-
-    return this.groupItemsByType(relatedItems.concat(results));
+    const relatedEntries = await this.DBInstance.getRelatedViewdata(conditions, params, this.type, jobCondition);
+    return groupItemsByType(relatedEntries.concat(entry));
   }
 
-  /**
-   * Related Data Methods
-   * --------------------------------------------------------------------------
-   */
-  protected async handleRelatedDataSQL(
-    modelId: string,
-    requestId: string,
-    jobId: string,
-    scheduleId: string,
-  ): Promise<any> {
-    let source = "";
-    let sourceId = "";
+  protected async getMetadata({ requestId, jobId, scheduleId }: { requestId: string, jobId: string, scheduleId: string }): Promise<any> {
+    if (!requestId && !jobId && !scheduleId) return null;
 
-    if (requestId) {
-      source = "request";
-      sourceId = requestId;
-    }
+    const conditions = [
+      ...(requestId ? [`AND request_id = ?`] : []),
+      ...(jobId ? [`AND job_id = ?`] : []),
+      ...(scheduleId ? [`AND schedule_id = ?`] : [])
+    ];
+    const params = [
+      ...(requestId ? [requestId] : []),
+      ...(scheduleId ? [scheduleId] : []),
+      ...(jobId ? [jobId] : [])
+    ];
 
-    if (jobId) {
-      source = "job";
-      sourceId = jobId;
-    }
+    const jobCondition = jobId
+      ? "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')"
+      : "";
 
-    if (scheduleId) {
-      source = "schedule";
-      sourceId = scheduleId;
-    }
-
-    const [results]: [any[], any] = await this.storeConnection.query(
-      `SELECT * FROM observatory_entries WHERE ${source}_id = ? AND type = '${source}'`,
-      [sourceId],
-    );
-
-    return this.groupItemsByType(results);
+    const results = await this.DBInstance.getRelatedViewdata(conditions, params, this.type, jobCondition);
+    return groupItemsByType(results);
   }
 
-  /**
-   * Instance Data Methods
-   * --------------------------------------------------------------------------
-   */
-  protected async getIndexTableDataByInstanceSQL(
-    filters: QueryFilters,
-  ): Promise<any> {
-    const { period, limit, offset, query, status, key } = filters;
-    const periodSql = period ? this.getPeriodSQL(period) : "";
-    const querySql = query ? this.getInclusionSQL(query, "query") : "";
-    const keySql = key ? this.getEqualitySQL(key, "sql") : "";
-    const statusSql =
-      status !== "all" ? `AND ${this.getStatusSQL(status)}` : "";
-
-    const [results] = await this.storeConnection.query(
-      `SELECT * FROM observatory_entries
-       WHERE type = 'query' ${periodSql} ${querySql} ${statusSql} ${keySql}
-       ORDER BY created_at DESC
-       LIMIT ? OFFSET ?`,
-      [limit, offset],
+  protected async getGraphData(filters: QueryFilters): Promise<any> {
+    return await this.DBInstance.getGraphData(
+      filters,
+      this.type,
+      ['completed', 'failed'],
+      true // query has duration
     );
-
-    const [countResult] = await this.storeConnection.query(
-      `SELECT COUNT(*) as total FROM observatory_entries
-       WHERE type = 'query' ${periodSql} ${querySql} ${statusSql} ${keySql}`,
-    );
-
-    return {
-      results,
-      count:
-        countResult[0].total > 999
-          ? (countResult[0].total / 1000).toFixed(2) + "K"
-          : countResult[0].total,
-    };
-  }
-
-  /**
-   * Group Data Methods
-   * --------------------------------------------------------------------------
-   */
-  protected async getIndexTableDataByGroupSQL(
-    filters: QueryFilters,
-  ): Promise<any> {
-    const { period, limit, offset, query } = filters;
-    const periodSql = period ? this.getPeriodSQL(period) : "";
-    const querySql = query ? this.getInclusionSQL(query, "endpoint") : "";
-
-    const [results] = await this.storeConnection.query(
-      `SELECT
-        JSON_UNQUOTE(JSON_EXTRACT(content, '$.sql')) as endpoint,
-        COUNT(*) as total,
-        AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL)) as duration,
-        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed,
-        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed,
-        CAST(
-          SUBSTRING_INDEX(
-            SUBSTRING_INDEX(
-              GROUP_CONCAT(
-                CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))
-                ORDER BY CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))
-                SEPARATOR ','
-              ),
-              ',',
-              CEILING(COUNT(*) * 0.95)
-            ),
-            ',',
-            -1
-          ) AS DECIMAL(10,2)
-        ) AS p95,
-        CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest,
-        CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest,
-        CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average
-        FROM observatory_entries
-        WHERE type = 'query' ${periodSql} ${querySql}
-        GROUP BY JSON_UNQUOTE(JSON_EXTRACT(content, '$.sql'))
-        ORDER BY total DESC
-        LIMIT ? OFFSET ?`,
-      [limit, offset],
-    );
-
-    const [countResult] = await this.storeConnection.query(
-      `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.sql'))) as total
-       FROM observatory_entries
-       WHERE type = 'query' ${periodSql} ${querySql}`,
-    );
-
-    return {
-      results,
-      count:
-        countResult[0].total > 999
-          ? (countResult[0].total / 1000).toFixed(2) + "K"
-          : countResult[0].total,
-    };
-  }
-
-  /**
-   * Graph Data Methods
-   * --------------------------------------------------------------------------
-   */
-  protected async getIndexGraphDataSQL(filters: QueryFilters): Promise<any> {
-    const { period, key } = filters;
-    const periodSql = period ? this.getPeriodSQL(period) : "";
-    const keySql = key ? this.getEqualitySQL(key, "sql") : "";
-
-    const [results] = await this.storeConnection.query(
-      `(
-        SELECT
-          COUNT(*) as total,
-          CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest,
-          CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest,
-          CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average,
-          SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed,
-          SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed,
-          CAST(
-            SUBSTRING_INDEX(
-              SUBSTRING_INDEX(
-                GROUP_CONCAT(
-                  CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))
-                  ORDER BY CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))
-                  SEPARATOR ','
-                ),
-                ',',
-                CEILING(COUNT(*) * 0.95)
-              ),
-              ',',
-              -1
-            ) AS DECIMAL(10,2)
-          ) AS p95,
-          NULL as created_at,
-          NULL as content,
-          'aggregate' as type
-        FROM observatory_entries
-        WHERE type = 'query' ${periodSql} ${keySql}
-      )
-      UNION ALL
-      (
-        SELECT 
-          NULL as total,
-          NULL as shortest,
-          NULL as longest,
-          NULL as average,
-          NULL as p95,
-          NULL as completed,
-          NULL as failed,
-          created_at,
-          content,
-          'row' as type
-        FROM observatory_entries
-        WHERE type = 'query' ${periodSql} ${keySql}
-        ORDER BY created_at DESC
-      );`,
-    );
-
-    const aggregateResults = results.shift();
-    const countFormattedData = this.countGraphData(results, period as string);
-    const durationFormattedData = this.durationGraphData(
-      results,
-      period as string,
-    );
-
-    return {
-      countFormattedData,
-      durationFormattedData,
-      count: this.formatValue(aggregateResults.total, true),
-      indexCountOne: this.formatValue(aggregateResults.completed, true),
-      indexCountTwo: this.formatValue(aggregateResults.failed, true),
-      shortest: this.formatValue(aggregateResults.shortest),
-      longest: this.formatValue(aggregateResults.longest),
-      average: this.formatValue(aggregateResults.average),
-      p95: this.formatValue(aggregateResults.p95),
-    };
-  }
-
-  /**
-   * Helper Methods
-   * --------------------------------------------------------------------------
-   */
-  protected countGraphData(data: any, period: string) {
-    const totalDuration = this.periods[period as keyof typeof this.periods].duration;
-    const intervalDuration = totalDuration / 120;
-    const now = new Date().getTime();
-    const startDate = now - totalDuration * 60 * 1000;
-
-    const groupedData = Array.from({ length: 120 }, (_, index) => ({
-      completed: 0,
-      failed: 0,
-      label: this.getLabel(index, period),
-    }));
-
-    data.forEach((query: any) => {
-      const queryTime = new Date(query.created_at).getTime();
-      const queryStatus = query.content.status;
-
-      const intervalIndex = Math.floor(
-        (queryTime - startDate) / (intervalDuration * 60 * 1000),
-      );
-
-      if (intervalIndex >= 0 && intervalIndex < 120) {
-        groupedData[intervalIndex] = {
-          ...groupedData[intervalIndex],
-          // @ts-ignore
-          [queryStatus]: groupedData[intervalIndex][queryStatus] + 1,
-        };
-      }
-    });
-
-    return groupedData;
   }
 
   protected extractFiltersFromRequest(req: Request): QueryFilters {

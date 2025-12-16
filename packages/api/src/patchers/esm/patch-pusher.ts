@@ -68,7 +68,7 @@ if (
                   hasLogged = true;
 
                   // Log the result of the notification
-                  watchers.notifications.addContent({
+                  watchers.notifications.insertRedisStream({
                     ...loggingObject,
                     status: error ? "failed" : "completed", // Indicate success or failure
                     error: error ? error.message : null, // Log the error message if any
@@ -93,7 +93,7 @@ if (
 
                     // Log the error immediately
                     hasLogged = true;
-                    watchers.notifications.addContent({
+                    watchers.notifications.insertRedisStream({
                       ...loggingObject,
                       status: "failed",
                       error: error.message,
@@ -150,7 +150,7 @@ if (
                   hasLogged = true;
 
                   // Log the error
-                  watchers.notifications.addContent({
+                  watchers.notifications.insertRedisStream({
                     ...loggingObject,
                     status: "failed",
                     error:
@@ -198,7 +198,7 @@ if (
                   hasLogged = true;
 
                   // Log the result of the batch notification
-                  watchers.notifications.addContent({
+                  watchers.notifications.insertRedisStream({
                     ...loggingObject,
                     status: error ? "failed" : "completed", // Indicate success or failure
                     error: error ? error.message : null, // Log the error message if any
@@ -223,7 +223,7 @@ if (
 
                     // Log the error immediately
                     hasLogged = true;
-                    watchers.notifications.addContent({
+                    watchers.notifications.insertRedisStream({
                       ...loggingObject,
                       status: "failed",
                       error: error.message,
@@ -253,7 +253,7 @@ if (
 
                       // Log the error immediately
                       hasLogged = true;
-                      watchers.notifications.addContent({
+                      watchers.notifications.insertRedisStream({
                         ...loggingObject,
                         status: "failed",
                         error: error.message,
@@ -308,7 +308,7 @@ if (
                   hasLogged = true;
 
                   // Log the error
-                  watchers.notifications.addContent({
+                  watchers.notifications.insertRedisStream({
                     ...loggingObject,
                     status: "failed",
                     error:

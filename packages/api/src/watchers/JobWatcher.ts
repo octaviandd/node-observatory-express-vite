@@ -2,328 +2,56 @@
 
 import { Request } from "express";
 import { BaseWatcher } from "./BaseWatcher";
+import { RedisClientType } from "redis";
+import Database from "src/database-sql";
+import { formatValue, groupItemsByType } from "../../src/helpers/helpers";
 
 class JobWatcher extends BaseWatcher {
-  /**
-   * Constants
-   * --------------------------------------------------------------------------
-   */
-  readonly type = "job";
-
-  /**
-   * Constructor & Initialization
-   * --------------------------------------------------------------------------
-   */
-  constructor(
-    storeDriver: StoreDriver,
-    storeConnection: any,
-    redisClient: any,
-    serverAdapter: any
-  ) {
-    super(storeDriver, storeConnection, redisClient, serverAdapter);
+  constructor(redisClient: RedisClientType, DBInstance: Database) {
+    super(redisClient, DBInstance, "job");
   }
 
-  /**
-   * View Methods
-   * --------------------------------------------------------------------------
-   */
-  protected async handleViewSQL(id: string): Promise<any> {
-    let [results]: [any[], any] = await this.storeConnection.query(
-      "SELECT * FROM observatory_entries WHERE uuid = ?",
-      [id],
-    );
+  protected async getData(filters: CacheFilters): Promise<{ results: any, count: string}> {
+    if (filters.index === 'instance') {
+      const results = await this.DBInstance.getInstanceData(filters, this.type);
+      const countResults = await this.DBInstance.getEntriesCount(filters, this.type);
 
-    let item = results[0];
-
-    const [relatedItems]: [any[], any] = await this.storeConnection.query(
-      `SELECT * FROM observatory_entries WHERE job_id = ? OR (request_id = ? AND type = 'request') AND type != ?`,
-      [item.job_id, item.request_id, this.type],
-    );
-
-    results = results.concat(relatedItems);
-    return this.groupItemsByType(results);
-  }
-  /**
-   * Related Data Methods
-   * --------------------------------------------------------------------------
-   */
-  protected async handleRelatedDataSQL(
-    modelId: string,
-    requestId: string,
-    jobId: string,
-    scheduleId: string,
-  ): Promise<any> {
-    let params = [];
-
-    if (requestId) {
-      params.push(requestId);
-    }
-
-    if (jobId) {
-      params.push(jobId);
-    }
-
-    if (scheduleId) {
-      params.push(scheduleId);
-    }
-
-    if (!requestId && !jobId && !scheduleId) {
-        return {
-            status: 504
-        }
-    }
-
-    params.push(this.type);
-
-    const [results]: [any[], any] = await this.storeConnection.query(
-      `SELECT * FROM observatory_entries WHERE ${
-        requestId ? "request_id = ? OR " : ""
-      }${jobId ? "job_id = ? OR " : ""}${
-        scheduleId ? "schedule_id = ? OR " : ""
-      }type != ?`.replace(/OR\s+type/, "AND type"),
-      params,
-    );
-
-    return this.groupItemsByType(results);
-  }
-
-  /**
-   * Instance Data Methods
-   * --------------------------------------------------------------------------
-   */
-  protected async getIndexTableDataByInstanceSQL(
-    filters: JobFilters,
-  ): Promise<any> {
-    const { period, limit, offset, jobStatus, key } = filters;
-    let periodSql = period ? this.getPeriodSQL(period) : "";
-    let queueSql = key ? this.getEqualitySQL(key, "queue") : "";
-    let typeSql = "";
-
-    if (jobStatus === "all") {
-      typeSql = `AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')`;
+      return { results, count: formatValue(countResults.total, true) };
     } else {
-      typeSql = this.getEqualitySQL(jobStatus, "status");
+      const results = await this.DBInstance.getIndexData(filters, this.type);
+      const countResult = await this.DBInstance.getEntriesCountByGroup(filters, this.type);
+
+      return {results, count: formatValue(countResult.total, true)};
     }
-
-    const [results] = (await this.storeConnection.query(`
-    SELECT *, 
-      CASE 
-        WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1
-        WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' THEN 2
-        WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 3
-        ELSE 4
-      END AS status_priority
-    FROM observatory_entries
-    WHERE type = 'job' AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.method')) = 'processJob'
-    ${typeSql} ${periodSql} ${queueSql}
-    ORDER BY created_at DESC, status_priority DESC
-    LIMIT ${limit} OFFSET ${offset}
-  `)) as [any[]];
-
-    const [countResult] = (await this.storeConnection.query(
-      `SELECT COUNT(*) as total FROM observatory_entries WHERE type = 'job' ${typeSql} ${periodSql} ${queueSql}`,
-    )) as [any[]];
-
-    return { results, count: this.formatValue(countResult[0].total, true) };
   }
 
-  /**
-   * Group Data Methods
-   * --------------------------------------------------------------------------
-   */
-  protected async getIndexTableDataByGroupSQL(
-    filters: JobFilters,
-  ): Promise<any> {
-    const { period, query, limit, offset, queueFilter } = filters;
-    const periodSql = period ? this.getPeriodSQL(period) : "";
-    const querySql = query ? this.getInclusionSQL(query, "queue") : "";
+  protected async getViewdata(id: string): Promise<any> {
+    const entry = await this.DBInstance.getEntry(id);
 
-    let orderBySql =
-      queueFilter === "all"
-        ? "ORDER BY total DESC"
-        : queueFilter === "errors"
-          ? "ORDER BY failed DESC"
-          : "ORDER BY average DESC";
+    if (!entry.requestId && !entry.scheduleId && !entry.jobId) return groupItemsByType([entry]);
 
-    const [results] = (await this.storeConnection.query(
-      `SELECT
-        JSON_UNQUOTE(JSON_EXTRACT(content, '$.queue')) AS queue,
-        COUNT(*) AS total,
-        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' THEN 1 ELSE 0 END) AS released,
-        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) AS completed,
-        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) AS failed,
-        CAST(
-          SUBSTRING_INDEX(
-            SUBSTRING_INDEX(
-              GROUP_CONCAT(
-                CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))
-                ORDER BY CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))
-                SEPARATOR ','
-              ),
-              ',',
-              CEILING(COUNT(*) * 0.95)
-            ),
-            ',',
-            -1
-          ) AS DECIMAL(10,2)
-        ) AS p95,
-        CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest,
-        CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest,
-        CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average
-      FROM observatory_entries
-      WHERE type = 'job' ${periodSql} ${querySql}
-      GROUP BY JSON_UNQUOTE(JSON_EXTRACT(content, '$.queue'))
-      ${orderBySql}
-      LIMIT ${limit} OFFSET ${offset};`,
-    )) as [any];
+    const conditions = [...(entry.requestId ? ["request_id = ?"] : []), ...(entry.scheduleId ? ["schedule_id = ?"] : []), ...(entry.jobId ? ["job_id = ?"] : [])];
+    const params = [...(entry.requestId ? [entry.requestId] : []), ...(entry.scheduleId ? [entry.scheduleId] : []), ...(entry.jobId ? [entry.jobId] : [])];
 
-    const [countResult] = (await this.storeConnection.query(
-      `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.queue'))) as total FROM observatory_entries WHERE type = 'job' ${periodSql} ${querySql}`,
-    )) as [any[]];
+    const jobCondition = entry.jobId ? "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')" : "";
 
-    return {
-      results, count: this.formatValue(countResult[0].total, true)
-    };
+    const relatedEntries = await this.DBInstance.getRelatedViewdata(conditions, params, this.type, jobCondition);
+    return groupItemsByType(relatedEntries.concat(entry));
   }
 
-  /**
-   * Graph Data Methods
-   * --------------------------------------------------------------------------
-   */
-  protected async getIndexGraphDataSQL(filters: JobFilters): Promise<any> {
-    const { period, key } = filters;
-    const periodSql = period ? this.getPeriodSQL(period) : "";
-    const queueSql = key ? this.getEqualitySQL(key, "queue") : "";
+  protected async getMetadata({ requestId, jobId, scheduleId }: { requestId: string, jobId: string, scheduleId: string }): Promise<any> {
+    if (!requestId && !jobId && !scheduleId) return null;
+    
+    const conditions = [...(requestId ? [`AND request_id = ?`] : []), ...(jobId ? [`AND job_id = ?`] : []), ...(scheduleId ? [`AND schedule_id = ?`] : [])]
+    const params = [...(requestId ? [requestId] : []), ...(scheduleId ? [scheduleId] : []), ...(jobId ? [jobId] : [])];
+    const jobCondition = jobId ? "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')" : "";
 
-    const [countResult] = (await this.storeConnection.query(
-      `SELECT COUNT(*) as total FROM observatory_entries WHERE type = 'job' AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed') ${periodSql} ${queueSql}`,
-    )) as [any[]];
-
-    const [results] = (await this.storeConnection.query(
-      `(
-        SELECT
-          COUNT(*) as total,
-         CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest,
-          CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest,
-          CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average,
-          SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed,
-          SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed,
-          SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' THEN 1 ELSE 0 END) as released,
-          CAST(
-            SUBSTRING_INDEX(
-              SUBSTRING_INDEX(
-                GROUP_CONCAT(
-                  CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))
-                  ORDER BY CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))
-                  SEPARATOR ','
-                ),
-                ',',
-                CEILING(COUNT(*) * 0.95)
-              ),
-              ',',
-              -1
-            ) AS DECIMAL(10,2)
-          ) AS p95,
-          NULL as created_at,
-          NULL as content,
-          'aggregate' as type
-        FROM observatory_entries
-        WHERE type = 'job' ${periodSql} ${queueSql} AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')
-      )
-      UNION ALL
-      (
-        SELECT
-          NULL as total,
-          NULL as shortest,
-          NULL as longest,
-          NULL as average,
-          NULL as completed,
-          NULL as failed,
-          NULL as released,
-          NULL as p95,
-          created_at,
-          content,
-          'row' as type
-        FROM observatory_entries
-        WHERE type = 'job' ${periodSql} ${queueSql} AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')
-        ORDER BY created_at DESC
-      );`,
-    )) as [any[], any];
-
-    const aggregateResults: {
-      total: number;
-      shortest: string | null;
-      longest: string | null;
-      average: string | null;
-      p95: string | null;
-      completed: string | null;
-      failed: string | null;
-      released: string | null;
-    } = results.shift();
-
-    const countFormattedData = this.countGraphData(results, period as string);
-    const durationFormattedData = this.durationGraphData(
-      results,
-      period as string,
-    );
-
-    return {
-      countFormattedData,
-      durationFormattedData,
-      count: this.formatValue(countResult[0].total, true),
-      indexCountOne: this.formatValue(aggregateResults.completed, true),
-      indexCountTwo: this.formatValue(aggregateResults.released, true),
-      indexCountThree: this.formatValue(aggregateResults.failed, true),
-      shortest: this.formatValue(aggregateResults.shortest),
-      longest: this.formatValue(aggregateResults.longest),
-      average: this.formatValue(aggregateResults.average),
-      p95: this.formatValue(aggregateResults.p95),
-    };
+    const results = await this.DBInstance.getRelatedViewdata(conditions, params, this.type, jobCondition)
+    return groupItemsByType(results);
   }
 
-  /**
-   * Helper Methods
-   * --------------------------------------------------------------------------
-   */
-  protected countGraphData(data: any, period: string) {
-    const totalDuration = this.periods[period as keyof typeof this.periods].duration;
-    const intervalDuration = totalDuration / 120;
-    const now = new Date().getTime();
-    const startDate = now - totalDuration * 60 * 1000;
-
-    const groupedData = Array.from({ length: 120 }, (_, index) => ({
-      completed: 0,
-      failed: 0,
-      released: 0,
-      label: this.getLabel(index, period),
-    }));
-
-    data.forEach((job: any) => {
-      if (
-        job.content.method === "processJob" &&
-        (job.content.status === "completed" ||
-          job.content.status === "failed" ||
-          job.content.status === "released")
-      ) {
-        const jobTime = new Date(job.created_at).getTime();
-        const status = job.content.status;
-        const intervalIndex = Math.floor(
-          (jobTime - startDate) / (intervalDuration * 60 * 1000),
-        );
-
-        if (intervalIndex >= 0 && intervalIndex < 120) {
-          if (status === "completed") {
-            groupedData[intervalIndex].completed++;
-          } else if (status === "failed") {
-            groupedData[intervalIndex].failed++;
-          } else if (status === "released") {
-            groupedData[intervalIndex].released++;
-          }
-        }
-      }
-    });
-
-    return groupedData;
+  protected async getGraphData(filters: CacheFilters): Promise<any> {
+    return await this.DBInstance.getGraphData(filters, this.type, ['hits', 'misses', 'writes'])  
   }
 
   protected extractFiltersFromRequest(req: Request): JobFilters {

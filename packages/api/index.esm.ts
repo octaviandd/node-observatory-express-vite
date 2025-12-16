@@ -18,45 +18,28 @@ import {
   ViewWatcher,
   ModelWatcher,
 } from "./src/watchers/index";
-import { createClient } from "redis";
+import { createClient, RedisClientType } from "redis";
 import { Connection } from "mysql2";
 import { Connection as PromiseConnection } from "mysql2/promise";
 import apiRoutes from "./src/routes/routes";
 import path from "path";
 
 const instanceCreator = (
-  driver: StoreDriver,
-  connection: Connection | PromiseConnection,
-  redisClient: ReturnType<typeof createClient>,
-  serverAdapter: IServerAdapter
+  redisClient: RedisClientType,
+  DBInstance: Database
 ) => ({
-  logWatcherInstance: new LogWatcher(driver, connection, redisClient, serverAdapter),
-  mailWatcherInstance: new MailWatcher(driver, connection, redisClient, serverAdapter),
-  jobWatcherInstance: new JobWatcher(driver, connection, redisClient, serverAdapter),
-  scheduleWatcherInstance: new ScheduleWatcher(driver, connection, redisClient, serverAdapter),
-  cacheWatcherInstance: new CacheWatcher(driver, connection, redisClient, serverAdapter),
-  notificationWatcherInstance: new NotificationWatcher(
-    driver,
-    connection,
-    redisClient,
-    serverAdapter
-  ),
-  requestWatcherInstance: new RequestWatcher(driver, connection, redisClient, serverAdapter),
-  httpClientWatcherInstance: new HTTPClientWatcher(
-    driver,
-    connection,
-    redisClient,
-    serverAdapter
-  ),
-  queryWatcherInstance: new QueryWatcher(driver, connection, redisClient, serverAdapter),
-  exceptionWatcherInstance: new ExceptionWatcher(
-    driver,
-    connection,
-    redisClient,
-    serverAdapter
-  ),
-  viewWatcherInstance: new ViewWatcher(driver, connection, redisClient, serverAdapter),
-  modelWatcherInstance: new ModelWatcher(driver, connection, redisClient, serverAdapter),
+  logWatcherInstance: new LogWatcher(redisClient, DBInstance),
+  mailWatcherInstance: new MailWatcher(redisClient, DBInstance),
+  jobWatcherInstance: new JobWatcher(redisClient, DBInstance),
+  scheduleWatcherInstance: new ScheduleWatcher(redisClient, DBInstance),
+  cacheWatcherInstance: new CacheWatcher(redisClient, DBInstance),
+  notificationWatcherInstance: new NotificationWatcher(redisClient, DBInstance),
+  requestWatcherInstance: new RequestWatcher(redisClient, DBInstance),
+  httpClientWatcherInstance: new HTTPClientWatcher(redisClient, DBInstance),
+  queryWatcherInstance: new QueryWatcher(redisClient, DBInstance),
+  exceptionWatcherInstance: new ExceptionWatcher(redisClient, DBInstance),
+  viewWatcherInstance: new ViewWatcher(redisClient, DBInstance),
+  modelWatcherInstance: new ModelWatcher(redisClient, DBInstance),
 });
 
 export const watchers: Record<string, any> = {};
@@ -74,7 +57,7 @@ export async function createObserver(
   options: { uiBasePath?: string },
   driver: StoreDriver,
   connection: Connection | PromiseConnection,
-  redisClient: ReturnType<typeof createClient>,
+  redisClient: RedisClientType,
 ): Promise<void> {
   console.log(connection)
   // @ts-expect-error
@@ -97,7 +80,7 @@ export async function createObserver(
     exceptionWatcherInstance,
     viewWatcherInstance,
     modelWatcherInstance,
-  } = instanceCreator(driver, connection, redisClient, serverAdapter);
+  } = instanceCreator(redisClient, DBInstance);
 
   watchers.requests = requestWatcherInstance;
   watchers.errors = exceptionWatcherInstance;

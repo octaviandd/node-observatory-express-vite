@@ -57,7 +57,7 @@ if (
           params: bindings,
         };
 
-        watchers.query.addContent(logEntry);
+        watchers.query.insertRedisStream(logEntry);
       }
 
       function getSqlType(sql: string): string {

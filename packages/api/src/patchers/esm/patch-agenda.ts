@@ -66,7 +66,7 @@ if (
                     methodName === 'scheduleJob'
                   ) {
                     const jobData = args[1];
-                    watchers.jobs.addContent({
+                    watchers.jobs.insertRedisStream({
                       status: 'scheduled',
                       method: displayName,
                       queue: this.name,
@@ -82,7 +82,7 @@ if (
                   if (methodName === 'create' && args[0]) {
                     const jobName = args[0];
                     const jobData = args[1] || {};
-                    watchers.jobs.addContent({
+                    watchers.jobs.insertRedisStream({
                       status: 'started',
                       method: displayName,
                       queue: this.name,
@@ -100,7 +100,7 @@ if (
                   if (methodName === 'now' && args[0]) {
                     const jobName = args[0];
                     const jobData = args[1] || {};
-                    watchers.jobs.addContent({
+                    watchers.jobs.insertRedisStream({
                       status: 'started',
                       method: displayName,
                       queue: this.name,
@@ -140,7 +140,7 @@ if (
               const attemptStartTime = performance.now();
 
               // Log processing start
-              watchers.jobs.addContent({
+              watchers.jobs.insertRedisStream({
                 status: 'processing',
                 method: 'processJobs',
                 queue: this.name,
@@ -162,7 +162,7 @@ if (
                 );
 
                 // Log successful completion
-                watchers.jobs.addContent({
+                watchers.jobs.insertRedisStream({
                   status: 'completed',
                   method: 'processJobs',
                   queue: this.name,
@@ -191,7 +191,7 @@ if (
 
                 if (willRetry) {
                   // Log retry attempt
-                  watchers.jobs.addContent({
+                  watchers.jobs.insertRedisStream({
                     status: 'released',
                     method: 'processJobs',
                     queue: this.name,
@@ -206,7 +206,7 @@ if (
                   });
                 } else {
                   // Log final failure
-                  watchers.jobs.addContent({
+                  watchers.jobs.insertRedisStream({
                     status: 'failed',
                     method: 'processJobs',
                     queue: this.name,

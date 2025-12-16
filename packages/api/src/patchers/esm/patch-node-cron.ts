@@ -38,7 +38,7 @@ if (
           ) {
             const scheduleId = uuidv4();
             const callerInfo = getCallerInfo(__filename);
-            watchers.scheduler.addContent({
+            watchers.scheduler.insertRedisStream({
               type: "set",
               package: "node-cron",
               cronExpression,
@@ -52,7 +52,7 @@ if (
             const wrappedTask = function (this: any, ...args: any[]) {
               const jobId = uuidv4();
               const startTime = performance.now();
-              watchers.scheduler.addContent({
+              watchers.scheduler.insertRedisStream({
                 type: "run",
                 package: "node-cron",
                 cronExpression,
@@ -68,7 +68,7 @@ if (
 
                 const endTime = performance.now();
                 const duration = parseFloat((endTime - startTime).toFixed(2));
-                watchers.scheduler.addContent({
+                watchers.scheduler.insertRedisStream({
                   type: "processJob",
                   status: "completed",
                   package: "node-cron",
@@ -84,7 +84,7 @@ if (
               } catch (error: any) {
                 const endTime = performance.now();
                 const duration = parseFloat((endTime - startTime).toFixed(2));
-                watchers.scheduler.addContent({
+                watchers.scheduler.insertRedisStream({
                   type: "processJob",
                   status: "failed",
                   package: "node-cron",
@@ -118,7 +118,7 @@ if (
                   return function patchedStop(this: any, ...args: any[]) {
                     const callerInfo = getCallerInfo(__filename);
                     // Log the stop action
-                    watchers.scheduler.addContent({
+                    watchers.scheduler.insertRedisStream({
                       type: "stop",
                       package: "node-cron",
                       cronExpression,
@@ -149,7 +149,7 @@ if (
           shimmer.wrap(nodeCronModule, method, function (originalFn: Function) {
             return function patchedMethod(this: any, ...args: any[]) {
               const callerInfo = getCallerInfo(__filename);
-              watchers.scheduler.addContent({
+              watchers.scheduler.insertRedisStream({
                 type: method,
                 package: "node-cron",
                 data: args,

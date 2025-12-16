@@ -4,25 +4,25 @@ import { Request } from "express";
 import { BaseWatcher } from "./BaseWatcher";
 import Database from '../database-sql';
 import { RedisClientType } from "redis";
-import { formatValue, groupItemsByType } from "src/helpers/helpers";
+import { formatValue, groupItemsByType } from "../../src/helpers/helpers";
 
 
 class CacheWatcher extends BaseWatcher {
-  readonly type = "cache";
+  private static readonly VALID_CACHE_TYPES = ["all", "misses", "hits", "writes"] as const;
 
   constructor(redisClient: RedisClientType, DBInstance: Database) {
-    super(redisClient, DBInstance);
+    super(redisClient, DBInstance, 'cache');
   }
 
-   protected async getData(filters: CacheFilters): Promise<{ results: any, count: string}> {
+  protected async getData(filters: CacheFilters): Promise<{ results: any, count: string}> {
     if (filters.index === 'instance') {
-      const results = await this.DBInstance.getInstanceData(filters, this.type, 'key');
-      const countResults = await this.DBInstance.getEntriesCount(filters, this.type, 'key', '');
+      const results = await this.DBInstance.getInstanceData(filters, this.type);
+      const countResults = await this.DBInstance.getEntriesCount(filters, this.type);
 
       return { results, count: formatValue(countResults.total, true) };
     } else {
-      const results = await this.DBInstance.getIndexData(filters, this.type, "key");
-      const countResult = await this.DBInstance.getEntriesCountByGroup(filters, this.type, 'key', ``);
+      const results = await this.DBInstance.getIndexData(filters, this.type);
+      const countResult = await this.DBInstance.getEntriesCountByGroup(filters, this.type);
 
       return {results, count: formatValue(countResult.total, true)};
     }
@@ -31,26 +31,23 @@ class CacheWatcher extends BaseWatcher {
   protected async getViewdata(id: string): Promise<any> {
     const entry = await this.DBInstance.getEntry(id);
 
+    if (!entry.requestId && !entry.scheduleId && !entry.jobId) return groupItemsByType([entry]);
+
     const conditions = [...(entry.requestId ? ["request_id = ?"] : []), ...(entry.scheduleId ? ["schedule_id = ?"] : []), ...(entry.jobId ? ["job_id = ?"] : [])];
     const params = [...(entry.requestId ? [entry.requestId] : []), ...(entry.scheduleId ? [entry.scheduleId] : []), ...(entry.jobId ? [entry.jobId] : [])];
 
     const jobCondition = entry.jobId ? "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')" : "";
 
-    if (!entry.requestId && !entry.scheduleId && !entry.jobId) return groupItemsByType([entry]);
-
     const relatedEntries = await this.DBInstance.getRelatedViewdata(conditions, params, this.type, jobCondition);
     return groupItemsByType(relatedEntries.concat(entry));
   }
 
-  protected async getMetadata({ requestId, jobId, scheduleId }: { requestId: string, jobId: string, scheduleId: string}): Promise<any> {
+  protected async getMetadata({ requestId, jobId, scheduleId }: { requestId: string, jobId: string, scheduleId: string }): Promise<any> {
+    if (!requestId && !jobId && !scheduleId) return null;
+    
     const conditions = [...(requestId ? [`AND request_id = ?`] : []), ...(jobId ? [`AND job_id = ?`] : []), ...(scheduleId ? [`AND schedule_id = ?`] : [])]
     const params = [...(requestId ? [requestId] : []), ...(scheduleId ? [scheduleId] : []), ...(jobId ? [jobId] : [])];
     const jobCondition = jobId ? "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')" : "";
-
-
-    if (!requestId && !jobId && !scheduleId) {
-      return null;
-    }
 
     const results = await this.DBInstance.getRelatedViewdata(conditions, params, this.type, jobCondition)
     return groupItemsByType(results);
@@ -58,7 +55,7 @@ class CacheWatcher extends BaseWatcher {
 
 
   protected async getGraphData(filters: CacheFilters): Promise<any> {
-    return await this.DBInstance.getGraphData(filters, this.type, "key", ['hits', 'misses', 'writes'])  
+    return await this.DBInstance.getGraphData(filters, this.type, ['hits', 'misses', 'writes'])  
   }
 
   protected extractFiltersFromRequest(req: Request): CacheFilters {

@@ -4,6 +4,7 @@ import "dotenv/config";
 import "./src/patchers/cjs/index";
 import Database from "./src/database-sql";
 import { setupMigrations } from "./src/migrations/index";
+
 import {
   LogWatcher,
   MailWatcher,
@@ -18,11 +19,13 @@ import {
   ViewWatcher,
   ModelWatcher,
 } from "./src/watchers/index";
+
 import { RedisClientType } from "redis";
 import { Connection } from "mysql2";
 import { Connection as PromiseConnection } from "mysql2/promise";
 import apiRoutes from "./src/routes/routes";
 import path from "path";
+
 
 function instanceCreator(redisClient: RedisClientType, DBInstance: Database){ 
   watchers.requests = new RequestWatcher(redisClient, DBInstance);

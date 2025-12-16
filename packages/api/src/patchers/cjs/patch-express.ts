@@ -235,7 +235,7 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
               // Send to your logging system
               if (watchers?.requests) {
                 if (req.originalUrl && !(req.originalUrl.includes("/ui/"))) {
-                  watchers.requests.addContent(logContent);
+                  watchers.requests.insertRedisStream(logContent);
                 }
               }
             }
@@ -284,7 +284,7 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
               };
 
               if (watchers?.requests) {
-                watchers.requests.addContent(errorLogContent);
+                watchers.requests.insertRedisStream(errorLogContent);
               }
             }
             // Crucially, let Express handle the error flow
@@ -343,7 +343,7 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
                 process.env.NODE_OBSERVATORY_VIEWS?.includes(packageType);
 
               if (logViewEnabled && watchers?.view) {
-                watchers.view.addContent({
+                watchers.view.insertRedisStream({
                   view: viewName,
                   options: actualOptions, // Log options passed to render
                   duration,

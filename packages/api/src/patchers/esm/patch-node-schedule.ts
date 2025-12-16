@@ -40,7 +40,7 @@ if (
           ) {
             const scheduleId = uuidv4();
             const callerInfo = getCallerInfo(__filename);
-            watchers.scheduler.addContent({
+            watchers.scheduler.insertRedisStream({
               type: "set",
               package: "node-schedule",
               name,
@@ -54,7 +54,7 @@ if (
             const wrappedTask = function (this: any, ...args: any[]) {
               const jobId = uuidv4();
               const startTime = performance.now();
-              watchers.scheduler.addContent({
+              watchers.scheduler.insertRedisStream({
                 type: "run",
                 package: "node-schedule",
                 name,
@@ -68,7 +68,7 @@ if (
 
                 const endTime = performance.now();
                 const duration = parseFloat((endTime - startTime).toFixed(2));
-                watchers.scheduler.addContent({
+                watchers.scheduler.insertRedisStream({
                   type: "processJob",
                   status: "completed",
                   package: "node-schedule",
@@ -84,7 +84,7 @@ if (
               } catch (error: any) {
                 const endTime = performance.now();
                 const duration = parseFloat((endTime - startTime).toFixed(2));
-                watchers.scheduler.addContent({
+                watchers.scheduler.insertRedisStream({
                   type: "processJob",
                   status: "failed",
                   package: "node-schedule",
@@ -111,7 +111,7 @@ if (
                   function (originalCancel: Function) {
                     return function patchedCancel(this: any, ...args: any[]) {
                       const callerInfo = getCallerInfo(__filename);
-                      watchers.scheduler.addContent({
+                      watchers.scheduler.insertRedisStream({
                         type: "cancel",
                         package: "node-schedule",
                         name: job.name,
@@ -138,7 +138,7 @@ if (
                       ...args: any[]
                     ) {
                       const callerInfo = getCallerInfo(__filename);
-                      watchers.scheduler.addContent({
+                      watchers.scheduler.insertRedisStream({
                         type: "reschedule",
                         package: "node-schedule",
                         name: job.name,
@@ -167,7 +167,7 @@ if (
                       const result = originalNextInvocation.apply(this, args);
 
                       const callerInfo = getCallerInfo(__filename);
-                      watchers.scheduler.addContent({
+                      watchers.scheduler.insertRedisStream({
                         type: "nextInvocation",
                         package: "node-schedule",
                         name: job.name,
@@ -198,7 +198,7 @@ if (
           shimmer.wrap(nodeScheduleModule, method, function (originalFn: Function) {
             return function patchedMethod(this: any, ...args: any[]) {
               const callerInfo = getCallerInfo(__filename);
-              watchers.scheduler.addContent({
+              watchers.scheduler.insertRedisStream({
                 type: method,
                 package: "node-schedule",
                 data: args,

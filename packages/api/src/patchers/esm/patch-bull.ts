@@ -65,7 +65,7 @@ if (
 
                   if (methodName === 'add') {
                     const jobData = args[1] || args[0]; // The data might be the second argument
-                    watchers.jobs.addContent(
+                    watchers.jobs.insertRedisStream(
                       {
                         status: 'started',
                         method: displayName,
@@ -85,7 +85,7 @@ if (
                     attemptStartTime = performance.now();
 
                     const job = args[0];
-                    watchers.jobs.addContent(
+                    watchers.jobs.insertRedisStream(
                       {
                         status: 'processing',
                         method: displayName,
@@ -142,7 +142,7 @@ if (
                       // finishedOn doesn't necessarely indicate that the job was completed but rather that all attempts have been made.
 
                       if (failedReason && returnvalue === null) {
-                        watchers.jobs.addContent(
+                        watchers.jobs.insertRedisStream(
                           {
                             status: 'failed',
                             method: displayName,
@@ -162,7 +162,7 @@ if (
                         );
 
                         if (attemptsMade < opts.attempts && !finishedOn) {
-                          watchers.jobs.addContent(
+                          watchers.jobs.insertRedisStream(
                             {
                               status: 'released',
                               method: displayName,
@@ -180,7 +180,7 @@ if (
                           );
                         }
                       } else if (returnvalue !== null) {
-                        watchers.jobs.addContent(
+                        watchers.jobs.insertRedisStream(
                           {
                             status: 'completed',
                             method: displayName,
