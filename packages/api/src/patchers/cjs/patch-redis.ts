@@ -2,9 +2,9 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../../index";
-import { redisCommandArgs } from "../../../constants";
-import { getCallerInfo } from "../../../utils";
+import { watchers } from "../../core/index";
+import { redisCommandArgs } from "../../core/helpers/constants";
+import { getCallerInfo } from "../../core/helpers/helpers";
 
 const REDIS_PATCHED_SYMBOL = Symbol.for("node-observer:redis-patched");
 

@@ -2,7 +2,7 @@ import { Request } from "express";
 import { BaseWatcher } from "./BaseWatcher";
 import Database from '../database-sql';
 import { RedisClientType } from "redis";
-import { formatValue, groupItemsByType } from "../../src/helpers/helpers";
+import { formatValue, groupItemsByType } from "../helpers/helpers";
 
 class RequestWatcher extends BaseWatcher {
   readonly type = "request";

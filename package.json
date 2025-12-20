@@ -1,9 +1,33 @@
-  {
-    "name": "node-observatory",
-    "private": false,
-    "version": "1.0.0",
-    "dependencies": {
-      "@node-observatory/api": "^1.0.0",
-      "@node-observatory/ui": "^1.0.0"
-    }
+{
+  "name": "node-observatory",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "packages/*",
+    "packages/examples/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "build:api": "npm run build -w @node-observatory/api",
+    "build:ui": "npm run build -w @node-observatory/ui",
+    "build:express": "npm run build -w @node-observatory/express",
+    
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:api": "npm run dev -w @node-observatory/api",
+    "dev:ui": "npm run dev -w @node-observatory/ui",
+    "dev:example": "npm run dev -w with-express",
+    "dev:all": "concurrently \"npm run dev:api\" \"npm run dev:ui\" \"npm run dev:example\"",
+    
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "clean": "npm run clean --workspaces --if-present",
+    
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    
+    "publish:packages": "npm publish --workspaces --access public"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "concurrently": "^8.0.0"
   }
+}

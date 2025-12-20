@@ -48,6 +48,7 @@ export const useIndexData = ({ type }: { type: string }) => {
     getItems();
   }, [state.period, param]);
 
+  //@ts-ignore
   const period = timePeriod(state.period);
 
   const currentDate = new Date()

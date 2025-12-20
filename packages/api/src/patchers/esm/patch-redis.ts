@@ -2,9 +2,9 @@
 
 import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../../index.js";
-import { redisCommandArgs } from "../../../constants.js";
-import { getCallerInfo } from "../../../utils.js";
+import { watchers } from "../../core/index";
+import { redisCommandArgs } from "../../core/helpers/constants.js";
+import { getCallerInfo } from "../../core/helpers/helpers.js";
 
 const REDIS_PATCHED_SYMBOL = Symbol.for("node-observer:redis-patched");
 

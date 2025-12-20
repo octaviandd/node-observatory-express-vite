@@ -4,7 +4,7 @@ import { Request } from "express";
 import { BaseWatcher } from "./BaseWatcher";
 import { RedisClientType } from "redis";
 import Database from '../database-sql';
-import { formatValue, groupItemsByType } from "../../src/helpers/helpers";
+import { formatValue, groupItemsByType } from "../helpers/helpers";
 
 class ExceptionWatcher extends BaseWatcher {
   constructor(redisClient: RedisClientType, DBInstance: Database) {

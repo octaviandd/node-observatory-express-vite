@@ -3,8 +3,8 @@
 import { Request } from "express";
 import { BaseWatcher } from "./BaseWatcher";
 import { RedisClientType } from "redis";
-import Database from "src/database-sql";
-import { formatValue, groupItemsByType } from "../../src/helpers/helpers";
+import Database from "../database-sql";
+import { formatValue, groupItemsByType } from "../helpers/helpers";
 
 class JobWatcher extends BaseWatcher {
   constructor(redisClient: RedisClientType, DBInstance: Database) {

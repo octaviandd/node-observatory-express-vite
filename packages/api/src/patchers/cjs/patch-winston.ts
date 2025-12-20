@@ -2,8 +2,8 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../../index";
-import { getCallerInfo } from "../../../utils";
+import { watchers } from "../../core/index";
+import { getCallerInfo } from "../../core/helpers/helpers";
 
 // Create a global symbol to track if winston has been patched
 const WINSTON_PATCHED_SYMBOL = Symbol.for("node-observer:winston-patched");

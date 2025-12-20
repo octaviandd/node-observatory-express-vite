@@ -2,8 +2,8 @@
 
 import { addHook, Namespace } from 'import-in-the-middle';
 import shimmer from 'shimmer';
-import { watchers } from '../../../index.js';
-import { getCallerInfo } from '../../../utils.js';
+import { watchers } from '../../core/index';
+import { getCallerInfo } from '../../core/helpers/helpers.js';
 import { v4 as uuidv4 } from 'uuid';
 
 // Create a global symbol to track if agenda has been patched

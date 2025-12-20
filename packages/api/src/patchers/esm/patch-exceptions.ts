@@ -2,9 +2,9 @@
 
 import fs from "fs";
 import path from "path";
-import { watchers } from "../../../index";
+import { watchers } from "../../core/index";
 import { inspect } from "util";
-import { getCallerInfo } from "../../../utils";
+import { getCallerInfo } from "../../core/helpers/helpers";
 
 // Create a global symbol to track if exceptions have been patched
 const EXCEPTIONS_PATCHED_SYMBOL = Symbol.for(

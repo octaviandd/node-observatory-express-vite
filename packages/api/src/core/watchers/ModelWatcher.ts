@@ -1,18 +1,17 @@
-/** @format */
 import { Request } from "express";
 import { BaseWatcher } from "./BaseWatcher";
 import Database from '../database-sql';
 import { RedisClientType } from "redis";
-import { formatValue, groupItemsByType } from "../../src/helpers/helpers";
+import { formatValue, groupItemsByType } from "../helpers/helpers";
 
-class ScheduleWatcher extends BaseWatcher {
-  readonly type = "schedule";
+class ModelWatcher extends BaseWatcher {
+  readonly type = "model";
 
   constructor(redisClient: RedisClientType, DBInstance: Database) {
-    super(redisClient, DBInstance, "schedule");
+    super(redisClient, DBInstance, "model");
   }
 
-  protected async getData(filters: ScheduleFilters): Promise<{ results: any, count: string }> {
+  protected async getData(filters: ModelFilters): Promise<{ results: any, count: string }> {
     if (filters.index === 'instance') {
       const results = await this.DBInstance.getInstanceData(filters, this.type);
       const countResults = await this.DBInstance.getEntriesCount(filters, this.type, '');
@@ -33,19 +32,22 @@ class ScheduleWatcher extends BaseWatcher {
       return groupItemsByType([entry]);
     }
 
-    // Schedule uses all three IDs together to find related entries
     const conditions = [
       ...(entry.requestId ? ["request_id = ?"] : []),
-      ...(entry.jobId ? ["job_id = ?"] : []),
-      ...(entry.scheduleId ? ["schedule_id = ?"] : [])
+      ...(entry.scheduleId ? ["schedule_id = ?"] : []),
+      ...(entry.jobId ? ["job_id = ?"] : [])
     ];
     const params = [
       ...(entry.requestId ? [entry.requestId] : []),
-      ...(entry.jobId ? [entry.jobId] : []),
-      ...(entry.scheduleId ? [entry.scheduleId] : [])
+      ...(entry.scheduleId ? [entry.scheduleId] : []),
+      ...(entry.jobId ? [entry.jobId] : [])
     ];
 
-    const relatedEntries = await this.DBInstance.getRelatedViewdata(conditions, params, this.type, '');
+    const jobCondition = entry.jobId
+      ? "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')"
+      : "";
+
+    const relatedEntries = await this.DBInstance.getRelatedViewdata(conditions, params, this.type, jobCondition);
     return groupItemsByType(relatedEntries.concat(entry));
   }
 
@@ -59,36 +61,39 @@ class ScheduleWatcher extends BaseWatcher {
     ];
     const params = [
       ...(requestId ? [requestId] : []),
-      ...(jobId ? [jobId] : []),
-      ...(scheduleId ? [scheduleId] : [])
+      ...(scheduleId ? [scheduleId] : []),
+      ...(jobId ? [jobId] : [])
     ];
 
-    const results = await this.DBInstance.getRelatedViewdata(conditions, params, this.type, '');
+    const jobCondition = jobId
+      ? "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')"
+      : "";
+
+    const results = await this.DBInstance.getRelatedViewdata(conditions, params, this.type, jobCondition);
     return groupItemsByType(results);
   }
 
-  protected async getGraphData(filters: ScheduleFilters): Promise<any> {
+  protected async getGraphData(filters: ModelFilters): Promise<any> {
     return await this.DBInstance.getGraphData(
       filters,
       this.type,
       ['completed', 'failed'],
-      true // schedule has duration
+      true // model has duration
     );
   }
 
-  protected extractFiltersFromRequest(req: Request): ScheduleFilters {
+  protected extractFiltersFromRequest(req: Request): ModelFilters {
     return {
       period: req.query.period as "1h" | "24h" | "7d" | "14d" | "30d",
       offset: parseInt(req.query.offset as string, 10) || 0,
       limit: parseInt(req.query.limit as string, 10) || 20,
       query: req.query.q as string,
       isTable: req.query.table === "true",
-      groupFilter: req.query.groupFilter as "all" | "errors" | "slow",
       index: req.query.index as "instance" | "group",
-      key: req.query.key as string,
       status: req.query.status as "all" | "completed" | "failed",
+      model: req.query.key as string,
     };
   }
 }
 
-export default ScheduleWatcher;
+export default ModelWatcher;

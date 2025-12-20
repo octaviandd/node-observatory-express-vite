@@ -2,16 +2,16 @@ import { Request } from "express";
 import { BaseWatcher } from "./BaseWatcher";
 import Database from '../database-sql';
 import { RedisClientType } from "redis";
-import { formatValue, groupItemsByType } from "../../src/helpers/helpers";
+import { formatValue, groupItemsByType } from "../helpers/helpers";
 
-class ModelWatcher extends BaseWatcher {
-  readonly type = "model";
+class ViewWatcher extends BaseWatcher {
+  readonly type = "view";
 
   constructor(redisClient: RedisClientType, DBInstance: Database) {
-    super(redisClient, DBInstance, "model");
+    super(redisClient, DBInstance, "view");
   }
 
-  protected async getData(filters: ModelFilters): Promise<{ results: any, count: string }> {
+  protected async getData(filters: ViewFilters): Promise<{ results: any, count: string }> {
     if (filters.index === 'instance') {
       const results = await this.DBInstance.getInstanceData(filters, this.type);
       const countResults = await this.DBInstance.getEntriesCount(filters, this.type, '');
@@ -73,16 +73,16 @@ class ModelWatcher extends BaseWatcher {
     return groupItemsByType(results);
   }
 
-  protected async getGraphData(filters: ModelFilters): Promise<any> {
+  protected async getGraphData(filters: ViewFilters): Promise<any> {
     return await this.DBInstance.getGraphData(
       filters,
       this.type,
       ['completed', 'failed'],
-      true // model has duration
+      true // view has duration
     );
   }
 
-  protected extractFiltersFromRequest(req: Request): ModelFilters {
+  protected extractFiltersFromRequest(req: Request): ViewFilters {
     return {
       period: req.query.period as "1h" | "24h" | "7d" | "14d" | "30d",
       offset: parseInt(req.query.offset as string, 10) || 0,
@@ -90,10 +90,10 @@ class ModelWatcher extends BaseWatcher {
       query: req.query.q as string,
       isTable: req.query.table === "true",
       index: req.query.index as "instance" | "group",
+      path: req.query.key as string,
       status: req.query.status as "all" | "completed" | "failed",
-      model: req.query.key as string,
     };
   }
 }
 
-export default ModelWatcher;
+export default ViewWatcher;

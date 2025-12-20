@@ -2,10 +2,10 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../../index";
-import { getCallerInfo } from "../../../utils";
+import { watchers } from "../../core/index";
+import { getCallerInfo } from "../../core/helpers/helpers";
 import { v4 as uuidv4 } from "uuid";
-import { jobLocalStorage } from "./store";
+import { jobLocalStorage } from "../../core/store";
 
 // Create a global symbol to track if bull has been patched
 const BULL_PATCHED_SYMBOL = Symbol.for("node-observer:bull-patched");

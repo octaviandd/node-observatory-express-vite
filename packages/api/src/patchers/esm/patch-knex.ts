@@ -2,8 +2,8 @@
 
 import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../../index.js";
-import { getCallerInfo } from "../../../utils.js";
+import { watchers } from "../../core/index";
+import { getCallerInfo } from "../../core/helpers/helpers.js";
 
 // Create a global symbol to track if knex has been patched
 const KNEX_PATCHED_SYMBOL = Symbol.for("node-observer:knex-patched");

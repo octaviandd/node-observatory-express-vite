@@ -4,12 +4,20 @@
     "module": "CommonJS",
     "moduleResolution": "node",
     "outDir": "./dist",
-    // "rootDir": "./",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    // "paths": {
+    //   "@node-observatory/api": ["../../api/index.ts"],
+    //   "@node-observatory/api/*": ["../../api/*"],
+    //   "@node-observatory/express": ["../../express/src/index.ts"],
+    //   "@node-observatory/express/*": ["../../express/src/*"]
+    // }
   },
   "include": ["*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  // "ts-node": {
+  //   "require": ["tsconfig-paths/register"]
+  // }
 }

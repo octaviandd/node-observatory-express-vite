@@ -2,9 +2,9 @@
 
 import { addHook, Namespace } from 'import-in-the-middle';
 import shimmer from 'shimmer';
-import { watchers } from '../../../index.js';
-import { ioRedisCommandsArgs } from '../../../constants.js';
-import { getCallerInfo } from '../../../utils.js';
+import { watchers } from '../../core/index';
+import { ioRedisCommandsArgs } from '../../core/helpers/constants.js';
+import { getCallerInfo } from '../../core/helpers/helpers.js';
 
 // Create a global symbol to track if ioredis has been patched
 const IOREDIS_PATCHED_SYMBOL = Symbol.for('node-observer:ioredis-patched');

@@ -2,10 +2,10 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../../index";
+import { watchers } from "../../core/index";
 import type { Connection, Pool } from "mysql";
 import type { QueryOptions } from "mysql";
-import { getCallerInfo } from "../../../utils";
+import { getCallerInfo } from "../../core/helpers/helpers";
 
 // Create a global symbol to track if mysql has been patched
 const MYSQL_PATCHED_SYMBOL = Symbol.for("node-observer:mysql-patched");

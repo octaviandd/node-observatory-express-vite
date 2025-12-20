@@ -2,9 +2,9 @@
 
 import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../../index.js";
+import { watchers } from "../../core/index";
 import { v4 as uuidv4 } from "uuid";
-import { getCallerInfo } from "../../../utils.js";
+import { getCallerInfo } from "../../core/helpers/helpers.js";
 
 const NODECRON_PATCHED_SYMBOL = Symbol.for("node-observer:nodecron-patched");
 

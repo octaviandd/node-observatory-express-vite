@@ -2,9 +2,9 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../../index";
+import { watchers } from "../../core/index";
 import { v4 as uuidv4 } from "uuid";
-import { getCallerInfo } from "../../../utils";
+import { getCallerInfo } from "../../core/helpers/helpers";
 
 const BREE_PATCHED_SYMBOL = Symbol.for("node-observer:bree-patched");
 

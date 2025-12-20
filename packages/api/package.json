@@ -5,9 +5,9 @@
   "private": false,
   "type": "commonjs",
   "description": "A Nodejs application that provides live monitoring of your application",
-  "main": "dist/index.js",
-  "module": "dist/esm/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/cjs/index.cjs.js",
+  "module": "./dist/esm/index.esm.js",
+  "types": "./dist/cjs/index.cjs.d.ts",
   "files": [
     "dist",
     "LICENSE.txt",
@@ -16,27 +16,21 @@
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/esm/index.d.ts",
-        "default": "./dist/esm/index.js"
+        "types": "./dist/esm/index.esm.d.ts",
+        "default": "./dist/esm/index.esm.js"
       },
       "require": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
+        "types": "./dist/cjs/index.cjs.d.ts",
+        "default": "./dist/cjs/index.cjs.js"
       }
     }
   },
   "scripts": {
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json}\"",
-    "lint": "eslint --fix .",
-    "prepublishOnly": "npm run build",
-    "cleanup": "npm run format && npm run lint && npm run deps-check",
-    "build": "npm run clean && npm run build:cjs && npm run build:esm && npm run copy:types",
-    "build:cjs": "tsc -p tsconfig.json --outDir dist",
-    "build:esm": "tsc -p tsconfig.esm.json --outDir dist/esm",
-    "start": "node dist/index.js",
-    "dev": "ts-node-dev index.ts",
-    "clean": "rm -rf dist",
-    "copy:types": "cp types.d.ts dist/types.d.ts && cp types.d.ts dist/esm/types.d.ts"
+    "build": "npm run clean && npm run build:cjs && npm run build:esm && npm run build:pkg-files",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build:pkg-files": "echo '{\"type\":\"commonjs\"}' > dist/cjs/package.json && echo '{\"type\":\"module\"}' > dist/esm/package.json",
+    "clean": "rm -rf dist"
   },
   "author": "Octavian David",
   "dependencies": {

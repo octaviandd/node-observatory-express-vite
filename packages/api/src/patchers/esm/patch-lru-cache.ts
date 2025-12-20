@@ -2,9 +2,9 @@
 
 import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../../index.js";
-import { getCallerInfo } from "../../../utils.js";
-import { LRUCacheCommandArgsMapping } from "../../../constants.js";
+import { watchers } from "../../core/index";
+import { getCallerInfo } from "../../core/helpers/helpers.js";
+import { LRUCacheCommandArgsMapping } from "../../core/helpers/constants.js";
 
 // Create a global symbol to track if lrucache has been patched
 const LRUCACHE_PATCHED_SYMBOL = Symbol.for("node-observer:lrucache-patched");

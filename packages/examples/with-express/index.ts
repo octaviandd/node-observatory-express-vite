@@ -1,11 +1,12 @@
 /** @format */
-
 import { createObserver } from "@node-observatory/api"
+console.log('Script starting...');
+
 import { ExpressAdapter } from "@node-observatory/express";
 import express from "express";
 import cors from "cors";
 import mysql2 from "mysql2/promise";
-import { createClient, RedisClientType } from "redis";
+import redis from "redis";
 import axios from "axios";
 import winston from "winston";
 import NodeCache from "node-cache"
@@ -17,34 +18,36 @@ app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 
-let logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json() 
-  ),
-  transports: [
-    new winston.transports.Console()
-  ]
-});
 
 
-app.get('/home', async (req, res) => {
-  try {
-    const response = await axios.get('https://jsonplaceholder.typicode.com/todos/1');
-    res.json(response.data);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: String(error) });
-  }
+// let logger = winston.createLogger({
+//   level: 'info',
+//   format: winston.format.combine(
+//     winston.format.timestamp(),
+//     winston.format.json() 
+//   ),
+//   transports: [
+//     new winston.transports.Console()
+//   ]
+// });
 
-  myCache.set('index', 'test')
-  myCache.get('index');
 
-  console.log(myCache.get('index'))
+// app.get('/home', async (req, res) => {
+//   try {
+//     const response = await axios.get('https://jsonplaceholder.typicode.com/todos/1');
+//     res.json(response.data);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: String(error) });
+//   }
 
-  logger.info('This is an info log message from Winston in user app');
-})
+//   myCache.set('index', 'test')
+//   myCache.get('index');
+
+//   console.log(myCache.get('index'))
+
+//   logger.info('This is an info log message from Winston in user app');
+// })
 
 const PORT = 9999;
 app.listen(PORT, () => {
@@ -52,14 +55,13 @@ app.listen(PORT, () => {
 });
 
 async function startServer() {
-  console.log('hit')
   let mysql2Connection = await mysql2.createConnection({
     host: "localhost",
     user: "root",
     database: "observatory",
   });
 
-  let redisConnection = createClient({
+  let redisConnection = redis.createClient({
     url: "redis://localhost:6379",
   });
 
@@ -69,7 +71,7 @@ async function startServer() {
   expressAdapter.setBasePath('/ui');
   app.use('/ui', expressAdapter.getRouter());
 
-  await createObserver(expressAdapter, {}, "mysql2", mysql2Connection, redisConnection as RedisClientType);
+  await createObserver(expressAdapter, {}, "mysql2", mysql2Connection, redisConnection as redis.RedisClientType);
 
   console.log("Server started");
 }

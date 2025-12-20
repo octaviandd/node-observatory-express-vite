@@ -1,15 +1,10 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "module": "ES2020",
-    "target": "ES2020",
-    "outDir": "dist/esm",
-    "declarationDir": "dist/esm"
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "outDir": "./dist/esm",
+    "rootDir": "./src"
   },
-  "include": [
-    "src/**/*.ts", 
-    "index.esm.ts", 
-    "types.d.ts"
-  ],
-  "exclude": ["dist", "node_modules", "**/*.test.ts", "index.ts"]
+  "include": ["src/index.esm.ts", "src/core/**/*", "src/patchers/esm/**/*"]
 }

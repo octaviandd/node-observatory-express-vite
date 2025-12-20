@@ -1,11 +1,7 @@
 import { Request } from "express";
 import Watcher from "./Watcher";
-import {
-  requestLocalStorage,
-  jobLocalStorage,
-  scheduleLocalStorage,
-} from "../patchers/cjs/store";
-import Database from "src/database-sql";
+import { requestLocalStorage, jobLocalStorage, scheduleLocalStorage,} from "../store";
+import Database from "../database-sql";
 import { RedisClientType } from "redis";
 
 interface RedisEntry {
@@ -41,8 +37,8 @@ export abstract class BaseWatcher implements Watcher {
     this.createRedisStream();
     this.ingestRedisStream();
 
-    process.on('SIGTERM', () => this.cleanup());
-    process.on('SIGINT', () => this.cleanup());
+    // process.on('SIGTERM', () => this.cleanup());
+    // process.on('SIGINT', () => this.cleanup());
   }
 
   private async createRedisStream() {

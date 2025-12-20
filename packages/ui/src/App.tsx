@@ -3,12 +3,11 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Outlet, useLocation } from "react-router";
 import { useContext, useEffect, useState } from "react";
 import { StoreContext } from "@/store";
-import { Moon, Sun, CalendarDays, CalendarIcon, XIcon } from "lucide-react";
+import { Moon, Sun, CalendarDays, CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/utils";
 import {
   Dialog,
@@ -269,15 +268,7 @@ const CustomDateRangeModal: React.FC<CustomDateRangeModalProps> = ({
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={startDate}
-                      onSelect={(date) => {
-                        setStartDate(date);
-                        setIsStartDatePickerOpen(false);
-                      }}
-                      initialFocus
-                    />
+                   
                   </PopoverContent>
                 </Popover>
               </div>
@@ -296,15 +287,7 @@ const CustomDateRangeModal: React.FC<CustomDateRangeModalProps> = ({
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={endDate}
-                      onSelect={(date) => {
-                        setEndDate(date);
-                        setIsEndDatePickerOpen(false);
-                      }}
-                      initialFocus
-                    />
+                    
                   </PopoverContent>
                 </Popover>
               </div>

@@ -1,9 +1,9 @@
 /** @format */
-/// <reference path="./types.d.ts" />
+/// <reference path="../../types.d.ts" />
 import "dotenv/config";
-import "./src/patchers/esm/index";
-import Database from "./src/database-sql";
-import { setupMigrations } from "./src/migrations/index";
+import Database from "./database-sql";
+import { setupMigrations } from "./migrations/index";
+
 import {
   LogWatcher,
   MailWatcher,
@@ -17,30 +17,29 @@ import {
   ExceptionWatcher,
   ViewWatcher,
   ModelWatcher,
-} from "./src/watchers/index";
-import { createClient, RedisClientType } from "redis";
+} from "./watchers/index";
+
+import { RedisClientType } from "redis";
 import { Connection } from "mysql2";
 import { Connection as PromiseConnection } from "mysql2/promise";
-import apiRoutes from "./src/routes/routes";
+import apiRoutes from "./routes/routes";
 import path from "path";
 
-const instanceCreator = (
-  redisClient: RedisClientType,
-  DBInstance: Database
-) => ({
-  logWatcherInstance: new LogWatcher(redisClient, DBInstance),
-  mailWatcherInstance: new MailWatcher(redisClient, DBInstance),
-  jobWatcherInstance: new JobWatcher(redisClient, DBInstance),
-  scheduleWatcherInstance: new ScheduleWatcher(redisClient, DBInstance),
-  cacheWatcherInstance: new CacheWatcher(redisClient, DBInstance),
-  notificationWatcherInstance: new NotificationWatcher(redisClient, DBInstance),
-  requestWatcherInstance: new RequestWatcher(redisClient, DBInstance),
-  httpClientWatcherInstance: new HTTPClientWatcher(redisClient, DBInstance),
-  queryWatcherInstance: new QueryWatcher(redisClient, DBInstance),
-  exceptionWatcherInstance: new ExceptionWatcher(redisClient, DBInstance),
-  viewWatcherInstance: new ViewWatcher(redisClient, DBInstance),
-  modelWatcherInstance: new ModelWatcher(redisClient, DBInstance),
-});
+
+function instanceCreator(redisClient: RedisClientType, DBInstance: Database){ 
+  watchers.requests = new RequestWatcher(redisClient, DBInstance);
+  watchers.errors = new ExceptionWatcher(redisClient, DBInstance);
+  watchers.http = new HTTPClientWatcher(redisClient, DBInstance);
+  watchers.jobs = new JobWatcher(redisClient, DBInstance);
+  watchers.logging = new LogWatcher(redisClient, DBInstance);
+  watchers.scheduler = new ScheduleWatcher(redisClient, DBInstance);
+  watchers.mailer = new MailWatcher(redisClient, DBInstance);
+  watchers.cache = new CacheWatcher(redisClient, DBInstance);
+  watchers.notifications = new NotificationWatcher(redisClient, DBInstance);
+  watchers.query = new QueryWatcher(redisClient, DBInstance);
+  watchers.view = new ViewWatcher(redisClient, DBInstance);
+  watchers.model = new ModelWatcher(redisClient, DBInstance);
+}
 
 export const watchers: Record<string, any> = {};
 
@@ -59,46 +58,18 @@ export async function createObserver(
   connection: Connection | PromiseConnection,
   redisClient: RedisClientType,
 ): Promise<void> {
-  console.log(connection)
+  // make callback based mysql2 into promises.
   // @ts-expect-error
   connection = connection.hasOwnProperty("Promise") ? connection : connection.promise();
   await setupMigrations(driver, connection as PromiseConnection);
 
-  // @ts-expect-error
-  const DBInstance = new Database(connection);
-
-  const {
-    queryWatcherInstance,
-    logWatcherInstance,
-    mailWatcherInstance,
-    jobWatcherInstance,
-    notificationWatcherInstance,
-    scheduleWatcherInstance,
-    cacheWatcherInstance,
-    requestWatcherInstance,
-    httpClientWatcherInstance,
-    exceptionWatcherInstance,
-    viewWatcherInstance,
-    modelWatcherInstance,
-  } = instanceCreator(redisClient, DBInstance);
-
-  watchers.requests = requestWatcherInstance;
-  watchers.errors = exceptionWatcherInstance;
-  watchers.http = httpClientWatcherInstance;
-  watchers.jobs = jobWatcherInstance;
-  watchers.logging = logWatcherInstance;
-  watchers.scheduler = scheduleWatcherInstance;
-  watchers.mailer = mailWatcherInstance;
-  watchers.cache = cacheWatcherInstance;
-  watchers.notifications = notificationWatcherInstance;
-  watchers.query = queryWatcherInstance;
-  watchers.view = viewWatcherInstance;
-  watchers.model = modelWatcherInstance;
+  const DBInstance = new Database(connection as PromiseConnection);
+  instanceCreator(redisClient, DBInstance);
 
   // looks for the module in node modules and returns the path of the package in node modules.
   const uiBasePath =
     options.uiBasePath || path.dirname(eval(`require.resolve('@node-observatory/ui/package.json')`));
-
+  
   const uiEntryRoute : AppViewRoute = {
     method: 'get',
     route: [
@@ -161,5 +132,6 @@ export async function createObserver(
       },
     }))
 
-  // console.log('Finish setup observatory')
+    
+  console.log('Finish setup observatory')
 }

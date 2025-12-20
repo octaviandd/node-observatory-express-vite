@@ -1,4 +1,4 @@
-import { watchers } from "../../index";
+import { watchers } from "../index";
 
 export interface ObservatoryBoardRequest {
   requestData: any;

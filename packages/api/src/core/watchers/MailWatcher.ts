@@ -1,17 +1,19 @@
+/** @format */
+
 import { Request } from "express";
 import { BaseWatcher } from "./BaseWatcher";
 import Database from '../database-sql';
 import { RedisClientType } from "redis";
-import { formatValue, groupItemsByType } from "../../src/helpers/helpers";
+import { formatValue, groupItemsByType } from "../helpers/helpers";
 
-class LogWatcher extends BaseWatcher {
-  readonly type = "log";
+class MailWatcher extends BaseWatcher {
+  readonly type = "mail";
 
   constructor(redisClient: RedisClientType, DBInstance: Database) {
-    super(redisClient, DBInstance, "log");
+    super(redisClient, DBInstance, "mail");
   }
 
-  protected async getData(filters: LogFilters): Promise<{ results: any, count: string }> {
+  protected async getData(filters: MailFilters): Promise<{ results: any, count: string }> {
     if (filters.index === 'instance') {
       const results = await this.DBInstance.getInstanceData(filters, this.type);
       const countResults = await this.DBInstance.getEntriesCount(filters, this.type, '');
@@ -73,22 +75,27 @@ class LogWatcher extends BaseWatcher {
     return groupItemsByType(results);
   }
 
-  protected async getGraphData(): Promise<any> {
-    return false;
+  protected async getGraphData(filters: MailFilters): Promise<any> {
+    return await this.DBInstance.getGraphData(
+      filters,
+      this.type,
+      ['completed', 'failed'],
+      true // mail has duration
+    );
   }
 
-  protected extractFiltersFromRequest(req: Request): LogFilters {
+  protected extractFiltersFromRequest(req: Request): MailFilters {
     return {
       period: req.query.period as "1h" | "24h" | "7d" | "14d" | "30d",
       offset: parseInt(req.query.offset as string, 10) || 0,
       limit: parseInt(req.query.limit as string, 10) || 20,
       query: req.query.q as string,
       isTable: req.query.table === "true",
-      logType: req.query.status as LogFilters["logType"],
       index: req.query.index as "instance" | "group",
+      status: req.query.status as "completed" | "failed" | "all",
       key: req.query.key as string,
     };
   }
 }
 
-export default LogWatcher;
+export default MailWatcher;
