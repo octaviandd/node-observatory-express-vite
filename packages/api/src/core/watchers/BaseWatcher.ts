@@ -1,18 +1,7 @@
-import { Request } from "express";
 import Watcher from "./Watcher";
-import { requestLocalStorage, jobLocalStorage, scheduleLocalStorage,} from "../store";
-import Database from "../database-sql";
+import { requestLocalStorage, jobLocalStorage, scheduleLocalStorage,} from "../store.js";
+import Database from "../database-sql.js";
 import { RedisClientType } from "redis";
-
-interface RedisEntry {
-  uuid: string
-  type: string
-  content: Record<string, any>
-  created_at: string;
-  schedule_id: string;
-  job_id: string;
-  request_id: string;
-}
 
 export abstract class BaseWatcher implements Watcher {
   protected readonly RedisClient: RedisClientType;
@@ -40,6 +29,7 @@ export abstract class BaseWatcher implements Watcher {
     // process.on('SIGTERM', () => this.cleanup());
     // process.on('SIGINT', () => this.cleanup());
   }
+
 
   private async createRedisStream() {
     try {
@@ -207,7 +197,8 @@ export abstract class BaseWatcher implements Watcher {
           schedule_id: scheduleLocalStorage.getStore()?.get("scheduleId") || 'null',
           type: content.type,
           content: JSON.stringify(content.content),
-          created_at: new Date(content.created_at).toISOString().replace('T', ' ').substring(0, 19)
+          //add created_at in the patcher
+          created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
         }
       );
     } catch (error) {
@@ -221,60 +212,31 @@ export abstract class BaseWatcher implements Watcher {
     await this.processPendingMessages();
   }
 
-  async index(req: Request): Promise<{ body?: any, statusCode: number }> {
-    try {
-      const filters = this.extractFiltersFromRequest(req);
-      const body = await this.DBInstance.getIndexData(filters, this.type);
-  
-      return { body, statusCode: 200 }
-    } catch (error) {
-      console.error(`[${this.type}] Index error:`, error);
-      return {
-        statusCode: 500,
-      }
-    }
+  async index(req: ObservatoryBoardRequest) {
+    const filters = this.extractFiltersFromRequest(req);
+    const body = await this.DBInstance.getIndexData(filters, this.type);
+    return { body, statusCode: 200 }
   }
   
 
-  async view(req: Request): Promise<{ body?: any, statusCode: number }> {
-    try {
-      const body = await this.getViewdata(req.params.id);
-
-      return { body, statusCode: 200 }
-    } catch (error) {
-      console.error(error);
-      return {
-        statusCode: 500
-      }
-    }
+  async view(req: ObservatoryBoardRequest) {
+    const body = await this.getViewdata(req.params.id);
+    return { body, statusCode: 200 }
   }
 
-  // async metadata(req: Request): Promise<{ body?: any, statusCode: number }> {
-  //   try {
-  //     const data = await this.DBInstance.getRelatedViewdata(req.body.entry_ids)
-      
-  //     return {
-  //       body: data, 
-  //       statusCode: 200
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //     return {
-  //       statusCode: 500
-  //     }
+  // async metadata(req: Request) {
+  //   const data = await this.DBInstance.getRelatedViewdata(req.body.entry_ids)
+    
+  //   return {
+  //     body: data, 
+  //     statusCode: 200
   //   }
   // }
 
-  protected async refresh(req: Request, res: Response): Promise<{ body?: any, statusCode: number }> {
-    try {
-      this.refreshInterval && clearInterval(this.refreshInterval);
-      await this.ingestRedisStream();
-      return { body: { message: "success" }, statusCode: 200 }
-    } catch (error) {
-      return {
-        statusCode: 500
-      }
-    }
+  protected async refresh() {
+    this.refreshInterval && clearInterval(this.refreshInterval);
+    await this.ingestRedisStream();
+    return { body: { message: "Interval has been refreshed." }, statusCode: 200 }
   }
  
 
@@ -291,7 +253,7 @@ export abstract class BaseWatcher implements Watcher {
    * Abstract Methods
    * --------------------------------------------------------------------------
    */
-  protected abstract extractFiltersFromRequest(req: Request): WatcherFilters;
+  protected abstract extractFiltersFromRequest(req: ObservatoryBoardRequest): WatcherFilters;
 
   protected abstract getViewdata(id: string): Promise<any>;
   protected abstract getMetadata({ requestId, jobId, scheduleId }: { requestId: string, jobId: string, scheduleId: string }): Promise<any>;

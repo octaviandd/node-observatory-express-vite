@@ -834,3 +834,20 @@ interface IServerAdapter {
   setErrorHandler(handler: (error: Error & { statusCode : HTTPStatus }) => ControllerHandlerReturnType): IServerAdapter;
   setApiRoutes(routes: AppControllerRoute[]): IServerAdapter;
 }
+
+interface ObservatoryBoardRequest {
+  requestData: any;
+  query: Record<string, any>;
+  params: Record<string, any>;
+  body: Record<string, any>;
+}
+
+interface RedisEntry {
+  uuid: string
+  type: string
+  content: Record<string, any>
+  created_at: string;
+  schedule_id: string;
+  job_id: string;
+  request_id: string;
+}

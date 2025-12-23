@@ -2,7 +2,7 @@
 
 import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers } from "../../core/index.js";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
 
 // Create a global symbol to track if memjs has been patched

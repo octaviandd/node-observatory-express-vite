@@ -1,6 +1,15 @@
-import { PERIODS } from "./constants";
+import { PERIODS } from "./constants.js";
 import type { RequestOptions } from "node:http";
 import * as url from "url";
+import {createRequire} from "module";
+
+export function resolvePackagePath(packageName: string, metaUrl?: string): string {
+  if (typeof require === 'undefined') {
+    const require = createRequire(metaUrl!);
+    return require.resolve(packageName);
+  }
+  return require.resolve(packageName);
+}
 
 /**
  * The format for values that indicate entries for each watcher.
@@ -270,7 +279,6 @@ export function getCallerInfo(filename: string) {
     if (
       !line.includes("node_modules") &&
       !line.includes(filename) && // Exclude this patch file dynamically
-      !line.includes(__filename) &&
       !line.includes("Namespace") &&
       !line.includes("node:async_hooks")
     ) {

@@ -107,7 +107,7 @@ if (process.env.NODE_OBSERVATORY_ERRORS) {
     (global as any)[EXCEPTIONS_PATCHED_SYMBOL] = true;
 
     // Apply all patchers
-    uncaughtPatcher();
-    unhandledRejectionPatcher();
+    // uncaughtPatcher();
+    // unhandledRejectionPatcher();
   }
 }

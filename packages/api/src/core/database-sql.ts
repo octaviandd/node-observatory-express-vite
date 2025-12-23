@@ -1,6 +1,7 @@
 import { Connection, FieldPacket, QueryResult } from "mysql2/promise";
-import { PERIODS } from "./helpers/constants";
-import { formattCountGraphData, formattDurationGraphData, formatValue } from "./helpers/helpers";
+import { PERIODS } from "./helpers/constants.js";
+import { formattCountGraphData, formattDurationGraphData, formatValue } from "./helpers/helpers.js";
+import { MigrationError } from "./helpers/errors/Errors.js";
 
 class Database {
   storeConnection!: Connection
@@ -42,9 +43,8 @@ class Database {
         `);
         console.log("observatory_entries table created via mysql2/promise");
       }
-    } catch (error) {
-      console.log(error)
-      throw error;
+    } catch (error: unknown) {
+      throw new MigrationError('Failed to up base tables', {cause: error});
     }
   }
 
@@ -57,12 +57,9 @@ class Database {
       );
       console.log("observatory_entries table droped via mysql2/promise");
     } catch (error) {
-      console.log(error)
-      throw error;
+      throw new MigrationError('Failed to down base tables', {cause: error});
     }
   }
-
-  // Insert, update, delete
 
   async insert(redisEntry: any) {
     try {
@@ -81,8 +78,7 @@ class Database {
       );
       await this.storeConnection.query("COMMIT");
     } catch (error) {
-      console.log(error)
-      throw error;
+      throw new MigrationError('Failed to insert into database', {cause: error});
     }
   }
 
@@ -91,12 +87,9 @@ class Database {
       this.storeConnection.query(`DELETE FROM observatory_entries WHERE uuid = ?`, [uuid])
       return true;
     } catch (error) {
-      console.log(error)
-      throw error;
+      throw new MigrationError('Failed to delete from database', {cause: error});
     }
   }
-
-  // Get entry/entries
 
   async getEntry(uuid: string): Promise<WatcherEntry> {
     try {
@@ -107,8 +100,7 @@ class Database {
 
       return results[0] as unknown as WatcherEntry;
     } catch (error) {
-      console.log(error)
-      throw error;
+      throw new MigrationError('Failed to get entry by uuid from database', {cause: error});
     }
   }
 
@@ -121,12 +113,9 @@ class Database {
     
       return results as unknown as WatcherEntry[];
     } catch (error) {
-      console.log(error)
-      throw error;
+      throw new MigrationError('Failed to get all entries by type from database', {cause: error});
     }
   }
-
-  // Basic Helpers
 
   private getStatusSQL = (status: string): string => status === 'all' ? "" : `AND JSON_EXTRACT(content, '$.statusCode') LIKE '${status.replace("xx", "%")}'`;
   private getPeriodSQL = (period: string): string => period ? `AND created_at >= UTC_TIMESTAMP() - ${PERIODS[period].interval}` : '';
@@ -443,9 +432,8 @@ class Database {
       ) as [QueryResult, FieldPacket[]];
 
       return results as unknown as WatcherEntry[];
-    } catch (error) {
-      console.log(error)
-      throw error;
+    } catch (error: unknown) {
+      throw new MigrationError('Failed to get instance data from database', {cause: error});
     }
   }
 
@@ -478,9 +466,8 @@ class Database {
       ) as [QueryResult, FieldPacket[]];
 
       return results;
-    } catch (error) {
-      console.log(error)
-      throw error;
+    } catch (error: unknown) {
+      throw new MigrationError('Failed to get index data from database', {cause: error});
     }
   }
 
@@ -495,9 +482,8 @@ class Database {
       ) as [QueryResult, FieldPacket[]];
       
       return relatedItems as unknown as WatcherEntry[];
-    } catch (error) {
-      console.log(error)
-      throw error;
+    } catch (error: unknown) {
+      throw new MigrationError('Failed to get related view data from database', {cause: error});
     }
   }
 
@@ -514,9 +500,8 @@ class Database {
       ) as [QueryResult, FieldPacket[]];
 
       return Array.isArray(results) && results.length > 0 ? results[0] : { count: 0 };
-    } catch (e) {
-      console.error('getCountByType error:', e);
-      throw e;
+    } catch (error: unknown) {
+      throw new MigrationError('Failed to get count by type data from database', {cause: error});
     }
   }
 
@@ -536,8 +521,7 @@ class Database {
 
       return countResult as QueryResult & { total: number }
     } catch (error) {
-      console.log(error)
-      throw error;
+      throw new MigrationError('Failed to get entries count from database', {cause: error});
     }
   }
 
@@ -556,8 +540,7 @@ class Database {
       return countResult as QueryResult & { total: number }
 
     } catch (error) {
-      console.log(error)
-      throw error;
+      throw new MigrationError('Failed to get entries count by group from database', {cause: error});
     }
   }
 
@@ -633,8 +616,7 @@ class Database {
         p95: formatValue(aggregateResults.p95),
       };
     } catch (error) {
-      console.log(error);
-      throw error;
+      throw new MigrationError('Failed to get graph data from database', {cause: error});
     }
   }
 }

@@ -1,12 +1,10 @@
 /** @format */
 import { createObserver } from "@node-observatory/api"
-console.log('Script starting...');
-
 import { ExpressAdapter } from "@node-observatory/express";
 import express from "express";
 import cors from "cors";
 import mysql2 from "mysql2/promise";
-import redis from "redis";
+import { createClient, RedisClientType } from "redis";
 import axios from "axios";
 import winston from "winston";
 import NodeCache from "node-cache"
@@ -49,10 +47,7 @@ app.use(express.urlencoded({ extended: true }));
 //   logger.info('This is an info log message from Winston in user app');
 // })
 
-const PORT = 9999;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+
 
 async function startServer() {
   let mysql2Connection = await mysql2.createConnection({
@@ -61,7 +56,7 @@ async function startServer() {
     database: "observatory",
   });
 
-  let redisConnection = redis.createClient({
+  let redisConnection = createClient({
     url: "redis://localhost:6379",
   });
 
@@ -71,9 +66,14 @@ async function startServer() {
   expressAdapter.setBasePath('/ui');
   app.use('/ui', expressAdapter.getRouter());
 
-  await createObserver(expressAdapter, {}, "mysql2", mysql2Connection, redisConnection as redis.RedisClientType);
+  await createObserver(expressAdapter, {}, "mysql2", mysql2Connection, redisConnection as RedisClientType);
 
   console.log("Server started");
+
+  const PORT = 9999;
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
 }
 
 startServer().catch((error) => {

@@ -1,6 +1,6 @@
-import { up as mysql2Up, down as mysql2Down } from "./mysql2";
-import { up as mongodbUp, down as mongodbDown } from "./mongodb";
-import { up as prismaUp, down as prismaDown } from "./prisma";
+import { up as mysql2Up, down as mysql2Down } from "./mysql2.js";
+import { up as mongodbUp, down as mongodbDown } from "./mongodb.js";
+import { up as prismaUp, down as prismaDown } from "./prisma.js";
 import { Connection as PromiseConnection } from "mysql2/promise";
 
 /**

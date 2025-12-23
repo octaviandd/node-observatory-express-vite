@@ -1,2 +1,2 @@
-import "./patchers/esm/index";
-export { createObserver, watchers } from "./core/index";
+import "./patchers/esm/index.js";
+export { createObserver, watchers } from "./core/index.js";

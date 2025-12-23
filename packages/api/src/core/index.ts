@@ -1,9 +1,9 @@
 /** @format */
 /// <reference path="../../types.d.ts" />
 import "dotenv/config";
-import Database from "./database-sql";
-import { setupMigrations } from "./migrations/index";
-
+import { resolvePackagePath } from "./helpers/helpers.js";
+import Database from "./database-sql.js";
+import { setupMigrations } from "./migrations/index.js";
 import {
   LogWatcher,
   MailWatcher,
@@ -17,14 +17,14 @@ import {
   ExceptionWatcher,
   ViewWatcher,
   ModelWatcher,
-} from "./watchers/index";
+} from "./watchers/index.js";
 
 import { RedisClientType } from "redis";
 import { Connection } from "mysql2";
 import { Connection as PromiseConnection } from "mysql2/promise";
-import apiRoutes from "./routes/routes";
+import apiRoutes from "./routes/routes.js";
 import path from "path";
-
+import { BaseWatcher } from "./watchers/BaseWatcher.js";
 
 function instanceCreator(redisClient: RedisClientType, DBInstance: Database){ 
   watchers.requests = new RequestWatcher(redisClient, DBInstance);
@@ -41,7 +41,7 @@ function instanceCreator(redisClient: RedisClientType, DBInstance: Database){
   watchers.model = new ModelWatcher(redisClient, DBInstance);
 }
 
-export const watchers: Record<string, any> = {};
+export const watchers: Record<string, BaseWatcher> = {};
 
 /**
  * Initial entry point for setting up the logger
@@ -67,9 +67,8 @@ export async function createObserver(
   instanceCreator(redisClient, DBInstance);
 
   // looks for the module in node modules and returns the path of the package in node modules.
-  const uiBasePath =
-    options.uiBasePath || path.dirname(eval(`require.resolve('@node-observatory/ui/package.json')`));
-  
+  const uiBasePath = options.uiBasePath || path.dirname(resolvePackagePath('@node-observatory/ui/package.json'));
+
   const uiEntryRoute : AppViewRoute = {
     method: 'get',
     route: [
@@ -132,6 +131,5 @@ export async function createObserver(
       },
     }))
 
-    
   console.log('Finish setup observatory')
 }

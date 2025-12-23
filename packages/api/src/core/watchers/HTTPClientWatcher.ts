@@ -1,10 +1,10 @@
 /** @format */
 
 import { Request } from "express";
-import { BaseWatcher } from "./BaseWatcher";
+import { BaseWatcher } from "./BaseWatcher.js";
 import { RedisClientType } from "redis";
-import Database from '../database-sql';
-import { formatValue, groupItemsByType } from "../helpers/helpers";
+import Database from '../database-sql.js';
+import { formatValue, groupItemsByType } from "../helpers/helpers.js";
 
 class HTTPClientWatcher extends BaseWatcher {
   constructor(redisClient: RedisClientType, DBInstance: Database) {
@@ -54,7 +54,7 @@ class HTTPClientWatcher extends BaseWatcher {
     return await this.DBInstance.getGraphData(filters, this.type, ['hits', 'misses', 'writes'])  
   }
 
-  protected extractFiltersFromRequest(req: Request): HTTPClientFilters {
+  protected extractFiltersFromRequest(req: ObservatoryBoardRequest): HTTPClientFilters {
     return {
       period: req.query.period as "1h" | "24h" | "7d" | "14d" | "30d",
       query: req.query.q as string,

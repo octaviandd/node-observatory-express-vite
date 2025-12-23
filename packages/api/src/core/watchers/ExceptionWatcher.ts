@@ -1,10 +1,10 @@
 /** @format */
 
 import { Request } from "express";
-import { BaseWatcher } from "./BaseWatcher";
+import { BaseWatcher } from "./BaseWatcher.js";
 import { RedisClientType } from "redis";
-import Database from '../database-sql';
-import { formatValue, groupItemsByType } from "../helpers/helpers";
+import Database from '../database-sql.js';
+import { formatValue, groupItemsByType } from "../helpers/helpers.js";
 
 class ExceptionWatcher extends BaseWatcher {
   constructor(redisClient: RedisClientType, DBInstance: Database) {
@@ -201,7 +201,7 @@ class ExceptionWatcher extends BaseWatcher {
     return await this.DBInstance.getGraphData(filters, this.type, ['unhandeledRejection', 'uncaughtException'])  
   }
 
-  protected extractFiltersFromRequest(req: Request): ExceptionFilters {
+  protected extractFiltersFromRequest(req: ObservatoryBoardRequest): ExceptionFilters {
     return {
       offset: parseInt(req.query.offset as string, 10) || 0,
       limit: parseInt(req.query.limit as string, 10) || 20,

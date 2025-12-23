@@ -1,4 +1,4 @@
-import express, { Express, Request, Response, Router } from 'express';
+import express, { Express, NextFunction, Request, Response, Router } from 'express';
 import { wrapAsync } from './helpers/wrapAsync';
 import fs from "node:fs"
 
@@ -50,7 +50,7 @@ export class ExpressAdapter {
             route.route,
             wrapAsync(async (req: Request, res: Response) => {
               const response = await route.handler({
-                requestData: this.requestData ,
+                requestData: this.requestData,
                 query: req.query,
                 params: req.params,
                 body: req.body,
@@ -63,13 +63,13 @@ export class ExpressAdapter {
       )
     );
 
-    router.use((err: Error & { statusCode: HTTPStatus }, _req: Request, res: Response, next: any) => {
+    router.use((err: Error & { statusCode: HTTPStatus }, _req: Request, res: Response, next: NextFunction) => {
       if (!this.errorHandler) {
         return next();
       }
 
       const response = this.errorHandler(err);
-      return res.status(response.status as number).send(response.body);
+      return res.status(response.status ?? 500).json(response.body);
     });
 
     this.app.use(router);
@@ -78,9 +78,7 @@ export class ExpressAdapter {
 
   public setEntryRoute(routeDef: AppViewRoute): ExpressAdapter {
     const viewHandler = async (_req: Request, res: Response) => {
-      const { name } = routeDef.handler({
-        basePath: this.basePath,
-      });
+      const { name: fullPath } = routeDef.handler({ basePath: this.basePath });
 
       const configData = {
         base: this.basePath,
@@ -90,11 +88,8 @@ export class ExpressAdapter {
         <script>
           window.SERVER_CONFIG = ${JSON.stringify(configData)};
         </script>
-        `;
+      `;
 
-      const fullPath = name;
-
-      console.log(scriptToInject, fullPath)
       let htmlContent = await fs.promises.readFile(fullPath, 'utf-8')
       if (htmlContent.includes('</body>')) {
         htmlContent = htmlContent.replace('</body>', `${scriptToInject}</body>`);
@@ -126,6 +121,7 @@ export class ExpressAdapter {
     return this;
   }
 
+  // do i need this?
   public setRequestData(requestData: any): ExpressAdapter {
     this.requestData = requestData;
     return this;

@@ -1,70 +1,70 @@
 /** @format */
 // LOGS
-import "./patch-winston";
-import "./patch-bunyan";
-import "./patch-pino";
-import "./patch-log4js";
-import "./patch-loglevel";
-// import "./patch-roarr";
-import "./patch-signale";
+import "./patch-winston.js";
+import "./patch-bunyan.js";
+import "./patch-pino.js";
+import "./patch-log4js.js";
+import "./patch-loglevel.js";
+// import "./patch-roarr.js";
+import "./patch-signale.js";
 
 // JOBS
-import "./patch-bull";
-import "./patch-agenda";
+import "./patch-bull.js";
+import "./patch-agenda.js";
 
 // SCHEDULE
-import "./patch-node-cron";
-import "./patch-node-schedule";
-import "./patch-bree";
+import "./patch-node-cron.js";
+import "./patch-node-schedule.js";
+import "./patch-bree.js";
 
 // MAIL
-import "./patch-nodemailer";
-import "./patch-sendgrid";
-import "./patch-mailgun";
-import "./patch-aws_ses";
-// import "./patch-postmark";
+import "./patch-nodemailer.js";
+import "./patch-sendgrid.js";
+import "./patch-mailgun.js";
+import "./patch-aws_ses.js";
+// import "./patch-postmark.js";
 
 // CACHE
-import "./patch-node-cache";
-import "./patch-redis";
-import "./patch-ioredis";
-// import "./patch-memjs";
-import "./patch-lru-cache";
-import "./patch-keyv";
-import "./patch-level";
+import "./patch-node-cache.js";
+import "./patch-redis.js";
+import "./patch-ioredis.js";
+// import "./patch-memjs.js";
+import "./patch-lru-cache.js";
+import "./patch-keyv.js";
+import "./patch-level.js";
 
 // QUERIES + MODELS
-import "./patch-mongoose";
-import "./patch-sequelize";
-import "./patch-typeorm";
-import "./patch-prisma";
-import "./patch-mysql2";
-import "./patch-pg";
-import "./patch-knex";
+import "./patch-mongoose.js";
+import "./patch-sequelize.js";
+import "./patch-typeorm.js";
+import "./patch-prisma.js";
+import "./patch-mysql2.js";
+import "./patch-pg.js";
+import "./patch-knex.js";
 
 // NOTIFICATIONS
-import "./patch-pusher";
-import "./patch-ably";
+import "./patch-pusher.js";
+import "./patch-ably.js";
 
 // EXCEPTIONS
-import "./patch-exceptions";
+import "./patch-exceptions.js";
 
 // FRAMEWORKS
-// import "./patch-koa";
-// import "./patch-fastify";
-// import "./patch-hapi";
-// import "./patch-apollo";
-import "./patch-express";
+// import "./patch-koa.js";
+// import "./patch-fastify.js";
+// import "./patch-hapi.js";
+// import "./patch-apollo.js";
+import "./patch-express.js";
 
 // OUTGOING REQUESTS
-import "./patch-http";
-import "./patch-undici";
+import "./patch-http.js";
+import "./patch-undici.js";
 
-// import "./patch-argparse";
-// import "./patch-commander";
-// import "./patch-firebase_admin";
-// import "./patch-kafkajs";
-// import "./patch-meow";
-// import "./patch-minimist";
-// import "./patch-oclif";
-// import "./patch-yargs";
+// import "./patch-argparse.js";
+// import "./patch-commander.js";
+// import "./patch-firebase_admin.js";
+// import "./patch-kafkajs.js";
+// import "./patch-meow.js";
+// import "./patch-minimist.js";
+// import "./patch-oclif.js";
+// import "./patch-yargs.js";

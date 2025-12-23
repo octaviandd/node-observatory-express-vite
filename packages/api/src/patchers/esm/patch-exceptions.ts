@@ -2,9 +2,16 @@
 
 import fs from "fs";
 import path from "path";
-import { watchers } from "../../core/index";
+import { watchers } from "../../core/index.js";
 import { inspect } from "util";
-import { getCallerInfo } from "../../core/helpers/helpers";
+import { getCallerInfo } from "../../core/helpers/helpers.js";
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+
+//@ts-ignore
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Create a global symbol to track if exceptions have been patched
 const EXCEPTIONS_PATCHED_SYMBOL = Symbol.for(
@@ -107,7 +114,7 @@ if (process.env.NODE_OBSERVATORY_ERRORS) {
     (global as any)[EXCEPTIONS_PATCHED_SYMBOL] = true;
 
     // Apply all patchers
-    uncaughtPatcher();
-    unhandledRejectionPatcher();
+    // uncaughtPatcher();
+    // unhandledRejectionPatcher();
   }
 }

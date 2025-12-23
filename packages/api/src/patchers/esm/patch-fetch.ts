@@ -1,6 +1,6 @@
 /** @format */
 
-import { watchers } from '../../core/index';
+import { watchers } from '../../core/index.js';
 import { getCallerInfo } from '../../core/helpers/helpers.js';
 
 // Create a global symbol to track if fetch has been patched

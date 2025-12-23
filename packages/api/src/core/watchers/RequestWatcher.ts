@@ -1,8 +1,8 @@
 import { Request } from "express";
-import { BaseWatcher } from "./BaseWatcher";
-import Database from '../database-sql';
+import { BaseWatcher } from "./BaseWatcher.js";
+import Database from '../database-sql.js';
 import { RedisClientType } from "redis";
-import { formatValue, groupItemsByType } from "../helpers/helpers";
+import { formatValue, groupItemsByType } from "../helpers/helpers.js";
 
 class RequestWatcher extends BaseWatcher {
   readonly type = "request";
@@ -60,7 +60,7 @@ class RequestWatcher extends BaseWatcher {
     );
   }
 
-  protected extractFiltersFromRequest(req: Request): RequestFilters {
+  protected extractFiltersFromRequest(req: ObservatoryBoardRequest): RequestFilters {
     return {
       period: req.query.period as "1h" | "24h" | "7d" | "14d" | "30d",
       query: req.query.q as string,

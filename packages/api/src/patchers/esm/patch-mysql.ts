@@ -2,7 +2,7 @@
 
 import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers } from "../../core/index.js";
 import type { Connection, Pool } from "mysql";
 import type { QueryOptions } from "mysql";
 import { getCallerInfo } from "../../core/helpers/helpers.js";

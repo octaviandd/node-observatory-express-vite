@@ -1,8 +1,6 @@
-import { Request, Response } from "express";
-
 interface Watcher {
-  index(req: Request, res: Response): Promise<{ body?: any, statusCode: number }>;
-  view(req: Request, res: Response): Promise<{ body?: any, statusCode: number }>;
+  index(req: ObservatoryBoardRequest): Promise<{ body?: any, statusCode: number }>;
+  view(req: ObservatoryBoardRequest): Promise<{ body?: any, statusCode: number }>;
 
   insertRedisStream(content: WatcherEntry): Promise<void>;
 }
