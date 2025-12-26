@@ -1,7 +1,7 @@
 import { Connection, FieldPacket, QueryResult } from "mysql2/promise";
 import { PERIODS } from "./helpers/constants.js";
 import { formattCountGraphData, formattDurationGraphData, formatValue } from "./helpers/helpers.js";
-import { MigrationError } from "./helpers/errors/Errors.js";
+import { MigrationError, DatabaseRetrieveError } from "./helpers/errors/Errors.js";
 
 class Database {
   storeConnection!: Connection
@@ -44,7 +44,7 @@ class Database {
         console.log("observatory_entries table created via mysql2/promise");
       }
     } catch (error: unknown) {
-      throw new MigrationError('Failed to up base tables', {cause: error});
+      throw new MigrationError('Failed to up base tables', {cause: (error as Error)});
     }
   }
 
@@ -57,7 +57,7 @@ class Database {
       );
       console.log("observatory_entries table droped via mysql2/promise");
     } catch (error) {
-      throw new MigrationError('Failed to down base tables', {cause: error});
+      throw new MigrationError('Failed to down base tables', {cause: (error as Error)});
     }
   }
 
@@ -78,7 +78,7 @@ class Database {
       );
       await this.storeConnection.query("COMMIT");
     } catch (error) {
-      throw new MigrationError('Failed to insert into database', {cause: error});
+      throw new MigrationError('Failed to insert into database', {cause: (error as Error)});
     }
   }
 
@@ -87,7 +87,7 @@ class Database {
       this.storeConnection.query(`DELETE FROM observatory_entries WHERE uuid = ?`, [uuid])
       return true;
     } catch (error) {
-      throw new MigrationError('Failed to delete from database', {cause: error});
+      throw new MigrationError('Failed to delete from database', {cause: (error as Error)});
     }
   }
 
@@ -100,7 +100,7 @@ class Database {
 
       return results[0] as unknown as WatcherEntry;
     } catch (error) {
-      throw new MigrationError('Failed to get entry by uuid from database', {cause: error});
+      throw new MigrationError('Failed to get entry by uuid from database', {cause: (error as Error)});
     }
   }
 
@@ -113,7 +113,7 @@ class Database {
     
       return results as unknown as WatcherEntry[];
     } catch (error) {
-      throw new MigrationError('Failed to get all entries by type from database', {cause: error});
+      throw new MigrationError('Failed to get all entries by type from database', {cause: (error as Error)});
     }
   }
 
@@ -122,7 +122,8 @@ class Database {
   private getEqualitySQL = (value: string, type: string): string => value ? `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.${type}')) = '${value}'` : '';
   private getInclusionSQL = (value: string, type: string): string => value ? `AND LOWER(JSON_UNQUOTE(JSON_EXTRACT(content, '$.${type}'))) LIKE '%${value.toLowerCase()}%'` : "";
 
-  private getDurationParametersSQL = (): string => {
+  private getDurationParametersSQL = (watcherType: string): string => {
+    if (watcherType === 'exception' || watcherType === 'log') return ''
     return `MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10, 6))) as shortest,
       MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10, 6))) as longest,
       AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10, 6))) as average,
@@ -218,7 +219,7 @@ class Database {
     } else if (watcherType === 'exception') {
       statement = `
         SUM(CASE WHEN JSON_EXTRACT(content, '$.type') = 'unhandledRejection' THEN 1 ELSE 0 END) as unhandledRejection,
-        SUM(CASE WHEN JSON_EXTRACT(content, '$.type') = 'uncaughtException' THEN 1 ELSE 0 END) as uncaughtException,
+        SUM(CASE WHEN JSON_EXTRACT(content, '$.type') = 'uncaughtException' THEN 1 ELSE 0 END) as uncaughtException
       `
     } else if (watcherType === 'http') {
       
@@ -230,7 +231,7 @@ class Database {
         SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.level')) LIKE 'debug' THEN 1 ELSE 0 END) as debug,
         SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.level')) LIKE 'trace' THEN 1 ELSE 0 END) as trace,
         SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.level')) LIKE 'fatal' THEN 1 ELSE 0 END) as fatal,
-        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.level')) LIKE 'log' THEN 1 ELSE 0 END) as log,
+        SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.level')) LIKE 'log' THEN 1 ELSE 0 END) as log
       `;
     } else if (watcherType === 'mail') {
       statement = `
@@ -282,27 +283,31 @@ class Database {
 
     switch (watcherType) {
       case 'cache':
-        conditions =
-          [
-            ...(filters.cacheType && filters.cacheType !== 'all') && `JSON_UNQUOTE(JSON_EXTRACT(content, '$.${filters.cacheType}')) IS NOT NULL`,
-            ...(filters.key && this.getEqualitySQL(filters.key, 'key'))
-          ];
+        if (filters.cacheType && filters.cacheType !== 'all') {
+          conditions.push(`JSON_UNQUOTE(JSON_EXTRACT(content, '$.${filters.cacheType}')) IS NOT NULL`)
+        }
+
+        if (filters.key) {
+          conditions.push(this.getEqualitySQL(filters.key, 'key'));
+        }
         break;
       
       case 'exception':
-        conditions =
-          [
-            ...(filters.type && filters.type !== 'all') && this.getEqualitySQL(filters.type, 'type'),
-            ...(filters.key && this.getInclusionSQL(filters.key, 'message'))
-          ];
+        if (filters.type !== 'all') {
+          conditions.push(this.getEqualitySQL(filters.type, 'type'));
+        }
+
+        if (filters.key) {
+          conditions.push(this.getInclusionSQL(filters.key, 'message'));
+        }
         break;
 
       case 'request':
-        conditions.push("JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0'");
+        conditions.push("AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0'");
         
         if (filters.status && filters.status !== 'all') {
           const statusPrefix = filters.status.charAt(0); // '2xx' -> '2'
-          conditions.push(`JSON_EXTRACT(content, '$.statusCode') LIKE '${statusPrefix}%'`);
+          conditions.push(`AND JSON_EXTRACT(content, '$.statusCode') LIKE '${statusPrefix}%'`);
         }
         if (filters.key) {
           conditions.push(this.getEqualitySQL(filters.key, 'route'));
@@ -312,7 +317,7 @@ class Database {
       case 'http-client':
         if (filters.status && filters.status !== 'all') {
           const statusCode = filters.status.charAt(0);
-          conditions.push(`JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) LIKE '${statusCode}%'`);
+          conditions.push(`AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) LIKE '${statusCode}%'`);
         }
         if (filters.key) {
           conditions.push(this.getEqualitySQL(filters.key, 'origin'));
@@ -433,7 +438,7 @@ class Database {
 
       return results as unknown as WatcherEntry[];
     } catch (error: unknown) {
-      throw new MigrationError('Failed to get instance data from database', {cause: error});
+      throw new MigrationError('Failed to get instance data from database', {cause: (error as Error)});
     }
   }
 
@@ -452,7 +457,7 @@ class Database {
         ${groupMainKeySql}
         COUNT(*) as total,
         ${this.getWatcherSpecificStatementsSQL(watcherType)}
-        ${this.getDurationParametersSQL()}
+        ${this.getDurationParametersSQL(watcherType)}
         ${this.getP95SQL(watcherType)}
         FROM observatory_entries
         WHERE type = ? 
@@ -467,7 +472,7 @@ class Database {
 
       return results;
     } catch (error: unknown) {
-      throw new MigrationError('Failed to get index data from database', {cause: error});
+      throw new DatabaseRetrieveError('Failed to get index data from database', {cause: (error as Error)});
     }
   }
 
@@ -483,7 +488,7 @@ class Database {
       
       return relatedItems as unknown as WatcherEntry[];
     } catch (error: unknown) {
-      throw new MigrationError('Failed to get related view data from database', {cause: error});
+      throw new DatabaseRetrieveError('Failed to get related view data from database', {cause: (error as Error)});
     }
   }
 
@@ -501,7 +506,7 @@ class Database {
 
       return Array.isArray(results) && results.length > 0 ? results[0] : { count: 0 };
     } catch (error: unknown) {
-      throw new MigrationError('Failed to get count by type data from database', {cause: error});
+      throw new DatabaseRetrieveError('Failed to get count by type data from database', {cause: (error as Error)});
     }
   }
 
@@ -521,7 +526,7 @@ class Database {
 
       return countResult as QueryResult & { total: number }
     } catch (error) {
-      throw new MigrationError('Failed to get entries count from database', {cause: error});
+      throw new DatabaseRetrieveError('Failed to get entries count from database', {cause: (error as Error)});
     }
   }
 
@@ -540,7 +545,7 @@ class Database {
       return countResult as QueryResult & { total: number }
 
     } catch (error) {
-      throw new MigrationError('Failed to get entries count by group from database', {cause: error});
+      throw new DatabaseRetrieveError('Failed to get entries count by group from database', {cause: (error as Error)});
     }
   }
 
@@ -554,7 +559,7 @@ class Database {
         `(
           SELECT
             COUNT(*) as total,
-            ${this.getDurationParametersSQL()}
+            ${this.getDurationParametersSQL(watcherType)}
             SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.misses')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.misses')) > 0 THEN 1 ELSE 0 END) as misses,
             SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.hits')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.hits')) > 0 THEN 1 ELSE 0 END) as hits,
             SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.writes')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.writes')) > 0 THEN 1 ELSE 0 END) as writes,
@@ -601,11 +606,11 @@ class Database {
       } = cleanResults;
 
       const countFormattedData = formattCountGraphData(results as unknown as CacheContent[], period, keys);
-      const durationFormattedData = hasDuration && formattDurationGraphData(results, period);
+      const durationFormattedData = hasDuration ? formattDurationGraphData(results, period): {};
 
       return {
         countFormattedData,
-        ...(hasDuration ? durationFormattedData : {}),
+        durationFormattedData,
         count: formatValue(aggregateResults.total, true),
         indexCountOne: formatValue(aggregateResults.hits, true),
         indexCountTwo: formatValue(aggregateResults.writes, true),
@@ -616,7 +621,7 @@ class Database {
         p95: formatValue(aggregateResults.p95),
       };
     } catch (error) {
-      throw new MigrationError('Failed to get graph data from database', {cause: error});
+      throw new DatabaseRetrieveError('Failed to get graph data from database', {cause: (error as Error)});
     }
   }
 }

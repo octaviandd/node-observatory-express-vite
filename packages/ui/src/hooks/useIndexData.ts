@@ -4,45 +4,13 @@ import { useContext, useEffect, useState } from "react";
 import { StoreContext } from "@/store";
 import { timePeriod } from "@/utils";
 import { useParams } from "react-router";
+import { IndexResponse } from "types";
 
-export const useIndexData = ({ type }: { type: string }) => {
+export const useIndexData = ({ type }: { type: string }): { data: IndexResponse | null, currentDate: string, period: string} => {
   const { state } = useContext(StoreContext);
   const params = useParams();
   const param = params.key || "";
-  const [data, setData] = useState<{
-    results: object[];
-    countFormattedData: object[];
-    durationFormattedData: {
-      avgDuration: number;
-      p95: number;
-      label: string;
-    }[];
-    count: number;
-    indexCountOne: number;
-    indexCountTwo: number;
-    indexCountThree: number;
-    indexCountFour?: number;
-    indexCountFive?: number;
-    indexCountSix?: number;
-    indexCountSeven?: number;
-    indexCountEight?: number;
-    shortest: 0;
-    longest: 0;
-    average: 0;
-    p95: 0;
-  }>({
-    results: [],
-    countFormattedData: [],
-    durationFormattedData: [],
-    count: 0,
-    indexCountOne: 0,
-    indexCountTwo: 0,
-    indexCountThree: 0,
-    shortest: 0,
-    longest: 0,
-    average: 0,
-    p95: 0,
-  });
+  const [data, setData] = useState<IndexResponse | null>(null);
 
   useEffect(() => {
     getItems();
@@ -69,44 +37,15 @@ export const useIndexData = ({ type }: { type: string }) => {
         }`,
       );
 
-      const {
-        results,
-        countFormattedData,
-        durationFormattedData,
-        count,
-        indexCountOne,
-        indexCountTwo,
-        indexCountThree,
-        indexCountFour,
-        indexCountFive,
-        indexCountSix,
-        indexCountSeven,
-        indexCountEight,
-        shortest,
-        longest,
-        average,
-        p95,
-      } = await response.json();
+      const { table, graph } = await response.json();
 
       setData((prevData) => ({
-        ...prevData,
-        results: addedNewItems ? [...prevData.results, ...results] : results,
-        count,
-        indexCountOne,
-        indexCountTwo,
-        indexCountThree,
-        indexCountFour,
-        indexCountFive,
-        indexCountSix,
-        indexCountSeven,
-        indexCountEight,
-        shortest,
-        longest,
-        average,
-        p95,
-        countFormattedData,
-        durationFormattedData,
-      }));
+        graph,
+        table: {
+          results: addedNewItems && prevData ? [...prevData.table.results, ...table.results] : table.results,
+          ...table
+        }
+      }))
     } catch (error) {
       console.error(error);
     }

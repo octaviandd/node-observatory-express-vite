@@ -17,8 +17,12 @@ export default function ViewsIndex() {
     type: "views",
   });
 
+  const graph = data?.graph;
+  const table = data?.table;
+
   return (
     <div className="flex flex-col gap-6">
+      {table && graph && 
       <div className="grid grid-cols-2 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -27,20 +31,20 @@ export default function ViewsIndex() {
                 <CardTitle className="text-sm text-muted-foreground">
                   VIEWS
                 </CardTitle>
-                <CardSubtitle>{data.count}</CardSubtitle>
+                <CardSubtitle>{table.count}</CardSubtitle>
               </div>
             </div>
             <div className="flex gap-4 text-xs">
               <div className="flex flex-col items-center">
                 <span className="text-muted-foreground">COMPLETED</span>
                 <Badge variant="secondary" className="mt-1">
-                  {data.indexCountOne}
+                  {table.indexCountOne}
                 </Badge>
               </div>
               <div className="flex flex-col items-center text-red-500">
                 <span className="text-muted-foreground">FAILED</span>
                 <Badge variant="destructive" className="mt-1">
-                  {data.indexCountTwo}
+                  {table.indexCountTwo}
                 </Badge>
               </div>
             </div>
@@ -48,7 +52,7 @@ export default function ViewsIndex() {
           <CardContent>
             <div className="h-auto">
               <CountGraph
-                data={data.countFormattedData}
+                data={graph.countFormattedData}
                 barData={[
                   { dataKey: "completed", stackId: "a", fill: "#f1f5f9" },
                   { dataKey: "failed", stackId: "b", fill: "#ef4444" },
@@ -68,17 +72,17 @@ export default function ViewsIndex() {
                   DURATION
                 </CardTitle>
                 <CardSubtitle>
-                  {data.shortest} – {data.longest}
+                  {table.shortest} – {table.longest}
                 </CardSubtitle>
               </div>
               <div className="flex gap-4 text-xs">
                 <div>
                   <span className="text-muted-foreground mr-1">AVG</span>
-                  <Badge variant="secondary">{data.average}</Badge>
+                  <Badge variant="secondary">{table.average}</Badge>
                 </div>
                 <div>
                   <span className="text-muted-foreground mr-1">P95</span>
-                  <Badge variant="warning">{data.p95}</Badge>
+                  <Badge variant="warning">{table.p95}</Badge>
                 </div>
               </div>
             </div>
@@ -86,14 +90,15 @@ export default function ViewsIndex() {
           <CardContent>
             <div className="h-auto">
               <DurationGraph
-                data={data.durationFormattedData}
+                data={graph.durationFormattedData}
                 period={period}
                 currentDate={currentDate}
               />
             </div>
           </CardContent>
         </Card>
-      </div>
+        </div>
+      }
 
       <ViewsIndexTable />
     </div>

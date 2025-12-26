@@ -2,6 +2,7 @@ import Watcher from "./Watcher";
 import { requestLocalStorage, jobLocalStorage, scheduleLocalStorage,} from "../store.js";
 import Database from "../database-sql.js";
 import { RedisClientType } from "redis";
+import { RedisError } from "../helpers/errors/Errors";
 
 export abstract class BaseWatcher implements Watcher {
   protected readonly RedisClient: RedisClientType;
@@ -25,9 +26,6 @@ export abstract class BaseWatcher implements Watcher {
 
     this.createRedisStream();
     this.ingestRedisStream();
-
-    // process.on('SIGTERM', () => this.cleanup());
-    // process.on('SIGINT', () => this.cleanup());
   }
 
 
@@ -35,19 +33,15 @@ export abstract class BaseWatcher implements Watcher {
     try {
       await this.RedisClient.xGroupCreate(this.streamKey, this.consumerGroup, '0', {  MKSTREAM: true });
       console.log(`Created consumer group for ${this.type}`);
-    } catch (error: any) {
-      if (!error.message?.includes('BUSYGROUP')) {
-        console.error(`Error creating consumer group for ${this.type}:`, error);
-      }
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message?.includes('BUSYGROUP')) return;
+      throw new RedisError(`Error creating consumer group for ${this.type}:`, {cause: (error as Error)})
     }
   }
 
   private async ingestRedisStream() {
     this.refreshInterval = setInterval(async () => {
-      if (this.isMigrating) {
-        return;
-      }
-
+      if (this.isMigrating) return;
       this.isMigrating = true;
 
       try {
@@ -185,7 +179,7 @@ export abstract class BaseWatcher implements Watcher {
     }
   }
 
-  async insertRedisStream(content: WatcherEntry): Promise<void> {
+  async insertRedisStream(content: Record<string, any>): Promise<void> {
     try {
       await this.RedisClient.xAdd(
         this.streamKey,
@@ -203,7 +197,6 @@ export abstract class BaseWatcher implements Watcher {
       );
     } catch (error) {
       console.error(`Error adding to stream ${this.type}:`, error);
-      throw error;
     }
   }
 
@@ -214,8 +207,9 @@ export abstract class BaseWatcher implements Watcher {
 
   async index(req: ObservatoryBoardRequest) {
     const filters = this.extractFiltersFromRequest(req);
-    const body = await this.DBInstance.getIndexData(filters, this.type);
-    return { body, statusCode: 200 }
+    const tableData = await this.DBInstance.getIndexData(filters, this.type);
+    const graphData = await this.getGraphData(filters);
+    return { body: { table: tableData, graph: graphData }, statusCode: 200 }
   }
   
 

@@ -1,11 +1,7 @@
 import winston from "winston";
 import path from "path";
 
-const { combine, timestamp, printf, colorize, errors } = winston.format;
-
-const logFormat = printf(({ level, message, timestamp, stack }) => {
-  return `${timestamp} [${level}]: ${stack || message}`;
-});
+const { combine, timestamp, json, errors, prettyPrint } = winston.format;
 
 const logsDir = process.env.LOGS_DIR || './logs';
 
@@ -14,14 +10,13 @@ const logger = winston.createLogger({
   format: combine(
     timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     errors({ stack: true }),
-    logFormat
+    json({space: 2})
   ),
   transports: [
     new winston.transports.File({
       filename: path.join(logsDir, 'combined.log'),
       level: 'info',
     }),
-    
     new winston.transports.File({
       filename: path.join(logsDir, 'error.log'),
       level: 'error',
@@ -32,9 +27,9 @@ const logger = winston.createLogger({
 if (process.env.NODE_ENV !== 'production') {
   logger.add(new winston.transports.Console({
     format: combine(
-      colorize({ all: true }),
       timestamp({ format: 'HH:mm:ss' }),
-      logFormat
+      errors({ stack: true }),
+      prettyPrint({ colorize: true })
     ),
   }));
 }

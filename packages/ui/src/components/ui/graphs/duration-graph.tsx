@@ -3,20 +3,22 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ResponsiveContainer, LineChart, Line, Tooltip, YAxis } from "recharts";
 
 type Props = {
-  data: { avgDuration: number; p95: number; label: string }[];
+  data: Record<string, {durations: number[], avgDuration: number, p95: number, count: number, label: string}>;
   period: string;
   currentDate: string;
 };
 
 export const DurationGraph = ({ data, period, currentDate }: Props) => {
-  const formattedData = data.map((entry, index: number) => ({
-    name: index,
-    "Average Duration": entry.avgDuration,
-    "95th Percentile": entry.p95,
-    label: entry.label,
-  }));
-
-  // Calculate max value for domain
+  const formattedData = [];
+  for (const [key, value] of Object.entries(data)) {
+    formattedData.push({
+      name: key,
+      "Average Duration": value.avgDuration,
+      "95th Percentile": value.p95,
+      label: value.label,
+    });
+  }
+  
   const maxValue = Math.max(
     ...formattedData.map((d) =>
       Math.max(d["Average Duration"], d["95th Percentile"]),

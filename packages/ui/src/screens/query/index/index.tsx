@@ -18,81 +18,86 @@ export default function QueryIndex() {
     type: "queries",
   });
 
+  const graph = data?.graph;
+  const table = data?.table;
+
   return (
     <div className="flex flex-col gap-6 w-full">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div>
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                QUERIES
-              </CardTitle>
-              <CardSubtitle>{data.count}</CardSubtitle>
-            </div>
-            <div className="flex gap-4 text-xs">
-              <div className="flex flex-col items-center">
-                <span className="text-muted-foreground">COMPLETED</span>
-                <Badge variant="secondary" className="mt-1">
-                  {data.indexCountOne}
-                </Badge>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="text-muted-foreground">FAILED</span>
-                <Badge variant="destructive" className="mt-1">
-                  {data.indexCountTwo}
-                </Badge>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="h-auto">
-              <CountGraph
-                data={data.countFormattedData}
-                barData={[
-                  { dataKey: "completed", stackId: "a", fill: "#f1f5f9" },
-                  { dataKey: "failed", stackId: "b", fill: "#ef4444" },
-                ]}
-                period={period}
-                currentDate={currentDate}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <div className="flex justify-between items-center">
+      {table && graph &&
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <div>
-                <CardTitle className="text-sm text-muted-foreground">
-                  DURATION
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  QUERIES
                 </CardTitle>
-                <CardSubtitle>
-                  {data.shortest} – {data.longest}
-                </CardSubtitle>
+                <CardSubtitle>{table.count}</CardSubtitle>
               </div>
               <div className="flex gap-4 text-xs">
-                <div>
-                  <span className="text-muted-foreground mr-1">AVG</span>
-                  <Badge variant="secondary">{data.average}</Badge>
+                <div className="flex flex-col items-center">
+                  <span className="text-muted-foreground">COMPLETED</span>
+                  <Badge variant="secondary" className="mt-1">
+                    {table.indexCountOne}
+                  </Badge>
                 </div>
-                <div>
-                  <span className="text-muted-foreground mr-1">P95</span>
-                  <Badge variant="warning">{data.p95}</Badge>
+                <div className="flex flex-col items-center">
+                  <span className="text-muted-foreground">FAILED</span>
+                  <Badge variant="destructive" className="mt-1">
+                    {table.indexCountTwo}
+                  </Badge>
                 </div>
               </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="h-auto">
-              <DurationGraph
-                data={data.durationFormattedData}
-                period={period}
-                currentDate={currentDate}
-              />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardHeader>
+            <CardContent>
+              <div className="h-auto">
+                <CountGraph
+                  data={graph.countFormattedData}
+                  barData={[
+                    { dataKey: "completed", stackId: "a", fill: "#f1f5f9" },
+                    { dataKey: "failed", stackId: "b", fill: "#ef4444" },
+                  ]}
+                  period={period}
+                  currentDate={currentDate}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle className="text-sm text-muted-foreground">
+                    DURATION
+                  </CardTitle>
+                  <CardSubtitle>
+                    {table.shortest} – {table.longest}
+                  </CardSubtitle>
+                </div>
+                <div className="flex gap-4 text-xs">
+                  <div>
+                    <span className="text-muted-foreground mr-1">AVG</span>
+                    <Badge variant="secondary">{table.average}</Badge>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground mr-1">P95</span>
+                    <Badge variant="warning">{table.p95}</Badge>
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="h-auto">
+                <DurationGraph
+                  data={graph.durationFormattedData}
+                  period={period}
+                  currentDate={currentDate}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      }
 
       <QueryIndexTable />
     </div>

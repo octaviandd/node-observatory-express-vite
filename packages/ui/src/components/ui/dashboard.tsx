@@ -1,70 +1,70 @@
 /** @format */
 
-import { StoreContext } from "@/store";
-import { CountGraph } from "../ui/graphs/count-graph";
-import { DurationGraph } from "../ui/graphs/duration-graph";
-import { Link } from "react-router";
-import { useIndexData } from "@/hooks/useIndexData";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardSubtitle,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  ArrowRightCircle,
-  LayoutDashboard,
-  AlertTriangle,
-  ArrowUpDown,
-  Database,
-  SquareActivity,
-} from "lucide-react";
-import { useState, useContext, useEffect } from "react";
-import { formatDuration, formatCount } from "@/utils";
-import { QueryGroupResponse, RequestGroupResponse } from "../../../types";
+// import { StoreContext } from "@/store";
+// import { CountGraph } from "../ui/graphs/count-graph";
+// import { DurationGraph } from "../ui/graphs/duration-graph";
+// import { Link } from "react-router";
+// import { useIndexData } from "@/hooks/useIndexData";
+// import {
+//   Card,
+//   CardContent,
+//   CardHeader,
+//   CardSubtitle,
+//   CardTitle,
+// } from "@/components/ui/card";
+// import { Badge } from "@/components/ui/badge";
+// import { Button } from "@/components/ui/button";
+// import {
+//   ArrowRightCircle,
+//   LayoutDashboard,
+//   AlertTriangle,
+//   ArrowUpDown,
+//   Database,
+//   SquareActivity,
+// } from "lucide-react";
+// import { useState, useContext } from "react";
+// import { formatDuration, formatCount } from "@/utils";
+// import { QueryGroupResponse, RequestGroupResponse } from "../../../types";
 
 export default function Dashboard() {
-  const {
-    data: requests,
-    currentDate,
-    period,
-  } = useIndexData({ type: "requests" });
-  const { data: exceptions } = useIndexData({ type: "exceptions" });
-  const { data: jobs } = useIndexData({ type: "jobs" });
-  const { state } = useContext(StoreContext);
-  const [groupedRequests, setGroupedRequests] = useState<
-    RequestGroupResponse[]
-  >([]);
-  const [groupedQueries, setGroupedQueries] = useState<QueryGroupResponse[]>(
-    [],
-  );
+  // const {
+  //   data: requests,
+  //   currentDate,
+  //   period,
+  // } = useIndexData({ type: "requests" });
+  // const { data: exceptions } = useIndexData({ type: "exceptions" });
+  // const { data: jobs } = useIndexData({ type: "jobs" });
+  // const { state } = useContext(StoreContext);
+  // const [groupedRequests, setGroupedRequests] = useState<
+  //   RequestGroupResponse[]
+  // >([]);
+  // const [groupedQueries, setGroupedQueries] = useState<QueryGroupResponse[]>(
+  //   [],
+  // );
 
-  useEffect(() => {
-    fetch(
-      `/ui/api/requests?table=true&offset=0&index=group&period=${state.period}`,
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        setGroupedRequests(data.results);
-      });
-  }, [state.period]);
+  // useEffect(() => {
+  //   fetch(
+  //     `/ui/api/requests?table=true&offset=0&index=group&period=${state.period}`,
+  //   )
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       setGroupedRequests(data.results);
+  //     });
+  // }, [state.period]);
 
-  useEffect(() => {
-    fetch(
-      `/ui/api/queries?table=true&offset=0&index=group&period=${state.period}`,
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        setGroupedQueries(data.results);
-      });
-  }, [state.period]);
+  // useEffect(() => {
+  //   fetch(
+  //     `/ui/api/queries?table=true&offset=0&index=group&period=${state.period}`,
+  //   )
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       setGroupedQueries(data.results);
+  //     });
+  // }, [state.period]);
 
   return (
     <div className="flex flex-col gap-6">
-      <Card>
+      {/* <Card>
         <CardHeader className="flex flex-row items-center justify-between pt-2 pb-1 px-2">
           <div className="flex items-center gap-2">
             <SquareActivity className="h-5 w-5" />
@@ -414,7 +414,7 @@ export default function Dashboard() {
             </Card>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 }

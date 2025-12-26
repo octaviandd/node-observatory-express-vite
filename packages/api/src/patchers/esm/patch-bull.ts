@@ -76,8 +76,8 @@ if (
                         file: callerInfo.file,
                         line: callerInfo.line,
                         package: 'bull',
+                        createdAt,
                       },
-                      createdAt,
                     );
                   }
 
@@ -97,8 +97,8 @@ if (
                         file: callerInfo.file,
                         line: callerInfo.line,
                         package: 'bull',
+                        createdAt,
                       },
-                      createdAt,
                     );
                   }
 
@@ -157,8 +157,8 @@ if (
                             attemptsMade,
                             package: 'bull',
                             returnValue: returnvalue,
+                            createdAt,
                           },
-                          createdAt,
                         );
 
                         if (attemptsMade < opts.attempts && !finishedOn) {
@@ -175,8 +175,8 @@ if (
                               line: callerInfo.line,
                               attemptsMade,
                               package: 'bull',
+                              createdAt,
                             },
-                            createdAt,
                           );
                         }
                       } else if (returnvalue !== null) {
@@ -194,8 +194,8 @@ if (
                             attemptsMade,
                             package: 'bull',
                             returnValue: returnvalue,
+                            createdAt,
                           },
-                          createdAt,
                         );
                       }
                     }

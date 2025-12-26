@@ -707,3 +707,34 @@ export interface ScheduleGroupResponse extends BaseGroupResponse {
   completed: number;
   failed: number;
 }
+
+
+
+export interface IndexResponse {
+  table: {
+    results: object[];
+    countFormattedData: object[];
+    durationFormattedData: {
+      avgDuration: number;
+      p95: number;
+      label: string;
+    }[];
+    count: number;
+    indexCountOne: number;
+    indexCountTwo: number;
+    indexCountThree: number;
+    indexCountFour?: number;
+    indexCountFive?: number;
+    indexCountSix?: number;
+    indexCountSeven?: number;
+    indexCountEight?: number;
+    shortest: number;
+    longest: number;
+    average: number;
+    p95: number;
+  }
+  graph: {
+    durationFormattedData: Record<string, { durations: number[], avgDuration: number, p95: number, count: number, label: string }>
+    countFormattedData: Record<string, string | number>[]
+  }
+}
