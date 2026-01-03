@@ -1,8 +1,8 @@
 /** @format */
-// import RequestIndexTable from "../table/index";
+import RequestIndexTable from "../table/index";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
 import { DurationGraph } from "@/components/ui/graphs/duration-graph";
-import { useIndexData } from "@/hooks/useIndexData";
+import { useGraph } from "@/hooks/useGraph";
 import {
   Card,
   CardContent,
@@ -13,16 +13,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 export default function RequestsIndex() {
-  const { data, currentDate, period } = useIndexData({
-    type: "requests",
-  });
+  const { data, currentDate, period } = useGraph({ type: "requests" });
 
-  const graph = data?.graph;
-  const table = data?.table;
-  
   return (
     <div className="flex flex-col gap-6 w-full">
-      {(graph && table) &&
+      {(data) &&
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -30,25 +25,25 @@ export default function RequestsIndex() {
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   REQUESTS
                 </CardTitle>
-                <CardSubtitle>{table.count}</CardSubtitle>
+                <CardSubtitle>{data.count}</CardSubtitle>
               </div>
               <div className="flex gap-4 text-xs">
                 <div className="flex flex-col items-center">
                   <span className="text-muted-foreground">1/2/3XX</span>
                   <Badge variant="secondary" className="mt-1">
-                    {table.indexCountOne}
+                    {data.indexCountOne}
                   </Badge>
                 </div>
                 <div className="flex flex-col items-center text-yellow-600">
                   <span className="text-muted-foreground">4XX</span>
                   <Badge variant="warning" className="mt-1">
-                    {table.indexCountTwo}
+                    {data.indexCountTwo}
                   </Badge>
                 </div>
                 <div className="flex flex-col items-center text-red-500">
                   <span className="text-muted-foreground">5XX</span>
                   <Badge variant="destructive" className="mt-1">
-                    {table.indexCountThree}
+                    {data.indexCountThree}
                   </Badge>
                 </div>
               </div>
@@ -56,7 +51,7 @@ export default function RequestsIndex() {
             <CardContent>
               <div className="h-auto">
                 <CountGraph
-                  data={graph.countFormattedData}
+                  data={data.countFormattedData}
                   barData={[
                     {
                       dataKey: "200",
@@ -82,38 +77,36 @@ export default function RequestsIndex() {
                   DURATION
                 </CardTitle>
                 <CardSubtitle>
-                  {table.shortest} – {table.longest}
+                  {data.shortest} – {data.longest}
                 </CardSubtitle>
               </div>
               <div className="flex items-center gap-4 text-xs">
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground">AVG</span>
-                  <Badge variant="secondary">{table.average}</Badge>
+                  <Badge variant="secondary">{data.average}</Badge>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground">P95</span>
-                  <Badge variant="warning">{table.p95}</Badge>
+                  <Badge variant="warning">{data.p95}</Badge>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
               <div className="h-auto">
                 <DurationGraph
-                  data={graph.durationFormattedData}
+                  data={data.durationFormattedData}
                   period={period}
                   currentDate={currentDate}
                 />
-              </div> 
+              </div>
             </CardContent>
           </Card>
         </div>
       }
 
-      {/* {table &&
-        <div className="flex flex-col gap-4">
-          <RequestIndexTable table={table} />
-        </div>
-      } */}
+      <div className="flex flex-col gap-4">
+        <RequestIndexTable />
+      </div>
     </div>
   );
 }

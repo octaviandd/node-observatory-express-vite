@@ -3,6 +3,7 @@ import { requestLocalStorage, jobLocalStorage, scheduleLocalStorage,} from "../s
 import Database from "../database-sql.js";
 import { RedisClientType } from "redis";
 import { RedisError } from "../helpers/errors/Errors";
+import { dropUndefinedKeys, sanitizeContent } from "../helpers/helpers";
 
 export abstract class BaseWatcher implements Watcher {
   protected readonly RedisClient: RedisClientType;
@@ -72,9 +73,9 @@ export abstract class BaseWatcher implements Watcher {
           for (const message of stream.messages) {
             try {
               const data = message.message;
-              
+
               const parsedEntry: RedisEntry = {
-                uuid: data.uuid,
+                uuid: message.id,
                 type: data.type,
                 content: JSON.parse(data.content),
                 created_at: data.created_at,
@@ -95,7 +96,7 @@ export abstract class BaseWatcher implements Watcher {
           try {
             await this.DBInstance.insert(parsedValues);
 
-            // Acknowledge messages (mark as processed)
+            console.log(messageIds)
             await this.RedisClient.xAck(
               this.streamKey,
               this.consumerGroup,
@@ -180,18 +181,17 @@ export abstract class BaseWatcher implements Watcher {
   }
 
   async insertRedisStream(content: Record<string, any>): Promise<void> {
+    const cleanContent = dropUndefinedKeys(sanitizeContent(content));
     try {
       await this.RedisClient.xAdd(
         this.streamKey,
         '*',
         {
-          uuid: content.uuid,
           request_id: requestLocalStorage.getStore()?.get("requestId") || 'null',
           job_id: jobLocalStorage.getStore()?.get("jobId") || 'null',
           schedule_id: scheduleLocalStorage.getStore()?.get("scheduleId") || 'null',
-          type: content.type,
-          content: JSON.stringify(content.content),
-          //add created_at in the patcher
+          type: this.type,
+          content: JSON.stringify(cleanContent),
           created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
         }
       );
@@ -207,11 +207,10 @@ export abstract class BaseWatcher implements Watcher {
 
   async index(req: ObservatoryBoardRequest) {
     const filters = this.extractFiltersFromRequest(req);
-    const tableData = await this.DBInstance.getIndexData(filters, this.type);
-    const graphData = await this.getGraphData(filters);
-    return { body: { table: tableData, graph: graphData }, statusCode: 200 }
+    const body = filters.isTable ? await this.getTableData(filters) : await this.getGraphData(filters);
+    return { body, statusCode: 200 }
   }
-  
+
 
   async view(req: ObservatoryBoardRequest) {
     const body = await this.getViewdata(req.params.id);
@@ -252,4 +251,5 @@ export abstract class BaseWatcher implements Watcher {
   protected abstract getViewdata(id: string): Promise<any>;
   protected abstract getMetadata({ requestId, jobId, scheduleId }: { requestId: string, jobId: string, scheduleId: string }): Promise<any>;
   protected abstract getGraphData(filters: any): Promise<any>
+  protected abstract getTableData(filters: any): Promise<any>
 }

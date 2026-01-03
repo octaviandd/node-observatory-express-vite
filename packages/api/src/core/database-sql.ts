@@ -1,6 +1,6 @@
 import { Connection, FieldPacket, QueryResult } from "mysql2/promise";
 import { PERIODS } from "./helpers/constants.js";
-import { formattCountGraphData, formattDurationGraphData, formatValue } from "./helpers/helpers.js";
+import { processedDurationGraphData, processedCountGraphData, formatValue } from "./helpers/helpers.js";
 import { MigrationError, DatabaseRetrieveError } from "./helpers/errors/Errors.js";
 
 class Database {
@@ -61,23 +61,31 @@ class Database {
     }
   }
 
-  async insert(redisEntry: any) {
+  async insert(redisEntries: RedisEntry[]) {
+    if (redisEntries.length === 0) return;
+
     try {
       await this.storeConnection.query("START TRANSACTION");
+
+      const placeholders = redisEntries.map(() => '(?, ?, ?, ?, ?, ?, ?)').join(', ');
+      const values = redisEntries.flatMap(entry => [
+        entry.uuid,
+        entry.request_id,
+        entry.job_id,
+        entry.schedule_id,
+        entry.type,
+        typeof entry.content === 'string' ? entry.content : JSON.stringify(entry.content),
+        entry.created_at,
+      ]);
+
       await this.storeConnection.query(
-        "INSERT INTO observatory_entries (uuid, request_id, job_id, schedule_id, type, content, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        [
-          redisEntry.uuid,
-          redisEntry.request_id,
-          redisEntry.job_id,
-          redisEntry.schedule_id,
-          redisEntry.type,
-          redisEntry.content,
-          redisEntry.created_at,
-        ],
+        `INSERT INTO observatory_entries (uuid, request_id, job_id, schedule_id, type, content, created_at) VALUES ${placeholders}`,
+        values
       );
+
       await this.storeConnection.query("COMMIT");
     } catch (error) {
+      await this.storeConnection.query("ROLLBACK");
       throw new MigrationError('Failed to insert into database', {cause: (error as Error)});
     }
   }
@@ -416,7 +424,7 @@ class Database {
     return conditions.join(' ');
   }
 
-  async getInstanceData(filters: any, watcherType: string): Promise<WatcherEntry[]> {
+  async getByInstance(filters: any, watcherType: string): Promise<WatcherEntry[]> {
     const { period, limit, offset, query } = filters;
     
     const periodSql = this.getPeriodSQL(period);
@@ -442,13 +450,13 @@ class Database {
     }
   }
 
-  async getIndexData(filters: any, watcherType: string) {
+  async getByGroup(filters: any, watcherType: string) {
     const { period, limit, offset, query } = filters;
-    
+
     const periodSql = this.getPeriodSQL(period);
     const querySql = this.getInclusionSQL(query, "key");
     const watcherFilters = this.getWatcherSpecificFiltersSQL(watcherType, filters);
-    
+
     const { sql: groupMainKeySql, key: watcherKey } = this.getGroupMainKey(watcherType);
 
     try {
@@ -476,7 +484,7 @@ class Database {
     }
   }
 
-  async getRelatedViewdata(conditions: string[], params: string[], type: string, extraCondition: string): Promise<WatcherEntry[]> {
+  async getRelatedViewdata(conditions: string[], params: string[], type: string, extraCondition = ''): Promise<WatcherEntry[]> {
     try {
       const [ relatedItems ] = await this.storeConnection.query(
         "SELECT * FROM observatory_entries WHERE " +
@@ -485,7 +493,7 @@ class Database {
           extraCondition,
         [...params, type],
       ) as [QueryResult, FieldPacket[]];
-      
+
       return relatedItems as unknown as WatcherEntry[];
     } catch (error: unknown) {
       throw new DatabaseRetrieveError('Failed to get related view data from database', {cause: (error as Error)});
@@ -496,54 +504,57 @@ class Database {
     const periodSql = this.getPeriodSQL(period);
 
     try {
-      const [results] = await this.storeConnection.query(
+      const [ countResults ] = await this.storeConnection.query(
         `SELECT COUNT(*) as count
         FROM observatory_entries
         WHERE type = ?
         ${periodSql}`,
         [watcherType]
-      ) as [QueryResult, FieldPacket[]];
+      ) as [QueryResult & {total: number}, FieldPacket[]];
 
-      return Array.isArray(results) && results.length > 0 ? results[0] : { count: 0 };
+      return countResults.total;
     } catch (error: unknown) {
       throw new DatabaseRetrieveError('Failed to get count by type data from database', {cause: (error as Error)});
     }
   }
 
-  async getEntriesCount(filters: any, watcherType: string, extraCondition?: string) {
-    const { period, query } = filters;
+  async getByInstanceCount(filters: any, watcherType: string, extraCondition = '') {
+    const { period, query, status } = filters;
 
     const watcherFilters = this.getWatcherSpecificFiltersSQL(watcherType, filters);
     const periodSql = this.getPeriodSQL(period);
     const querySql = this.getInclusionSQL(query, "key");
-    // const statusSql = this.getStatusSQL(status);
+    const statusSql = this.getStatusSQL(status);
 
     try {
       const [countResult] = (await this.storeConnection.query(
-        `SELECT COUNT(*) as total FROM observatory_entries WHERE type = ? ${periodSql} ${querySql} ${watcherFilters} ${extraCondition}`,
+        `SELECT COUNT(*) as total FROM observatory_entries WHERE type = ? ${statusSql} ${periodSql} ${querySql} ${watcherFilters} ${extraCondition}`,
         [watcherType]
-      )) as [QueryResult, FieldPacket[]];
+      )) as [QueryResult & { total : number }, FieldPacket[]];
 
-      return countResult as QueryResult & { total: number }
+      return countResult.total;
     } catch (error) {
       throw new DatabaseRetrieveError('Failed to get entries count from database', {cause: (error as Error)});
     }
   }
 
-  async getEntriesCountByGroup(filters: any, watcherType: string, extraCondition?: string) {
+  async getByGroupCount(filters: any, watcherType: string, extraCondition = '') {
     const { period, query } = filters;
 
-    const { sql: groupMainKeySql } = this.getGroupMainKey(watcherType);
+    const { key: watcherKey } = this.getGroupMainKey(watcherType);
     const periodSql = this.getPeriodSQL(period);
     const querySql = this.getInclusionSQL(query, "key");
+    const watcherFilters = this.getWatcherSpecificFiltersSQL(watcherType, filters);
 
     try {
-      const [countResult] = (await this.storeConnection.query(
-        `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.key'))) as total FROM observatory_entries WHERE type = ? ${periodSql} ${querySql} ${groupMainKeySql} ${extraCondition}`,
+      const [ countResult ] = (await this.storeConnection.query(
+        `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.${watcherKey}'))) as total
+         FROM observatory_entries 
+         WHERE type = ? ${periodSql} ${querySql} ${watcherFilters} ${extraCondition}`,
         [watcherType]
-      )) as [QueryResult, FieldPacket[]];
-      return countResult as QueryResult & { total: number }
+      )) as [QueryResult & { total: number }, FieldPacket[]];
 
+      return countResult.total;
     } catch (error) {
       throw new DatabaseRetrieveError('Failed to get entries count by group from database', {cause: (error as Error)});
     }
@@ -605,8 +616,8 @@ class Database {
         p95: string | null;
       } = cleanResults;
 
-      const countFormattedData = formattCountGraphData(results as unknown as CacheContent[], period, keys);
-      const durationFormattedData = hasDuration ? formattDurationGraphData(results, period): {};
+      const countFormattedData = processedCountGraphData(results as unknown as CacheContent[], period, keys);
+      const durationFormattedData = hasDuration ? processedDurationGraphData(results, period): {};
 
       return {
         countFormattedData,

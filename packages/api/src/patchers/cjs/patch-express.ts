@@ -235,7 +235,7 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
               // Send to your logging system
               if (watchers?.requests) {
                 if (req.originalUrl && !(req.originalUrl.includes("/ui/"))) {
-                  // watchers.requests.insertRedisStream(logContent);
+                  watchers.requests.insertRedisStream(logContent);
                 }
               }
             }
@@ -284,7 +284,7 @@ if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
               };
 
               if (watchers?.requests) {
-                // watchers.requests.insertRedisStream(errorLogContent);
+                watchers.requests.insertRedisStream(errorLogContent);
               }
             }
             // Crucially, let Express handle the error flow

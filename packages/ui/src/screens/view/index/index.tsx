@@ -10,19 +10,16 @@ import { Badge } from "@/components/ui/badge";
 import ViewsIndexTable from "../table/index";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
 import { DurationGraph } from "@/components/ui/graphs/duration-graph";
-import { useIndexData } from "@/hooks/useIndexData";
+import { useGraph } from "@/hooks/useGraph";
 
 export default function ViewsIndex() {
-  const { data, currentDate, period } = useIndexData({
+  const { data, currentDate, period } = useGraph({
     type: "views",
   });
 
-  const graph = data?.graph;
-  const table = data?.table;
-
   return (
     <div className="flex flex-col gap-6">
-      {table && graph && 
+      {data &&
       <div className="grid grid-cols-2 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -31,20 +28,20 @@ export default function ViewsIndex() {
                 <CardTitle className="text-sm text-muted-foreground">
                   VIEWS
                 </CardTitle>
-                <CardSubtitle>{table.count}</CardSubtitle>
+                <CardSubtitle>{data.count}</CardSubtitle>
               </div>
             </div>
             <div className="flex gap-4 text-xs">
               <div className="flex flex-col items-center">
                 <span className="text-muted-foreground">COMPLETED</span>
                 <Badge variant="secondary" className="mt-1">
-                  {table.indexCountOne}
+                  {data.indexCountOne}
                 </Badge>
               </div>
               <div className="flex flex-col items-center text-red-500">
                 <span className="text-muted-foreground">FAILED</span>
                 <Badge variant="destructive" className="mt-1">
-                  {table.indexCountTwo}
+                  {data.indexCountTwo}
                 </Badge>
               </div>
             </div>
@@ -52,7 +49,7 @@ export default function ViewsIndex() {
           <CardContent>
             <div className="h-auto">
               <CountGraph
-                data={graph.countFormattedData}
+                data={data.countFormattedData}
                 barData={[
                   { dataKey: "completed", stackId: "a", fill: "#f1f5f9" },
                   { dataKey: "failed", stackId: "b", fill: "#ef4444" },
@@ -72,17 +69,17 @@ export default function ViewsIndex() {
                   DURATION
                 </CardTitle>
                 <CardSubtitle>
-                  {table.shortest} – {table.longest}
+                  {data.shortest} – {data.longest}
                 </CardSubtitle>
               </div>
               <div className="flex gap-4 text-xs">
                 <div>
                   <span className="text-muted-foreground mr-1">AVG</span>
-                  <Badge variant="secondary">{table.average}</Badge>
+                  <Badge variant="secondary">{data.average}</Badge>
                 </div>
                 <div>
                   <span className="text-muted-foreground mr-1">P95</span>
-                  <Badge variant="warning">{table.p95}</Badge>
+                  <Badge variant="warning">{data.p95}</Badge>
                 </div>
               </div>
             </div>
@@ -90,7 +87,7 @@ export default function ViewsIndex() {
           <CardContent>
             <div className="h-auto">
               <DurationGraph
-                data={graph.durationFormattedData}
+                data={data.durationFormattedData}
                 period={period}
                 currentDate={currentDate}
               />

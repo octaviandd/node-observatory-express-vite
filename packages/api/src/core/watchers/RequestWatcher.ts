@@ -1,4 +1,3 @@
-import { Request } from "express";
 import { BaseWatcher } from "./BaseWatcher.js";
 import Database from '../database-sql.js';
 import { RedisClientType } from "redis";
@@ -11,24 +10,23 @@ class RequestWatcher extends BaseWatcher {
     super(redisClient, DBInstance, "request");
   }
 
-  protected async getData(filters: RequestFilters): Promise<{ results: any, count: string }> {
+  protected async getTableData(filters: RequestFilters): Promise<{ results: any, count: string }> {
     if (filters.index === 'instance') {
-      const results = await this.DBInstance.getInstanceData(filters, this.type);
-      const countResults = await this.DBInstance.getEntriesCount(filters, this.type, '');
+      const results = await this.DBInstance.getByInstance(filters, this.type);
+      const count = await this.DBInstance.getByInstanceCount(filters, this.type);
 
-      return { results, count: formatValue(countResults.total, true) };
+      return { results, count: formatValue(count, true) };
     } else {
-      const results = await this.DBInstance.getIndexData(filters, this.type);
-      const countResult = await this.DBInstance.getEntriesCountByGroup(filters, this.type, '');
+      const results = await this.DBInstance.getByGroup(filters, this.type);
+      const count = await this.DBInstance.getByGroupCount(filters, this.type);
 
-      return { results, count: formatValue(countResult.total, true) };
+      return { results, count: formatValue(count, true) };
     }
   }
 
   protected async getViewdata(id: string): Promise<any> {
     // Request has a unique view pattern - it fetches the entry AND all related entries by request_id
     const entry = await this.DBInstance.getEntry(id);
-    
     if (!entry.requestId) {
       return groupItemsByType([entry]);
     }
@@ -56,7 +54,7 @@ class RequestWatcher extends BaseWatcher {
       filters,
       this.type,
       ['count_200', 'count_400', 'count_500'],
-      true // request has duration
+      true
     );
   }
 
