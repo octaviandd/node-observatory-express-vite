@@ -30,9 +30,9 @@ if (
   JSON.parse(process.env.NODE_OBSERVATORY_NOTIFICATIONS).includes('ably')
 ) {
   // Check if ably has already been patched
-  if (!(global as any)[ABLY_PATCHED_SYMBOL]) {
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLSPATCHERS_GLOBAL_SYMBOLS.ABLY_PATCHED_SYMBOL]) {
     // Mark ably as patched
-    (global as any)[ABLY_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLSABLY_PATCHED_SYMBOL] = true;
 
     /**
      * Hook "ably" to patch its connection and event handling (ESM version).

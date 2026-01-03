@@ -533,9 +533,9 @@ if (
   JSON.parse(process.env.NODE_OBSERVATORY_HTTP).includes('http')
 ) {
   // Check if http has already been patched
-  if (!(global as any)[HTTP_PATCHED_SYMBOL]) {
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLSPATCHERS_GLOBAL_SYMBOLS.HTTP_PATCHED_SYMBOL]) {
     // Mark http as patched
-    (global as any)[HTTP_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLSHTTP_PATCHED_SYMBOL] = true;
 
     // Apply patches to HTTP methods
     patchHttpMethod(http, 'request', 'http');

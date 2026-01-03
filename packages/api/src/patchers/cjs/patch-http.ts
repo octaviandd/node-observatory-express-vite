@@ -3,16 +3,14 @@
 import shimmer from "shimmer";
 import http from "http";
 import https from "https";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import {
   getCallerInfo,
   getRequestInfo,
   httpRequestToRequestData,
 } from "../../core/helpers/helpers";
 import zlib from "zlib";
-
-// Create a global symbol to track if http has been patched
-const HTTP_PATCHED_SYMBOL = Symbol.for("node-observer:http-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 // Maximum size of request/response body to capture (1MB)
 const MAX_BODY_SIZE = 1024 * 1024;
@@ -532,10 +530,8 @@ if (
   process.env.NODE_OBSERVATORY_HTTP &&
   JSON.parse(process.env.NODE_OBSERVATORY_HTTP).includes("http")
 ) {
-  // Check if http has already been patched
-  if (!(global as any)[HTTP_PATCHED_SYMBOL]) {
-    // Mark http as patched
-    (global as any)[HTTP_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.HTTP_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.HTTP_PATCHED_SYMBOL] = true;
 
     // Apply patches to HTTP methods
     patchHttpMethod(http, "request", "http");

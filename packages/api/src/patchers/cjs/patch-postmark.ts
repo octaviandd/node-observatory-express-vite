@@ -2,23 +2,18 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
-
-const POSTMARK_PATCHED_SYMBOL = Symbol.for("node-observer:postmark-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 if (
   process.env.NODE_OBSERVATORY_MAILER &&
   JSON.parse(process.env.NODE_OBSERVATORY_MAILER).includes("postmark")
 ) {
-  if (!(global as any)[POSTMARK_PATCHED_SYMBOL]) {
-    (global as any)[POSTMARK_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.POSTMARK_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.POSTMARK_PATCHED_SYMBOL] = true;
 
-    /**
-     * Hook "postmark" to patch its mail sending functionality.
-     */
     new Hook(["postmark"], function (exports: any, name, basedir) {
-      // `exports` is the object returned by require("postmark").
       if (!exports || typeof exports.ServerClient !== "function") {
         return exports;
       }

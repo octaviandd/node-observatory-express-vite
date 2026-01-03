@@ -2,7 +2,7 @@
 
 import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index.js";
+import { watchers, patchedGlobal } from "../../core/index.js";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
 
 // Create a global symbol to track if memjs has been patched
@@ -13,9 +13,9 @@ if (
   JSON.parse(process.env.NODE_OBSERVATORY_CACHE).includes("memjs")
 ) {
   // Check if memjs has already been patched
-  if (!(global as any)[MEMJS_PATCHED_SYMBOL]) {
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.MEMJS_PATCHED_SYMBOL]) {
     // Mark memjs as patched
-    (global as any)[MEMJS_PATCHED_SYMBOL] = true;
+    patchedGlobal[MEMJS_PATCHED_SYMBOL] = true;
 
     const MEMJS_METHODS = {
       get: "get",

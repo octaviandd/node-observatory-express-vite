@@ -11,9 +11,9 @@ if (
   JSON.parse(process.env.NODE_OBSERVATORY_HTTP).includes('fetch')
 ) {
   // Check if fetch has already been patched
-  if (!(global as any)[FETCH_PATCHED_SYMBOL]) {
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLSPATCHERS_GLOBAL_SYMBOLS.FETCH_PATCHED_SYMBOL]) {
     // Mark fetch as patched
-    (global as any)[FETCH_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLSFETCH_PATCHED_SYMBOL] = true;
 
     // Only patch if fetch exists
     // @ts-ignore

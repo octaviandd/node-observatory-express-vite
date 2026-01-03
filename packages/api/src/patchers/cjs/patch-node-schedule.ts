@@ -2,13 +2,10 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { v4 as uuidv4 } from "uuid";
 import { getCallerInfo } from "../../core/helpers/helpers";
-
-const NODESCHEDULE_PATCHED_SYMBOL = Symbol.for(
-  "node-observer:nodeschedule-patched",
-);
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 const METHODS = ["scheduleJob", "rescheduleJob", "cancelJob", "cancelNext"];
 
@@ -16,8 +13,8 @@ if (
   process.env.NODE_OBSERVATORY_SCHEDULER &&
   JSON.parse(process.env.NODE_OBSERVATORY_SCHEDULER).includes("node-schedule")
 ) {
-  if (!(global as any)[NODESCHEDULE_PATCHED_SYMBOL]) {
-    (global as any)[NODESCHEDULE_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.NODESCHEDULE_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.NODESCHEDULE_PATCHED_SYMBOL] = true;
 
     new Hook(["node-schedule"], function (exports, name, basedir) {
       shimmer.wrap(

@@ -2,7 +2,7 @@
 
 import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index.js";
+import { watchers, patchedGlobal } from "../../core/index.js";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
 
 // Create a global symbol to track if mongoose has been patched
@@ -13,9 +13,9 @@ if (
   JSON.parse(process.env.NODE_OBSERVATORY_MODELS).includes("mongoose")
 ) {
   // Check if mongoose has already been patched
-  if (!(global as any)[MONGOOSE_PATCHED_SYMBOL]) {
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.MONGOOSE_PATCHED_SYMBOL]) {
     // Mark mongoose as patched
-    (global as any)[MONGOOSE_PATCHED_SYMBOL] = true;
+    patchedGlobal[MONGOOSE_PATCHED_SYMBOL] = true;
 
     /**
      * Hook "mongoose" to patch its query and document methods.

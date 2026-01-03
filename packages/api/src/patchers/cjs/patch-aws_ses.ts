@@ -2,11 +2,9 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
-
-// Create a global symbol to track if aws-ses has been patched
-const AWS_SES_PATCHED_SYMBOL = Symbol.for("node-observer:aws-ses-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 if (
   process.env.NODE_OBSERVATORY_MAILER &&
@@ -15,9 +13,9 @@ if (
   )
 ) {
   // Check if aws-ses has already been patched
-  if (!(global as any)[AWS_SES_PATCHED_SYMBOL]) {
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.AWS_SES_PATCHED_SYMBOL]) {
     // Mark aws-ses as patched
-    (global as any)[AWS_SES_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.AWS_SES_PATCHED_SYMBOL] = true;
 
     /**
      * Hook "@aws-sdk/client-ses" to patch its email sending functionality.

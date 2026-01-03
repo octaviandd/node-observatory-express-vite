@@ -2,27 +2,19 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
-
-// Create a global symbol to track if pusher has been patched
-const PUSHER_PATCHED_SYMBOL = Symbol.for("node-observer:pusher-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 if (
   process.env.NODE_OBSERVATORY_NOTIFICATIONS &&
   JSON.parse(process.env.NODE_OBSERVATORY_NOTIFICATIONS).includes("pusher")
 ) {
-  // Check if pusher has already been patched
-  if (!(global as any)[PUSHER_PATCHED_SYMBOL]) {
-    // Mark pusher as patched
-    (global as any)[PUSHER_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.PUSHER_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.PUSHER_PATCHED_SYMBOL] = true;
 
-    /**
-     * Hook the "pusher" module so we can patch the prototype methods (like trigger/triggerBatch).
-     */
     new Hook(["pusher"], function (exports, name, basedir) {
       if (exports && (exports as any).prototype) {
-        // Patch pusher.trigger
         if (typeof (exports as any).prototype.trigger === "function") {
           shimmer.wrap(
             (exports as any).prototype,

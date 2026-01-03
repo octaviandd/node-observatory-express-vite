@@ -14,9 +14,9 @@ if (
   JSON.parse(process.env.NODE_OBSERVATORY_JOBS).includes('agenda')
 ) {
   // Check if agenda has already been patched
-  if (!(global as any)[AGENDA_PATCHED_SYMBOL]) {
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLSPATCHERS_GLOBAL_SYMBOLS.AGENDA_PATCHED_SYMBOL]) {
     // Mark agenda as patched
-    (global as any)[AGENDA_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLSAGENDA_PATCHED_SYMBOL] = true;
 
     // The Agenda methods we want to intercept
     const METHODS_TO_PATCH = {

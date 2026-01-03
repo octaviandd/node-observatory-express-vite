@@ -2,11 +2,9 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
-
-// Create a global symbol to track if keyv has been patched
-const KEYV_PATCHED_SYMBOL = Symbol.for("node-observer:keyv-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 const patchMethod = (prototype: any, method: string) => {
   shimmer.wrap(prototype, method, function (original) {
@@ -70,9 +68,9 @@ if (
   JSON.parse(process.env.NODE_OBSERVATORY_CACHE).includes("keyv")
 ) {
   // Check if keyv has already been patched
-  if (!(global as any)[KEYV_PATCHED_SYMBOL]) {
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.KEYV_PATCHED_SYMBOL]) {
     // Mark keyv as patched
-    (global as any)[KEYV_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.KEYV_PATCHED_SYMBOL] = true;
 
     new Hook(["keyv"], (exports: any) => {
       if (!exports.Keyv || typeof exports.Keyv !== "function") {

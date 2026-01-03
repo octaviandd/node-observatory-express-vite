@@ -2,24 +2,17 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
-
-// Create a global symbol to track if mongoose has been patched
-const MONGOOSE_PATCHED_SYMBOL = Symbol.for("node-observer:mongoose-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 if (
   process.env.NODE_OBSERVATORY_MODELS &&
   JSON.parse(process.env.NODE_OBSERVATORY_MODELS).includes("mongoose")
 ) {
-  // Check if mongoose has already been patched
-  if (!(global as any)[MONGOOSE_PATCHED_SYMBOL]) {
-    // Mark mongoose as patched
-    (global as any)[MONGOOSE_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.MONGOOSE_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.MONGOOSE_PATCHED_SYMBOL] = true;
 
-    /**
-     * Hook "mongoose" to patch its query and document methods.
-     */
     new Hook(["mongoose"], function (exports: any, name, basedir) {
       // `exports` is the Mongoose module.
       if (!exports || typeof exports.Model !== "function") {

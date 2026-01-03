@@ -70,9 +70,9 @@ if (
   JSON.parse(process.env.NODE_OBSERVATORY_CACHE).includes('keyv')
 ) {
   // Check if keyv has already been patched
-  if (!(global as any)[KEYV_PATCHED_SYMBOL]) {
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLSPATCHERS_GLOBAL_SYMBOLS.KEYV_PATCHED_SYMBOL]) {
     // Mark keyv as patched
-    (global as any)[KEYV_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLSKEYV_PATCHED_SYMBOL] = true;
 
     addHook((exports: any, name: Namespace, baseDir?: string) => {
       // Only patch 'keyv' module

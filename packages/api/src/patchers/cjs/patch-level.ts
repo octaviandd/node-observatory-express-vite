@@ -2,24 +2,17 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
-
-// Create a global symbol to track if level has been patched
-const LEVEL_PATCHED_SYMBOL = Symbol.for("node-observer:level-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 if (
   process.env.NODE_OBSERVATORY_CACHE &&
   JSON.parse(process.env.NODE_OBSERVATORY_CACHE).includes("level")
 ) {
-  // Check if level has already been patched
-  if (!(global as any)[LEVEL_PATCHED_SYMBOL]) {
-    // Mark level as patched
-    (global as any)[LEVEL_PATCHED_SYMBOL] = true;
-
-    /**
-     * Hook "level" to patch its cache operations.
-     */
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.LEVEL_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.LEVEL_PATCHED_SYMBOL] = true;
+   
     new Hook(["level"], function (exports: any, name, basedir) {
       // The level package exports a function that creates a database instance
       if (!exports.Level || typeof exports.Level !== "function") {

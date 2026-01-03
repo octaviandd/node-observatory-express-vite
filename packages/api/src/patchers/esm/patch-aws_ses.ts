@@ -15,9 +15,9 @@ if (
   )
 ) {
   // Check if aws-ses has already been patched
-  if (!(global as any)[AWS_SES_PATCHED_SYMBOL]) {
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLSPATCHERS_GLOBAL_SYMBOLS.AWS_SES_PATCHED_SYMBOL]) {
     // Mark aws-ses as patched
-    (global as any)[AWS_SES_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLSAWS_SES_PATCHED_SYMBOL] = true;
 
     /**
      * Hook "@aws-sdk/client-ses" to patch its email sending functionality (ESM version).

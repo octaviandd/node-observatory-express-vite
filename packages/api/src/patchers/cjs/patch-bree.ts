@@ -2,42 +2,30 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { v4 as uuidv4 } from "uuid";
 import { getCallerInfo } from "../../core/helpers/helpers";
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
-const BREE_PATCHED_SYMBOL = Symbol.for("node-observer:bree-patched");
-
-// Methods to patch on the Bree prototype
 const instanceMethods = ["add", "start", "stop", "remove"];
-
-// Methods to patch on individual job objects
 const jobMethods = ["run", "stop", "remove"];
 
 if (
   process.env.NODE_OBSERVATORY_SCHEDULER &&
   JSON.parse(process.env.NODE_OBSERVATORY_SCHEDULER).includes("bree")
 ) {
-  if (!(global as any)[BREE_PATCHED_SYMBOL]) {
-    (global as any)[BREE_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.BREE_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.BREE_PATCHED_SYMBOL] = true;
 
     new Hook(["bree"], (exports: any) => {
-      // Check if Bree has already been patched
-
-      // Patch Bree constructor to intercept job creation
       shimmer.wrap(exports, "default", function (originalConstructor: any) {
         return function patchedConstructor(this: any, ...args: any[]) {
           const callerInfo = getCallerInfo(__filename);
-          // Call the original constructor
           const breeInstance = new originalConstructor(...args);
 
-          // Generate a unique ID for this Bree instance
           const breeId = uuidv4();
-
-          // Store the ID on the instance for reference
           breeInstance._observerId = breeId;
 
-          // Log the creation of the Bree instance
           watchers.scheduler.insertRedisStream({
             type: "create",
             package: "bree",
@@ -51,15 +39,13 @@ if (
         };
       });
 
-      // Patch instance methods
       instanceMethods.forEach((method) => {
         shimmer.wrap(exports.prototype, method, function (originalFn) {
           return function patchedMethod(this: any, ...args: any[]) {
             const callerInfo = getCallerInfo(__filename);
             const breeId = this._observerId || uuidv4();
-            const scheduleId = uuidv4(); // Generate a unique ID for this operation
+            const scheduleId = uuidv4();
 
-            // Handle different method signatures
             let jobName = "";
             let jobConfig = {};
 

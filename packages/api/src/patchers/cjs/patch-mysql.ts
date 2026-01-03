@@ -2,29 +2,20 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import type { Connection, Pool } from "mysql";
 import type { QueryOptions } from "mysql";
 import { getCallerInfo } from "../../core/helpers/helpers";
-
-// Create a global symbol to track if mysql has been patched
-const MYSQL_PATCHED_SYMBOL = Symbol.for("node-observer:mysql-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 if (
   process.env.NODE_OBSERVATORY_QUERIES &&
   JSON.parse(process.env.NODE_OBSERVATORY_QUERIES).includes("mysql")
 ) {
-  // Check if mysql has already been patched
-  if (!(global as any)[MYSQL_PATCHED_SYMBOL]) {
-    // Mark mysql as patched
-    (global as any)[MYSQL_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.MYSQL_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.MYSQL_PATCHED_SYMBOL] = true;
 
-    /**
-     * Hook the "mysql" module so that when it's first required,
-     * we can patch its connection and pool prototypes.
-     */
     new Hook(["mysql"], function (exports, name, basedir) {
-      // 1) Patch createConnection
       shimmer.wrap(
         exports as any,
         "createConnection",

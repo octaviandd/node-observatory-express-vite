@@ -2,7 +2,7 @@
 
 import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index.js";
+import { watchers, patchedGlobal } from "../../core/index.js";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
 import { PassThrough } from "stream";
 
@@ -14,8 +14,8 @@ if (
   process.env.NODE_OBSERVATORY_HTTP &&
   JSON.parse(process.env.NODE_OBSERVATORY_HTTP).includes("undici")
 ) {
-  if (!(global as any)[UNDICI_PATCHED_SYMBOL]) {
-    (global as any)[UNDICI_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.UNDICI_PATCHED_SYMBOL]) {
+    patchedGlobal[UNDICI_PATCHED_SYMBOL] = true;
 
     addHook((exports: any, name: Namespace, baseDir?: string) => {
       // Only patch 'undici' module

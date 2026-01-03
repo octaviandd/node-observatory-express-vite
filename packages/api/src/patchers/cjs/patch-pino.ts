@@ -2,23 +2,18 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
-
-const PINO_PATCHED_SYMBOL = Symbol.for("node-observer:pino-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 if (
   process.env.NODE_OBSERVATORY_LOGGING &&
   JSON.parse(process.env.NODE_OBSERVATORY_LOGGING).includes("pino")
 ) {
-  if (!(global as any)[PINO_PATCHED_SYMBOL]) {
-    (global as any)[PINO_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.PINO_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.PINO_PATCHED_SYMBOL] = true;
 
-    new Hook(["pino"], function (
-      exports: any,
-      name: string,
-      basedir: string | undefined,
-    ): any {
+    new Hook(["pino"], function (exports: any): any {
       // The `exports` here is the top-level function from "pino".
       // We can wrap that function to intercept any Pino logger creation.
 

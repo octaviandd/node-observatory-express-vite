@@ -2,26 +2,18 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
-
-// Create a global symbol to track if bunyan has been patched
-const BUNYAN_PATCHED_SYMBOL = Symbol.for("node-observer:bunyan-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 if (
   process.env.NODE_OBSERVATORY_LOGGING &&
   JSON.parse(process.env.NODE_OBSERVATORY_LOGGING).includes("bunyan")
 ) {
-  // Check if bunyan has already been patched
-  if (!(global as any)[BUNYAN_PATCHED_SYMBOL]) {
-    // Mark bunyan as patched
-    (global as any)[BUNYAN_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.BUNYAN_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.BUNYAN_PATCHED_SYMBOL] = true;
 
-    // Intercepts loading of "bunyan"
-    new Hook(["bunyan"], function (exports, name, basedir) {
-      // The `exports` object is the "bunyan" module.
-      // We'll wrap "createLogger" to patch its returned loggers.
-
+    new Hook(["bunyan"], function (exports) {
       function patchLoggerMethods(loggerInstance: any, contextMetadata = {}) {
         ["info", "warn", "error", "debug", "trace", "fatal"].forEach(
           (method) => {

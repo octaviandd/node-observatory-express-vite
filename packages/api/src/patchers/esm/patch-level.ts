@@ -2,7 +2,7 @@
 
 import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index.js";
+import { watchers, patchedGlobal } from "../../core/index.js";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
 
 // Create a global symbol to track if level has been patched
@@ -13,9 +13,9 @@ if (
   JSON.parse(process.env.NODE_OBSERVATORY_CACHE).includes("level")
 ) {
   // Check if level has already been patched
-  if (!(global as any)[LEVEL_PATCHED_SYMBOL]) {
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.LEVEL_PATCHED_SYMBOL]) {
     // Mark level as patched
-    (global as any)[LEVEL_PATCHED_SYMBOL] = true;
+    patchedGlobal[LEVEL_PATCHED_SYMBOL] = true;
 
     /**
      * Hook "level" to patch its cache operations.

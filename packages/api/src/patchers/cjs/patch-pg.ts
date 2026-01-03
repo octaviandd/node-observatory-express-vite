@@ -2,10 +2,10 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
-const PG_PATCHED_SYMBOL = Symbol.for("node-observer:pg-patched");
 
 /**
  * Determines if a query or execute command should be logged.
@@ -19,8 +19,8 @@ if (
   process.env.NODE_OBSERVATORY_QUERIES &&
   JSON.parse(process.env.NODE_OBSERVATORY_QUERIES).includes("pg")
 ) {
-  if (!(global as any)[PG_PATCHED_SYMBOL]) {
-    (global as any)[PG_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.PG_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.PG_PATCHED_SYMBOL] = true;
 
     new Hook(["pg"], function (exports: any, name, basedir) {
       if (!exports || typeof exports.Client !== "function") {

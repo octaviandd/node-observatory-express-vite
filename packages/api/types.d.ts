@@ -7,6 +7,7 @@ declare global {
       };
     }
   }
+  const WINSTON_PATCHED_SYMBOL: unique symbol
 }
 
 interface WatcherEntry {

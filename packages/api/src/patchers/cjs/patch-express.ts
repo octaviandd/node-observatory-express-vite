@@ -8,23 +8,17 @@ import type {
 } from "express";
 import { v4 as uuidv4 } from "uuid";
 import path from "path";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { requestLocalStorage } from "../../core/store";
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
-const OBSERVATORY_SKIP_MARKER = Symbol.for("node-observatory:skip-logging");
-
-// Symbol to prevent double patching
-const EXPRESS_PATCHED_SYMBOL = Symbol.for("node-observer:express-patched");
 const MAX_PAYLOAD_SIZE = 1024 * 50; // 50KB
 
-if (!(global as any)[EXPRESS_PATCHED_SYMBOL]) {
-  (global as any)[EXPRESS_PATCHED_SYMBOL] = true;
+if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.EXPRESS_PATCHED_SYMBOL]) {
+  patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.EXPRESS_PATCHED_SYMBOL] = true;
 
-  new Hook(["express"], function (exports: any, name, basedir) {
-    if (!exports?.application?.handle) {
-      return exports;
-    }
-    if (!exports?.response) {
+  new Hook(["express"], function (exports: any) {
+    if (!exports?.application?.handle || !exports?.response) {
       return exports;
     }
 

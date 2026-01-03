@@ -2,21 +2,17 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { nodeCacheCommandsArgs } from "../../core/helpers/constants";
 import { getCallerInfo } from "../../core/helpers/helpers";
-
-// Create a global symbol to track if node-cache has been patched
-const NODECACHE_PATCHED_SYMBOL = Symbol.for("node-observer:nodecache-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 if (
   process.env.NODE_OBSERVATORY_CACHE &&
   JSON.parse(process.env.NODE_OBSERVATORY_CACHE).includes("node-cache")
 ) {
-  // Check if node-cache has already been patched
-  if (!(global as any)[NODECACHE_PATCHED_SYMBOL]) {
-    // Mark node-cache as patched
-    (global as any)[NODECACHE_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.NODECACHE_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.NODECACHE_PATCHED_SYMBOL] = true;
 
     new Hook(["node-cache"], function (exports, name, basedir) {
       // `exports` is the NodeCache constructor (class).

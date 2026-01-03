@@ -18,8 +18,8 @@ if (
   process.env.NODE_OBSERVATORY_SCHEDULER &&
   JSON.parse(process.env.NODE_OBSERVATORY_SCHEDULER).includes('bree')
 ) {
-  if (!(global as any)[BREE_PATCHED_SYMBOL]) {
-    (global as any)[BREE_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLSPATCHERS_GLOBAL_SYMBOLS.BREE_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLSBREE_PATCHED_SYMBOL] = true;
 
     addHook((exports: any, name: Namespace, baseDir?: string) => {
       // Only patch 'bree' module

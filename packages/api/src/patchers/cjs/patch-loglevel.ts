@@ -2,27 +2,18 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
-
-// Create a global symbol to track if loglevel has been patched
-const LOGLEVEL_PATCHED_SYMBOL = Symbol.for("node-observer:loglevel-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 if (
   process.env.NODE_OBSERVATORY_LOGGING &&
   JSON.parse(process.env.NODE_OBSERVATORY_LOGGING).includes("loglevel")
 ) {
-  // Check if loglevel has already been patched
-  if (!(global as any)[LOGLEVEL_PATCHED_SYMBOL]) {
-    // Mark loglevel as patched
-    (global as any)[LOGLEVEL_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.LOGLEVEL_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.LOGLEVEL_PATCHED_SYMBOL] = true;
 
-    /**
-     * Hook "loglevel" to patch its logging functionality.
-     */
-    new Hook(["loglevel"], function (exports: any, name, basedir) {
-      // `exports` is the object returned by require("loglevel").
-      //@ts-ignore
+    new Hook(["loglevel"], function (exports: any) {
       if (
         !exports ||
         typeof exports !== "object" ||

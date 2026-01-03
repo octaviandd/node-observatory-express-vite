@@ -2,17 +2,16 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
-
-const SIGNALE_PATCHED_SYMBOL = Symbol.for("node-observer:signale-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 if (
   process.env.NODE_OBSERVATORY_LOGGING &&
   JSON.parse(process.env.NODE_OBSERVATORY_LOGGING).includes("signale")
 ) {
-  if (!(global as any)[SIGNALE_PATCHED_SYMBOL]) {
-    (global as any)[SIGNALE_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.SIGNALE_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.SIGNALE_PATCHED_SYMBOL] = true;
 
     new Hook(["signale"], function (exports: any, name, basedir) {
       if (!exports || typeof exports !== "object") {

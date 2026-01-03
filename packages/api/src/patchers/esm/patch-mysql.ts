@@ -2,7 +2,7 @@
 
 import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index.js";
+import { watchers, patchedGlobal } from "../../core/index.js";
 import type { Connection, Pool } from "mysql";
 import type { QueryOptions } from "mysql";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
@@ -15,9 +15,9 @@ if (
   JSON.parse(process.env.NODE_OBSERVATORY_QUERIES).includes("mysql")
 ) {
   // Check if mysql has already been patched
-  if (!(global as any)[MYSQL_PATCHED_SYMBOL]) {
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.MYSQL_PATCHED_SYMBOL]) {
     // Mark mysql as patched
-    (global as any)[MYSQL_PATCHED_SYMBOL] = true;
+    patchedGlobal[MYSQL_PATCHED_SYMBOL] = true;
 
     /**
      * Hook the "mysql" module so that when it's first imported,

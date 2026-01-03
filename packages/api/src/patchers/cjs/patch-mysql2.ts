@@ -2,23 +2,17 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 if (
   process.env.NODE_OBSERVATORY_QUERIES &&
   JSON.parse(process.env.NODE_OBSERVATORY_QUERIES).includes("mysql2")
 ) {
-  const MYSQL2_PATCHED_SYMBOL = Symbol.for("node-observer:mysql2-patched");
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.MYSQL2_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.MYSQL2_PATCHED_SYMBOL] = true;
 
-  // Check if mysql2 has already been patched
-  if (!(global as any)[MYSQL2_PATCHED_SYMBOL]) {
-    // Mark mysql2 as patched
-    (global as any)[MYSQL2_PATCHED_SYMBOL] = true;
-
-    /**
-     * Hook into the "mysql2/promise" module to patch its connection and pool prototypes.
-     */
     new Hook(["mysql2/promise"], (exports: any) => {
       // Patch createConnection
       shimmer.wrap(

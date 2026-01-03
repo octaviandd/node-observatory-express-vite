@@ -1,9 +1,8 @@
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
-
-const PRISMA_PATCHED_SYMBOL = Symbol.for("node-observer:prisma-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 function patchPrismaModels(prisma: any) {
   const methodsToPatch = [
@@ -26,7 +25,6 @@ function patchPrismaModels(prisma: any) {
 
   // Prisma attaches model properties (like prisma.user, prisma.post) dynamically.
   for (const modelName in prisma) {
-    // Skip non-model properties.
     if (!Object.prototype.hasOwnProperty.call(prisma, modelName)) continue;
     const model = prisma[modelName];
     if (typeof model !== "object" || model === null) continue;
@@ -79,8 +77,8 @@ if (
   process.env.NODE_OBSERVATORY_MODELS &&
   JSON.parse(process.env.NODE_OBSERVATORY_MODELS).includes("prisma")
 ) {
-  if (!(global as any)[PRISMA_PATCHED_SYMBOL]) {
-    (global as any)[PRISMA_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.PRISMA_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.PRISMA_PATCHED_SYMBOL] = true;
 
     new Hook(["@prisma/client"], (exports: any, name, basedir) => {
       if (!exports || !exports.PrismaClient) {

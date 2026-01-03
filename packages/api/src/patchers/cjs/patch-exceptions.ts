@@ -2,14 +2,10 @@
 
 import fs from "fs";
 import path from "path";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { inspect } from "util";
 import { getCallerInfo } from "../../core/helpers/helpers";
-
-// Create a global symbol to track if exceptions have been patched
-const EXCEPTIONS_PATCHED_SYMBOL = Symbol.for(
-  "node-observer:exceptions-patched",
-);
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 /**
  * Extract detailed error information, including formatted code context
@@ -102,9 +98,9 @@ function unhandledRejectionPatcher() {
 
 if (process.env.NODE_OBSERVATORY_ERRORS) {
   // Check if exceptions have already been patched
-  if (!(global as any)[EXCEPTIONS_PATCHED_SYMBOL]) {
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.EXCEPTIONS_PATCHED_SYMBOL]) {
     // Mark exceptions as patched
-    (global as any)[EXCEPTIONS_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.EXCEPTIONS_PATCHED_SYMBOL] = true;
 
     // Apply all patchers
     // uncaughtPatcher();

@@ -2,21 +2,18 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
-
-const TYPEORM_PATCHED_SYMBOL = Symbol.for("node-observer:typeorm-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 if (
   process.env.NODE_OBSERVATORY_MODELS &&
   JSON.parse(process.env.NODE_OBSERVATORY_MODELS).includes("typeorm")
 ) {
-  if (!(global as any)[TYPEORM_PATCHED_SYMBOL]) {
-    // Mark typeorm as patched
-    (global as any)[TYPEORM_PATCHED_SYMBOL] = true;
+  if (patchedGlobal[PATCHERS_GLOBAL_SYMBOLSPATCHERS_GLOBAL_SYMBOLS.TYPEORM_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLSPATCHERS_GLOBAL_SYMBOLS.TYPEORM_PATCHED_SYMBOL] = true;
 
-    new Hook(["typeorm"], function (exports: any, name, basedir) {
-      // `exports` is the TypeORM module.
+    new Hook(["typeorm"], function (exports: any) {
       if (!exports || typeof exports.Repository !== "function") {
         return exports;
       }

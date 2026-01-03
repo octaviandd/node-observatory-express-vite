@@ -2,11 +2,10 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { v4 as uuidv4 } from "uuid";
 import { getCallerInfo } from "../../core/helpers/helpers";
-
-const NODECRON_PATCHED_SYMBOL = Symbol.for("node-observer:nodecron-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 const METHODS = ["schedule", "validate", "getTasks"];
 
@@ -14,8 +13,8 @@ if (
   process.env.NODE_OBSERVATORY_SCHEDULER &&
   JSON.parse(process.env.NODE_OBSERVATORY_SCHEDULER).includes("node-cron")
 ) {
-  if (!(global as any)[NODECRON_PATCHED_SYMBOL]) {
-    (global as any)[NODECRON_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.NODECRON_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.NODECRON_PATCHED_SYMBOL] = true;
 
     new Hook(["node-cron"], function (exports, name, basedir) {
       shimmer.wrap(

@@ -2,17 +2,16 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
-
-const SENDGRID_PATCHED_SYMBOL = Symbol.for("node-observer:sendgrid-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 if (
   process.env.NODE_OBSERVATORY_MAILER &&
   JSON.parse(process.env.NODE_OBSERVATORY_MAILER).includes("@sendgrid/mail")
 ) {
-  if (!(global as any)[SENDGRID_PATCHED_SYMBOL]) {
-    (global as any)[SENDGRID_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.SENDGRID_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.SENDGRID_PATCHED_SYMBOL] = true;
 
     new Hook(["@sendgrid/mail"], function (exports, name, basedir) {
       if (typeof (exports as any).send === "function") {

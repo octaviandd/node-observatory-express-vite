@@ -2,7 +2,7 @@
 
 import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index.js";
+import { watchers, patchedGlobal } from "../../core/index.js";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
 
 // Create a global symbol to track if winston has been patched
@@ -12,9 +12,9 @@ if (
   JSON.parse(process.env.NODE_OBSERVATORY_LOGGING).includes("winston")
 ) {
   // Check if winston has already been patched
-  if (!(global as any)[WINSTON_PATCHED_SYMBOL]) {
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.WINSTON_PATCHED_SYMBOL]) {
     // Mark winston as patched
-    (global as any)[WINSTON_PATCHED_SYMBOL] = true;
+    patchedGlobal[WINSTON_PATCHED_SYMBOL] = true;
 
     addHook((exports: any, name: Namespace, baseDir?: string) => {
       // Only patch 'winston' module

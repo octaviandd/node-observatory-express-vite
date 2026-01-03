@@ -13,9 +13,9 @@ if (
   JSON.parse(process.env.NODE_OBSERVATORY_LOGGING).includes('bunyan')
 ) {
   // Check if bunyan has already been patched
-  if (!(global as any)[BUNYAN_PATCHED_SYMBOL]) {
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLSPATCHERS_GLOBAL_SYMBOLS.BUNYAN_PATCHED_SYMBOL]) {
     // Mark bunyan as patched
-    (global as any)[BUNYAN_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLSBUNYAN_PATCHED_SYMBOL] = true;
 
     // Intercepts loading of "bunyan" (ESM version)
     addHook((exports: any, name: Namespace, baseDir?: string) => {

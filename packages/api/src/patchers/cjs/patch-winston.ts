@@ -2,30 +2,19 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { patchedGlobal, watchers } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
-// Create a global symbol to track if winston has been patched
-const WINSTON_PATCHED_SYMBOL = Symbol.for("node-observer:winston-patched");
-if (
-  process.env.NODE_OBSERVATORY_LOGGING &&
-  JSON.parse(process.env.NODE_OBSERVATORY_LOGGING).includes("winston")
-) {
-  // Check if winston has already been patched
-  if (!(global as any)[WINSTON_PATCHED_SYMBOL]) {
-    // Mark winston as patched
-    (global as any)[WINSTON_PATCHED_SYMBOL] = true;
+if (process.env.NODE_OBSERVATORY_LOGGING && JSON.parse(process.env.NODE_OBSERVATORY_LOGGING).includes("winston")) {
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.WINSTON_PATCHED_SYMBOL]) {
+    (global as typeof patchedGlobal)[PATCHERS_GLOBAL_SYMBOLS.WINSTON_PATCHED_SYMBOL] = true;
 
-    new Hook(["winston"], function (
-      exports: any,
-      name: string,
-      basedir: string | undefined,
-    ) {
+    new Hook(["winston"], function (exports: any) {
       shimmer.wrap(exports, "createLogger", function (originalCreateLogger) {
-        return function patchedCreateLogger(this: any, ...loggerArgs: any[]) {
+        return function patchedCreateLogger(this: any, ...loggerArgs: unknown[]) {
           const loggerInstance = originalCreateLogger.apply(this, loggerArgs);
 
-          // 3. Patch logger methods like `info`, `warn`, `error`
           ["info", "warn", "error", "debug", "verbose", "silly", "log"].forEach(
             (method) => {
               if (typeof loggerInstance[method] === "function") {
@@ -42,7 +31,6 @@ if (
                       line: callerInfo.line,
                     });
 
-                    // Continue calling the original Winston method
                     return originalMethod.apply(this, args);
                   };
                 });
@@ -54,11 +42,8 @@ if (
         };
       });
 
-      //
-      // 4. Patch the default logger (e.g., `winston.info(...)`) if needed
-      //
+      // Patch the default logger (e.g., `winston.info(...)`) if needed
       if (exports.default && typeof exports.default === "object") {
-        // Winston exports a default logger with methods like info, warn, error, etc.
         ["info", "warn", "error", "debug", "verbose", "silly", "log"].forEach(
           (method) => {
             if (typeof exports.default[method] === "function") {

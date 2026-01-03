@@ -2,26 +2,19 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { ioRedisCommandsArgs } from "../../core/helpers/constants";
 import { getCallerInfo } from "../../core/helpers/helpers";
-
-// Create a global symbol to track if ioredis has been patched
-const IOREDIS_PATCHED_SYMBOL = Symbol.for("node-observer:ioredis-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 if (
   process.env.NODE_OBSERVATORY_CACHE &&
   JSON.parse(process.env.NODE_OBSERVATORY_CACHE).includes("ioredis")
 ) {
-  // Check if ioredis has already been patched
-  if (!(global as any)[IOREDIS_PATCHED_SYMBOL]) {
-    // Mark ioredis as patched
-    (global as any)[IOREDIS_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.IOREDIS_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.IOREDIS_PATCHED_SYMBOL] = true;
 
-    /**
-     * Hook "ioredis" so we can patch its prototype methods.
-     */
-    new Hook(["ioredis"], function (exports, name, basedir) {
+    new Hook(["ioredis"], function (exports) {
       // `exports` is the default class returned by require("ioredis").
       // Typically: class IORedis extends EventEmitter { ... }
       // We want to patch the prototype of that class to intercept commands (e.g., get, set, etc.).

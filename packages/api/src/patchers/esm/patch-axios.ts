@@ -302,9 +302,9 @@ if (
   JSON.parse(process.env.NODE_OBSERVATORY_HTTP).includes('axios')
 ) {
   // Check if axios has already been patched
-  if (!(global as any)[AXIOS_PATCHED_SYMBOL]) {
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLSPATCHERS_GLOBAL_SYMBOLS.AXIOS_PATCHED_SYMBOL]) {
     // Mark axios as patched
-    (global as any)[AXIOS_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLSAXIOS_PATCHED_SYMBOL] = true;
 
     // Intercepts any import of "axios" (ESM version)
     addHook((exports: any, name: Namespace, baseDir?: string) => {

@@ -2,7 +2,7 @@
 
 import fs from "fs";
 import path from "path";
-import { watchers } from "../../core/index.js";
+import { watchers, patchedGlobal } from "../../core/index.js";
 import { inspect } from "util";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
 import { fileURLToPath } from 'url';
@@ -109,9 +109,9 @@ function unhandledRejectionPatcher() {
 
 if (process.env.NODE_OBSERVATORY_ERRORS) {
   // Check if exceptions have already been patched
-  if (!(global as any)[EXCEPTIONS_PATCHED_SYMBOL]) {
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.EXCEPTIONS_PATCHED_SYMBOL]) {
     // Mark exceptions as patched
-    (global as any)[EXCEPTIONS_PATCHED_SYMBOL] = true;
+    patchedGlobal[EXCEPTIONS_PATCHED_SYMBOL] = true;
 
     // Apply all patchers
     // uncaughtPatcher();

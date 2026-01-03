@@ -2,23 +2,18 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
 import { v4 as uuidv4 } from "uuid";
-
-// Create a global symbol to track if agenda has been patched
-const AGENDA_PATCHED_SYMBOL = Symbol.for("node-observer:agenda-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 if (
   process.env.NODE_OBSERVATORY_JOBS &&
   JSON.parse(process.env.NODE_OBSERVATORY_JOBS).includes("agenda")
 ) {
-  // Check if agenda has already been patched
-  if (!(global as any)[AGENDA_PATCHED_SYMBOL]) {
-    // Mark agenda as patched
-    (global as any)[AGENDA_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.AGENDA_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.AGENDA_PATCHED_SYMBOL] = true;
 
-    // The Agenda methods we want to intercept
     const METHODS_TO_PATCH = {
       schedule: "schedule",
       cancel: "cancel",
@@ -30,16 +25,8 @@ if (
       define: "define",
     };
 
-    /**
-     * Hook into "agenda" so that when `require("agenda")` is called,
-     * we can patch its prototype methods.
-     */
-    new Hook(["agenda"], function (
-      exports: any,
-      name: string,
-      basedir: string | undefined,
-    ) {
-      // Agenda typically exports a class, so let's access its prototype
+    new Hook(["agenda"], function (exports: any) {
+      // Agenda typically exports a class, access its prototype
       if (exports && exports.prototype) {
         const AgendaProto = exports.prototype;
 

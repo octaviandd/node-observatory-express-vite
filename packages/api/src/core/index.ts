@@ -41,6 +41,10 @@ function instanceCreator(redisClient: RedisClientType, DBInstance: Database){
   watchers.model = new ModelWatcher(redisClient, DBInstance);
 }
 
+export const patchedGlobal = global as typeof globalThis & { 
+  [key: symbol]: boolean | undefined 
+};
+
 export const watchers: Record<string, BaseWatcher> = {};
 
 /**

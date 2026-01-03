@@ -2,7 +2,7 @@
 
 import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index.js";
+import { watchers, patchedGlobal } from "../../core/index.js";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
 
 const TYPEORM_PATCHED_SYMBOL = Symbol.for("node-observer:typeorm-patched");
@@ -11,9 +11,9 @@ if (
   process.env.NODE_OBSERVATORY_MODELS &&
   JSON.parse(process.env.NODE_OBSERVATORY_MODELS).includes("typeorm")
 ) {
-  if (!(global as any)[TYPEORM_PATCHED_SYMBOL]) {
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.TYPEORM_PATCHED_SYMBOL]) {
     // Mark typeorm as patched
-    (global as any)[TYPEORM_PATCHED_SYMBOL] = true;
+    patchedGlobal[TYPEORM_PATCHED_SYMBOL] = true;
 
     addHook((exports: any, name: Namespace, baseDir?: string) => {
       // Only patch 'typeorm' module

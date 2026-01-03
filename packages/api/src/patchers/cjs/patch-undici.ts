@@ -2,22 +2,18 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 import { PassThrough } from "stream";
-
-const UNDICI_PATCHED_SYMBOL = Symbol.for("node-observer:undici-patched");
 
 const MAX_BODY_SIZE = 1024 * 1024;
 
-if (
-  process.env.NODE_OBSERVATORY_HTTP &&
-  JSON.parse(process.env.NODE_OBSERVATORY_HTTP).includes("undici")
-) {
-  if (!(global as any)[UNDICI_PATCHED_SYMBOL]) {
-    (global as any)[UNDICI_PATCHED_SYMBOL] = true;
+if (process.env.NODE_OBSERVATORY_HTTP && JSON.parse(process.env.NODE_OBSERVATORY_HTTP).includes("undici")) {
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.UNDICI_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.UNDICI_PATCHED_SYMBOL] = true;
 
-    new Hook(["undici"], function (exports: any, name, basedir) {
+    new Hook(["undici"], function (exports: any) {
       if (!exports || typeof exports.request !== "function") {
         return exports;
       }
@@ -26,8 +22,8 @@ if (
         return async function patchedRequest(
           this: any,
           url: string,
-          options: any,
-          ...args: any[]
+          options: Record<string, any>,
+          ...args: unknown[]
         ) {
           const callerInfo = getCallerInfo(__filename);
 

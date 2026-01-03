@@ -2,20 +2,19 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { redisCommandArgs } from "../../core/helpers/constants";
 import { getCallerInfo } from "../../core/helpers/helpers";
-
-const REDIS_PATCHED_SYMBOL = Symbol.for("node-observer:redis-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 if (
   process.env.NODE_OBSERVATORY_CACHE &&
   JSON.parse(process.env.NODE_OBSERVATORY_CACHE).includes("redis")
 ) {
-  if (!(global as any)[REDIS_PATCHED_SYMBOL]) {
-    (global as any)[REDIS_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.REDIS_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.REDIS_PATCHED_SYMBOL] = true;
 
-    new Hook(["redis"], function (exports, name, basedir) {
+    new Hook(["redis"], function (exports) {
       if (typeof (exports as any).createClient === "function") {
         shimmer.wrap(exports as any, "createClient", function (originalCreate) {
           return function patchedCreateClient(this: any, ...args: any[]) {

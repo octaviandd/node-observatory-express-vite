@@ -2,19 +2,14 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
 import { URL } from "url";
-
-// Create a global symbol to track if axios has been patched
-const AXIOS_PATCHED_SYMBOL = Symbol.for("node-observer:axios-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 // Maximum size of request/response body to capture (1MB)
 const MAX_BODY_SIZE = 1024 * 1024;
 
-/**
- * Helper function to create a standardized logging object from axios request/response
- */
 function createLoggingObject(
   config: any,
   response?: any,
@@ -301,20 +296,10 @@ if (
   process.env.NODE_OBSERVATORY_HTTP &&
   JSON.parse(process.env.NODE_OBSERVATORY_HTTP).includes("axios")
 ) {
-  // Check if axios has already been patched
-  if (!(global as any)[AXIOS_PATCHED_SYMBOL]) {
-    // Mark axios as patched
-    (global as any)[AXIOS_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.AXIOS_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.AXIOS_PATCHED_SYMBOL] = true;
 
-    // Intercepts any require("axios") call
-    new Hook(["axios"], function (
-      exports: any,
-      name: string,
-      basedir: string | undefined,
-    ) {
-      //
-      // Patch `axios.request`
-      //
+    new Hook(["axios"], function (exports: any) {
       if (typeof exports.request === "function") {
         shimmer.wrap(exports, "request", function (originalRequest: Function) {
           return function patchedRequest(

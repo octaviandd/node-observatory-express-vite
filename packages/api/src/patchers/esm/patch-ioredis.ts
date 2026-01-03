@@ -14,9 +14,9 @@ if (
   JSON.parse(process.env.NODE_OBSERVATORY_CACHE).includes('ioredis')
 ) {
   // Check if ioredis has already been patched
-  if (!(global as any)[IOREDIS_PATCHED_SYMBOL]) {
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLSPATCHERS_GLOBAL_SYMBOLS.IOREDIS_PATCHED_SYMBOL]) {
     // Mark ioredis as patched
-    (global as any)[IOREDIS_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLSIOREDIS_PATCHED_SYMBOL] = true;
 
     /**
      * Hook "ioredis" so we can patch its prototype methods (ESM version).

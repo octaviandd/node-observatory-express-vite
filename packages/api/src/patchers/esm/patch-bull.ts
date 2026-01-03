@@ -15,9 +15,9 @@ if (
   JSON.parse(process.env.NODE_OBSERVATORY_JOBS).includes('bull')
 ) {
   // Check if bull has already been patched
-  if (!(global as any)[BULL_PATCHED_SYMBOL]) {
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLSPATCHERS_GLOBAL_SYMBOLS.BULL_PATCHED_SYMBOL]) {
     // Mark bull as patched
-    (global as any)[BULL_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLSBULL_PATCHED_SYMBOL] = true;
 
     const METHODS_TO_PATCH = {
       process: 'process',

@@ -1,16 +1,15 @@
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
-
-const SQLITE3_PATCHED_SYMBOL = Symbol.for("node-observer:sqlite3-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 if (
   process.env.NODE_OBSERVATORY_DATABASES &&
   JSON.parse(process.env.NODE_OBSERVATORY_DATABASES).includes("sqlite3")
 ) {
-  if (!(global as any)[SQLITE3_PATCHED_SYMBOL]) {
-    (global as any)[SQLITE3_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.SQLITE3_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.SQLITE3_PATCHED_SYMBOL] = true;
 
     new Hook(["sqlite3"], function (exports: any) {
       if (!exports || !exports.Database) {

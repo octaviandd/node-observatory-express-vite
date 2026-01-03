@@ -2,21 +2,17 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
 import { LRUCacheCommandArgsMapping } from "../../core/helpers/constants";
-
-// Create a global symbol to track if lrucache has been patched
-const LRUCACHE_PATCHED_SYMBOL = Symbol.for("node-observer:lrucache-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 if (
   process.env.NODE_OBSERVATORY_CACHE &&
   JSON.parse(process.env.NODE_OBSERVATORY_CACHE).includes("lru-cache")
 ) {
-  // Check if lrucache has already been patched
-  if (!(global as any)[LRUCACHE_PATCHED_SYMBOL]) {
-    // Mark lrucache as patched
-    (global as any)[LRUCACHE_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.LRUCACHE_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.LRUCACHE_PATCHED_SYMBOL] = true;
 
     /**
      * Hook 'lru-cache' so that the first time it's required, we can patch the LRUCache class.

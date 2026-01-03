@@ -2,22 +2,17 @@
 
 import { Hook } from "require-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index";
+import { watchers, patchedGlobal } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
-
-// Create a global symbol to track if log4js has been patched
-const LOG4JS_PATCHED_SYMBOL = Symbol.for("node-observer:log4js-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
 
 if (
   process.env.NODE_OBSERVATORY_LOGGING &&
   JSON.parse(process.env.NODE_OBSERVATORY_LOGGING).includes("log4js")
 ) {
-  // Check if log4js has already been patched
-  if (!(global as any)[LOG4JS_PATCHED_SYMBOL]) {
-    // Mark log4js as patched
-    (global as any)[LOG4JS_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.LOG4JS_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.LOG4JS_PATCHED_SYMBOL] = true;
 
-    // Intercepts `require("log4js")`
     new Hook(["log4js"], function (exports, name, basedir) {
       // `exports` is the log4js module.
       // We'll patch `getLogger` so that we can intercept the returned logger instance.
