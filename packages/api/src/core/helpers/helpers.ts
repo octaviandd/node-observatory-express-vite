@@ -141,7 +141,7 @@ export const sanitizeContent = <T>(content: T): T => {
   return sanitize(content);
 }
 
-export const formattDurationGraphData = (data: any, period: string) => {
+export const processedDurationGraphData = (data: any, period: string) => {
   const totalDuration = PERIODS[period].duration; // in minutes
   const slotsCount = 120; // how many time slots (bars) we want
   const intervalDuration = totalDuration / slotsCount; // each slot in minutes
@@ -188,7 +188,7 @@ export const formattDurationGraphData = (data: any, period: string) => {
   return groupedData;
 }
 
-export const formattCountGraphData = <T extends readonly string[]>(data: CacheContent[], period: string, keys: T): Array<Record<T[number], number> & {label: string}> => {
+export const processedCountGraphData = <T extends readonly string[]>(data: CacheContent[], period: string, keys: T): Array<Record<T[number], number> & {label: string}> => {
   const totalDuration = PERIODS[period].duration;
   const intervalDuration = totalDuration / 120;
   const now = new Date().getTime();

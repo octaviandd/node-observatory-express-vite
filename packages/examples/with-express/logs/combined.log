@@ -131,3 +131,309 @@
   "stack": "DatabaseRetrieveError: Failed to get graph data from database\n    at Database.getGraphData (/Users/octaviandavid/Desktop/node-express-vite-observatory/packages/api/src/core/database-sql.ts:638:13)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async ExceptionWatcher.getGraphData (/Users/octaviandavid/Desktop/node-express-vite-observatory/packages/api/src/core/watchers/ExceptionWatcher.ts:201:12)\n    at async ExceptionWatcher.index (/Users/octaviandavid/Desktop/node-express-vite-observatory/packages/api/src/core/watchers/BaseWatcher.ts:211:23)\n    at async /Users/octaviandavid/Desktop/node-express-vite-observatory/packages/express/src/ExpressAdapter.ts:52:32",
   "timestamp": "2025-12-26 15:14:47"
 }
+{
+  "cause": {
+    "code": "ER_PARSE_ERROR",
+    "errno": 1064,
+    "message": "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'JSON_UNQUOTE(JSON_EXTRACT(content, '$.route')) as route, undefined' at line 1",
+    "name": "Error",
+    "sql": "SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.key'))) as total FROM observatory_entries WHERE type = 'request' AND created_at >= UTC_TIMESTAMP() - INTERVAL 1 DAY  JSON_UNQUOTE(JSON_EXTRACT(content, '$.route')) as route, undefined",
+    "sqlMessage": "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'JSON_UNQUOTE(JSON_EXTRACT(content, '$.route')) as route, undefined' at line 1",
+    "sqlState": "42000",
+    "stack": "Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'JSON_UNQUOTE(JSON_EXTRACT(content, '$.route')) as route, undefined' at line 1\n    at PromiseConnection.query (/Users/octaviandavid/Desktop/node-observatory-express-vite/node_modules/mysql2/lib/promise/connection.js:29:22)\n    at PromiseConnection.patchedQuery (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/patchers/cjs/patch-mysql2.ts:100:30)\n    at Database.getByGroupCount (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:541:59)\n    at RequestWatcher.getTableData (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/RequestWatcher.ts:21:43)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async RequestWatcher.index (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:210:36)\n    at async /Users/octaviandavid/Desktop/node-observatory-express-vite/packages/express/src/ExpressAdapter.ts:52:32"
+  },
+  "errorName": "DatabaseRetrieveError",
+  "level": "error",
+  "message": "Error Failed to get entries count by group from database",
+  "stack": "DatabaseRetrieveError: Failed to get entries count by group from database\n    at Database.getByGroupCount (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:549:13)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async RequestWatcher.getTableData (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/RequestWatcher.ts:21:21)\n    at async RequestWatcher.index (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:210:36)\n    at async /Users/octaviandavid/Desktop/node-observatory-express-vite/packages/express/src/ExpressAdapter.ts:52:32",
+  "timestamp": "2025-12-30 13:00:41"
+}
+{
+  "cause": {
+    "code": "ER_PARSE_ERROR",
+    "errno": 1064,
+    "message": "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'undefined' at line 3",
+    "name": "Error",
+    "sql": "SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.route'))) as total\n         FROM observatory_entries \n         WHERE type = 'request' AND created_at >= UTC_TIMESTAMP() - INTERVAL 1 DAY  AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0' undefined",
+    "sqlMessage": "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'undefined' at line 3",
+    "sqlState": "42000",
+    "stack": "Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'undefined' at line 3\n    at PromiseConnection.query (/Users/octaviandavid/Desktop/node-observatory-express-vite/node_modules/mysql2/lib/promise/connection.js:29:22)\n    at PromiseConnection.patchedQuery (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/patchers/cjs/patch-mysql2.ts:100:30)\n    at Database.getByGroupCount (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:542:59)\n    at RequestWatcher.getTableData (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/RequestWatcher.ts:21:43)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async RequestWatcher.index (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:210:36)\n    at async /Users/octaviandavid/Desktop/node-observatory-express-vite/packages/express/src/ExpressAdapter.ts:52:32"
+  },
+  "errorName": "DatabaseRetrieveError",
+  "level": "error",
+  "message": "Error Failed to get entries count by group from database",
+  "stack": "DatabaseRetrieveError: Failed to get entries count by group from database\n    at Database.getByGroupCount (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:552:13)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async RequestWatcher.getTableData (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/RequestWatcher.ts:21:21)\n    at async RequestWatcher.index (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:210:36)\n    at async /Users/octaviandavid/Desktop/node-observatory-express-vite/packages/express/src/ExpressAdapter.ts:52:32",
+  "timestamp": "2025-12-30 13:06:04"
+}
+{
+  "cause": {
+    "code": "ER_BAD_NULL_ERROR",
+    "errno": 1048,
+    "message": "Column 'uuid' cannot be null",
+    "name": "Error",
+    "sql": "INSERT INTO observatory_entries (uuid, request_id, job_id, schedule_id, type, content, created_at) VALUES (NULL, NULL, NULL, NULL, NULL, NULL, NULL)",
+    "sqlMessage": "Column 'uuid' cannot be null",
+    "sqlState": "23000",
+    "stack": "Error: Column 'uuid' cannot be null\n    at PromiseConnection.query (/Users/octaviandavid/Desktop/node-observatory-express-vite/node_modules/mysql2/lib/promise/connection.js:29:22)\n    at PromiseConnection.patchedQuery (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/patchers/cjs/patch-mysql2.ts:100:30)\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:67:34)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)"
+  },
+  "errorName": "MigrationError",
+  "level": "error",
+  "message": "Error Failed to insert into database",
+  "stack": "MigrationError: Failed to insert into database\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:81:13)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)",
+  "timestamp": "2025-12-30 14:23:40"
+}
+{
+  "cause": {
+    "code": "ER_BAD_NULL_ERROR",
+    "errno": 1048,
+    "message": "Column 'uuid' cannot be null",
+    "name": "Error",
+    "sql": "INSERT INTO observatory_entries (uuid, request_id, job_id, schedule_id, type, content, created_at) VALUES (NULL, NULL, NULL, NULL, NULL, NULL, NULL)",
+    "sqlMessage": "Column 'uuid' cannot be null",
+    "sqlState": "23000",
+    "stack": "Error: Column 'uuid' cannot be null\n    at PromiseConnection.query (/Users/octaviandavid/Desktop/node-observatory-express-vite/node_modules/mysql2/lib/promise/connection.js:29:22)\n    at PromiseConnection.patchedQuery (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/patchers/cjs/patch-mysql2.ts:100:30)\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:67:34)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)"
+  },
+  "errorName": "MigrationError",
+  "level": "error",
+  "message": "Error Failed to insert into database",
+  "stack": "MigrationError: Failed to insert into database\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:81:13)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)",
+  "timestamp": "2025-12-30 14:23:41"
+}
+{
+  "cause": {
+    "code": "ER_BAD_NULL_ERROR",
+    "errno": 1048,
+    "message": "Column 'uuid' cannot be null",
+    "name": "Error",
+    "sql": "INSERT INTO observatory_entries (uuid, request_id, job_id, schedule_id, type, content, created_at) VALUES (NULL, NULL, NULL, NULL, NULL, NULL, NULL)",
+    "sqlMessage": "Column 'uuid' cannot be null",
+    "sqlState": "23000",
+    "stack": "Error: Column 'uuid' cannot be null\n    at PromiseConnection.query (/Users/octaviandavid/Desktop/node-observatory-express-vite/node_modules/mysql2/lib/promise/connection.js:29:22)\n    at PromiseConnection.patchedQuery (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/patchers/cjs/patch-mysql2.ts:100:30)\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:67:34)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)"
+  },
+  "errorName": "MigrationError",
+  "level": "error",
+  "message": "Error Failed to insert into database",
+  "stack": "MigrationError: Failed to insert into database\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:81:13)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)",
+  "timestamp": "2025-12-30 14:23:42"
+}
+{
+  "cause": {
+    "code": "ER_BAD_NULL_ERROR",
+    "errno": 1048,
+    "message": "Column 'uuid' cannot be null",
+    "name": "Error",
+    "sql": "INSERT INTO observatory_entries (uuid, request_id, job_id, schedule_id, type, content, created_at) VALUES (NULL, NULL, NULL, NULL, NULL, NULL, NULL)",
+    "sqlMessage": "Column 'uuid' cannot be null",
+    "sqlState": "23000",
+    "stack": "Error: Column 'uuid' cannot be null\n    at PromiseConnection.query (/Users/octaviandavid/Desktop/node-observatory-express-vite/node_modules/mysql2/lib/promise/connection.js:29:22)\n    at PromiseConnection.patchedQuery (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/patchers/cjs/patch-mysql2.ts:100:30)\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:67:34)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)"
+  },
+  "errorName": "MigrationError",
+  "level": "error",
+  "message": "Error Failed to insert into database",
+  "stack": "MigrationError: Failed to insert into database\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:81:13)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)",
+  "timestamp": "2025-12-30 14:25:42"
+}
+{
+  "cause": {
+    "code": "ER_BAD_NULL_ERROR",
+    "errno": 1048,
+    "message": "Column 'uuid' cannot be null",
+    "name": "Error",
+    "sql": "INSERT INTO observatory_entries (uuid, request_id, job_id, schedule_id, type, content, created_at) VALUES (NULL, NULL, NULL, NULL, NULL, NULL, NULL)",
+    "sqlMessage": "Column 'uuid' cannot be null",
+    "sqlState": "23000",
+    "stack": "Error: Column 'uuid' cannot be null\n    at PromiseConnection.query (/Users/octaviandavid/Desktop/node-observatory-express-vite/node_modules/mysql2/lib/promise/connection.js:29:22)\n    at PromiseConnection.patchedQuery (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/patchers/cjs/patch-mysql2.ts:100:30)\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:67:34)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)"
+  },
+  "errorName": "MigrationError",
+  "level": "error",
+  "message": "Error Failed to insert into database",
+  "stack": "MigrationError: Failed to insert into database\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:81:13)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)",
+  "timestamp": "2025-12-30 14:25:43"
+}
+{
+  "cause": {
+    "code": "ER_BAD_NULL_ERROR",
+    "errno": 1048,
+    "message": "Column 'uuid' cannot be null",
+    "name": "Error",
+    "sql": "INSERT INTO observatory_entries (uuid, request_id, job_id, schedule_id, type, content, created_at) VALUES (NULL, NULL, NULL, NULL, NULL, NULL, NULL)",
+    "sqlMessage": "Column 'uuid' cannot be null",
+    "sqlState": "23000",
+    "stack": "Error: Column 'uuid' cannot be null\n    at PromiseConnection.query (/Users/octaviandavid/Desktop/node-observatory-express-vite/node_modules/mysql2/lib/promise/connection.js:29:22)\n    at PromiseConnection.patchedQuery (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/patchers/cjs/patch-mysql2.ts:100:30)\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:67:34)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)"
+  },
+  "errorName": "MigrationError",
+  "level": "error",
+  "message": "Error Failed to insert into database",
+  "stack": "MigrationError: Failed to insert into database\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:81:13)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)",
+  "timestamp": "2025-12-30 14:25:44"
+}
+{
+  "cause": {
+    "code": "ER_BAD_NULL_ERROR",
+    "errno": 1048,
+    "message": "Column 'uuid' cannot be null",
+    "name": "Error",
+    "sql": "INSERT INTO observatory_entries (uuid, request_id, job_id, schedule_id, type, content, created_at) VALUES (NULL, NULL, NULL, NULL, NULL, NULL, NULL)",
+    "sqlMessage": "Column 'uuid' cannot be null",
+    "sqlState": "23000",
+    "stack": "Error: Column 'uuid' cannot be null\n    at PromiseConnection.query (/Users/octaviandavid/Desktop/node-observatory-express-vite/node_modules/mysql2/lib/promise/connection.js:29:22)\n    at PromiseConnection.patchedQuery (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/patchers/cjs/patch-mysql2.ts:100:30)\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:67:34)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)"
+  },
+  "errorName": "MigrationError",
+  "level": "error",
+  "message": "Error Failed to insert into database",
+  "stack": "MigrationError: Failed to insert into database\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:81:13)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)",
+  "timestamp": "2025-12-30 14:25:46"
+}
+{
+  "cause": {
+    "code": "ER_WRONG_VALUE_COUNT_ON_ROW",
+    "errno": 1136,
+    "message": "Column count doesn't match value count at row 1",
+    "name": "Error",
+    "sql": "INSERT INTO observatory_entries (uuid, request_id, job_id, schedule_id, type, content, created_at) VALUES ('1767104934627-0', '6101bb5f-6ed9-4394-85f7-6caf3a5932a3', 'null', 'null', 'request', `method` = 'get', `route` = '/home', `statusCode` = 304, `duration` = '130.49', `requestSize` = 0, `responseSize` = 66, `payload` = '', `headers` = '[object Object]', `query` = '[object Object]', `params` = '[object Object]', `ip` = '::1', `memoryUsage` = '[object Object]', `session` = '[object Object]', `package` = 'express', '2025-12-30 14:28:43')",
+    "sqlMessage": "Column count doesn't match value count at row 1",
+    "sqlState": "21S01",
+    "stack": "Error: Column count doesn't match value count at row 1\n    at PromiseConnection.query (/Users/octaviandavid/Desktop/node-observatory-express-vite/node_modules/mysql2/lib/promise/connection.js:29:22)\n    at PromiseConnection.patchedQuery (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/patchers/cjs/patch-mysql2.ts:100:30)\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:81:34)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)"
+  },
+  "errorName": "MigrationError",
+  "level": "error",
+  "message": "Error Failed to insert into database",
+  "stack": "MigrationError: Failed to insert into database\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:89:13)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)",
+  "timestamp": "2025-12-30 14:28:54"
+}
+{
+  "cause": {
+    "code": "ER_WRONG_VALUE_COUNT_ON_ROW",
+    "errno": 1136,
+    "message": "Column count doesn't match value count at row 1",
+    "name": "Error",
+    "sql": "INSERT INTO observatory_entries (uuid, request_id, job_id, schedule_id, type, content, created_at) VALUES ('1767104934627-0', '6101bb5f-6ed9-4394-85f7-6caf3a5932a3', 'null', 'null', 'http', `protocol` = 'https:', `maxRedirects` = 21, `maxBodyLength` = NULL, `path` = '/todos/1', `method` = 'GET', `headers` = '[object Object]', `agents` = '[object Object]', `beforeRedirects` = '[object Object]', `hostname` = 'jsonplaceholder.typicode.com', `port` = '', `pathname` = '/todos/1', `origin` = 'https://jsonplaceholder.typicode.com', `file` = '/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/helpers/helpers.ts', `line` = '275', `responseBodySize` = 70, `statusCode` = 200, `statusMessage` = 'OK', `library` = 'axios', `duration` = 117.12, `responseBody` = '\u001bR\\0\\0�6W����ʪ��DA\u0007�}y5=\u000f\u00139p\u000b\u0018j��;�0��\u0013���.�b\u000e\u0001x\u0018u�\u0006\u0015�wywº`]��\\'nNŶ�!?', `aborted` = false, `isMedia` = false, '2025-12-30 14:28:43')",
+    "sqlMessage": "Column count doesn't match value count at row 1",
+    "sqlState": "21S01",
+    "stack": "Error: Column count doesn't match value count at row 1\n    at PromiseConnection.query (/Users/octaviandavid/Desktop/node-observatory-express-vite/node_modules/mysql2/lib/promise/connection.js:29:22)\n    at PromiseConnection.patchedQuery (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/patchers/cjs/patch-mysql2.ts:100:30)\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:81:34)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)"
+  },
+  "errorName": "MigrationError",
+  "level": "error",
+  "message": "Error Failed to insert into database",
+  "stack": "MigrationError: Failed to insert into database\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:89:13)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)",
+  "timestamp": "2025-12-30 14:28:55"
+}
+{
+  "cause": {
+    "code": "ER_WRONG_VALUE_COUNT_ON_ROW",
+    "errno": 1136,
+    "message": "Column count doesn't match value count at row 1",
+    "name": "Error",
+    "sql": "INSERT INTO observatory_entries (uuid, request_id, job_id, schedule_id, type, content, created_at) VALUES ('1767104934627-0', '6101bb5f-6ed9-4394-85f7-6caf3a5932a3', 'null', 'null', 'log', `level` = 'info', `package` = 'winston', `message` = 'This is an info log message from Winston in user app', `meta` = '[object Object]', `file` = '/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/helpers/helpers.ts', `line` = '275', '2025-12-30 14:28:43')",
+    "sqlMessage": "Column count doesn't match value count at row 1",
+    "sqlState": "21S01",
+    "stack": "Error: Column count doesn't match value count at row 1\n    at PromiseConnection.query (/Users/octaviandavid/Desktop/node-observatory-express-vite/node_modules/mysql2/lib/promise/connection.js:29:22)\n    at PromiseConnection.patchedQuery (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/patchers/cjs/patch-mysql2.ts:100:30)\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:81:34)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)"
+  },
+  "errorName": "MigrationError",
+  "level": "error",
+  "message": "Error Failed to insert into database",
+  "stack": "MigrationError: Failed to insert into database\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:89:13)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)",
+  "timestamp": "2025-12-30 14:28:56"
+}
+{
+  "cause": {
+    "code": "ER_WRONG_VALUE_COUNT_ON_ROW",
+    "errno": 1136,
+    "message": "Column count doesn't match value count at row 1",
+    "name": "Error",
+    "sql": "INSERT INTO observatory_entries (uuid, request_id, job_id, schedule_id, type, content, created_at) VALUES ('1767104934627-0', '6101bb5f-6ed9-4394-85f7-6caf3a5932a3', 'null', 'null', 'cache', `type` = 'set', `package` = 'node-cache', `file` = '/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/helpers/helpers.ts', `line` = '275', `writes` = 1, `key` = 'index', `value` = 'test', `duration` = 0.71, '2025-12-30 14:28:43'), ('1767104934627-1', '6101bb5f-6ed9-4394-85f7-6caf3a5932a3', 'null', 'null', 'cache', `type` = 'get', `package` = 'node-cache', `file` = '/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/helpers/helpers.ts', `line` = '275', `hits` = 1, `misses` = 0, `key` = 'index', `value` = 'test', `duration` = 0.11, '2025-12-30 14:28:43'), ('1767104934627-2', '6101bb5f-6ed9-4394-85f7-6caf3a5932a3', 'null', 'null', 'cache', `type` = 'get', `package` = 'node-cache', `file` = '/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/helpers/helpers.ts', `line` = '275', `hits` = 1, `misses` = 0, `key` = 'index', `value` = 'test', `duration` = 0.01, '2025-12-30 14:28:43')",
+    "sqlMessage": "Column count doesn't match value count at row 1",
+    "sqlState": "21S01",
+    "stack": "Error: Column count doesn't match value count at row 1\n    at PromiseConnection.query (/Users/octaviandavid/Desktop/node-observatory-express-vite/node_modules/mysql2/lib/promise/connection.js:29:22)\n    at PromiseConnection.patchedQuery (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/patchers/cjs/patch-mysql2.ts:100:30)\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:81:34)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)"
+  },
+  "errorName": "MigrationError",
+  "level": "error",
+  "message": "Error Failed to insert into database",
+  "stack": "MigrationError: Failed to insert into database\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:89:13)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)",
+  "timestamp": "2025-12-30 14:28:58"
+}
+{
+  "cause": {
+    "code": "ER_DUP_ENTRY",
+    "errno": 1062,
+    "message": "Duplicate entry '1767105049369-0' for key 'observatory_entries.uuid'",
+    "name": "Error",
+    "sql": "INSERT INTO observatory_entries (uuid, request_id, job_id, schedule_id, type, content, created_at) VALUES ('1767105049369-0', '99e0d3fd-d010-4266-9d2d-d4653189fcb6', 'null', 'null', 'log', '{\\\"level\\\":\\\"info\\\",\\\"package\\\":\\\"winston\\\",\\\"message\\\":\\\"This is an info log message from Winston in user app\\\",\\\"meta\\\":{},\\\"file\\\":\\\"/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/helpers/helpers.ts\\\",\\\"line\\\":\\\"275\\\"}', '2025-12-30 14:30:49')",
+    "sqlMessage": "Duplicate entry '1767105049369-0' for key 'observatory_entries.uuid'",
+    "sqlState": "23000",
+    "stack": "Error: Duplicate entry '1767105049369-0' for key 'observatory_entries.uuid'\n    at PromiseConnection.query (/Users/octaviandavid/Desktop/node-observatory-express-vite/node_modules/mysql2/lib/promise/connection.js:29:22)\n    at PromiseConnection.patchedQuery (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/patchers/cjs/patch-mysql2.ts:100:30)\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:81:34)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)"
+  },
+  "errorName": "MigrationError",
+  "level": "error",
+  "message": "Error Failed to insert into database",
+  "stack": "MigrationError: Failed to insert into database\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:89:13)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)",
+  "timestamp": "2025-12-30 14:30:53"
+}
+{
+  "cause": {
+    "code": "ER_DUP_ENTRY",
+    "errno": 1062,
+    "message": "Duplicate entry '1767105049369-0' for key 'observatory_entries.uuid'",
+    "name": "Error",
+    "sql": "INSERT INTO observatory_entries (uuid, request_id, job_id, schedule_id, type, content, created_at) VALUES ('1767105049369-0', '99e0d3fd-d010-4266-9d2d-d4653189fcb6', 'null', 'null', 'cache', '{\\\"type\\\":\\\"set\\\",\\\"package\\\":\\\"node-cache\\\",\\\"file\\\":\\\"/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/helpers/helpers.ts\\\",\\\"line\\\":\\\"275\\\",\\\"writes\\\":1,\\\"key\\\":\\\"index\\\",\\\"value\\\":\\\"test\\\",\\\"duration\\\":0.43}', '2025-12-30 14:30:49'), ('1767105049369-1', '99e0d3fd-d010-4266-9d2d-d4653189fcb6', 'null', 'null', 'cache', '{\\\"type\\\":\\\"get\\\",\\\"package\\\":\\\"node-cache\\\",\\\"file\\\":\\\"/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/helpers/helpers.ts\\\",\\\"line\\\":\\\"275\\\",\\\"hits\\\":1,\\\"misses\\\":0,\\\"key\\\":\\\"index\\\",\\\"value\\\":\\\"test\\\",\\\"duration\\\":0.07}', '2025-12-30 14:30:49'), ('1767105049369-2', '99e0d3fd-d010-4266-9d2d-d4653189fcb6', 'null', 'null', 'cache', '{\\\"type\\\":\\\"get\\\",\\\"package\\\":\\\"node-cache\\\",\\\"file\\\":\\\"/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/helpers/helpers.ts\\\",\\\"line\\\":\\\"275\\\",\\\"hits\\\":1,\\\"misses\\\":0,\\\"key\\\":\\\"index\\\",\\\"value\\\":\\\"test\\\",\\\"duration\\\":0}', '2025-12-30 14:30:49')",
+    "sqlMessage": "Duplicate entry '1767105049369-0' for key 'observatory_entries.uuid'",
+    "sqlState": "23000",
+    "stack": "Error: Duplicate entry '1767105049369-0' for key 'observatory_entries.uuid'\n    at PromiseConnection.query (/Users/octaviandavid/Desktop/node-observatory-express-vite/node_modules/mysql2/lib/promise/connection.js:29:22)\n    at PromiseConnection.patchedQuery (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/patchers/cjs/patch-mysql2.ts:100:30)\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:81:34)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)"
+  },
+  "errorName": "MigrationError",
+  "level": "error",
+  "message": "Error Failed to insert into database",
+  "stack": "MigrationError: Failed to insert into database\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:89:13)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)",
+  "timestamp": "2025-12-30 14:30:55"
+}
+{
+  "cause": {
+    "code": "ER_DUP_ENTRY",
+    "errno": 1062,
+    "message": "Duplicate entry '1767105099922-0' for key 'observatory_entries.uuid'",
+    "name": "Error",
+    "sql": "INSERT INTO observatory_entries (uuid, request_id, job_id, schedule_id, type, content, created_at) VALUES ('1767105099921-0', '69b3addd-80ca-4b5e-9109-28e793c69401', 'null', 'null', 'cache', '{\\\"type\\\":\\\"set\\\",\\\"package\\\":\\\"node-cache\\\",\\\"file\\\":\\\"/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/helpers/helpers.ts\\\",\\\"line\\\":\\\"275\\\",\\\"writes\\\":1,\\\"key\\\":\\\"index\\\",\\\"value\\\":\\\"test\\\",\\\"duration\\\":0.55}', '2025-12-30 14:31:39'), ('1767105099921-1', '69b3addd-80ca-4b5e-9109-28e793c69401', 'null', 'null', 'cache', '{\\\"type\\\":\\\"get\\\",\\\"package\\\":\\\"node-cache\\\",\\\"file\\\":\\\"/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/helpers/helpers.ts\\\",\\\"line\\\":\\\"275\\\",\\\"hits\\\":1,\\\"misses\\\":0,\\\"key\\\":\\\"index\\\",\\\"value\\\":\\\"test\\\",\\\"duration\\\":0.11}', '2025-12-30 14:31:39'), ('1767105099922-0', '69b3addd-80ca-4b5e-9109-28e793c69401', 'null', 'null', 'cache', '{\\\"type\\\":\\\"get\\\",\\\"package\\\":\\\"node-cache\\\",\\\"file\\\":\\\"/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/helpers/helpers.ts\\\",\\\"line\\\":\\\"275\\\",\\\"hits\\\":1,\\\"misses\\\":0,\\\"key\\\":\\\"index\\\",\\\"value\\\":\\\"test\\\",\\\"duration\\\":0.01}', '2025-12-30 14:31:39')",
+    "sqlMessage": "Duplicate entry '1767105099922-0' for key 'observatory_entries.uuid'",
+    "sqlState": "23000",
+    "stack": "Error: Duplicate entry '1767105099922-0' for key 'observatory_entries.uuid'\n    at PromiseConnection.query (/Users/octaviandavid/Desktop/node-observatory-express-vite/node_modules/mysql2/lib/promise/connection.js:29:22)\n    at PromiseConnection.patchedQuery (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/patchers/cjs/patch-mysql2.ts:100:30)\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:81:34)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)"
+  },
+  "errorName": "MigrationError",
+  "level": "error",
+  "message": "Error Failed to insert into database",
+  "stack": "MigrationError: Failed to insert into database\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:89:13)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)",
+  "timestamp": "2025-12-30 14:31:46"
+}
+{
+  "cause": {
+    "code": "ER_DUP_ENTRY",
+    "errno": 1062,
+    "message": "Duplicate entry '1767105316208-0' for key 'observatory_entries.uuid'",
+    "name": "Error",
+    "sql": "INSERT INTO observatory_entries (uuid, request_id, job_id, schedule_id, type, content, created_at) VALUES ('1767105316208-0', '83e19b68-d231-4d37-a3e1-6e8ede91d831', 'null', 'null', 'log', '{\\\"level\\\":\\\"info\\\",\\\"package\\\":\\\"winston\\\",\\\"message\\\":\\\"This is an info log message from Winston in user app\\\",\\\"meta\\\":{},\\\"file\\\":\\\"/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/helpers/helpers.ts\\\",\\\"line\\\":\\\"275\\\"}', '2025-12-30 14:35:16')",
+    "sqlMessage": "Duplicate entry '1767105316208-0' for key 'observatory_entries.uuid'",
+    "sqlState": "23000",
+    "stack": "Error: Duplicate entry '1767105316208-0' for key 'observatory_entries.uuid'\n    at PromiseConnection.query (/Users/octaviandavid/Desktop/node-observatory-express-vite/node_modules/mysql2/lib/promise/connection.js:29:22)\n    at PromiseConnection.patchedQuery (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/patchers/cjs/patch-mysql2.ts:100:30)\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:81:34)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)"
+  },
+  "errorName": "MigrationError",
+  "level": "error",
+  "message": "Error Failed to insert into database",
+  "stack": "MigrationError: Failed to insert into database\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:89:13)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)",
+  "timestamp": "2025-12-30 14:35:19"
+}
+{
+  "cause": {
+    "code": "ER_DUP_ENTRY",
+    "errno": 1062,
+    "message": "Duplicate entry '1767105316208-0' for key 'observatory_entries.uuid'",
+    "name": "Error",
+    "sql": "INSERT INTO observatory_entries (uuid, request_id, job_id, schedule_id, type, content, created_at) VALUES ('1767105316208-0', '83e19b68-d231-4d37-a3e1-6e8ede91d831', 'null', 'null', 'cache', '{\\\"type\\\":\\\"set\\\",\\\"package\\\":\\\"node-cache\\\",\\\"file\\\":\\\"/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/helpers/helpers.ts\\\",\\\"line\\\":\\\"275\\\",\\\"writes\\\":1,\\\"key\\\":\\\"index\\\",\\\"value\\\":\\\"test\\\",\\\"duration\\\":1.47}', '2025-12-30 14:35:16'), ('1767105316208-1', '83e19b68-d231-4d37-a3e1-6e8ede91d831', 'null', 'null', 'cache', '{\\\"type\\\":\\\"get\\\",\\\"package\\\":\\\"node-cache\\\",\\\"file\\\":\\\"/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/helpers/helpers.ts\\\",\\\"line\\\":\\\"275\\\",\\\"hits\\\":1,\\\"misses\\\":0,\\\"key\\\":\\\"index\\\",\\\"value\\\":\\\"test\\\",\\\"duration\\\":0.17}', '2025-12-30 14:35:16'), ('1767105316208-2', '83e19b68-d231-4d37-a3e1-6e8ede91d831', 'null', 'null', 'cache', '{\\\"type\\\":\\\"get\\\",\\\"package\\\":\\\"node-cache\\\",\\\"file\\\":\\\"/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/helpers/helpers.ts\\\",\\\"line\\\":\\\"275\\\",\\\"hits\\\":1,\\\"misses\\\":0,\\\"key\\\":\\\"index\\\",\\\"value\\\":\\\"test\\\",\\\"duration\\\":0.01}', '2025-12-30 14:35:16')",
+    "sqlMessage": "Duplicate entry '1767105316208-0' for key 'observatory_entries.uuid'",
+    "sqlState": "23000",
+    "stack": "Error: Duplicate entry '1767105316208-0' for key 'observatory_entries.uuid'\n    at PromiseConnection.query (/Users/octaviandavid/Desktop/node-observatory-express-vite/node_modules/mysql2/lib/promise/connection.js:29:22)\n    at PromiseConnection.patchedQuery (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/patchers/cjs/patch-mysql2.ts:100:30)\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:81:34)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)"
+  },
+  "errorName": "MigrationError",
+  "level": "error",
+  "message": "Error Failed to insert into database",
+  "stack": "MigrationError: Failed to insert into database\n    at Database.insert (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/database-sql.ts:89:13)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Timeout._onTimeout (/Users/octaviandavid/Desktop/node-observatory-express-vite/packages/api/src/core/watchers/BaseWatcher.ts:97:13)",
+  "timestamp": "2025-12-30 14:35:21"
+}

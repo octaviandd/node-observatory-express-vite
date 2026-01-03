@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useIndexTableData } from "@/hooks/useIndexTableData";
-import { Dispatch, memo, SetStateAction } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { SidePanelState } from "../../../../types";
 
 export default function RequestIndexTable() {
@@ -98,45 +98,35 @@ export default function RequestIndexTable() {
   );
 }
 
-const Toggles = memo(
-  ({
-    modelKey,
-    instanceStatusType,
-    setInstanceStatusType,
-  }: {
-    modelKey: string;
-    instanceStatusType: string;
-    setInstanceStatusType: (value: string) => void;
-  }) => {
-    return (
-      <div className="flex items-center gap-4">
-        {modelKey ? (
-          <ToggleGroup
-            type="single"
-            value={instanceStatusType}
-            onValueChange={(value) => value && setInstanceStatusType(value)}
-          >
-            <span className="text-sm text-muted-foreground border rounded-md px-2 py-1">
-              SHOW
-            </span>
-            {["all", "2xx", "4xx", "5xx"].map((status) => (
-              <ToggleGroupItem
-                key={status}
-                value={status}
-                aria-label={status}
-                className="text-black cursor-pointer dark:text-white"
-              >
-                {status.toUpperCase()}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-        ) : null}
-      </div>
-    );
-  },
-);
+const Toggles = ({ modelKey, instanceStatusType, setInstanceStatusType }: { modelKey: string; instanceStatusType: string; setInstanceStatusType: (value: string) => void }) => {
+  return (
+    <div className="flex items-center gap-4">
+      {modelKey ? (
+        <ToggleGroup
+          type="single"
+          value={instanceStatusType}
+          onValueChange={(value) => value && setInstanceStatusType(value)}
+        >
+          <span className="text-sm text-muted-foreground border rounded-md px-2 py-1">
+            SHOW
+          </span>
+          {["all", "2xx", "4xx", "5xx"].map((status) => (
+            <ToggleGroupItem
+              key={status}
+              value={status}
+              aria-label={status}
+              className="text-black cursor-pointer dark:text-white"
+            >
+              {status.toUpperCase()}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+      ) : null}
+    </div>
+  );
+};
 
-const SidePanelOpener = memo(
+const SidePanelOpener =
   ({
     sidePanelData,
     setSidePanelData,
@@ -182,5 +172,5 @@ const SidePanelOpener = memo(
         )}
       </>
     );
-  },
-);
+  }
+

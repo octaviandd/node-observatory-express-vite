@@ -4,7 +4,7 @@
 // import { CountGraph } from "../ui/graphs/count-graph";
 // import { DurationGraph } from "../ui/graphs/duration-graph";
 // import { Link } from "react-router";
-// import { useIndexData } from "@/hooks/useIndexData";
+// import { useGraph } from "@/hooks/useGraph";
 // import {
 //   Card,
 //   CardContent,
@@ -22,7 +22,7 @@
 //   Database,
 //   SquareActivity,
 // } from "lucide-react";
-// import { useState, useContext } from "react";
+// import { useState, useContext, useEffect } from "react";
 // import { formatDuration, formatCount } from "@/utils";
 // import { QueryGroupResponse, RequestGroupResponse } from "../../../types";
 
@@ -31,9 +31,9 @@ export default function Dashboard() {
   //   data: requests,
   //   currentDate,
   //   period,
-  // } = useIndexData({ type: "requests" });
-  // const { data: exceptions } = useIndexData({ type: "exceptions" });
-  // const { data: jobs } = useIndexData({ type: "jobs" });
+  // } = useGraph({ type: "requests" });
+  // const { data: exceptions } = useGraph({ type: "exceptions" });
+  // const { data: jobs } = useGraph({ type: "jobs" });
   // const { state } = useContext(StoreContext);
   // const [groupedRequests, setGroupedRequests] = useState<
   //   RequestGroupResponse[]
@@ -77,6 +77,7 @@ export default function Dashboard() {
             </Link>
           </Button>
         </CardHeader>
+        {requests && 
         <CardContent className="p-1">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card>
@@ -161,6 +162,7 @@ export default function Dashboard() {
             </Card>
           </div>
         </CardContent>
+        }
       </Card>
 
       <Card>

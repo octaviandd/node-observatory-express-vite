@@ -11,17 +11,17 @@ class JobWatcher extends BaseWatcher {
     super(redisClient, DBInstance, "job");
   }
 
-  protected async getData(filters: CacheFilters): Promise<{ results: any, count: string}> {
+  protected async getTableData(filters: CacheFilters): Promise<{ results: any, count: string}> {
     if (filters.index === 'instance') {
-      const results = await this.DBInstance.getInstanceData(filters, this.type);
-      const countResults = await this.DBInstance.getEntriesCount(filters, this.type);
+      const results = await this.DBInstance.getByInstance(filters, this.type);
+      const count = await this.DBInstance.getByInstanceCount(filters, this.type);
 
-      return { results, count: formatValue(countResults.total, true) };
+      return { results, count: formatValue(count, true) };
     } else {
-      const results = await this.DBInstance.getIndexData(filters, this.type);
-      const countResult = await this.DBInstance.getEntriesCountByGroup(filters, this.type);
+      const results = await this.DBInstance.getByGroup(filters, this.type);
+      const count = await this.DBInstance.getByGroupCount(filters, this.type);
 
-      return {results, count: formatValue(countResult.total, true)};
+      return {results, count: formatValue(count, true)};
     }
   }
 

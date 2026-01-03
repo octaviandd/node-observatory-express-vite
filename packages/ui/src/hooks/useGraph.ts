@@ -4,13 +4,13 @@ import { useContext, useEffect, useState } from "react";
 import { StoreContext } from "@/store";
 import { timePeriod } from "@/utils";
 import { useParams } from "react-router";
-import { IndexResponse } from "types";
+import { GraphResponse } from "types";
 
-export const useIndexData = ({ type }: { type: string }): { data: IndexResponse | null, currentDate: string, period: string} => {
+export const useGraph = ({ type }: { type: string }): { data: GraphResponse | null, currentDate: string, period: string} => {
   const { state } = useContext(StoreContext);
   const params = useParams();
   const param = params.key || "";
-  const [data, setData] = useState<IndexResponse | null>(null);
+  const [data, setData] = useState<GraphResponse | null>(null);
 
   useEffect(() => {
     getItems();
@@ -29,7 +29,7 @@ export const useIndexData = ({ type }: { type: string }): { data: IndexResponse 
     .replace(",", "")
     .toUpperCase();
 
-  const getItems = async (addedNewItems = false) => {
+  const getItems = async () => {
     try {
       const response = await fetch(
         `${window.SERVER_CONFIG.base}/api/${type}?period=${state.period}${
@@ -37,15 +37,8 @@ export const useIndexData = ({ type }: { type: string }): { data: IndexResponse 
         }`,
       );
 
-      const { table, graph } = await response.json();
-
-      setData((prevData) => ({
-        graph,
-        table: {
-          results: addedNewItems && prevData ? [...prevData.table.results, ...table.results] : table.results,
-          ...table
-        }
-      }))
+      const data = await response.json();
+      setData(data);
     } catch (error) {
       console.error(error);
     }

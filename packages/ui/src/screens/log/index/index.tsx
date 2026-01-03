@@ -10,7 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
 import LogsIndexTable from "../table";
-import { useIndexData } from "@/hooks/useIndexData";
+import { useGraph } from "@/hooks/useGraph";
 
 const LOG_LEVELS = [
   { dataKey: "info", variant: "secondary", fill: "#F3F7FA" },
@@ -23,16 +23,13 @@ const LOG_LEVELS = [
 ] as const;
 
 export default function LogsIndex() {
-  const { data, currentDate, period } = useIndexData({
+  const { data, currentDate, period } = useGraph({
     type: "logs",
   });
 
-  const graph = data?.graph;
-  const table = data?.table;
-
   return (
     <div className="flex flex-col gap-6">
-      {table && graph &&
+      {data &&
         <div className="grid grid-cols-1 gap-4">
           <Card>
             <CardHeader className="pb-2">
@@ -41,49 +38,49 @@ export default function LogsIndex() {
                   <CardTitle className="text-sm text-muted-foreground">
                     LOGS
                   </CardTitle>
-                  <CardSubtitle>{table.count}</CardSubtitle>
+                  <CardSubtitle>{data.count}</CardSubtitle>
                 </div>
                 <div className="flex gap-4 text-xs">
                   <div className="flex flex-col items-center">
                     <span className="text-muted-foreground">INFO</span>
                     <Badge variant="secondary" className="mt-1">
-                      {table.indexCountOne}
+                      {data.indexCountOne}
                     </Badge>
                   </div>
                   <div className="flex flex-col items-center text-muted-foreground">
                     <span className="text-muted-foreground">WARN</span>
                     <Badge variant="warning" className="mt-1">
-                      {table.indexCountTwo}
+                      {data.indexCountTwo}
                     </Badge>
                   </div>
                   <div className="flex flex-col items-center text-muted-foreground">
                     <span className="text-muted-foreground">ERROR</span>
                     <Badge variant="destructive" className="mt-1">
-                      {table.indexCountThree}
+                      {data.indexCountThree}
                     </Badge>
                   </div>
                   <div className="flex flex-col items-center text-muted-foreground">
                     <span className="text-muted-foreground">DEBUG</span>
                     <Badge variant="debug" className="mt-1">
-                      {table.indexCountFive}
+                      {data.indexCountFive}
                     </Badge>
                   </div>
                   <div className="flex flex-col items-center text-muted-foreground">
                     <span className="text-muted-foreground">TRACE</span>
                     <Badge variant="trace" className="mt-1">
-                      {table.indexCountSix}
+                      {data.indexCountSix}
                     </Badge>
                   </div>
                   <div className="flex flex-col items-center text-muted-foreground">
                     <span className="text-muted-foreground">FATAL</span>
                     <Badge variant="error" className="mt-1">
-                      {table.indexCountSeven}
+                      {data.indexCountSeven}
                     </Badge>
                   </div>
                   <div className="flex flex-col items-center text-muted-foreground">
                     <span className="text-muted-foreground">LOG</span>
                     <Badge variant="log" className="mt-1">
-                      {table.indexCountEight}
+                      {data.indexCountEight}
                     </Badge>
                   </div>
                 </div>
@@ -92,7 +89,7 @@ export default function LogsIndex() {
             <CardContent>
               <div className="h-auto">
                 <CountGraph
-                  data={graph.countFormattedData}
+                  data={data.countFormattedData}
                   barData={LOG_LEVELS.map((level) => ({
                     dataKey: level.dataKey,
                     stackId: level.dataKey,

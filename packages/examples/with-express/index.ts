@@ -18,34 +18,34 @@ app.use(express.urlencoded({ extended: true }));
 
 
 
-// let logger = winston.createLogger({
-//   level: 'info',
-//   format: winston.format.combine(
-//     winston.format.timestamp(),
-//     winston.format.json() 
-//   ),
-//   transports: [
-//     new winston.transports.Console()
-//   ]
-// });
+let logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json() 
+  ),
+  transports: [
+    new winston.transports.Console()
+  ]
+});
 
 
-// app.get('/home', async (req, res) => {
-//   try {
-//     const response = await axios.get('https://jsonplaceholder.typicode.com/todos/1');
-//     res.json(response.data);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: String(error) });
-//   }
+app.get('/home', async (req, res) => {
+  try {
+    const response = await axios.get('https://jsonplaceholder.typicode.com/todos/1');
+    res.json(response.data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: String(error) });
+  }
 
-//   myCache.set('index', 'test')
-//   myCache.get('index');
+  myCache.set('index', 'test')
+  myCache.get('index');
 
-//   console.log(myCache.get('index'))
+  console.log(myCache.get('index'))
 
-//   logger.info('This is an info log message from Winston in user app');
-// })
+  logger.info('This is an info log message from Winston in user app');
+})
 
 
 
@@ -53,6 +53,7 @@ async function startServer() {
   let mysql2Connection = await mysql2.createConnection({
     host: "localhost",
     user: "root",
+    password: "Database.123",
     database: "observatory",
   });
 
