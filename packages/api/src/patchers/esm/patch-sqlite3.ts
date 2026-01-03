@@ -4,23 +4,16 @@ import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
 import { watchers, patchedGlobal } from "../../core/index.js";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
-
-const SQLITE3_PATCHED_SYMBOL = Symbol.for("node-observer:sqlite3-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants.js";
 
 if (
   process.env.NODE_OBSERVATORY_DATABASES &&
   JSON.parse(process.env.NODE_OBSERVATORY_DATABASES).includes("sqlite3")
 ) {
   if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.SQLITE3_PATCHED_SYMBOL]) {
-    patchedGlobal[SQLITE3_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.SQLITE3_PATCHED_SYMBOL] = true;
 
     addHook((exports: any, name: Namespace, baseDir?: string) => {
-      // Only patch 'sqlite3' module
-      // if (name !== 'sqlite3') {
-      //   return exports;
-      // }
-
-      // Handle both default and named exports
       const sqlite3Module = exports.default || exports;
 
       if (!sqlite3Module || !sqlite3Module.Database) {

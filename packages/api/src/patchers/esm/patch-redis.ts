@@ -3,25 +3,17 @@
 import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
 import { watchers, patchedGlobal } from "../../core/index.js";
-import { redisCommandArgs } from "../../core/helpers/constants.js";
+import { PATCHERS_GLOBAL_SYMBOLS, redisCommandArgs } from "../../core/helpers/constants.js";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
-
-const REDIS_PATCHED_SYMBOL = Symbol.for("node-observer:redis-patched");
 
 if (
   process.env.NODE_OBSERVATORY_CACHE &&
   JSON.parse(process.env.NODE_OBSERVATORY_CACHE).includes("redis")
 ) {
   if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.REDIS_PATCHED_SYMBOL]) {
-    patchedGlobal[REDIS_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.REDIS_PATCHED_SYMBOL] = true;
 
     addHook((exports: any, name: Namespace, baseDir?: string) => {
-      // Only patch 'redis' module
-      // if (name !== 'redis') {
-      //   return exports;
-      // }
-
-      // Handle both default and named exports
       const redisModule = exports.default || exports;
 
       if (typeof redisModule.createClient === "function") {

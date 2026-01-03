@@ -4,18 +4,14 @@ import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
 import { watchers, patchedGlobal } from "../../core/index.js";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
-
-// Create a global symbol to track if knex has been patched
-const KNEX_PATCHED_SYMBOL = Symbol.for("node-observer:knex-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants.js";
 
 if (
   process.env.NODE_OBSERVATORY_QUERIES &&
   JSON.parse(process.env.NODE_OBSERVATORY_QUERIES).includes("knex")
 ) {
-  // Check if knex has already been patched
   if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.KNEX_PATCHED_SYMBOL]) {
-    // Mark knex as patched
-    patchedGlobal[KNEX_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.KNEX_PATCHED_SYMBOL] = true;
 
     /**
      * We'll try to patch a commonly used internal method on Knex's Client prototype:

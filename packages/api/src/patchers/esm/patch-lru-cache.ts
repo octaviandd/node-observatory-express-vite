@@ -4,23 +4,15 @@ import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
 import { watchers, patchedGlobal } from "../../core/index.js";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
-import { LRUCacheCommandArgsMapping } from "../../core/helpers/constants.js";
-
-// Create a global symbol to track if lrucache has been patched
-const LRUCACHE_PATCHED_SYMBOL = Symbol.for("node-observer:lrucache-patched");
+import { LRUCacheCommandArgsMapping, PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants.js";
 
 if (
   process.env.NODE_OBSERVATORY_CACHE &&
   JSON.parse(process.env.NODE_OBSERVATORY_CACHE).includes("lru-cache")
 ) {
-  // Check if lrucache has already been patched
   if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.LRUCACHE_PATCHED_SYMBOL]) {
-    // Mark lrucache as patched
-    patchedGlobal[LRUCACHE_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.LRUCACHE_PATCHED_SYMBOL] = true;
 
-    /**
-     * Hook 'lru-cache' so that the first time it's imported, we can patch the LRUCache class.
-     */
     addHook((exports: any, name: Namespace, baseDir?: string) => {
       // Only patch 'lru-cache' module
       // if (name !== 'lru-cache') {

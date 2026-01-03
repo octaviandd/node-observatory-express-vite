@@ -2,11 +2,10 @@
 
 import { addHook, Namespace } from 'import-in-the-middle';
 import shimmer from 'shimmer';
-import { watchers } from '../../core/index.js';
+import { patchedGlobal, watchers } from '../../core/index.js';
 import { getCallerInfo } from '../../core/helpers/helpers.js';
+import { PATCHERS_GLOBAL_SYMBOLS } from '../../core/helpers/constants.js';
 
-// Create a global symbol to track if ably has been patched
-const ABLY_PATCHED_SYMBOL = Symbol.for('node-observer:ably-patched');
 
 const channelMethodsToPatch = [
   'publish',
@@ -29,10 +28,8 @@ if (
   process.env.NODE_OBSERVATORY_NOTIFICATIONS &&
   JSON.parse(process.env.NODE_OBSERVATORY_NOTIFICATIONS).includes('ably')
 ) {
-  // Check if ably has already been patched
-  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLSPATCHERS_GLOBAL_SYMBOLS.ABLY_PATCHED_SYMBOL]) {
-    // Mark ably as patched
-    patchedGlobal[PATCHERS_GLOBAL_SYMBOLSABLY_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.ABLY_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.ABLY_PATCHED_SYMBOL] = true;
 
     /**
      * Hook "ably" to patch its connection and event handling (ESM version).

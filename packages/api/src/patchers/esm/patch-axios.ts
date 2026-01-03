@@ -2,14 +2,11 @@
 
 import { addHook, Namespace } from 'import-in-the-middle';
 import shimmer from 'shimmer';
-import { watchers } from '../../core/index.js';
+import { patchedGlobal, watchers } from '../../core/index.js';
 import { getCallerInfo } from '../../core/helpers/helpers.js';
 import { URL } from 'url';
+import { PATCHERS_GLOBAL_SYMBOLS } from '../../core/helpers/constants.js';
 
-// Create a global symbol to track if axios has been patched
-const AXIOS_PATCHED_SYMBOL = Symbol.for('node-observer:axios-patched');
-
-// Maximum size of request/response body to capture (1MB)
 const MAX_BODY_SIZE = 1024 * 1024;
 
 /**
@@ -301,10 +298,8 @@ if (
   process.env.NODE_OBSERVATORY_HTTP &&
   JSON.parse(process.env.NODE_OBSERVATORY_HTTP).includes('axios')
 ) {
-  // Check if axios has already been patched
-  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLSPATCHERS_GLOBAL_SYMBOLS.AXIOS_PATCHED_SYMBOL]) {
-    // Mark axios as patched
-    patchedGlobal[PATCHERS_GLOBAL_SYMBOLSAXIOS_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.AXIOS_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.AXIOS_PATCHED_SYMBOL] = true;
 
     // Intercepts any import of "axios" (ESM version)
     addHook((exports: any, name: Namespace, baseDir?: string) => {

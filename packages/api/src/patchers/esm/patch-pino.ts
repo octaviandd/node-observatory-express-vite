@@ -4,23 +4,16 @@ import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
 import { watchers, patchedGlobal } from "../../core/index.js";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
-
-const PINO_PATCHED_SYMBOL = Symbol.for("node-observer:pino-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants.js";
 
 if (
   process.env.NODE_OBSERVATORY_LOGGING &&
   JSON.parse(process.env.NODE_OBSERVATORY_LOGGING).includes("pino")
 ) {
   if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.PINO_PATCHED_SYMBOL]) {
-    patchedGlobal[PINO_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.PINO_PATCHED_SYMBOL] = true;
 
     addHook((exports: any, name: Namespace, baseDir?: string): any => {
-      // Only patch 'pino' module
-      // if (name !== 'pino') {
-      //   return exports;
-      // }
-
-      // Handle both default and named exports
       const pinoModule = exports.default || exports;
 
       // The `pinoModule` here is the top-level function from "pino".

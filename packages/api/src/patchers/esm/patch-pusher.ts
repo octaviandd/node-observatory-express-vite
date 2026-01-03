@@ -4,29 +4,16 @@ import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
 import { watchers, patchedGlobal } from "../../core/index.js";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
-
-// Create a global symbol to track if pusher has been patched
-const PUSHER_PATCHED_SYMBOL = Symbol.for("node-observer:pusher-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants.js";
 
 if (
   process.env.NODE_OBSERVATORY_NOTIFICATIONS &&
   JSON.parse(process.env.NODE_OBSERVATORY_NOTIFICATIONS).includes("pusher")
 ) {
-  // Check if pusher has already been patched
   if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.PUSHER_PATCHED_SYMBOL]) {
-    // Mark pusher as patched
-    patchedGlobal[PUSHER_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.PUSHER_PATCHED_SYMBOL] = true;
 
-    /**
-     * Hook the "pusher" module so we can patch the prototype methods (like trigger/triggerBatch).
-     */
     addHook((exports: any, name: Namespace, baseDir?: string) => {
-      // Only patch 'pusher' module
-      // if (name !== 'pusher') {
-      //   return exports;
-      // }
-
-      // Handle both default and named exports
       const pusherModule = exports.default || exports;
 
       if (pusherModule && pusherModule.prototype) {

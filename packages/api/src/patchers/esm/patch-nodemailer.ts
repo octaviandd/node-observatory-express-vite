@@ -4,25 +4,16 @@ import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
 import { watchers, patchedGlobal } from "../../core/index.js";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
-
-const NODEMAILER_PATCHED_SYMBOL = Symbol.for(
-  "node-observer:nodemailer-patched",
-);
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants.js";
 
 if (
   process.env.NODE_OBSERVATORY_MAILER &&
   JSON.parse(process.env.NODE_OBSERVATORY_MAILER).includes("nodemailer")
 ) {
   if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.NODEMAILER_PATCHED_SYMBOL]) {
-    patchedGlobal[NODEMAILER_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.NODEMAILER_PATCHED_SYMBOL] = true;
 
     addHook((exports: any, name: Namespace, baseDir?: string) => {
-      // Only patch 'nodemailer' module
-      // if (name !== 'nodemailer') {
-      //   return exports;
-      // }
-
-      // Handle both default and named exports
       const nodemailerModule = exports.default || exports;
 
       shimmer.wrap(nodemailerModule, "createTransport", function (originalFn) {

@@ -4,25 +4,16 @@ import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
 import { watchers, patchedGlobal } from "../../core/index.js";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
-
-// Create a global symbol to track if mailgun has been patched
-const MAILGUN_PATCHED_SYMBOL = Symbol.for("node-observer:mailgun-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants.js";
 
 if (
   process.env.NODE_OBSERVATORY_MAILER &&
   JSON.parse(process.env.NODE_OBSERVATORY_MAILER).includes("mailgun.js")
 ) {
-  // Check if mailgun has already been patched
   if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.MAILGUN_PATCHED_SYMBOL]) {
-    // Mark mailgun as patched
-    patchedGlobal[MAILGUN_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.MAILGUN_PATCHED_SYMBOL] = true;
 
     addHook((exports: any, name: Namespace, baseDir?: string) => {
-      // Only patch 'mailgun.js' module
-      // if (name !== 'mailgun.js') {
-      //   return exports;
-      // }
-
       if (!exports || typeof exports.default !== "function") {
         return exports;
       }

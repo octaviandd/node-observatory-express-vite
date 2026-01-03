@@ -6,18 +6,14 @@ import { watchers, patchedGlobal } from "../../core/index.js";
 import type { Connection, Pool } from "mysql";
 import type { QueryOptions } from "mysql";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
-
-// Create a global symbol to track if mysql has been patched
-const MYSQL_PATCHED_SYMBOL = Symbol.for("node-observer:mysql-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants.js";
 
 if (
   process.env.NODE_OBSERVATORY_QUERIES &&
   JSON.parse(process.env.NODE_OBSERVATORY_QUERIES).includes("mysql")
 ) {
-  // Check if mysql has already been patched
   if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.MYSQL_PATCHED_SYMBOL]) {
-    // Mark mysql as patched
-    patchedGlobal[MYSQL_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.MYSQL_PATCHED_SYMBOL] = true;
 
     /**
      * Hook the "mysql" module so that when it's first imported,

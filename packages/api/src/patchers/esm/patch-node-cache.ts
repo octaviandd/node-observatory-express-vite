@@ -3,28 +3,17 @@
 import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
 import { watchers, patchedGlobal } from "../../core/index.js";
-import { nodeCacheCommandsArgs } from "../../core/helpers/constants.js";
+import { nodeCacheCommandsArgs, PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants.js";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
-
-// Create a global symbol to track if node-cache has been patched
-const NODECACHE_PATCHED_SYMBOL = Symbol.for("node-observer:nodecache-patched");
 
 if (
   process.env.NODE_OBSERVATORY_CACHE &&
   JSON.parse(process.env.NODE_OBSERVATORY_CACHE).includes("node-cache")
 ) {
-  // Check if node-cache has already been patched
   if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.NODECACHE_PATCHED_SYMBOL]) {
-    // Mark node-cache as patched
-    patchedGlobal[NODECACHE_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.NODECACHE_PATCHED_SYMBOL] = true;
 
     addHook((exports: any, name: Namespace, baseDir?: string) => {
-      // Only patch 'node-cache' module
-      // if (name !== 'node-cache') {
-      //   return exports;
-      // }
-
-      // Handle both default and named exports
       const nodeCacheModule = exports.default || exports;
 
       // `nodeCacheModule` is the NodeCache constructor (class).

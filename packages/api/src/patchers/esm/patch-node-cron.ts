@@ -5,8 +5,7 @@ import shimmer from "shimmer";
 import { watchers, patchedGlobal } from "../../core/index.js";
 import { v4 as uuidv4 } from "uuid";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
-
-const NODECRON_PATCHED_SYMBOL = Symbol.for("node-observer:nodecron-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants.js";
 
 const METHODS = ["schedule", "validate", "getTasks"];
 
@@ -15,15 +14,9 @@ if (
   JSON.parse(process.env.NODE_OBSERVATORY_SCHEDULER).includes("node-cron")
 ) {
   if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.NODECRON_PATCHED_SYMBOL]) {
-    patchedGlobal[NODECRON_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.NODECRON_PATCHED_SYMBOL] = true;
 
     addHook((exports: any, name: Namespace, baseDir?: string) => {
-      // Only patch 'node-cron' module
-      // if (name !== 'node-cron') {
-      //   return exports;
-      // }
-
-      // Handle both default and named exports
       const nodeCronModule = exports.default || exports;
 
       shimmer.wrap(

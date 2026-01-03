@@ -2,20 +2,16 @@
 
 import { addHook, Namespace } from 'import-in-the-middle';
 import shimmer from 'shimmer';
-import { watchers } from '../../core/index.js';
+import { patchedGlobal, watchers } from '../../core/index.js';
 import { getCallerInfo } from '../../core/helpers/helpers.js';
-
-// Create a global symbol to track if bunyan has been patched
-const BUNYAN_PATCHED_SYMBOL = Symbol.for('node-observer:bunyan-patched');
+import { PATCHERS_GLOBAL_SYMBOLS } from '../../core/helpers/constants.js';
 
 if (
   process.env.NODE_OBSERVATORY_LOGGING &&
   JSON.parse(process.env.NODE_OBSERVATORY_LOGGING).includes('bunyan')
 ) {
-  // Check if bunyan has already been patched
-  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLSPATCHERS_GLOBAL_SYMBOLS.BUNYAN_PATCHED_SYMBOL]) {
-    // Mark bunyan as patched
-    patchedGlobal[PATCHERS_GLOBAL_SYMBOLSBUNYAN_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.BUNYAN_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.BUNYAN_PATCHED_SYMBOL] = true;
 
     // Intercepts loading of "bunyan" (ESM version)
     addHook((exports: any, name: Namespace, baseDir?: string) => {

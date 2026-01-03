@@ -5,10 +5,7 @@ import shimmer from "shimmer";
 import { watchers, patchedGlobal } from "../../core/index.js";
 import { v4 as uuidv4 } from "uuid";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
-
-const NODESCHEDULE_PATCHED_SYMBOL = Symbol.for(
-  "node-observer:nodeschedule-patched",
-);
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants.js";
 
 const METHODS = ["scheduleJob", "rescheduleJob", "cancelJob", "cancelNext"];
 
@@ -17,15 +14,9 @@ if (
   JSON.parse(process.env.NODE_OBSERVATORY_SCHEDULER).includes("node-schedule")
 ) {
   if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.NODESCHEDULE_PATCHED_SYMBOL]) {
-    patchedGlobal[NODESCHEDULE_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.NODESCHEDULE_PATCHED_SYMBOL] = true;
 
     addHook((exports: any, name: Namespace, baseDir?: string) => {
-      // Only patch 'node-schedule' module
-      // if (name !== 'node-schedule') {
-      //   return exports;
-      // }
-
-      // Handle both default and named exports
       const nodeScheduleModule = exports.default || exports;
 
       shimmer.wrap(

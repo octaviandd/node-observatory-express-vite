@@ -4,26 +4,16 @@ import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
 import { watchers, patchedGlobal } from "../../core/index.js";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
-
-const POSTMARK_PATCHED_SYMBOL = Symbol.for("node-observer:postmark-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants.js";
 
 if (
   process.env.NODE_OBSERVATORY_MAILER &&
   JSON.parse(process.env.NODE_OBSERVATORY_MAILER).includes("postmark")
 ) {
   if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.POSTMARK_PATCHED_SYMBOL]) {
-    patchedGlobal[POSTMARK_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.POSTMARK_PATCHED_SYMBOL] = true;
 
-    /**
-     * Hook "postmark" to patch its mail sending functionality.
-     */
     addHook((exports: any, name: Namespace, baseDir?: string) => {
-      // Only patch 'postmark' module
-      // if (name !== 'postmark') {
-      //   return exports;
-      // }
-
-      // Handle both default and named exports
       const postmarkModule = exports.default || exports;
 
       // `postmarkModule` is the object returned by import postmark.

@@ -4,8 +4,7 @@ import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
 import { watchers, patchedGlobal } from "../../core/index.js";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
-
-const PG_PATCHED_SYMBOL = Symbol.for("node-observer:pg-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants.js";
 
 /**
  * Determines if a query or execute command should be logged.
@@ -20,15 +19,9 @@ if (
   JSON.parse(process.env.NODE_OBSERVATORY_QUERIES).includes("pg")
 ) {
   if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.PG_PATCHED_SYMBOL]) {
-    patchedGlobal[PG_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.PG_PATCHED_SYMBOL] = true;
 
     addHook((exports: any, name: Namespace, baseDir?: string) => {
-      // Only patch 'pg' module
-      // if (name !== 'pg') {
-      //   return exports;
-      // }
-
-      // Handle both default and named exports
       const pgModule = exports.default || exports;
 
       if (!pgModule || typeof pgModule.Client !== "function") {

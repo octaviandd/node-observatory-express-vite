@@ -2,10 +2,9 @@
 
 import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
-import { watchers } from "../../core/index.js";
+import { watchers, patchedGlobal } from "../../core/index.js";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
-
-const SENDGRID_PATCHED_SYMBOL = Symbol.for("node-observer:sendgrid-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants.js";
 
 if (
   process.env.NODE_OBSERVATORY_MAILER &&
@@ -15,12 +14,6 @@ if (
     patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.SENDGRID_PATCHED_SYMBOL] = true;
 
     addHook((exports: any, name: Namespace, baseDir?: string) => {
-      // Only patch '@sendgrid/mail' module
-      // if (name !== '@sendgrid/mail') {
-      //   return exports;
-      // }
-
-      // Handle both default and named exports
       const sendgridModule = exports.default || exports;
 
       if (typeof sendgridModule.send === "function") {

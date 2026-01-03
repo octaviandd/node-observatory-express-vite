@@ -2,24 +2,20 @@
 
 import { addHook, Namespace } from 'import-in-the-middle';
 import shimmer from 'shimmer';
-import { watchers } from '../../core/index.js';
+import { patchedGlobal, watchers } from '../../core/index.js';
 import { v4 as uuidv4 } from 'uuid';
 import { getCallerInfo } from '../../core/helpers/helpers.js';
+import { PATCHERS_GLOBAL_SYMBOLS } from '../../core/helpers/constants.js';
 
-const BREE_PATCHED_SYMBOL = Symbol.for('node-observer:bree-patched');
-
-// Methods to patch on the Bree prototype
 const instanceMethods = ['add', 'start', 'stop', 'remove'];
-
-// Methods to patch on individual job objects
 const jobMethods = ['run', 'stop', 'remove'];
 
 if (
   process.env.NODE_OBSERVATORY_SCHEDULER &&
   JSON.parse(process.env.NODE_OBSERVATORY_SCHEDULER).includes('bree')
 ) {
-  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLSPATCHERS_GLOBAL_SYMBOLS.BREE_PATCHED_SYMBOL]) {
-    patchedGlobal[PATCHERS_GLOBAL_SYMBOLSBREE_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.BREE_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.BREE_PATCHED_SYMBOL] = true;
 
     addHook((exports: any, name: Namespace, baseDir?: string) => {
       // Only patch 'bree' module

@@ -4,23 +4,16 @@ import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
 import { watchers, patchedGlobal } from "../../core/index.js";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
-
-const SEQUELIZE_PATCHED_SYMBOL = Symbol.for("node-observer:sequelize-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants.js";
 
 if (
   process.env.NODE_OBSERVATORY_MODELS &&
   JSON.parse(process.env.NODE_OBSERVATORY_MODELS).includes("sequelize")
 ) {
   if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.SEQUELIZE_PATCHED_SYMBOL]) {
-    patchedGlobal[SEQUELIZE_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.SEQUELIZE_PATCHED_SYMBOL] = true;
 
     addHook((exports: any, name: Namespace, baseDir?: string) => {
-      // Only patch 'sequelize' module
-      // if (name !== 'sequelize') {
-      //   return exports;
-      // }
-
-      // Handle both default and named exports
       const sequelizeModule = exports.default || exports;
 
       if (!sequelizeModule || typeof sequelizeModule !== "function") {

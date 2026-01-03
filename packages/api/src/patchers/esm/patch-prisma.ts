@@ -4,6 +4,7 @@ import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
 import { watchers, patchedGlobal } from "../../core/index.js";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants.js";
 
 const PRISMA_PATCHED_SYMBOL = Symbol.for("node-observer:prisma-patched");
 
@@ -82,15 +83,9 @@ if (
   JSON.parse(process.env.NODE_OBSERVATORY_MODELS).includes("prisma")
 ) {
   if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.PRISMA_PATCHED_SYMBOL]) {
-    patchedGlobal[PRISMA_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.PRISMA_PATCHED_SYMBOL] = true;
 
     addHook((exports: any, name: Namespace, baseDir?: string) => {
-      // Only patch '@prisma/client' module
-      // if (name !== '@prisma/client') {
-      //   return exports;
-      // }
-
-      // Handle both default and named exports
       const prismaModule = exports.default || exports;
 
       if (!prismaModule || !prismaModule.PrismaClient) {

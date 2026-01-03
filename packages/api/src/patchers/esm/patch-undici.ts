@@ -5,8 +5,7 @@ import shimmer from "shimmer";
 import { watchers, patchedGlobal } from "../../core/index.js";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
 import { PassThrough } from "stream";
-
-const UNDICI_PATCHED_SYMBOL = Symbol.for("node-observer:undici-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants.js";
 
 const MAX_BODY_SIZE = 1024 * 1024;
 
@@ -15,15 +14,9 @@ if (
   JSON.parse(process.env.NODE_OBSERVATORY_HTTP).includes("undici")
 ) {
   if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.UNDICI_PATCHED_SYMBOL]) {
-    patchedGlobal[UNDICI_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.UNDICI_PATCHED_SYMBOL] = true;
 
     addHook((exports: any, name: Namespace, baseDir?: string) => {
-      // Only patch 'undici' module
-      // if (name !== 'undici') {
-      //   return exports;
-      // }
-
-      // Handle both default and named exports
       const undiciModule = exports.default || exports;
 
       if (!undiciModule || typeof undiciModule.request !== "function") {

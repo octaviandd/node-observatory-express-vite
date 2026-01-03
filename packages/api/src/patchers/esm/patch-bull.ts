@@ -2,22 +2,18 @@
 
 import { addHook, Namespace } from 'import-in-the-middle';
 import shimmer from 'shimmer';
-import { watchers } from '../../core/index.js';
+import { patchedGlobal, watchers } from '../../core/index.js';
 import { getCallerInfo } from '../../core/helpers/helpers.js';
 import { v4 as uuidv4 } from 'uuid';
 import { jobLocalStorage } from '../../core/store.js';
-
-// Create a global symbol to track if bull has been patched
-const BULL_PATCHED_SYMBOL = Symbol.for('node-observer:bull-patched');
+import { PATCHERS_GLOBAL_SYMBOLS } from '../../core/helpers/constants.js';
 
 if (
   process.env.NODE_OBSERVATORY_JOBS &&
   JSON.parse(process.env.NODE_OBSERVATORY_JOBS).includes('bull')
 ) {
-  // Check if bull has already been patched
-  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLSPATCHERS_GLOBAL_SYMBOLS.BULL_PATCHED_SYMBOL]) {
-    // Mark bull as patched
-    patchedGlobal[PATCHERS_GLOBAL_SYMBOLSBULL_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.BULL_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.BULL_PATCHED_SYMBOL] = true;
 
     const METHODS_TO_PATCH = {
       process: 'process',

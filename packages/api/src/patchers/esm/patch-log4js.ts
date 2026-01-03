@@ -4,18 +4,14 @@ import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
 import { watchers, patchedGlobal } from "../../core/index.js";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
-
-// Create a global symbol to track if log4js has been patched
-const LOG4JS_PATCHED_SYMBOL = Symbol.for("node-observer:log4js-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants.js";
 
 if (
   process.env.NODE_OBSERVATORY_LOGGING &&
   JSON.parse(process.env.NODE_OBSERVATORY_LOGGING).includes("log4js")
 ) {
-  // Check if log4js has already been patched
   if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.LOG4JS_PATCHED_SYMBOL]) {
-    // Mark log4js as patched
-    patchedGlobal[LOG4JS_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.LOG4JS_PATCHED_SYMBOL] = true;
 
     // Intercepts `import log4js from "log4js"`
     addHook((exports: any, name: Namespace, baseDir?: string) => {

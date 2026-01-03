@@ -10,8 +10,8 @@ if (
   process.env.NODE_OBSERVATORY_MODELS &&
   JSON.parse(process.env.NODE_OBSERVATORY_MODELS).includes("typeorm")
 ) {
-  if (patchedGlobal[PATCHERS_GLOBAL_SYMBOLSPATCHERS_GLOBAL_SYMBOLS.TYPEORM_PATCHED_SYMBOL]) {
-    patchedGlobal[PATCHERS_GLOBAL_SYMBOLSPATCHERS_GLOBAL_SYMBOLS.TYPEORM_PATCHED_SYMBOL] = true;
+  if (patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.TYPEORM_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.TYPEORM_PATCHED_SYMBOL] = true;
 
     new Hook(["typeorm"], function (exports: any) {
       if (!exports || typeof exports.Repository !== "function") {

@@ -7,16 +7,12 @@ import { inspect } from "util";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants.js";
 
 
 //@ts-ignore
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-// Create a global symbol to track if exceptions have been patched
-const EXCEPTIONS_PATCHED_SYMBOL = Symbol.for(
-  "node-observer:exceptions-patched",
-);
 
 /**
  * Extract detailed error information, including formatted code context
@@ -111,7 +107,7 @@ if (process.env.NODE_OBSERVATORY_ERRORS) {
   // Check if exceptions have already been patched
   if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.EXCEPTIONS_PATCHED_SYMBOL]) {
     // Mark exceptions as patched
-    patchedGlobal[EXCEPTIONS_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.EXCEPTIONS_PATCHED_SYMBOL] = true;
 
     // Apply all patchers
     // uncaughtPatcher();

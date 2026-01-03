@@ -4,28 +4,16 @@ import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
 import { watchers, patchedGlobal } from "../../core/index.js";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
-
-// Create a global symbol to track if mongoose has been patched
-const MONGOOSE_PATCHED_SYMBOL = Symbol.for("node-observer:mongoose-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants.js";
 
 if (
   process.env.NODE_OBSERVATORY_MODELS &&
   JSON.parse(process.env.NODE_OBSERVATORY_MODELS).includes("mongoose")
 ) {
-  // Check if mongoose has already been patched
   if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.MONGOOSE_PATCHED_SYMBOL]) {
-    // Mark mongoose as patched
-    patchedGlobal[MONGOOSE_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.MONGOOSE_PATCHED_SYMBOL] = true;
 
-    /**
-     * Hook "mongoose" to patch its query and document methods.
-     */
     addHook((exports: any, name: Namespace, baseDir?: string) => {
-      // Only patch 'mongoose' module
-      // if (name !== 'mongoose') {
-      //   return exports;
-      // }
-
       // Handle both default and named exports
       const mongooseModule = exports.default || exports;
 

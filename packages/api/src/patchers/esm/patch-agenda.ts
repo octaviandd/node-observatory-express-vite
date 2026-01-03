@@ -2,21 +2,17 @@
 
 import { addHook, Namespace } from 'import-in-the-middle';
 import shimmer from 'shimmer';
-import { watchers } from '../../core/index.js';
+import { patchedGlobal, watchers } from '../../core/index.js';
 import { getCallerInfo } from '../../core/helpers/helpers.js';
 import { v4 as uuidv4 } from 'uuid';
-
-// Create a global symbol to track if agenda has been patched
-const AGENDA_PATCHED_SYMBOL = Symbol.for('node-observer:agenda-patched');
+import { PATCHERS_GLOBAL_SYMBOLS } from '../../core/helpers/constants.js';
 
 if (
   process.env.NODE_OBSERVATORY_JOBS &&
   JSON.parse(process.env.NODE_OBSERVATORY_JOBS).includes('agenda')
 ) {
-  // Check if agenda has already been patched
-  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLSPATCHERS_GLOBAL_SYMBOLS.AGENDA_PATCHED_SYMBOL]) {
-    // Mark agenda as patched
-    patchedGlobal[PATCHERS_GLOBAL_SYMBOLSAGENDA_PATCHED_SYMBOL] = true;
+  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.AGENDA_PATCHED_SYMBOL]) {
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.AGENDA_PATCHED_SYMBOL] = true;
 
     // The Agenda methods we want to intercept
     const METHODS_TO_PATCH = {

@@ -4,27 +4,18 @@ import { addHook, Namespace } from "import-in-the-middle";
 import shimmer from "shimmer";
 import { watchers, patchedGlobal } from "../../core/index.js";
 import { getCallerInfo } from "../../core/helpers/helpers.js";
-
-const TYPEORM_PATCHED_SYMBOL = Symbol.for("node-observer:typeorm-patched");
+import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants.js";
 
 if (
   process.env.NODE_OBSERVATORY_MODELS &&
   JSON.parse(process.env.NODE_OBSERVATORY_MODELS).includes("typeorm")
 ) {
   if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.TYPEORM_PATCHED_SYMBOL]) {
-    // Mark typeorm as patched
-    patchedGlobal[TYPEORM_PATCHED_SYMBOL] = true;
+    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.TYPEORM_PATCHED_SYMBOL] = true;
 
     addHook((exports: any, name: Namespace, baseDir?: string) => {
-      // Only patch 'typeorm' module
-      // if (name !== 'typeorm') {
-      //   return exports;
-      // }
-
-      // Handle both default and named exports
       const typeormModule = exports.default || exports;
 
-      // `typeormModule` is the TypeORM module.
       if (!typeormModule || typeof typeormModule.Repository !== "function") {
         return exports;
       }
