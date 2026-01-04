@@ -143,6 +143,7 @@ if (
       line: callerInfo.line,
       error: error ? error.toString() : undefined,
       status: error ? "failed" : "completed",
+      created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
     };
     watchers.model.insertRedisStream(modelLogEntry);
   }

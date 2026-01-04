@@ -36,6 +36,7 @@ if (
                     context: contextMetadata, // Include the child logger's context
                     file: callerInfo.file,
                     line: callerInfo.line,
+                    created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                   });
 
                   return originalMethod.apply(this, logArgs);

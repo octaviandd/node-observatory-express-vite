@@ -11,7 +11,6 @@ export abstract class BaseWatcher implements Watcher {
   private streamKey: string;
   private consumerGroup: string;
   private consumerName: string;
-  private isMigrating: boolean = false;
   protected refreshInterval?: NodeJS.Timeout;
   protected refreshIntervalDuration: number = 5000;
   readonly type: string;
@@ -26,11 +25,12 @@ export abstract class BaseWatcher implements Watcher {
     this.consumerName = `consumer:${process.pid}:${Date.now()}`;
 
     this.createRedisStream();
+    this.cleanupPendingOnStartup();
     this.ingestRedisStream();
   }
 
 
-  private async createRedisStream() {
+  private async createRedisStream(): Promise<void | undefined> {
     try {
       await this.RedisClient.xGroupCreate(this.streamKey, this.consumerGroup, '0', {  MKSTREAM: true });
       console.log(`Created consumer group for ${this.type}`);
@@ -40,83 +40,135 @@ export abstract class BaseWatcher implements Watcher {
     }
   }
 
+  private async acknowledgeMessages(messageIds: string[]) {
+    try {
+      const result = await this.RedisClient.xAck(
+        this.streamKey,
+        this.consumerGroup,
+        messageIds
+      );
+      console.log('after xAck, result:', result);
+    } catch (error) {
+      console.error(`Error xAck messages for ${this.type}:`, error);
+    }
+  }
+
+  private async trimStreamKeys() {
+    try {
+      await this.RedisClient.xTrim(this.streamKey, 'MAXLEN', 1000, { strategyModifier: "~" });
+    } catch (error) {
+      console.error(`Error trimming data for ${this.type}:`, error);
+    }
+  }
+
+  private async insertIntoDB(parsedValues: RedisEntry[]): Promise<void> {
+    try {
+      await this.DBInstance.insert(parsedValues);
+      console.log('inserted into db: ',  parsedValues)
+    } catch (dbError) {
+      console.error(`Error inserting batch data for ${this.type}:`, dbError);
+      // Don't ACK if DB insert failed - messages will be retried
+    }
+  }
+
+  private async extractEntriesFromStream(): Promise<undefined | { parsedValues: RedisEntry[], messageIds: string[] }> {
+    try {
+      const streams = await this.RedisClient.xReadGroup(
+        this.consumerGroup,
+        this.consumerName,
+        [{
+            key: this.streamKey,
+            id: '>' // Only new messages
+          }
+        ],
+        {
+          COUNT: 500,
+          BLOCK: 1000 // Block for 1 second
+        }
+      );
+
+      if (!streams || streams.length === 0) return;
+
+      const parsedValues: RedisEntry[] = [];
+      const messageIds: string[] = [];
+
+
+      for (const stream of streams) {
+        for (const messageObject of stream.messages) {
+          const { message } = messageObject;
+
+          const parsedEntry = {
+            uuid: `${this.type}:${messageObject.id}`,
+            type: message.type,
+            content: JSON.parse(message.content),
+            created_at: message.created_at,
+            request_id: message.request_id,
+            job_id: message.job_id,
+            schedule_id: message.schedule_id
+          };
+
+          parsedValues.push(parsedEntry);
+          messageIds.push(messageObject.id);
+        }
+      }
+
+      return { parsedValues, messageIds };
+    } catch (error: unknown) {
+      console.error(`Error in Redis stream xReadGroup for ${this.type}:`, error);
+    }
+  }
+
   private async ingestRedisStream() {
-    this.refreshInterval = setInterval(async () => {
-      if (this.isMigrating) return;
-      this.isMigrating = true;
-
+    const processMessages = async () => {
       try {
-        const messages = await this.RedisClient.xReadGroup(
-          this.consumerGroup,
-          this.consumerName,
-          [
-            {
-              key: this.streamKey,
-              id: '>' // Only new messages
-            }
-          ],
-          {
-            COUNT: 500,
-            BLOCK: 1000 // Block for 1 second
-          }
-        );
-
-        if (!messages || messages.length === 0) {
-          this.isMigrating = false;
-          return;
-        }
-
-        const parsedValues: RedisEntry[] = [];
-        const messageIds: string[] = [];
-
-        for (const stream of messages) {
-          for (const message of stream.messages) {
-            try {
-              const data = message.message;
-
-              const parsedEntry: RedisEntry = {
-                uuid: message.id,
-                type: data.type,
-                content: JSON.parse(data.content),
-                created_at: data.created_at,
-                request_id: data.request_id,
-                job_id: data.job_id,
-                schedule_id: data.schedule_id
-              };
-
-              parsedValues.push(parsedEntry);
-              messageIds.push(message.id);
-            } catch (error) {
-              console.error(`Error parsing stream message ${message.id}:`, error);
-            }
-          }
-        }
+        const { parsedValues, messageIds } = await this.extractEntriesFromStream() ?? { parsedValues: [], messageIds: [] };
 
         if (parsedValues.length > 0) {
-          try {
-            await this.DBInstance.insert(parsedValues);
-
-            console.log(messageIds)
-            await this.RedisClient.xAck(
-              this.streamKey,
-              this.consumerGroup,
-              messageIds
-            );
-
-            await this.RedisClient.xTrim(this.streamKey, 'MAXLEN', 1000, {strategyModifier: "~"});
-
-            console.log(`Migrated ${parsedValues.length} ${this.type} entries to database`);
-          } catch (dbError) {
-            console.error(`Error inserting batch data for ${this.type}:`, dbError);
-            // Don't ACK if DB insert failed - messages will be retried
-          }
+          await this.insertIntoDB(parsedValues);
+          await this.acknowledgeMessages(messageIds);
+          await this.trimStreamKeys();
         }
+
+        console.log('finished one ingest for:', this.streamKey, this.consumerGroup)
       } catch (error) {
         console.error(`Error in Redis stream migration for ${this.type}:`, error);
       } finally {
-        this.isMigrating = false;
+        this.refreshInterval = setTimeout(processMessages, this.refreshIntervalDuration);
       }
-    }, this.refreshIntervalDuration);
+    }
+
+    this.refreshInterval = setTimeout(processMessages, 0);
+  }
+
+  private async cleanupPendingOnStartup() {
+    try {
+      const pending = await this.RedisClient.xPendingRange(
+        this.streamKey,
+        this.consumerGroup,
+        '-',
+        '+',
+        100  // Check up to 100 pending messages
+      );
+
+      if (!pending || pending.length === 0) {
+        console.log(`No pending messages for ${this.type}`);
+        return;
+      }
+
+      const messageIds = pending.map(p => p.id);
+      const existingUuids = await this.DBInstance.findExistingUuids(messageIds);
+
+      if (existingUuids.length > 0) {
+        await this.RedisClient.xAck(
+          this.streamKey,
+          this.consumerGroup,
+          existingUuids
+        );
+        console.log(`Cleaned up ${existingUuids.length} already-inserted pending messages for ${this.type}`);
+      }
+    } catch (error) {
+      console.error(`Error cleaning up pending messages for ${this.type}:`, error);
+    }
   }
 
   private async processPendingMessages() {
@@ -129,10 +181,7 @@ export abstract class BaseWatcher implements Watcher {
         100     // count
       );
 
-      if (!pending || !Array.isArray(pending) || pending.length === 0) {
-        return;
-      }
-
+      if (!pending || !Array.isArray(pending) || pending.length === 0) return;
       const messageIds = pending.map((msg: any) => msg.id);
 
       const claimed = await this.RedisClient.xClaim(
@@ -153,8 +202,8 @@ export abstract class BaseWatcher implements Watcher {
           try {
             const data = message.message;
 
-            const parsedEntry: RedisEntry = {
-              uuid: data.uuid,
+            const parsedEntry = {
+              uuid: `${this.type}:${message.id}`,
               type: data.type,
               content: typeof data.content === 'string' ? JSON.parse(data.content) : data.content,
               created_at: new Date(parseInt(data.created_at)).toISOString().replace('T', ' ').substring(0, 19),
@@ -192,7 +241,7 @@ export abstract class BaseWatcher implements Watcher {
           schedule_id: scheduleLocalStorage.getStore()?.get("scheduleId") || 'null',
           type: this.type,
           content: JSON.stringify(cleanContent),
-          created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
+          created_at: content.created_at,
         }
       );
     } catch (error) {
@@ -201,7 +250,7 @@ export abstract class BaseWatcher implements Watcher {
   }
 
   private async cleanup() {
-    if (this.refreshInterval) clearInterval(this.refreshInterval);
+    // if (this.refreshInterval) clearInterval(this.refreshInterval);
     await this.processPendingMessages();
   }
 

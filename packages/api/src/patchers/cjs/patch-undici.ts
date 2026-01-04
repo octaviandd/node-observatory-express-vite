@@ -263,6 +263,7 @@ if (process.env.NODE_OBSERVATORY_HTTP && JSON.parse(process.env.NODE_OBSERVATORY
               library: "undici",
               file: callerInfo.file,
               line: callerInfo.line,
+              created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
             };
 
             // Calculate request body size if present

@@ -44,8 +44,6 @@ if (
                   ? `${redisOptions.host}:${redisOptions.port}`
                   : "default";
 
-                const createdAt = Date.now();
-
                 let fnResult;
                 let didFail = false;
                 let failReason;
@@ -64,7 +62,7 @@ if (
                       file: callerInfo.file,
                       line: callerInfo.line,
                       package: "bull",
-                      createdAt,
+                      created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                     },
                   );
                 }
@@ -85,7 +83,7 @@ if (
                       file: callerInfo.file,
                       line: callerInfo.line,
                       package: "bull",
-                      createdAt,
+                      created_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
                     },
                   );
                 }
@@ -145,7 +143,7 @@ if (
                           attemptsMade,
                           package: "bull",
                           returnValue: returnvalue,
-                          createdAt,
+                          created_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
                         },
                       );
 
@@ -163,7 +161,7 @@ if (
                             line: callerInfo.line,
                             attemptsMade,
                             package: "bull",
-                            createdAt,
+                            created_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
                           },
                         );
                       }
@@ -182,7 +180,7 @@ if (
                           attemptsMade,
                           package: "bull",
                           returnValue: returnvalue,
-                          createdAt,
+                          created_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
                         },
                       );
                     }

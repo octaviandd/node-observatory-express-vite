@@ -182,6 +182,7 @@ if (
       status: error ? "failed" : "completed",
       sqlType: getSqlType(sql),
       params: values,
+      created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
     };
 
     watchers.query.insertRedisStream(logEntry);

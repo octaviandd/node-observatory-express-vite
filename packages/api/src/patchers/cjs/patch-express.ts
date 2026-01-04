@@ -211,6 +211,7 @@ if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.EXPRESS_PATCHED_SYMBOL]) {
                 //@ts-ignore Add session if available
                 session: req.session || {},
                 package: "express",
+                created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
               };
 
               // Add error details if an error handler put them in res.locals
@@ -275,6 +276,7 @@ if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.EXPRESS_PATCHED_SYMBOL]) {
                 },
                 memoryUsage: process.memoryUsage(),
                 package: "express",
+                created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
               };
 
               if (watchers?.requests) {
@@ -349,6 +351,7 @@ if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.EXPRESS_PATCHED_SYMBOL]) {
                 //     cacheEnabled: viewCacheEnabled,
                 //     // Note: Cache hit/miss status usually requires patching the view engine itself
                 //   },
+                //   created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                 // });
               }
 

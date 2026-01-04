@@ -59,6 +59,7 @@ if (
                       file: callerInfo.file,
                       line: callerInfo.line,
                       package: "agenda",
+                      created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                     });
                   }
 
@@ -77,6 +78,7 @@ if (
                       file: callerInfo.file,
                       line: callerInfo.line,
                       package: "agenda",
+                      created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                     });
                   }
 
@@ -95,6 +97,7 @@ if (
                       file: callerInfo.file,
                       line: callerInfo.line,
                       package: "agenda",
+                      created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                     });
                   }
 
@@ -135,6 +138,7 @@ if (
                 line: job.attrs.line || job.attrs.lastRunAt?.line,
                 attemptsMade: job.attrs.failCount,
                 package: "agenda",
+                created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
               });
 
               try {
@@ -159,6 +163,7 @@ if (
                   attemptsMade: job.attrs.failCount,
                   returnValue: result,
                   package: "agenda",
+                  created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                 });
 
                 return result;
@@ -187,6 +192,7 @@ if (
                     line: job.attrs.line || job.attrs.lastRunAt?.line,
                     attemptsMade: job.attrs.failCount,
                     package: "agenda",
+                    created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                   });
                 } else {
                   // Log final failure
@@ -203,6 +209,7 @@ if (
                     attemptsMade: job.attrs.failCount,
                     failedReason: failReason,
                     package: "agenda",
+                    created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                   });
                 }
 

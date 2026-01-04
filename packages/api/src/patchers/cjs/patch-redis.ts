@@ -46,6 +46,7 @@ if (
               package: "redis",
               file: callerInfo.file,
               line: callerInfo.line,
+              created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
             };
 
             // Skip observatory entries

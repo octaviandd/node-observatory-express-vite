@@ -38,6 +38,7 @@ function extractErrorDetails(error: any) {
     codeContext:
       file && line ? formatCodeContext(file, line) : "No context available",
     fullError: inspect(error, { depth: null }), // Full error object for debugging
+    created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
   };
 }
 

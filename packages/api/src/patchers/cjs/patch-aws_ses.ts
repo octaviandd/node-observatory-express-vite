@@ -74,6 +74,7 @@ if (
                 },
                 duration,
                 ...content,
+                created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
               });
 
               return result;
@@ -90,6 +91,7 @@ if (
                 },
                 duration,
                 ...content,
+                created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
               });
               throw err;
             }
@@ -173,6 +175,7 @@ if (
                       },
                       duration,
                       ...content,
+                      created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                     });
 
                     return result;
@@ -191,6 +194,7 @@ if (
                       },
                       duration,
                       ...content,
+                      created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                     });
                     throw err;
                   }

@@ -184,6 +184,7 @@ if (
       line: callerInfo.line,
       error: error ? error.toString() : undefined,
       sqlType: getSqlType(sql),
+      created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
     };
 
     watchers.query.insertRedisStream(logEntry);

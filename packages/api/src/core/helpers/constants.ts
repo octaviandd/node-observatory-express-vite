@@ -1,4 +1,4 @@
-export const PERIODS : {[key: string]: {duration: number, interval : string, config: { minute: string, second: string, weekday?: string }}} = {
+export const PERIODS : Record<string, {duration: number, interval : string, config: { minute: string, second: string, weekday?: string }}> = {
   "1h": {
     duration: 60,
     interval: "INTERVAL 1 HOUR",

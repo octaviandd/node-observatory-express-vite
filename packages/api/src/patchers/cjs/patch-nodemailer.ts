@@ -48,6 +48,7 @@ if (
                   file: callerInfo.file,
                   line: callerInfo.line,
                   package: "nodemailer",
+                  created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                 };
 
                 const result = originalSendMail.call(

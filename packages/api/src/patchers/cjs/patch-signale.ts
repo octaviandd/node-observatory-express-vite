@@ -33,6 +33,7 @@ if (
               message: args[0],
               file: callerInfo.file,
               line: callerInfo.line,
+              created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
             };
 
             watchers.logging.insertRedisStream(logContent);

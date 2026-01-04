@@ -44,6 +44,7 @@ if (
                 key: argNames.includes("key")
                   ? args[argNames.indexOf("key")]
                   : undefined,
+                created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
               };
 
               const startTime = performance.now();

@@ -34,6 +34,7 @@ if (
                 message: args[0],
                 file: callerInfo.file,
                 line: callerInfo.line,
+                created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
               };
 
               // Log the message content
@@ -63,6 +64,7 @@ if (
                     logger: args[0],
                     level: method,
                     message: logArgs,
+                    created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                   };
 
                   // Log the message content

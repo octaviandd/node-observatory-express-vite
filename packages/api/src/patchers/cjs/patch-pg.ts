@@ -142,6 +142,7 @@ if (
       file: callerInfo.file,
       line: callerInfo.line,
       error: error ? error.toString() : undefined,
+      created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
     };
 
     if (watchers?.query) {

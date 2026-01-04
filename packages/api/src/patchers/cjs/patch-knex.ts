@@ -51,6 +51,7 @@ if (
           error: error ? error.toString() : undefined,
           sqlType: getSqlType(sql),
           params: bindings,
+          created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
         };
 
         watchers.query.insertRedisStream(logEntry);

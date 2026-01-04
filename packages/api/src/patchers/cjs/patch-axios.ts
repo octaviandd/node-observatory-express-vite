@@ -185,6 +185,8 @@ function createLoggingObject(
       parseFloat((performance.now() - startTime).toFixed(2)) || 0;
   }
 
+  loggingObject.created_at = new Date().toISOString().replace('T', ' ').substring(0, 19)
+
   return loggingObject;
 }
 

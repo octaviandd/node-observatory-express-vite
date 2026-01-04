@@ -47,6 +47,7 @@ function patchPrismaModels(prisma: any) {
                 status: "success",
                 file: callerInfo.file,
                 line: callerInfo.line,
+                created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
               });
 
               return result;
@@ -62,6 +63,7 @@ function patchPrismaModels(prisma: any) {
                 error: error.message,
                 file: callerInfo.file,
                 line: callerInfo.line,
+                created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
               });
 
               throw error;

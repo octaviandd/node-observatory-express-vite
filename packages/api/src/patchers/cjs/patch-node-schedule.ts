@@ -37,6 +37,7 @@ if (
               scheduleId,
               file: callerInfo.file,
               line: callerInfo.line,
+              created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
             });
 
             // Wrap the task to log execution time and handle errors
@@ -50,6 +51,7 @@ if (
                 args,
                 scheduleId,
                 jobId,
+                created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
               });
 
               try {
@@ -67,6 +69,7 @@ if (
                   jobId,
                   file: callerInfo.file,
                   line: callerInfo.line,
+                  created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                 });
 
                 return result;
@@ -84,6 +87,7 @@ if (
                   error: error instanceof Error ? error.message : String(error),
                   file: callerInfo.file,
                   line: callerInfo.line,
+                  created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                 });
 
                 throw error;
@@ -107,6 +111,7 @@ if (
                         scheduleId,
                         file: callerInfo.file,
                         line: callerInfo.line,
+                        created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                       });
 
                       return originalCancel.apply(this, args);
@@ -135,6 +140,7 @@ if (
                         scheduleId,
                         file: callerInfo.file,
                         line: callerInfo.line,
+                        created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                       });
 
                       return originalReschedule.apply(this, [spec, ...args]);
@@ -164,6 +170,7 @@ if (
                         scheduleId,
                         file: callerInfo.file,
                         line: callerInfo.line,
+                        created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                       });
 
                       return result;
@@ -193,6 +200,7 @@ if (
                 data: args,
                 file: callerInfo.file,
                 line: callerInfo.line,
+                created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
               });
 
               return originalFn.apply(this, args);

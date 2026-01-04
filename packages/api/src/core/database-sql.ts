@@ -635,6 +635,17 @@ class Database {
       throw new DatabaseRetrieveError('Failed to get graph data from database', {cause: (error as Error)});
     }
   }
+
+  async findExistingUuids(uuids: string[]): Promise<string[]> {
+    if (uuids.length === 0) return [];
+    
+    const [rows] = await this.storeConnection.query(
+      `SELECT uuid FROM observatory_entries WHERE uuid IN (?)`,
+      [uuids]
+    );
+    
+    return (rows as { uuid: string }[]).map(r => r.uuid);
+  }
 }
 
 export default Database;

@@ -29,6 +29,7 @@ if (process.env.NODE_OBSERVATORY_LOGGING && JSON.parse(process.env.NODE_OBSERVAT
                       meta: args[1] || {},
                       file: callerInfo.file,
                       line: callerInfo.line,
+                      created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                     });
 
                     return originalMethod.apply(this, args);
@@ -58,6 +59,7 @@ if (process.env.NODE_OBSERVATORY_LOGGING && JSON.parse(process.env.NODE_OBSERVAT
                     meta: args[1] || {},
                     file: callerInfo.file,
                     line: callerInfo.line,
+                    created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                   });
 
                   return originalMethod.apply(this, args);

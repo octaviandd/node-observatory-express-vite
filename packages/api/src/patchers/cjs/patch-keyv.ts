@@ -17,6 +17,7 @@ const patchMethod = (prototype: any, method: string) => {
         file: callerInfo.file,
         line: callerInfo.line,
         key,
+        created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
       };
 
       const startTime = performance.now();

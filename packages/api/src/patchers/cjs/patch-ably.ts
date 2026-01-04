@@ -129,6 +129,7 @@ function wrapMethod(original: Function, methodName: string, context: any = {}) {
       options: methodName === "publish" && args.length > 2 ? args[2] : null,
       file: callerInfo.file,
       line: callerInfo.line,
+      created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
     };
 
     try {

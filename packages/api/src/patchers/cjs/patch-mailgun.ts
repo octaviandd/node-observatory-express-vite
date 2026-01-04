@@ -57,6 +57,7 @@ if (
                   file: callerInfo.file,
                   line: callerInfo.line,
                   package: "mailgun.js",
+                  created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                 };
 
                 try {

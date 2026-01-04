@@ -446,7 +446,7 @@ function patchHttpMethod(
                   );
                   loggingObject.duration =
                     parseFloat((performance.now() - start).toFixed(2)) || 0;
-
+                  loggingObject.created_at = new Date().toISOString().replace('T', ' ').substring(0, 19)
                   // Log the complete request/response
                   watchers.http.insertRedisStream(loggingObject);
                   hasLoggedResponse = true;
@@ -511,6 +511,7 @@ function patchServerEmit(module: typeof http | typeof https) {
                 statusCode,
                 duration,
                 ipAddress,
+                created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
               });
             } catch (error) {
               console.error("Error logging server request:", error);

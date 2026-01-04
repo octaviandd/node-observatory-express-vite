@@ -33,6 +33,7 @@ if (
             config: args[0] || {},
             file: callerInfo.file,
             line: callerInfo.line,
+            created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
           });
 
           return breeInstance;
@@ -82,6 +83,7 @@ if (
               arguments: args,
               file: callerInfo.file,
               line: callerInfo.line,
+              created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
             });
 
             try {
@@ -118,6 +120,7 @@ if (
                         error instanceof Error ? error.message : String(error),
                       file: callerInfo.file,
                       line: callerInfo.line,
+                      created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                     });
                     throw error;
                   });
@@ -147,6 +150,7 @@ if (
                 success: true,
                 file: callerInfo.file,
                 line: callerInfo.line,
+                created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
               });
 
               return result;
@@ -162,6 +166,7 @@ if (
                 error: error instanceof Error ? error.message : String(error),
                 file: callerInfo.file,
                 line: callerInfo.line,
+                created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
               });
               throw error;
             }
@@ -194,6 +199,7 @@ if (
                   jobName,
                   file: callerInfo.file,
                   line: callerInfo.line,
+                  created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                 });
 
                 try {
@@ -221,6 +227,7 @@ if (
                           success: true,
                           file: callerInfo.file,
                           line: callerInfo.line,
+                          created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                         });
                         return value;
                       })
@@ -246,6 +253,7 @@ if (
                               : String(error),
                           file: callerInfo.file,
                           line: callerInfo.line,
+                          created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                         });
                         throw error;
                       });
@@ -266,6 +274,7 @@ if (
                     success: true,
                     file: callerInfo.file,
                     line: callerInfo.line,
+                    created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                   });
 
                   return result;
@@ -287,6 +296,7 @@ if (
                       error instanceof Error ? error.message : String(error),
                     file: callerInfo.file,
                     line: callerInfo.line,
+                    created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
                   });
                   throw error;
                 }
@@ -321,6 +331,7 @@ if (
                 jobName: name,
                 file: callerInfo.file,
                 line: callerInfo.line,
+                created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
               });
             });
 
@@ -341,6 +352,7 @@ if (
                 jobName: name,
                 file: callerInfo.file,
                 line: callerInfo.line,
+                created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
               });
             });
 
@@ -368,6 +380,7 @@ if (
                 success: true,
                 file: callerInfo.file,
                 line: callerInfo.line,
+                created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
               });
 
               // Clean up
@@ -399,6 +412,7 @@ if (
                 error: error instanceof Error ? error.message : String(error),
                 file: callerInfo.file,
                 line: callerInfo.line,
+                created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
               });
 
               // Clean up
