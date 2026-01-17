@@ -20,7 +20,8 @@ const ToggleGroup = React.forwardRef<
   <ToggleGroupPrimitive.Root
     ref={ref}
     className={cn("flex items-center justify-center gap-1", className)}
-    {...props}
+    { 
+    watchers...props}
   >
     <ToggleGroupContext.Provider value={{ variant, size }}>
       {children}
@@ -47,7 +48,8 @@ const ToggleGroupItem = React.forwardRef<
         }),
         className,
       )}
-      {...props}
+      { 
+    watchers...props}
     >
       {children}
     </ToggleGroupPrimitive.Item>

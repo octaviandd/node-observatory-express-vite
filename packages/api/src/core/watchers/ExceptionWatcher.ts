@@ -1,6 +1,5 @@
 /** @format */
 
-import { Request } from "express";
 import { BaseWatcher } from "./BaseWatcher.js";
 import { RedisClientType } from "redis";
 import Database from '../database-sql.js';
@@ -197,7 +196,7 @@ class ExceptionWatcher extends BaseWatcher {
   //   };
   // }
 
-  protected async getGraphData(filters: CacheFilters): Promise<any> {
+  protected async getGraphData(filters: ExceptionFilters): Promise<any> {
     return await this.DBInstance.getGraphData(filters, this.type, ['unhandeledRejection', 'uncaughtException'])  
   }
 

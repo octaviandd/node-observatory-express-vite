@@ -145,7 +145,8 @@ const data = {
 export const AppSidebar = memo(
   ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
     return (
-      <Sidebar collapsible="icon" {...props}>
+      <Sidebar collapsible="icon" { 
+    watchers...props}>
         <SidebarHeader>
           <Link
             to="/"

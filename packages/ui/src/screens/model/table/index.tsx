@@ -1,14 +1,18 @@
 /** @format */
 
 import { Cuboid } from "lucide-react";
-import SidePanel from "../../../components/ui/side-panel";
-import { createPortal } from "react-dom";
 import { InstanceTable } from "./instance";
 import { GroupTable } from "./group";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useIndexTableData } from "@/hooks/useIndexTableData";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  TablePageLayout,
+  TableHeader,
+  StatusFilter,
+  LoadMoreButton,
+} from "@/components/ui/table-page";
+
+const STATUS_OPTIONS = ["all", "completed", "failed"];
 
 export default function ModelsIndexTable() {
   const {
@@ -32,45 +36,18 @@ export default function ModelsIndexTable() {
   });
 
   const Table = index === "instance" ? InstanceTable : GroupTable;
+  const count = index === "instance" ? instanceDataCount : groupDataCount;
+  const label = index === "instance" ? "Instance" : "Model";
 
   return (
-    <div className="relative">
-      {sidePanelData.isOpen &&
-        createPortal(
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-xs z-50"
-            onClick={() =>
-              setSidePanelData({
-                ...sidePanelData,
-                isOpen: false,
-                requestId: "",
-                jobId: "",
-                scheduleId: "",
-                modelId: "",
-              })
-            }
-          ></div>,
-          document.body,
-        )}
-      {sidePanelData.isOpen && (
-        <SidePanel
+    <TablePageLayout
+      sidePanelData={sidePanelData}
           setSidePanelData={setSidePanelData}
-          requestId={sidePanelData.requestId}
-          jobId={sidePanelData.jobId}
-          scheduleId={sidePanelData.scheduleId}
-          modelId={sidePanelData.modelId}
           type="models"
-        />
-      )}
+    >
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
-          <Cuboid className="h-5 w-5 text-muted-foreground" />
-          <span className="font-medium text-sm text-dark dark:text-white">
-            {index === "instance" ? instanceDataCount : groupDataCount}{" "}
-            {index === "instance" ? "Instance" : "Model"}
-            {index === "instance" && Number(instanceDataCount) > 1 && "s"}
-            {index === "group" && Number(groupDataCount) > 1 && "s"}
-          </span>
+          <TableHeader icon={Cuboid} count={count} label={label} />
           <div className="flex px-4 grow">
             <Input
               type="text"
@@ -81,49 +58,21 @@ export default function ModelsIndexTable() {
             />
           </div>
         </div>
-        {modelKey ? (
-          <ToggleGroup
-            type="single"
+        {modelKey && (
+          <StatusFilter
+            options={STATUS_OPTIONS}
             value={instanceStatusType}
-            onValueChange={(value) => value && setInstanceStatusType(value)}
-          >
-            <span className="text-sm text-muted-foreground border rounded-md px-2 py-1">
-              SHOW
-            </span>
-            {["all", "completed", "failed"].map((status) => (
-              <ToggleGroupItem
-                key={status}
-                value={status}
-                className="text-black cursor-pointer dark:text-white"
-              >
-                {status.toUpperCase()}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-        ) : null}
+            onChange={setInstanceStatusType}
+          />
+        )}
       </div>
       {/* @ts-expect-error dumb ts*/}
-      <Table data={index === "instance" ? instanceData : groupData}
+      <Table
+        data={index === "instance" ? instanceData : groupData}
         setSidePanelData={setSidePanelData}
       >
-        <div className="my-6">
-          <div className="flex items-center justify-center">
-            {message ? (
-              <div className="text-sm text-muted-foreground bg-muted px-4 py-2 rounded-md">
-                {message}
-              </div>
-            ) : (
-              <Button
-                variant="outline"
-                onClick={loadData}
-                className="text-black"
-              >
-                Load older entries
-              </Button>
-            )}
-          </div>
-        </div>
+        <LoadMoreButton message={message} onLoadMore={loadData} />
       </Table>
-    </div>
+    </TablePageLayout>
   );
 }

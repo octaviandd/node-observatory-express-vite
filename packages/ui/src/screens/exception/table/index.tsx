@@ -1,14 +1,18 @@
 /** @format */
 
 import { Bug } from "lucide-react";
-import SidePanel from "../../../components/ui/side-panel";
-import { createPortal } from "react-dom";
 import { InstanceTable } from "./instance";
 import { GroupTable } from "./group";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useIndexTableData } from "@/hooks/useIndexTableData";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  TablePageLayout,
+  TableHeader,
+  StatusFilter,
+  LoadMoreButton,
+} from "@/components/ui/table-page";
+
+const STATUS_OPTIONS = ["all", "unhandled", "uncaught"];
 
 export default function ExceptionsIndexTable() {
   const {
@@ -32,44 +36,18 @@ export default function ExceptionsIndexTable() {
   });
 
   const Table = index === "instance" ? InstanceTable : GroupTable;
+  const count = index === "instance" ? instanceDataCount : groupDataCount;
+  const label = index === "instance" ? "Exception" : "Type";
 
   return (
-    <div className="relative">
-      {sidePanelData.isOpen &&
-        createPortal(
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-xs z-50"
-            onClick={() =>
-              setSidePanelData({
-                isOpen: false,
-                requestId: "",
-                jobId: "",
-                scheduleId: "",
-                modelId: "",
-              })
-            }
-          ></div>,
-          document.body,
-        )}
-      {sidePanelData.isOpen && (
-        <SidePanel
-          setSidePanelData={setSidePanelData}
-          requestId={sidePanelData.requestId}
-          jobId={sidePanelData.jobId}
-          scheduleId={sidePanelData.scheduleId}
-          modelId={sidePanelData.modelId}
-          type="exceptions"
-        />
-      )}
+    <TablePageLayout
+      sidePanelData={sidePanelData}
+      setSidePanelData={setSidePanelData}
+      type="exceptions"
+    >
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
-          <Bug className="h-5 w-5 text-muted-foreground" />
-          <span className="font-medium text-sm text-dark dark:text-white">
-            {index === "instance" ? instanceDataCount : groupDataCount}{" "}
-            {index === "instance" ? "Exception" : "Type"}
-            {index === "instance" && Number(instanceDataCount) > 1 && "s"}
-            {index === "group" && Number(groupDataCount) > 1 && "s"}
-          </span>
+          <TableHeader icon={Bug} count={count} label={label} />
         </div>
         <div className="flex px-4 grow">
           {!modelKey && (
@@ -82,51 +60,21 @@ export default function ExceptionsIndexTable() {
             />
           )}
         </div>
-        {modelKey ? (
-          <ToggleGroup
-            type="single"
+        {modelKey && (
+          <StatusFilter
+            options={STATUS_OPTIONS}
             value={instanceStatusType}
-            onValueChange={(value) => value && setInstanceStatusType(value)}
-          >
-            <span className="text-sm text-muted-foreground border rounded-md px-2 py-1">
-              SHOW
-            </span>
-            {["ALL", "UNHANDLED", "UNCAUGHT"].map((label, index) => (
-              <ToggleGroupItem
-                key={index}
-                value={label.toLowerCase()}
-                className="text-black cursor-pointer dark:text-white"
-              >
-                {label}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-        ) : null}
+            onChange={setInstanceStatusType}
+          />
+        )}
       </div>
       {/* @ts-expect-error dumb ts*/}
-      <Table data={index === "instance" ? instanceData : groupData}
+      <Table
+        data={index === "instance" ? instanceData : groupData}
         setSidePanelData={setSidePanelData}
       >
-        <div className="flex justify-center my-2">
-          {message ? (
-            <Button
-              variant="outline"
-              className="text-muted-foreground"
-              disabled
-            >
-              {message}
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              className="text-muted-foreground"
-              onClick={loadData}
-            >
-              Load older entries
-            </Button>
-          )}
-        </div>
+        <LoadMoreButton message={message} onLoadMore={loadData} />
       </Table>
-    </div>
+    </TablePageLayout>
   );
 }

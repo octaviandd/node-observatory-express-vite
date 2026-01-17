@@ -1,10 +1,9 @@
 /** @format */
 
 import { Hook } from "require-in-the-middle";
-import shimmer from "shimmer";
-import { watchers, patchedGlobal } from "../../core/index";
-import { getCallerInfo } from "../../core/helpers/helpers";
+import { patchedGlobal } from "../../core/index";
 import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
+import { patchMongooseExports } from "../shared/mongoose-common";
 
 if (
   process.env.NODE_OBSERVATORY_MODELS &&
@@ -12,129 +11,6 @@ if (
 ) {
   if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.MONGOOSE_PATCHED_SYMBOL]) {
     patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.MONGOOSE_PATCHED_SYMBOL] = true;
-
-    new Hook(["mongoose"], function (exports: any, name, basedir) {
-      // `exports` is the Mongoose module.
-      if (!exports || typeof exports.Model !== "function") {
-        return exports;
-      }
-
-      // Patch static methods at the Model constructor level
-      const staticMethodsToPatch = [
-        "create",
-        "findOne",
-        "find",
-        "findById",
-        "countDocuments",
-        "updateOne",
-        "updateMany",
-        "deleteOne",
-        "deleteMany",
-        "aggregate",
-        "findOneAndUpdate",
-        "findOneAndDelete",
-      ];
-
-      shimmer.wrap(exports.Model.prototype, "save", function (originalSave) {
-        return async function patchedSave(this: any, ...args: any[]) {
-          const startTime = performance.now();
-
-          try {
-            const result = await originalSave.apply(this, args);
-
-            const endTime = performance.now();
-            logModelOperation(
-              "create",
-              result.__proto__.$collection.modelName,
-              args,
-              result.toObject(),
-              parseFloat((endTime - startTime).toFixed(2)),
-              undefined,
-            );
-            return result;
-          } catch (error: any) {
-            // Do not log the error for the model, it should be logged as an exception since the model doesn't exist yet.
-            throw error;
-          }
-        };
-      });
-
-      staticMethodsToPatch.forEach((method) => {
-        if (
-          typeof exports.Model[method] === "function" &&
-          !exports.Model[method].__patched
-        ) {
-          shimmer.wrap(exports.Model, method, function (originalMethod) {
-            async function patchedMethod(this: any, ...args: any[]) {
-              const startTime = performance.now();
-
-              try {
-                const result = await originalMethod.apply(this, args);
-                const endTime = performance.now();
-                logModelOperation(
-                  method,
-                  this.modelName || "Unknown",
-                  args,
-                  result.toJSON ? result.toJSON() : result,
-                  parseFloat((endTime - startTime).toFixed(2)),
-                  undefined,
-                );
-                return result;
-              } catch (error: any) {
-                const endTime = performance.now();
-                logModelOperation(
-                  method,
-                  this.modelName || "Unknown",
-                  args,
-                  undefined,
-                  parseFloat((endTime - startTime).toFixed(2)),
-                  error,
-                );
-                throw error;
-              }
-            }
-
-            patchedMethod.__patched = true;
-            return patchedMethod;
-          });
-        }
-      });
-      return exports;
-    });
-  }
-
-  /**
-   * Logs model operation details with the originating file and line number.
-   * @param method - The method being executed (e.g., "save", "find").
-   * @param modelName - The model name of the entity or repository.
-   * @param args - The arguments passed to the method.
-   * @param result - The result of the method execution.
-   * @param duration - The time taken to execute the operation in milliseconds.
-   * @param error - Optional error object, if the operation fails.
-   */
-  function logModelOperation(
-    method: string,
-    modelName: string,
-    args: any[],
-    result: any,
-    duration: number,
-    error?: Error,
-  ) {
-    const callerInfo = getCallerInfo(__filename);
-
-    // Log to model watcher with consistent keys
-    const modelLogEntry = {
-      method,
-      modelName,
-      arguments: args,
-      result,
-      duration,
-      package: "mongoose",
-      file: callerInfo.file,
-      line: callerInfo.line,
-      error: error ? error.toString() : undefined,
-      status: error ? "failed" : "completed",
-    };
-    watchers.model.insertRedisStream(modelLogEntry);
+    new Hook(["mongoose"], (exports) => patchMongooseExports(exports, __filename));
   }
 }

@@ -1,10 +1,9 @@
 /** @format */
 
 import { Hook } from "require-in-the-middle";
-import shimmer from "shimmer";
-import { watchers, patchedGlobal } from "../../core/index";
-import { getCallerInfo } from "../../core/helpers/helpers";
+import { patchedGlobal } from "../../core/index";
 import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
+import { patchPinoExports } from "../shared/pino-common";
 
 if (
   process.env.NODE_OBSERVATORY_LOGGING &&
@@ -12,76 +11,6 @@ if (
 ) {
   if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.PINO_PATCHED_SYMBOL]) {
     patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.PINO_PATCHED_SYMBOL] = true;
-
-    new Hook(["pino"], function (exports: any): any {
-      // The `exports` here is the top-level function from "pino".
-      // We can wrap that function to intercept any Pino logger creation.
-
-      const originalPino = exports;
-
-      function patchLoggerMethods(loggerInstance: any, contextMetadata = {}) {
-        ["info", "warn", "error", "debug", "trace", "fatal"].forEach(
-          (method) => {
-            if (typeof loggerInstance[method] === "function") {
-              shimmer.wrap(loggerInstance, method, function (originalMethod) {
-                return function patchedMethod(this: any, ...logArgs: any) {
-                  const callerInfo = getCallerInfo(__filename);
-
-                  // Include the context metadata in the log content
-                  watchers.logging.insertRedisStream({
-                    package: "pino",
-                    level: method,
-                    message: logArgs[0],
-                    metadata: logArgs[1] || {},
-                    context: contextMetadata, // Include the child logger's context
-                    file: callerInfo.file,
-                    line: callerInfo.line,
-                    created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
-                  });
-
-                  return originalMethod.apply(this, logArgs);
-                };
-              });
-            }
-          },
-        );
-
-        // Patch the child method to handle nested child loggers
-        if (typeof loggerInstance.child === "function") {
-          shimmer.wrap(loggerInstance, "child", function (originalChild) {
-            return function patchedChild(
-              this: any,
-              childBindings: any,
-              ...rest: any[]
-            ) {
-              const childLogger = originalChild.call(
-                this,
-                childBindings,
-                ...rest,
-              );
-              // Merge parent and child context
-              const mergedContext = {
-                ...contextMetadata,
-                ...childBindings,
-              };
-              // Patch the child logger's methods with the merged context
-              patchLoggerMethods(childLogger, mergedContext);
-              return childLogger;
-            };
-          });
-        }
-      }
-
-      function patchedPino(...args: any[]) {
-        const loggerInstance = originalPino(...args);
-        patchLoggerMethods(loggerInstance);
-        return loggerInstance;
-      }
-
-      // Copy over any properties from the original pino
-      Object.assign(patchedPino, originalPino);
-
-      return patchedPino;
-    });
+    new Hook(["pino"], (exports) => patchPinoExports(exports, __filename));
   }
 }

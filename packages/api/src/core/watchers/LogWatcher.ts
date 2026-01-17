@@ -73,7 +73,7 @@ class LogWatcher extends BaseWatcher {
     return groupItemsByType(results);
   }
 
-  protected async getGraphData(): Promise<any> {
+  protected async getGraphData(filters: LogFilters): Promise<any> {
     return false;
   }
 

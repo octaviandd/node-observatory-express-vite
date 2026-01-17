@@ -1,8 +1,16 @@
-interface Watcher {
-  index(req: ObservatoryBoardRequest): Promise<{ body?: any, statusCode: number }>;
-  view(req: ObservatoryBoardRequest): Promise<{ body?: any, statusCode: number }>;
+interface WatcherResponse {
+  body?: any;
+  statusCode: number;
+}
 
-  insertRedisStream(content: WatcherEntry): Promise<void>;
+interface Watcher {
+  readonly type: string;
+
+  index(req: ObservatoryBoardRequest): Promise<WatcherResponse>;
+  view(req: ObservatoryBoardRequest): Promise<WatcherResponse>;
+  insertRedisStream(entry: BaseLogEntry): Promise<void>;
+  stop(): void;
 }
 
 export default Watcher;
+export type { WatcherResponse };

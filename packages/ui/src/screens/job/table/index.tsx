@@ -4,11 +4,15 @@ import { Layers } from "lucide-react";
 import { InstanceTable } from "./instance";
 import { GroupTable } from "./group";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { createPortal } from "react-dom";
-import SidePanel from "@/components/ui/side-panel";
 import { useIndexTableData } from "@/hooks/useIndexTableData";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  TablePageLayout,
+  TableHeader,
+  StatusFilter,
+  LoadMoreButton,
+} from "@/components/ui/table-page";
+
+const STATUS_OPTIONS = ["all", "completed", "released", "failed"];
 
 export default function JobsIndexTable() {
   const {
@@ -31,36 +35,18 @@ export default function JobsIndexTable() {
   });
 
   const Table = index === "instance" ? InstanceTable : GroupTable;
+  const count = index === "instance" ? instanceDataCount : groupDataCount;
+  const label = index === "group" ? "Queue" : "ATTEMPT";
 
   return (
-    <div className="relative">
-      {sidePanelData.isOpen &&
-        createPortal(
-          <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50"
-            onClick={() =>
-              setSidePanelData({ ...sidePanelData, isOpen: false })
-            }
-          ></div>,
-          document.body,
-        )}
-      {sidePanelData.isOpen && (
-        <SidePanel
+    <TablePageLayout
+      sidePanelData={sidePanelData}
           setSidePanelData={setSidePanelData}
-          jobId={sidePanelData.jobId}
-          scheduleId={sidePanelData.scheduleId}
-          requestId={sidePanelData.requestId}
-          modelId={sidePanelData.modelId}
           type="jobs"
-        />
-      )}
+    >
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
-          <Layers className="h-5 w-5 text-muted-foreground" />
-          <span className="font-medium text-sm text-dark dark:text-white">
-            {index === "group" ? groupDataCount : instanceDataCount}{" "}
-            {index === "group" ? "Queues" : "ATTEMPTS"}
-          </span>
+          <TableHeader icon={Layers} count={count} label={label} />
           {index === "group" && (
             <div className="flex px-4 grow">
               <Input
@@ -74,51 +60,22 @@ export default function JobsIndexTable() {
           )}
         </div>
         <div className="flex items-center gap-4">
-          {index === "instance" ? (
-            <ToggleGroup
-              type="single"
+          {index === "instance" && (
+            <StatusFilter
+              options={STATUS_OPTIONS}
               value={instanceStatusType}
-              onValueChange={(value) => value && setInstanceStatusType(value)}
-            >
-              <span className="text-sm text-muted-foreground border rounded-md px-2 py-1">
-                SHOW
-              </span>
-              {["all", "completed", "released", "failed"].map((status) => (
-                <ToggleGroupItem
-                  key={status}
-                  value={status}
-                  aria-label={status}
-                  className="text-black cursor-pointer dark:text-white"
-                >
-                  {status.toUpperCase()}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-          ) : null}
+              onChange={setInstanceStatusType}
+            />
+          )}
         </div>
       </div>
       {/* @ts-expect-error dumb ts*/}
-      <Table data={index === "instance" ? instanceData : groupData}
+      <Table
+        data={index === "instance" ? instanceData : groupData}
         setSidePanelData={setSidePanelData}
       >
-        <div className="my-6">
-          <div className="flex items-center justify-center">
-            {message ? (
-              <div className="text-sm text-muted-foreground bg-muted px-4 py-2 rounded-md">
-                {message}
-              </div>
-            ) : (
-              <Button
-                variant="outline"
-                onClick={loadData}
-                className="text-black"
-              >
-                Load older entries
-              </Button>
-            )}
-          </div>
-        </div>
+        <LoadMoreButton message={message} onLoadMore={loadData} />
       </Table>
-    </div>
+    </TablePageLayout>
   );
 }

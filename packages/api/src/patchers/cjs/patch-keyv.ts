@@ -1,87 +1,16 @@
 /** @format */
 
 import { Hook } from "require-in-the-middle";
-import shimmer from "shimmer";
-import { watchers, patchedGlobal } from "../../core/index";
-import { getCallerInfo } from "../../core/helpers/helpers";
+import { patchedGlobal } from "../../core/index";
 import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants";
-
-const patchMethod = (prototype: any, method: string) => {
-  shimmer.wrap(prototype, method, function (original) {
-    return async function (this: any, key: any, ...args: any[]) {
-      const callerInfo = getCallerInfo(__filename);
-
-      const logContent: { [key: string]: any } = {
-        type: method,
-        package: "keyv",
-        file: callerInfo.file,
-        line: callerInfo.line,
-        key,
-        created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
-      };
-
-      const startTime = performance.now();
-
-      try {
-        const result = await original.call(this, key, ...args);
-        const endTime = performance.now();
-        logContent["duration"] = parseFloat((endTime - startTime).toFixed(2));
-
-        // Track operation type using consistent format with node-cache
-        if (method === "get") {
-          const isHit = result !== undefined && result !== null;
-          logContent["hits"] = isHit ? 1 : 0;
-          logContent["misses"] = isHit ? 0 : 1;
-          logContent["value"] = result;
-          logContent["key"] = key;
-        } else if (method === "set") {
-          logContent["writes"] = 1;
-          logContent["key"] = key;
-          logContent["value"] = args[0];
-        } else if (method === "delete") {
-          logContent["writes"] = 1;
-          logContent["key"] = key;
-        } else if (method === "has") {
-          const isHit = !!result;
-          logContent["hits"] = isHit ? 1 : 0;
-          logContent["misses"] = isHit ? 0 : 1;
-          logContent["key"] = key;
-        }
-
-        watchers.cache.insertRedisStream(logContent);
-        return result;
-      } catch (error) {
-        const endTime = performance.now();
-        logContent["duration"] = parseFloat((endTime - startTime).toFixed(2));
-        logContent["error"] =
-          error instanceof Error ? error.message : String(error);
-        logContent["stack"] =
-          error instanceof Error ? error.stack : String(error);
-        watchers.cache.insertRedisStream(logContent);
-        throw error;
-      }
-    };
-  });
-};
+import { patchKeyvExports } from "../shared/keyv-common";
 
 if (
   process.env.NODE_OBSERVATORY_CACHE &&
   JSON.parse(process.env.NODE_OBSERVATORY_CACHE).includes("keyv")
 ) {
-  // Check if keyv has already been patched
   if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.KEYV_PATCHED_SYMBOL]) {
-    // Mark keyv as patched
     patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.KEYV_PATCHED_SYMBOL] = true;
-
-    new Hook(["keyv"], (exports: any) => {
-      if (!exports.Keyv || typeof exports.Keyv !== "function") {
-        return exports;
-      }
-
-      ["set", "get", "delete", "has"].forEach((method) =>
-        patchMethod(exports.Keyv.prototype, method),
-      );
-      return exports;
-    });
+    new Hook(["keyv"], (exports) => patchKeyvExports(exports, __filename));
   }
 }

@@ -1,39 +1,46 @@
 /** @format */
-// import { scan } from "react-scan";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { createBrowserRouter, RouterProvider } from "react-router";
-import MailsIndex from "./screens/mail/index";
-import MailPreview from "./screens/mail/view/view";
-import ExceptionIndex from "./screens/exception/index";
-import ExceptionPreview from "./screens/exception/view/view";
-import NotificationsIndex from "./screens/notification/index";
-import NotificationPreview from "./screens/notification/view/view";
-import JobsIndex from "./screens/job/index";
-import JobPreview from "./screens/job/view/view";
-import CacheIndex from "./screens/cache/index";
-import CachePreview from "./screens/cache/view/view";
-import QueriesIndex from "./screens/query/index";
-import QueryPreview from "./screens/query/view/view";
-import ModelsIndex from "./screens/model/index";
-import ModelPreview from "./screens/model/view/view";
-import RequestsIndex from "./screens/request/index/index";
-import RequestView from "./screens/request/view/view";
-import ScheduleIndex from "./screens/schedule/index";
-import SchedulePreview from "./screens/schedule/view/view";
-import HttpIndex from "./screens/http/index";
-import HttpPreview from "./screens/http/view/view";
-import LogIndex from "./screens/log/index";
-import LogPreview from "./screens/log/view/view";
-import ViewsIndex from "./screens/view/index/index";
-import ViewPreview from "./screens/view/view/view";
 import Dashboard from "./components/ui/dashboard";
 import { StoreProvider } from "./store";
 import MainLayout from "./App";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { queryClient, QueryClientProvider } from "@/hooks/useApi";
 
-// scan({ enabled: !import.meta.env.PROD });
+const screens = {
+  mail: { Index: () => import("./screens/mail/index"), View: () => import("./screens/mail/view/view") },
+  exception: { Index: () => import("./screens/exception/index"), View: () => import("./screens/exception/view/view") },
+  notification: { Index: () => import("./screens/notification/index"), View: () => import("./screens/notification/view/view") },
+  job: { Index: () => import("./screens/job/index"), View: () => import("./screens/job/view/view") },
+  cache: { Index: () => import("./screens/cache/index"), View: () => import("./screens/cache/view/view") },
+  query: { Index: () => import("./screens/query/index"), View: () => import("./screens/query/view/view") },
+  model: { Index: () => import("./screens/model/index"), View: () => import("./screens/model/view/view") },
+  request: { Index: () => import("./screens/request/index/index"), View: () => import("./screens/request/view/view") },
+  schedule: { Index: () => import("./screens/schedule/index"), View: () => import("./screens/schedule/view/view") },
+  http: { Index: () => import("./screens/http/index"), View: () => import("./screens/http/view/view") },
+  log: { Index: () => import("./screens/log/index"), View: () => import("./screens/log/view/view") },
+  view: { Index: () => import("./screens/view/index/index"), View: () => import("./screens/view/view/view") },
+} as const;
+
+import { lazy, Suspense } from "react";
+
+const resourceRoutes = Object.entries(screens).flatMap(([name, { Index, View }]) => {
+  const IndexComponent = lazy(Index);
+  const ViewComponent = lazy(View);
+  const plural = name === "query" ? "queries" 
+    : name === "cache" ? "caches" 
+    : name === "http" ? "https" 
+    : `${name}s`;
+
+  return [
+    { path: `/${plural}`, element: <Suspense fallback={null}><IndexComponent /></Suspense> },
+    { path: `/${plural}/:key`, element: <Suspense fallback={null}><IndexComponent /></Suspense> },
+    { path: `/${name}/:id`, element: <Suspense fallback={null}><ViewComponent /></Suspense> },
+  ];
+});
+
 const basePath = (window as any).SERVER_CONFIG?.base || '/ui';
 
 const router = createBrowserRouter(
@@ -43,168 +50,22 @@ const router = createBrowserRouter(
       element: <MainLayout />,
       errorElement: <div>404</div>,
       children: [
-        {
-          index: true,
-          element: <Dashboard />,
-        },
-        {
-          path: "/mails",
-          element: <MailsIndex />,
-        },
-        {
-          path: "/mails/:key",
-          element: <MailsIndex />,
-        },
-        {
-          path: "/mail/:id",
-          element: <MailPreview />,
-        },
-        {
-          path: "/exceptions",
-          element: <ExceptionIndex />,
-        },
-        {
-          path: "/exceptions/:key",
-          element: <ExceptionIndex />,
-        },
-        {
-          path: "/exception/:id",
-          element: <ExceptionPreview />,
-        },
-        {
-          path: "/logs",
-          element: <LogIndex />,
-        },
-        {
-          path: "/logs/:key",
-          element: <LogIndex />,
-        },
-        {
-          path: "/log/:id",
-          element: <LogPreview />,
-        },
-        {
-          path: "/notifications",
-          element: <NotificationsIndex />,
-        },
-        {
-          path: "/notifications/:key",
-          element: <NotificationsIndex />,
-        },
-        {
-          path: "/notification/:id",
-          element: <NotificationPreview />,
-        },
-        {
-          path: "/jobs",
-          element: <JobsIndex />,
-        },
-        {
-          path: "/jobs/:key",
-          element: <JobsIndex />,
-        },
-        {
-          path: "/job/:id",
-          element: <JobPreview />,
-        },
-        {
-          path: "/caches",
-          element: <CacheIndex />,
-        },
-        {
-          path: "/caches/:key",
-          element: <CacheIndex />,
-        },
-        {
-          path: "/cache/:id",
-          element: <CachePreview />,
-        },
-        {
-          path: "/queries",
-          element: <QueriesIndex />,
-        },
-        {
-          path: "/queries/:key",
-          element: <QueriesIndex />,
-        },
-        {
-          path: "/query/:id",
-          element: <QueryPreview />,
-        },
-        {
-          path: "/models",
-          element: <ModelsIndex />,
-        },
-        {
-          path: "/models/:key",
-          element: <ModelsIndex />,
-        },
-        {
-          path: "/model/:id",
-          element: <ModelPreview />,
-        },
-        {
-          path: "/requests",
-          element: <RequestsIndex />,
-        },
-        {
-          path: "/requests/:key",
-          element: <RequestsIndex />,
-        },
-        {
-          path: "/request/:id",
-          element: <RequestView />,
-        },
-        {
-          path: "/schedules",
-          element: <ScheduleIndex />,
-        },
-        {
-          path: "/schedules/:key",
-          element: <ScheduleIndex />,
-        },
-        {
-          path: "/schedule/:id",
-          element: <SchedulePreview />,
-        },
-        {
-          path: "/https",
-          element: <HttpIndex />,
-        },
-        {
-          path: "/https/:key",
-          element: <HttpIndex />,
-        },
-        {
-          path: "/http/:id",
-          element: <HttpPreview />,
-        },
-        {
-          path: "/views",
-          element: <ViewsIndex />,
-        },
-        {
-          path: "/views/:key",
-          element: <ViewsIndex />,
-        },
-        {
-          path: "/view/:id",
-          element: <ViewPreview />,
-        },
+        { index: true, element: <Dashboard /> },
+        ...resourceRoutes,
       ],
     },
   ],
-  {
-    basename: basePath
-  },
+  { basename: basePath },
 );
 
 createRoot(document.getElementById("node-observatory") as HTMLDivElement).render(
   <StrictMode>
-    <StoreProvider>
-      <ScrollArea className="h-[calc(100vh-0.1px)]">
-        <RouterProvider router={router}></RouterProvider>
-      </ScrollArea>
-    </StoreProvider>
+    <QueryClientProvider client={queryClient}>
+      <StoreProvider>
+        <ScrollArea className="h-[calc(100vh-0.1px)]">
+          <RouterProvider router={router} />
+        </ScrollArea>
+      </StoreProvider>
+    </QueryClientProvider>
   </StrictMode>,
 );

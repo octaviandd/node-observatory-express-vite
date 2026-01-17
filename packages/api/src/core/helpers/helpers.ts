@@ -688,7 +688,7 @@ export function extractHttpDisplayData(data: HttpRequestData): {
     method: data.method,
     url: url,
     statusCode: data.statusCode,
-    duration: data.duration,
+    duration: data.duration ?? 0,
     size: data.responseBodySize,
     library: data.library,
     timestamp: data.created_at

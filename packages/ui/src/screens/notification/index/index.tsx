@@ -1,17 +1,19 @@
 /** @format */
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardSubtitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { CountGraph } from "@/components/ui/graphs/count-graph";
 import NotificationsIndexTable from "../table";
-import { DurationGraph } from "@/components/ui/graphs/duration-graph";
+import { CountGraph } from "@/components/ui/graphs/count-graph";
 import { useGraph } from "@/hooks/useGraph";
+import {
+  IndexPageLayout,
+  StatsCard,
+  DurationCard,
+  StatsGrid,
+} from "@/components/ui/index-page";
+
+const NOTIFICATION_BAR_DATA = [
+  { dataKey: "completed", stackId: "a", fill: "#f1f5f9" },
+  { dataKey: "failed", stackId: "b", fill: "#ef4444" },
+];
 
 export default function NotificationsIndex() {
   const { data, currentDate, period } = useGraph({
@@ -19,82 +21,37 @@ export default function NotificationsIndex() {
   });
 
   return (
-    <div className="flex flex-col gap-6">
-      {data &&
-        <div className="grid grid-cols-2 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle className="text-sm text-muted-foreground">
-                    NOTIFICATIONS
-                  </CardTitle>
-                  <CardSubtitle>{data.count}</CardSubtitle>
-                </div>
-                <div className="flex gap-4 text-xs">
-                  <div className="flex flex-col items-center">
-                    <span className="text-muted-foreground mb-1">Completed</span>
-                    <Badge variant="secondary">{data.indexCountOne}</Badge>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <span className="text-muted-foreground mb-1">Failed</span>
-                    <Badge variant="error">{data.indexCountTwo}</Badge>
-                  </div>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[200px]">
+    <IndexPageLayout>
+      {data && (
+        <StatsGrid columns={2}>
+          <StatsCard
+            title="NOTIFICATIONS"
+            count={data.count}
+            badges={[
+              { label: "Completed", value: data.indexCountOne, variant: "secondary" },
+              { label: "Failed", value: data.indexCountTwo, variant: "error" },
+            ]}
+            graph={
                 <CountGraph
                   data={data.countFormattedData}
-                  barData={[
-                    { dataKey: "completed", stackId: "a", fill: "#f1f5f9" },
-                    { dataKey: "failed", stackId: "b", fill: "#ef4444" },
-                  ]}
+                barData={NOTIFICATION_BAR_DATA}
                   period={period}
                   currentDate={currentDate}
                 />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle className="text-sm text-muted-foreground">
-                    DURATION
-                  </CardTitle>
-                  <CardSubtitle>
-                    {data.shortest} – {data.longest}
-                  </CardSubtitle>
-                </div>
-                <div className="flex gap-4 text-xs">
-                  <div>
-                    <span className="text-muted-foreground mr-1">AVG</span>
-                    <Badge variant="secondary">{data.average}</Badge>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground mr-1">P95</span>
-                    <Badge variant="warning">{data.p95}</Badge>
-                  </div>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="h-auto">
-                <DurationGraph
-                  data={data.durationFormattedData}
+            }
+          />
+          <DurationCard
+            shortest={data.shortest}
+            longest={data.longest}
+            average={data.average}
+            p95={data.p95}
+            durationFormattedData={data.durationFormattedData}
                   period={period}
                   currentDate={currentDate}
                 />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      }
-
+        </StatsGrid>
+      )}
       <NotificationsIndexTable />
-    </div>
+    </IndexPageLayout>
   );
 }

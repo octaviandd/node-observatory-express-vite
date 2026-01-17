@@ -13,6 +13,7 @@ export abstract class BaseWatcher implements Watcher {
   private consumerName: string;
   protected refreshInterval?: NodeJS.Timeout;
   protected refreshIntervalDuration: number = 5000;
+  private isStopped: boolean = false;
   readonly type: string;
 
   constructor(redisClient: RedisClientType, DBInstance: Database, type: string) {
@@ -41,6 +42,8 @@ export abstract class BaseWatcher implements Watcher {
   }
 
   private async acknowledgeMessages(messageIds: string[]) {
+    if (this.isStopped) return;
+
     try {
       const result = await this.RedisClient.xAck(
         this.streamKey,
@@ -49,15 +52,21 @@ export abstract class BaseWatcher implements Watcher {
       );
       console.log('after xAck, result:', result);
     } catch (error) {
-      console.error(`Error xAck messages for ${this.type}:`, error);
+      if (!this.isStopped) {
+        console.error(`Error xAck messages for ${this.type}:`, error);
+      }
     }
   }
 
   private async trimStreamKeys() {
+    if (this.isStopped) return;
+
     try {
       await this.RedisClient.xTrim(this.streamKey, 'MAXLEN', 1000, { strategyModifier: "~" });
     } catch (error) {
-      console.error(`Error trimming data for ${this.type}:`, error);
+      if (!this.isStopped) {
+        console.error(`Error trimming data for ${this.type}:`, error);
+      }
     }
   }
 
@@ -72,6 +81,9 @@ export abstract class BaseWatcher implements Watcher {
   }
 
   private async extractEntriesFromStream(): Promise<undefined | { parsedValues: RedisEntry[], messageIds: string[] }> {
+    // Don't attempt Redis operations if stopped
+    if (this.isStopped) return;
+
     try {
       const streams = await this.RedisClient.xReadGroup(
         this.consumerGroup,
@@ -114,12 +126,18 @@ export abstract class BaseWatcher implements Watcher {
 
       return { parsedValues, messageIds };
     } catch (error: unknown) {
-      console.error(`Error in Redis stream xReadGroup for ${this.type}:`, error);
+      // Don't log errors if watcher is stopped (client may be closed)
+      if (!this.isStopped) {
+        console.error(`Error in Redis stream xReadGroup for ${this.type}:`, error);
+      }
     }
   }
 
   private async ingestRedisStream() {
     const processMessages = async () => {
+      // Don't process if watcher has been stopped
+      if (this.isStopped) return;
+
       try {
         const { parsedValues, messageIds } = await this.extractEntriesFromStream() ?? { parsedValues: [], messageIds: [] };
 
@@ -129,11 +147,16 @@ export abstract class BaseWatcher implements Watcher {
           await this.trimStreamKeys();
         }
 
-        console.log('finished one ingest for:', this.streamKey, this.consumerGroup)
       } catch (error) {
-        console.error(`Error in Redis stream migration for ${this.type}:`, error);
+        // Ignore errors if watcher is stopped (client may be closed)
+        if (!this.isStopped) {
+          console.error(`Error in Redis stream migration for ${this.type}:`, error);
+        }
       } finally {
-        this.refreshInterval = setTimeout(processMessages, this.refreshIntervalDuration);
+        // Only schedule next iteration if not stopped
+        if (!this.isStopped) {
+          this.refreshInterval = setTimeout(processMessages, this.refreshIntervalDuration);
+        }
       }
     }
 
@@ -229,8 +252,10 @@ export abstract class BaseWatcher implements Watcher {
     }
   }
 
-  async insertRedisStream(content: Record<string, any>): Promise<void> {
-    const cleanContent = dropUndefinedKeys(sanitizeContent(content));
+  async insertRedisStream(entry: BaseLogEntry): Promise<void> {
+    if (this.isStopped) return;
+
+    const cleanContent = dropUndefinedKeys(sanitizeContent(entry));
     try {
       await this.RedisClient.xAdd(
         this.streamKey,
@@ -241,16 +266,26 @@ export abstract class BaseWatcher implements Watcher {
           schedule_id: scheduleLocalStorage.getStore()?.get("scheduleId") || 'null',
           type: this.type,
           content: JSON.stringify(cleanContent),
-          created_at: content.created_at,
+          created_at: entry.created_at || new Date().toISOString().replace("T", " ").substring(0, 19),
         }
       );
     } catch (error) {
-      console.error(`Error adding to stream ${this.type}:`, error);
+      if (!this.isStopped) {
+        console.error(`Error adding to stream ${this.type}:`, error);
+      }
+    }
+  }
+
+  stop(): void {
+    this.isStopped = true;
+    if (this.refreshInterval) {
+      clearTimeout(this.refreshInterval);
+      this.refreshInterval = undefined;
     }
   }
 
   private async cleanup() {
-    // if (this.refreshInterval) clearInterval(this.refreshInterval);
+    this.stop();
     await this.processPendingMessages();
   }
 

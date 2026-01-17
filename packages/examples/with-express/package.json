@@ -5,7 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "build": "npm run build:deps && tsc",
-    "build:deps": "cd ../../api && npm run build && cd ../express && npm run build",
+    "build:deps": "cd ../../api && npm run build && cd ../express  npm run build && ../ui npm run build",
     "dev": "node --trace-warnings --trace-uncaught -r ts-node/esm index.ts",
     "start": "node dist/index.js",
     "clean": "rm -rf node_modules package-lock.json"

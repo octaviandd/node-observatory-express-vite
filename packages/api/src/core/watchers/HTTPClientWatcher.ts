@@ -11,7 +11,7 @@ class HTTPClientWatcher extends BaseWatcher {
     super(redisClient, DBInstance, 'http');
   };
 
-  protected async getTableData(filters: CacheFilters): Promise<{ results: any, count: string}> {
+  protected async getTableData(filters: HTTPClientFilters): Promise<{ results: any, count: string}> {
     if (filters.index === 'instance') {
       const results = await this.DBInstance.getByInstance(filters, this.type);
       const count = await this.DBInstance.getByInstanceCount(filters, this.type);
@@ -50,7 +50,7 @@ class HTTPClientWatcher extends BaseWatcher {
     return groupItemsByType(results);
   }
 
-  protected async getGraphData(filters: CacheFilters): Promise<any> {
+  protected async getGraphData(filters: HTTPClientFilters): Promise<any> {
     return await this.DBInstance.getGraphData(filters, this.type, ['hits', 'misses', 'writes'])  
   }
 

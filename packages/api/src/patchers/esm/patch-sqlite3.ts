@@ -1,120 +1,14 @@
 /** @format */
 
-import { addHook, Namespace } from "import-in-the-middle";
-import shimmer from "shimmer";
-import { watchers, patchedGlobal } from "../../core/index.js";
-import { getCallerInfo } from "../../core/helpers/helpers.js";
+import { addHook } from "import-in-the-middle";
+import { patchedGlobal } from "../../core/index.js";
 import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants.js";
+import { patchSqlite3Exports } from "../shared/sqlite3-common.js";
 
 if (
-  process.env.NODE_OBSERVATORY_DATABASES &&
-  JSON.parse(process.env.NODE_OBSERVATORY_DATABASES).includes("sqlite3")
+  process.env.NODE_OBSERVATORY_QUERIES?.includes("sqlite3") &&
+  !patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.SQLITE3_PATCHED_SYMBOL]
 ) {
-  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.SQLITE3_PATCHED_SYMBOL]) {
-    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.SQLITE3_PATCHED_SYMBOL] = true;
-
-    addHook((exports: any, name: Namespace, baseDir?: string) => {
-      const sqlite3Module = exports.default || exports;
-
-      if (!sqlite3Module || !sqlite3Module.Database) {
-        return exports;
-      }
-
-      const methodsToPatch = ["all", "get", "run", "each", "exec", "prepare"];
-
-      methodsToPatch.forEach((method) => {
-        if (typeof sqlite3Module.Database.prototype[method] === "function") {
-          shimmer.wrap(
-            sqlite3Module.Database.prototype,
-            method,
-            function (originalMethod) {
-              return function patchedMethod(
-                this: any,
-                sql: string,
-                ...args: any[]
-              ) {
-                const startTime = performance.now();
-
-                // Handle different callback patterns
-                const lastArg = args[args.length - 1];
-                const hasCallback = typeof lastArg === "function";
-                const params = hasCallback ? args.slice(0, -1) : args;
-                const callback = hasCallback ? lastArg : undefined;
-
-                if (!callback) {
-                  // Handle promise-based calls
-                  return new Promise((resolve, reject) => {
-                    originalMethod.call(
-                      this,
-                      sql,
-                      ...params,
-                      function (err: Error, result: any) {
-                        const endTime = performance.now();
-                        logQuery(
-                          method,
-                          sql,
-                          params,
-                          err ? undefined : result,
-                          endTime - startTime,
-                          err,
-                        );
-                        if (err) reject(err);
-                        else resolve(result);
-                      },
-                    );
-                  });
-                }
-
-                // Handle callback-based calls
-                return originalMethod.call(
-                  this,
-                  sql,
-                  ...params,
-                  function (err: Error, result: any) {
-                    const endTime = performance.now();
-                    logQuery(
-                      method,
-                      sql,
-                      params,
-                      err ? undefined : result,
-                      endTime - startTime,
-                      err,
-                    );
-                    callback(err, result);
-                  },
-                );
-              };
-            },
-          );
-        }
-      });
-
-      return exports;
-    });
-  }
-
-  function logQuery(
-    method: string,
-    sql: string,
-    params: any[],
-    result: any,
-    duration: number,
-    error?: Error,
-  ) {
-    const callerInfo = getCallerInfo(__filename);
-
-    const logEntry = {
-      method,
-      sql,
-      parameters: params,
-      result,
-      duration,
-      package: "sqlite3",
-      file: callerInfo.file,
-      line: callerInfo.line,
-      error: error ? error.toString() : undefined,
-    };
-
-    watchers.database.insertRedisStream(logEntry);
-  }
+  patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.SQLITE3_PATCHED_SYMBOL] = true;
+  addHook((exports) => patchSqlite3Exports(exports, "patch-sqlite3.ts"));
 }
