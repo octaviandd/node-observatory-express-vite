@@ -41,7 +41,12 @@ export class ApiError extends Error {
   statusText: string;
   data?: unknown;
 
-  constructor(message: string, status: number, statusText: string, data?: unknown) {
+  constructor(
+    message: string,
+    status: number,
+    statusText: string,
+    data?: unknown,
+  ) {
     super(message);
     this.name = "ApiError";
     this.status = status;
@@ -50,10 +55,7 @@ export class ApiError extends Error {
   }
 }
 
-async function fetcher<T>(
-  endpoint: string,
-  options?: RequestInit
-): Promise<T> {
+async function fetcher<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const baseUrl = getBaseUrl();
   const url = endpoint.startsWith("http") ? endpoint : `${baseUrl}${endpoint}`;
 
@@ -76,22 +78,24 @@ async function fetcher<T>(
       `API Error: ${response.status} ${response.statusText}`,
       response.status,
       response.statusText,
-      errorData
+      errorData,
     );
   }
 
   return response.json();
 }
 
-interface UseApiQueryOptions<TData>
-  extends Omit<UseQueryOptions<TData, ApiError>, "queryKey" | "queryFn"> {
+export interface UseApiQueryOptions<TData> extends Omit<
+  UseQueryOptions<TData, ApiError>,
+  "queryKey" | "queryFn"
+> {
   includePeriod?: boolean;
 }
 
 export function useApiQuery<TData = unknown>(
   endpoint: string,
   queryKey: QueryKey,
-  options?: UseApiQueryOptions<TData>
+  options?: UseApiQueryOptions<TData>,
 ) {
   const { state } = useContext(StoreContext);
   const { includePeriod = true, ...queryOptions } = options ?? {};
@@ -107,13 +111,15 @@ export function useApiQuery<TData = unknown>(
   });
 }
 
-interface UseApiMutationOptions<TData, TVariables>
-  extends Omit<UseMutationOptions<TData, ApiError, TVariables>, "mutationFn"> {}
+export interface UseApiMutationOptions<TData, TVariables> extends Omit<
+  UseMutationOptions<TData, ApiError, TVariables>,
+  "mutationFn"
+> {}
 
 export function useApiMutation<TData = unknown, TVariables = unknown>(
   endpoint: string,
   method: "POST" | "PUT" | "PATCH" | "DELETE" = "POST",
-  options?: UseApiMutationOptions<TData, TVariables>
+  options?: UseApiMutationOptions<TData, TVariables>,
 ) {
   return useMutation<TData, ApiError, TVariables>({
     mutationFn: (variables) =>
@@ -130,11 +136,16 @@ interface PaginatedResponse<T> {
   count: string;
 }
 
-interface UseApiInfiniteQueryOptions<TData>
-  extends Omit<
-    UseInfiniteQueryOptions<PaginatedResponse<TData>, ApiError, PaginatedResponse<TData>, QueryKey, number>,
-    "queryKey" | "queryFn" | "initialPageParam" | "getNextPageParam"
-  > {
+interface UseApiInfiniteQueryOptions<TData> extends Omit<
+  UseInfiniteQueryOptions<
+    PaginatedResponse<TData>,
+    ApiError,
+    PaginatedResponse<TData>,
+    QueryKey,
+    number
+  >,
+  "queryKey" | "queryFn" | "initialPageParam" | "getNextPageParam"
+> {
   includePeriod?: boolean;
   pageSize?: number;
 }
@@ -142,22 +153,37 @@ interface UseApiInfiniteQueryOptions<TData>
 export function useApiInfiniteQuery<TData = unknown>(
   endpoint: string,
   queryKey: QueryKey,
-  options?: UseApiInfiniteQueryOptions<TData>
+  options?: UseApiInfiniteQueryOptions<TData>,
 ) {
   const { state } = useContext(StoreContext);
-  const { includePeriod = true, pageSize = 20, ...queryOptions } = options ?? {};
+  const {
+    includePeriod = true,
+    pageSize = 20,
+    ...queryOptions
+  } = options ?? {};
 
-  return useInfiniteQuery<PaginatedResponse<TData>, ApiError, PaginatedResponse<TData>, QueryKey, number>({
+  return useInfiniteQuery<
+    PaginatedResponse<TData>,
+    ApiError,
+    PaginatedResponse<TData>,
+    QueryKey,
+    number
+  >({
     queryKey: includePeriod ? [...queryKey, state.period] : queryKey,
     queryFn: ({ pageParam = 0 }) => {
       const separator = endpoint.includes("?") ? "&" : "?";
-      const periodParams = includePeriod ? `&${buildPeriodParams(state.period)}` : "";
+      const periodParams = includePeriod
+        ? `&${buildPeriodParams(state.period)}`
+        : "";
       const fullEndpoint = `${endpoint}${separator}offset=${pageParam}${periodParams}`;
       return fetcher<PaginatedResponse<TData>>(fullEndpoint);
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
-      const totalFetched = allPages.reduce((acc, page) => acc + page.results.length, 0);
+      const totalFetched = allPages.reduce(
+        (acc, page) => acc + page.results.length,
+        0,
+      );
       const hasMore = lastPage.results.length === pageSize;
       return hasMore ? totalFetched : undefined;
     },
@@ -165,10 +191,7 @@ export function useApiInfiniteQuery<TData = unknown>(
   });
 }
 
-export function useGraphData<TData = unknown>(
-  type: string,
-  key?: string
-) {
+export function useGraphData<TData = unknown>(type: string, key?: string) {
   const endpoint = `/api/${type}${key ? `?key=${encodeURIComponent(key)}` : ""}`;
   return useApiQuery<TData>(endpoint, ["graph", type, key ?? "all"]);
 }
@@ -180,10 +203,10 @@ export function useTableData<TData = unknown>(
     status?: string;
     key?: string;
     query?: string;
-  }
+  },
 ) {
   const { index, status, key, query } = params;
-  
+
   const searchParams = new URLSearchParams({
     table: "true",
     index,
@@ -193,7 +216,7 @@ export function useTableData<TData = unknown>(
   });
 
   const endpoint = `/api/${type}?${searchParams.toString()}`;
-  
+
   return useApiInfiniteQuery<TData>(endpoint, [
     "table",
     type,
@@ -207,17 +230,13 @@ export function useTableData<TData = unknown>(
 export function useItemById<TData = unknown>(
   type: string,
   id: string | undefined,
-  options?: UseApiQueryOptions<TData>
+  options?: UseApiQueryOptions<TData>,
 ) {
-  return useApiQuery<TData>(
-    `/api/${type}/${id}`,
-    [type, id ?? ""],
-    {
-      enabled: !!id,
-      includePeriod: false,
-      ...options,
-    }
-  );
+  return useApiQuery<TData>(`/api/${type}/${id}`, [type, id ?? ""], {
+    enabled: !!id,
+    includePeriod: false,
+    ...options,
+  });
 }
 
 export function useDeleteItem(type: string) {
@@ -231,9 +250,8 @@ export function useDeleteItem(type: string) {
         queryClient.invalidateQueries({ queryKey: ["table", type] });
         queryClient.invalidateQueries({ queryKey: ["graph", type] });
       },
-    }
+    },
   );
 }
 
 export { fetcher, buildPeriodParams, getBaseUrl };
-

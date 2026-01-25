@@ -1,3 +1,5 @@
+/** @format */
+
 import { BaseBuilder } from "./BaseBuilder";
 
 class ScheduleWatcherSQL extends BaseBuilder {
@@ -5,10 +7,11 @@ class ScheduleWatcherSQL extends BaseBuilder {
    * Helper for schedule-specific status and type filtering
    */
   private getStatusSQL(type: string | undefined): string {
-    const base = "AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.type')) = 'processJob'";
+    const base =
+      "AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data,type')) = 'processJob'";
     if (!type || type === "all") return base;
-    
-    return `${base} AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = '${type}'`;
+
+    return `${base} AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.status')) = '${type}'`;
   }
 
   /**
@@ -16,10 +19,12 @@ class ScheduleWatcherSQL extends BaseBuilder {
    */
   public getIndexTableDataByInstanceSQL(filters: any) {
     const { offset, limit, query, period, key, status } = filters;
-    
+
     const periodSql = this.getPeriodSQL(period);
-    const querySql = query ? this.getInclusionSQL(query, "scheduleId") : "";
-    const scheduleSql = key ? this.getEqualitySQL(key, "scheduleId") : "";
+    const querySql = query
+      ? this.getInclusionSQL(query, "data.scheduleId")
+      : "";
+    const scheduleSql = key ? this.getEqualitySQL(key, "data.scheduleId") : "";
     const statusSql = this.getStatusSQL(status);
 
     const whereClause = `WHERE type = 'schedule' ${statusSql} ${querySql} ${periodSql} ${scheduleSql}`;
@@ -35,7 +40,7 @@ class ScheduleWatcherSQL extends BaseBuilder {
    */
   public getIndexTableDataByGroupSQL(filters: any) {
     const { offset, limit, period, groupFilter, query } = filters;
-    
+
     const timeSql = this.getPeriodSQL(period);
     const querySql = query ? this.getInclusionSQL(query, "jobId") : "";
 
@@ -45,15 +50,15 @@ class ScheduleWatcherSQL extends BaseBuilder {
     if (groupFilter === "slow") orderBySql = "ORDER BY longest DESC";
 
     const columns = [
-      "JSON_UNQUOTE(JSON_EXTRACT(content, '$.scheduleId')) AS scheduleId",
+      "JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.scheduleId')) AS scheduleId",
       "COUNT(*) as total",
-      "GROUP_CONCAT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.cronExpression'))) AS cronExpression",
+      "GROUP_CONCAT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.cronExpression'))) AS cronExpression",
       "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed",
       "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed",
       "CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest",
       "CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest",
       "CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average",
-      this.getP95SQL("schedule")
+      this.getP95SQL("schedule"),
     ];
 
     const whereClause = `
@@ -69,7 +74,7 @@ class ScheduleWatcherSQL extends BaseBuilder {
         GROUP BY scheduleId
         ${orderBySql}
         LIMIT ${limit} OFFSET ${offset};`,
-      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.scheduleId'))) as total FROM observatory_entries ${whereClause};`,
+      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.scheduleId'))) as total FROM observatory_entries ${whereClause};`,
     };
   }
 
@@ -89,13 +94,22 @@ class ScheduleWatcherSQL extends BaseBuilder {
       "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed",
       "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed",
       this.getP95SQL("schedule"),
-      "NULL as created_at", "NULL as content", "'aggregate' as type"
+      "NULL as created_at",
+      "NULL as content",
+      "'aggregate' as type",
     ];
 
     const rowColumns = [
-      "NULL as total", "NULL as shortest", "NULL as longest", "NULL as average",
-      "NULL as completed", "NULL as failed", "NULL as p95",
-      "created_at", "content", "'row' as type"
+      "NULL as total",
+      "NULL as shortest",
+      "NULL as longest",
+      "NULL as average",
+      "NULL as completed",
+      "NULL as failed",
+      "NULL as p95",
+      "created_at",
+      "content",
+      "'row' as type",
     ];
 
     const whereClause = `

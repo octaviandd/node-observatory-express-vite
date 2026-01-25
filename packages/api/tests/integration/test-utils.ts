@@ -1,29 +1,33 @@
 /**
  * Integration Test Utilities
- * 
+ *
  * Provides real Redis and MySQL connections for integration tests,
  * along with utility functions to reset data between tests.
+ *
+ * @format
  */
 
-import { createClient, RedisClientType } from 'redis';
-import mysql, { Connection } from 'mysql2/promise';
+import { createClient, RedisClientType } from "redis";
+import mysql, { Connection } from "mysql2/promise";
 
 // Test container configuration
 export const TEST_CONFIG = {
   redis: {
-    url: 'redis://localhost:6380',
+    url: "redis://localhost:6380",
   },
   mysql: {
-    host: 'localhost',
+    host: "localhost",
     port: 3307,
-    user: 'test_user',
-    password: 'test_password',
-    database: 'observatory_test',
+    user: "test_user",
+    password: "test_password",
+    database: "observatory_test",
   },
 };
 
 let redisClient: RedisClientType | null = null;
 let mysqlConnection: Connection | null = null;
+// Track watchers for cleanup
+const activeWatchers: any[] = [];
 
 /**
  * Creates and returns a Redis client connected to the test container.
@@ -34,9 +38,9 @@ export async function getRedisClient(): Promise<RedisClientType> {
   }
 
   redisClient = createClient({ url: TEST_CONFIG.redis.url });
-  
-  redisClient.on('error', (err) => {
-    console.error('Redis Test Client Error:', err);
+
+  redisClient.on("error", (err) => {
+    console.error("Redis Test Client Error:", err);
   });
 
   await redisClient.connect();
@@ -74,11 +78,11 @@ export async function resetRedis(): Promise<void> {
  */
 export async function resetDatabase(): Promise<void> {
   const connection = await getMySQLConnection();
-  
+
   // Disable foreign key checks for truncate
-  await connection.query('SET FOREIGN_KEY_CHECKS = 0');
-  await connection.query('TRUNCATE TABLE observatory_entries');
-  await connection.query('SET FOREIGN_KEY_CHECKS = 1');
+  await connection.query("SET FOREIGN_KEY_CHECKS = 0");
+  await connection.query("TRUNCATE TABLE observatory_entries");
+  await connection.query("SET FOREIGN_KEY_CHECKS = 1");
 }
 
 /**
@@ -86,7 +90,7 @@ export async function resetDatabase(): Promise<void> {
  */
 export async function ensureTestSchema(): Promise<void> {
   const connection = await getMySQLConnection();
-  
+
   const [rows]: any = await connection.query(`
     SELECT COUNT(*) as count 
     FROM information_schema.tables 
@@ -114,7 +118,7 @@ export async function ensureTestSchema(): Promise<void> {
         INDEX idx_created_at (created_at)
       );
     `);
-    console.log('Test schema created: observatory_entries table');
+    console.log("Test schema created: observatory_entries table");
   }
 }
 
@@ -130,7 +134,9 @@ export async function verifyContainers(): Promise<void> {
     const redis = await getRedisClient();
     await redis.ping();
   } catch (error) {
-    errors.push(`Redis container not accessible at ${TEST_CONFIG.redis.url}: ${(error as Error).message}`);
+    errors.push(
+      `Redis container not accessible at ${TEST_CONFIG.redis.url}: ${(error as Error).message}`,
+    );
   }
 
   // Check MySQL
@@ -138,23 +144,59 @@ export async function verifyContainers(): Promise<void> {
     const mysql = await getMySQLConnection();
     await mysql.ping();
   } catch (error) {
-    errors.push(`MySQL container not accessible at ${TEST_CONFIG.mysql.host}:${TEST_CONFIG.mysql.port}: ${(error as Error).message}`);
+    errors.push(
+      `MySQL container not accessible at ${TEST_CONFIG.mysql.host}:${TEST_CONFIG.mysql.port}: ${(error as Error).message}`,
+    );
   }
 
   if (errors.length > 0) {
     throw new Error(
       `Test containers are not accessible.\n` +
-      `If running 'npm run test:integration:only', start containers first with 'npm run test:docker:up'\n` +
-      `Otherwise use 'npm run test:integration' to auto-start containers.\n\n` +
-      errors.join('\n')
+        `If running 'npm run test:integration:only', start containers first with 'npm run test:docker:up'\n` +
+        `Otherwise use 'npm run test:integration' to auto-start containers.\n\n` +
+        errors.join("\n"),
     );
   }
+}
+
+/**
+ * Register a watcher for cleanup
+ */
+export function registerWatcher(watcher: any): void {
+  if (watcher && !activeWatchers.includes(watcher)) {
+    activeWatchers.push(watcher);
+  }
+}
+
+/**
+ * Stop all registered watchers
+ */
+export async function stopAllWatchers(): Promise<void> {
+  const stopPromises = activeWatchers
+    .filter((w) => w && typeof w.stop === "function")
+    .map((w) => {
+      try {
+        return Promise.resolve(w.stop());
+      } catch (error) {
+        console.error("Error stopping watcher:", error);
+        return Promise.resolve();
+      }
+    });
+
+  await Promise.all(stopPromises);
+  activeWatchers.length = 0;
 }
 
 /**
  * Closes all test connections. Call this in afterAll.
  */
 export async function closeConnections(): Promise<void> {
+  // Stop all watchers first
+  await stopAllWatchers();
+
+  // Give a moment for background tasks to finish
+  await new Promise((resolve) => setTimeout(resolve, 500));
+
   if (redisClient && redisClient.isOpen) {
     await redisClient.quit();
     redisClient = null;
@@ -172,4 +214,3 @@ export async function closeConnections(): Promise<void> {
 export async function resetAll(): Promise<void> {
   await Promise.all([resetRedis(), resetDatabase()]);
 }
-

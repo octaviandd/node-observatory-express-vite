@@ -1,3 +1,5 @@
+/** @format */
+
 import { BaseBuilder } from "./BaseBuilder";
 
 class JobWatcherSQL extends BaseBuilder {
@@ -24,7 +26,7 @@ class JobWatcherSQL extends BaseBuilder {
 
     const whereClause = `
       WHERE type = 'job' 
-      AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.method')) = 'processJob'
+      AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.method')) = 'processJob'
       ${statusSql} ${periodSql} ${queueSql}
     `;
 
@@ -73,7 +75,7 @@ class JobWatcherSQL extends BaseBuilder {
       "CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest",
       "CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest",
       "CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average",
-      this.getP95SQL("job")
+      this.getP95SQL("job"),
     ];
 
     const whereClause = `WHERE type = 'job' ${periodSql} ${querySql}`;
@@ -86,7 +88,7 @@ class JobWatcherSQL extends BaseBuilder {
         GROUP BY queue
         ${orderBySql}
         LIMIT ${limit} OFFSET ${offset};`,
-      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.queue'))) as total FROM observatory_entries ${whereClause};`
+      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.queue'))) as total FROM observatory_entries ${whereClause};`,
     };
   }
 
@@ -110,13 +112,21 @@ class JobWatcherSQL extends BaseBuilder {
       this.getP95SQL("job"),
       "NULL as created_at",
       "NULL as content",
-      "'aggregate' as type"
+      "'aggregate' as type",
     ];
 
     const rowColumns = [
-      "NULL as total", "NULL as shortest", "NULL as longest", "NULL as average",
-      "NULL as completed", "NULL as failed", "NULL as released", "NULL as p95",
-      "created_at", "content", "'row' as type"
+      "NULL as total",
+      "NULL as shortest",
+      "NULL as longest",
+      "NULL as average",
+      "NULL as completed",
+      "NULL as failed",
+      "NULL as released",
+      "NULL as p95",
+      "created_at",
+      "content",
+      "'row' as type",
     ];
 
     const commonFilter = `WHERE type = 'job' ${periodSql} ${queueSql} ${statusSql}`;

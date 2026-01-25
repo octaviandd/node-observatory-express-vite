@@ -1,12 +1,17 @@
 /**
- * JobWatcher Integration Tests
+ * ViewsWatcher Integration Tests
  *
- * Entry structure matches bull-common.ts patcher output:
+ * Entry structure matches express-common.ts render patcher output:
  * {
  *   status: 'completed' | 'failed',
  *   duration: number,
- *   metadata: { package: 'bull', method: string, queue: string, connectionName: string },
- *   data: { jobId?: string, attemptsMade?: number, failedReason?: string },
+ *   metadata: { package: 'ejs' | 'pug' | 'handlebars', method: 'render' },
+ *   data: {
+ *     view: string,
+ *     options?: any,
+ *     size: number,
+ *     cacheInfo?: { cacheEnabled: boolean }
+ *   },
  *   location?: { file: string, line: string },
  *   error?: { name: string, message: string }
  * }
@@ -26,7 +31,7 @@ import {
 import type { Connection } from "mysql2/promise";
 import { WATCHER_CONFIGS } from "../../../src/core/watcherConfig";
 
-describe("JobWatcher Integration", () => {
+describe("ViewsWatcher Integration", () => {
   let redisClient: RedisClientType;
   let mysqlConnection: Connection;
   let database: Database;
@@ -44,21 +49,20 @@ describe("JobWatcher Integration", () => {
     }) as unknown as ObservatoryBoardRequest;
 
   /**
-   * Creates a job entry in the patcher format
+   * Creates a view entry in the patcher format
    */
-  const createJobEntry = (
+  const createViewEntry = (
     uuid: string,
     data: {
-      jobId?: string;
-      attemptsMade?: number;
-      failedReason?: string;
+      view: string;
+      options?: any;
+      size?: number;
+      cacheInfo?: { cacheEnabled: boolean };
     },
     options: {
       status?: "completed" | "failed";
       duration?: number;
-      method?: string;
-      queue?: string;
-      connectionName?: string;
+      package?: "ejs" | "pug" | "handlebars";
       request_id?: string;
       job_id?: string;
       schedule_id?: string;
@@ -66,27 +70,26 @@ describe("JobWatcher Integration", () => {
     } = {},
   ) => ({
     uuid,
-    type: "job",
+    type: "view",
     content: {
       status: options.status || "completed",
-      duration: options.duration ?? 500,
+      duration: options.duration ?? 50,
       metadata: {
-        package: "bull" as const,
-        method: options.method || "processJob",
-        queue: options.queue || "email",
-        connectionName: options.connectionName || "localhost:6379",
+        package: options.package || "ejs",
+        method: "render",
       },
       data: {
-        jobId: data.jobId,
-        attemptsMade: data.attemptsMade ?? 1,
-        failedReason: data.failedReason,
+        view: data.view,
+        options: data.options,
+        size: data.size ?? 2048,
+        cacheInfo: data.cacheInfo || { cacheEnabled: false },
       },
-      location: { file: "jobs.ts", line: "30" },
+      location: { file: "express", line: "0" },
       ...(options.error && { error: options.error }),
     },
     created_at: new Date().toISOString().replace("T", " ").substring(0, 19),
     request_id: options.request_id || "null",
-    job_id: options.job_id || data.jobId || "null",
+    job_id: options.job_id || "null",
     schedule_id: options.schedule_id || "null",
   });
 
@@ -101,16 +104,13 @@ describe("JobWatcher Integration", () => {
     watcher = new GenericWatcher(
       redisClient as any,
       database,
-      WATCHER_CONFIGS.job,
+      WATCHER_CONFIGS.view,
     );
-    registerWatcher(watcher);
   });
 
   afterEach(async () => {
-    if (watcher) {
-      await watcher.stop();
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    }
+    watcher.stop();
+    await new Promise((resolve) => setTimeout(resolve, 100));
   });
 
   describe("index endpoint", () => {
@@ -127,32 +127,17 @@ describe("JobWatcher Integration", () => {
       expect(result.body.count).toBe("0");
     });
 
-    it("should return job entries", async () => {
+    it("should return view entries", async () => {
       await database.insert([
-        createJobEntry(
-          "job:1",
-          { jobId: "job-1", attemptsMade: 1 },
-          {
-            status: "completed",
-            duration: 500,
-            queue: "email",
-            job_id: "job-1",
-          },
+        createViewEntry(
+          "view:1",
+          { view: "views/home.ejs", size: 2048 },
+          { duration: 50, request_id: "req-1" },
         ),
-        createJobEntry(
-          "job:2",
-          {
-            jobId: "job-2",
-            attemptsMade: 2,
-            failedReason: "Connection timeout",
-          },
-          {
-            status: "failed",
-            duration: 100,
-            queue: "email",
-            job_id: "job-2",
-            error: { name: "BullError", message: "Connection timeout" },
-          },
+        createViewEntry(
+          "view:2",
+          { view: "views/profile.ejs", size: 3072 },
+          { duration: 80, request_id: "req-2" },
         ),
       ]);
 
@@ -167,17 +152,17 @@ describe("JobWatcher Integration", () => {
       expect(result.body.results).toHaveLength(2);
     });
 
-    it("should group jobs by queue", async () => {
+    it("should group by view path", async () => {
       await database.insert([
-        createJobEntry(
-          "job:1",
-          { jobId: "job-1" },
-          { queue: "email", job_id: "job-1" },
+        createViewEntry(
+          "view:1",
+          { view: "views/home.ejs", size: 2048 },
+          { duration: 50 },
         ),
-        createJobEntry(
-          "job:2",
-          { jobId: "job-2" },
-          { queue: "email", job_id: "job-2" },
+        createViewEntry(
+          "view:2",
+          { view: "views/home.ejs", size: 2048 },
+          { duration: 60 },
         ),
       ]);
 
@@ -192,20 +177,19 @@ describe("JobWatcher Integration", () => {
       expect(result.body.results).toHaveLength(1);
     });
 
-    it("should filter by job status", async () => {
+    it("should filter by status", async () => {
       await database.insert([
-        createJobEntry(
-          "job:completed",
-          { jobId: "job-1" },
-          { status: "completed", job_id: "job-1" },
+        createViewEntry(
+          "view:completed",
+          { view: "views/home.ejs", size: 2048 },
+          { status: "completed" },
         ),
-        createJobEntry(
-          "job:failed",
-          { jobId: "job-2", failedReason: "Error" },
+        createViewEntry(
+          "view:failed",
+          { view: "views/broken.ejs", size: 0 },
           {
             status: "failed",
-            job_id: "job-2",
-            error: { name: "Error", message: "Failed" },
+            error: { name: "RenderError", message: "Template syntax error" },
           },
         ),
       ]);
@@ -214,7 +198,7 @@ describe("JobWatcher Integration", () => {
         table: "true",
         index: "instance",
         period: "24h",
-        status: "completed",
+        status: "failed",
       });
       const result = await watcher.index(req);
 
@@ -233,50 +217,58 @@ describe("JobWatcher Integration", () => {
   describe("view endpoint", () => {
     it("should return entry data by uuid", async () => {
       await database.insert([
-        createJobEntry(
-          "job:view-test",
-          { jobId: "job-view" },
-          { job_id: "job-view" },
-        ),
+        createViewEntry("view:view-test", {
+          view: "views/home.ejs",
+          size: 2048,
+        }),
       ]);
 
-      const req = createMockRequest({}, { id: "job:view-test" });
+      const req = createMockRequest({}, { id: "view:view-test" });
       const result = await watcher.view(req);
 
       expect(result.statusCode).toBe(200);
-      expect(result.body).toHaveProperty("job");
+      expect(result.body).toHaveProperty("view");
     });
 
-    it("should include related entries", async () => {
-      const jobId = "shared-job-id";
+    it("should include related request", async () => {
+      const requestId = "shared-request";
       await database.insert([
-        createJobEntry("job:main", { jobId }, { job_id: jobId }),
+        createViewEntry(
+          "view:related",
+          { view: "views/home.ejs", size: 2048 },
+          { request_id: requestId },
+        ),
         {
-          uuid: "log:related",
-          type: "log",
+          uuid: "request:source",
+          type: "request",
           content: {
             status: "completed",
-            duration: 0,
-            metadata: { package: "winston", level: "info" },
-            data: { message: "Job started" },
-            location: { file: "jobs.ts", line: "35" },
+            duration: 100,
+            metadata: { package: "express", method: "get" },
+            data: {
+              route: "/",
+              statusCode: 200,
+              requestSize: 0,
+              responseSize: 2048,
+            },
+            location: { file: "express", line: "0" },
           },
           created_at: new Date()
             .toISOString()
             .replace("T", " ")
             .substring(0, 19),
-          request_id: "null",
-          job_id: jobId,
+          request_id: requestId,
+          job_id: "null",
           schedule_id: "null",
         },
       ]);
 
-      const req = createMockRequest({}, { id: "job:main" });
+      const req = createMockRequest({}, { id: "view:related" });
       const result = await watcher.view(req);
 
       expect(result.statusCode).toBe(200);
-      expect(result.body).toHaveProperty("job");
-      expect(result.body).toHaveProperty("log");
+      expect(result.body).toHaveProperty("view");
+      expect(result.body).toHaveProperty("request");
     });
   });
 
@@ -284,45 +276,60 @@ describe("JobWatcher Integration", () => {
     it("should add entry to Redis stream", async () => {
       const entry = {
         status: "completed" as const,
-        duration: 500,
-        metadata: {
-          package: "bull" as const,
-          method: "processJob",
-          queue: "email",
-          connectionName: "localhost:6379",
+        duration: 50,
+        metadata: { package: "ejs" as const, method: "render" },
+        data: {
+          view: "views/home.ejs",
+          size: 2048,
+          cacheInfo: { cacheEnabled: false },
         },
-        data: { jobId: "job-123", attemptsMade: 1 },
-        location: { file: "jobs.ts", line: "30" },
+        location: { file: "express", line: "0" },
       };
 
       await watcher.insertRedisStream(entry as any);
 
-      const streamLen = await redisClient.xLen("observatory:stream:job");
+      const streamLen = await redisClient.xLen("observatory:stream:view");
       expect(streamLen).toBeGreaterThan(0);
     });
 
-    it("should handle failed jobs with error", async () => {
+    it("should handle different template engines", async () => {
+      const packages = ["ejs", "pug", "handlebars"] as const;
+
+      for (const pkg of packages) {
+        const entry = {
+          status: "completed" as const,
+          duration: 50,
+          metadata: { package: pkg, method: "render" },
+          data: {
+            view: `views/home.${pkg === "pug" ? "pug" : pkg === "handlebars" ? "hbs" : "ejs"}`,
+            size: 2048,
+          },
+          location: { file: "express", line: "0" },
+        };
+
+        await watcher.insertRedisStream(entry as any);
+      }
+
+      const streamLen = await redisClient.xLen("observatory:stream:view");
+      expect(streamLen).toBe(3);
+    });
+
+    it("should handle failed renders with error", async () => {
       const entry = {
         status: "failed" as const,
-        duration: 100,
-        metadata: {
-          package: "bull" as const,
-          method: "processJob",
-          queue: "email",
-          connectionName: "localhost:6379",
-        },
+        duration: 10,
+        metadata: { package: "ejs" as const, method: "render" },
         data: {
-          jobId: "job-456",
-          attemptsMade: 3,
-          failedReason: "Max retries exceeded",
+          view: "views/broken.ejs",
+          size: 0,
         },
-        location: { file: "jobs.ts", line: "30" },
-        error: { name: "BullError", message: "Max retries exceeded" },
+        location: { file: "express", line: "0" },
+        error: { name: "RenderError", message: "Template syntax error" },
       };
 
       await watcher.insertRedisStream(entry as any);
 
-      const streamLen = await redisClient.xLen("observatory:stream:job");
+      const streamLen = await redisClient.xLen("observatory:stream:view");
       expect(streamLen).toBeGreaterThan(0);
     });
   });

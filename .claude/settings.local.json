@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /Users/octaviandavid/Desktop/node-express-vite-observatory log --oneline -20)",
+      "Bash(git -C /Users/octaviandavid/Desktop/node-express-vite-observatory branch:*)",
+      "Bash(npm run test:integration:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(npm run lint)"
+    ]
+  }
+}

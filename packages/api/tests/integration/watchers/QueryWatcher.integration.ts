@@ -15,7 +15,7 @@
 import type { RedisClientType } from 'redis';
 import Database from '../../../src/core/databases/sql/Base';
 import GenericWatcher from '../../../src/core/watchers/GenericWatcher';
-import { getRedisClient, getMySQLConnection, resetAll } from '../test-utils';
+import { getRedisClient, getMySQLConnection, resetAll, registerWatcher } from '../test-utils';
 import type { Connection } from 'mysql2/promise';
 import { WATCHER_CONFIGS } from '../../../src/core/watcherConfig';
 
@@ -90,8 +90,9 @@ describe('QueryWatcher Integration', () => {
     watcher = new GenericWatcher(redisClient as any, database, WATCHER_CONFIGS.query);
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     watcher.stop();
+    await new Promise((resolve) => setTimeout(resolve, 100));
   });
 
   describe('index endpoint', () => {

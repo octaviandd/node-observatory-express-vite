@@ -1,7 +1,16 @@
+/** @format */
+
 import { Connection, FieldPacket, QueryResult } from "mysql2/promise";
 import { PERIODS } from "../../helpers/constants.js";
-import { processedDurationGraphData, processedCountGraphData, formatValue } from "../../helpers/helpers.js";
-import { MigrationError, DatabaseRetrieveError } from "../../helpers/errors/Errors.js";
+import {
+  processedDurationGraphData,
+  processedCountGraphData,
+  formatValue,
+} from "../../helpers/helpers.js";
+import {
+  MigrationError,
+  DatabaseRetrieveError,
+} from "../../helpers/errors/Errors.js";
 import ModelWatcherSQL from "./ModelWatcherSQLBuilder.js";
 import RequestWatcherSQL from "./RequestWatcherSQLBuilder.js";
 import ScheduleWatcherSQL from "./ScheduleViewerSQLBuilder.js";
@@ -16,20 +25,20 @@ import JobWatcherSQL from "./JobWatcherSQLBuilder.js";
 import MailWatcherSQL from "./MailWatcherSQLBuilder.js";
 
 class Base {
-  storeConnection!: Connection
+  storeConnection!: Connection;
   private builders: {
-    request: RequestWatcherSQL,
-    model: ModelWatcherSQL,
-    view: ViewWatcherSQL,
-    schedule: ScheduleWatcherSQL,
-    cache: CacheWatcherSQL,
-    exception: ExceptionWatcherSQL,
-    log: LogWatcherSQL,
-    notification: NotificationWatcherSQL,
-    query: QueryWatcherSQL,
-    http: HTTPClientWatcherSQL,
-    job: JobWatcherSQL,
-    mail: MailWatcherSQL
+    request: RequestWatcherSQL;
+    model: ModelWatcherSQL;
+    view: ViewWatcherSQL;
+    schedule: ScheduleWatcherSQL;
+    cache: CacheWatcherSQL;
+    exception: ExceptionWatcherSQL;
+    log: LogWatcherSQL;
+    notification: NotificationWatcherSQL;
+    query: QueryWatcherSQL;
+    http: HTTPClientWatcherSQL;
+    job: JobWatcherSQL;
+    mail: MailWatcherSQL;
   };
 
   constructor(storeConnection: Connection) {
@@ -51,9 +60,7 @@ class Base {
     };
   }
 
-  async up(
-    connection: Connection,
-  ): Promise<void> {
+  async up(connection: Connection): Promise<void> {
     try {
       const [rows]: any = await connection.query(`
         SELECT COUNT(*) as count 
@@ -85,20 +92,20 @@ class Base {
         console.log("observatory_entries table created via mysql2/promise");
       }
     } catch (error: unknown) {
-      throw new MigrationError('Failed to up base tables', {cause: (error as Error)});
+      throw new MigrationError("Failed to up base tables", {
+        cause: error as Error,
+      });
     }
   }
 
-  async down(
-    connection: Connection,
-  ): Promise<void> {
+  async down(connection: Connection): Promise<void> {
     try {
-      await connection.query(
-        "DROP TABLE IF EXISTS observatory_entries;",
-      );
+      await connection.query("DROP TABLE IF EXISTS observatory_entries;");
       console.log("observatory_entries table droped via mysql2/promise");
     } catch (error) {
-      throw new MigrationError('Failed to down base tables', {cause: (error as Error)});
+      throw new MigrationError("Failed to down base tables", {
+        cause: error as Error,
+      });
     }
   }
 
@@ -108,91 +115,116 @@ class Base {
     try {
       await this.storeConnection.query("START TRANSACTION");
 
-      const placeholders = redisEntries.map(() => '(?, ?, ?, ?, ?, ?, ?)').join(', ');
-      const values = redisEntries.flatMap(entry => [
+      const placeholders = redisEntries
+        .map(() => "(?, ?, ?, ?, ?, ?, ?)")
+        .join(", ");
+      const values = redisEntries.flatMap((entry) => [
         entry.uuid,
         entry.request_id,
         entry.job_id,
         entry.schedule_id,
         entry.type,
-        typeof entry.content === 'string' ? entry.content : JSON.stringify(entry.content),
+        typeof entry.content === "string"
+          ? entry.content
+          : JSON.stringify(entry.content),
         entry.created_at,
       ]);
 
       await this.storeConnection.query(
         `INSERT INTO observatory_entries (uuid, request_id, job_id, schedule_id, type, content, created_at) VALUES ${placeholders}`,
-        values
+        values,
       );
 
       await this.storeConnection.query("COMMIT");
     } catch (error) {
       await this.storeConnection.query("ROLLBACK");
-      throw new MigrationError('Failed to insert into database', {cause: (error as Error)});
+      throw new MigrationError("Failed to insert into database", {
+        cause: error as Error,
+      });
     }
   }
 
   async delete(uuid: string): Promise<boolean> {
     try {
-      this.storeConnection.query(`DELETE FROM observatory_entries WHERE uuid = ?`, [uuid])
+      this.storeConnection.query(
+        `DELETE FROM observatory_entries WHERE uuid = ?`,
+        [uuid],
+      );
       return true;
     } catch (error) {
-      throw new MigrationError('Failed to delete from database', {cause: (error as Error)});
+      throw new MigrationError("Failed to delete from database", {
+        cause: error as Error,
+      });
     }
   }
 
   async getEntry(uuid: string): Promise<WatcherEntry> {
     try {
-      const [rows] = await this.storeConnection.query(
+      const [rows] = (await this.storeConnection.query(
         `SELECT * FROM observatory_entries WHERE uuid = ?`,
-        [uuid]
-      ) as [QueryResult, FieldPacket[]];
+        [uuid],
+      )) as [QueryResult, FieldPacket[]];
 
       return (rows as unknown as WatcherEntry[])[0];
     } catch (error) {
-      throw new MigrationError('Failed to get entry by uuid from database', {cause: (error as Error)});
+      throw new MigrationError("Failed to get entry by uuid from database", {
+        cause: error as Error,
+      });
     }
   }
 
   async getAllEntriesByType(type: string): Promise<WatcherEntry[]> {
     try {
-      const [results] = await this.storeConnection.query(
+      const [results] = (await this.storeConnection.query(
         "SELECT * FROM observatory_entries WHERE type = ?",
         [type],
-      ) as [QueryResult, FieldPacket[]];
-    
+      )) as [QueryResult, FieldPacket[]];
+
       return results as unknown as WatcherEntry[];
     } catch (error) {
-      throw new MigrationError('Failed to get all entries by type from database', {cause: (error as Error)});
+      throw new MigrationError(
+        "Failed to get all entries by type from database",
+        { cause: error as Error },
+      );
     }
   }
 
   async findExistingUuids(uuids: string[]): Promise<string[]> {
     if (uuids.length === 0) return [];
-    
+
     const [rows] = await this.storeConnection.query(
       `SELECT uuid FROM observatory_entries WHERE uuid IN (?)`,
-      [uuids]
+      [uuids],
     );
-    
-    return (rows as { uuid: string }[]).map(r => r.uuid);
+
+    return (rows as { uuid: string }[]).map((r) => r.uuid);
   }
 
-  getPeriodSQL = (period: string): string => period ? `AND created_at >= UTC_TIMESTAMP() - ${PERIODS[period].interval}` : '';
-  getEqualitySQL = (value: string, type: string): string => value ? `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.${type}')) = '${value}'` : '';
-  getInclusionSQL = (value: string, type: string): string => value ? `AND LOWER(JSON_UNQUOTE(JSON_EXTRACT(content, '$.${type}'))) LIKE '%${value.toLowerCase()}%'` : "";
+  getPeriodSQL = (period: string): string =>
+    period
+      ? `AND created_at >= UTC_TIMESTAMP() - ${PERIODS[period].interval}`
+      : "";
+  getEqualitySQL = (value: string, type: string): string =>
+    value
+      ? `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.${type}')) = '${value}'`
+      : "";
+  getInclusionSQL = (value: string, type: string): string =>
+    value
+      ? `AND LOWER(JSON_UNQUOTE(JSON_EXTRACT(content, '$.${type}'))) LIKE '%${value.toLowerCase()}%'`
+      : "";
 
   private getDurationParametersSQL = (watcherType: WatcherType): string => {
-    if (watcherType === 'exception' || watcherType === 'log') {
-      return ``
+    if (watcherType === "exception" || watcherType === "log") {
+      return ``;
     }
     return `MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10, 6))) as shortest,
       MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10, 6))) as longest,
       AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10, 6))) as average,
-    `
-  }
+    `;
+  };
 
   getP95SQL(watcherType: WatcherType): string {
-    if (watcherType === 'exception' || watcherType === 'log') return ''
+    if (watcherType === "exception" || watcherType === "log") return "";
 
     return `
       CAST(
@@ -210,45 +242,67 @@ class Base {
           -1
         ) AS DECIMAL(10,2)
       ) AS p95
-    `
+    `;
   }
-  
-  async getByInstance(filters: any, watcherType: WatcherType): Promise<{ results: WatcherEntry[], count: number }> {
+
+  async getByInstance(
+    filters: any,
+    watcherType: WatcherType,
+  ): Promise<{ results: WatcherEntry[]; count: number }> {
     const builder = this.builders[watcherType];
     try {
-      const [ results ] = await this.storeConnection.query(
-        builder.getIndexTableDataByInstanceSQL(filters).items) as [QueryResult, FieldPacket[]
-      ];
-      
-      const [ count ] = await this.storeConnection.query(
-        builder.getIndexTableDataByInstanceSQL(filters).count) as [QueryResult & {total: number}, FieldPacket[]
-      ];
-      
-      return { results: results as unknown as WatcherEntry[], count: count.total };
+      const [results] = (await this.storeConnection.query(
+        builder.getIndexTableDataByInstanceSQL(filters).items,
+      )) as [QueryResult, FieldPacket[]];
+
+      const [count] = (await this.storeConnection.query(
+        builder.getIndexTableDataByInstanceSQL(filters).count,
+      )) as [any[], FieldPacket[]];
+
+      return {
+        results: results as unknown as WatcherEntry[],
+        count: count[0]?.total ?? 0,
+      };
     } catch (error: unknown) {
-      throw new MigrationError('Failed to get instance data from database', {cause: (error as Error)});
+      throw new MigrationError("Failed to get instance data from database", {
+        cause: error as Error,
+      });
     }
   }
 
-  async getByGroup(filters: any, watcherType: WatcherType): Promise<{ results: WatcherEntry[], count: number }> {
+  async getByGroup(
+    filters: any,
+    watcherType: WatcherType,
+  ): Promise<{ results: WatcherEntry[]; count: number }> {
     const builder = this.builders[watcherType];
 
     try {
-      const [ results ] = await this.storeConnection.query(
-        builder.getIndexTableDataByGroupSQL(filters).items) as [QueryResult, FieldPacket[]
-        ];
-      
-      const [count] = await this.storeConnection.query(
-        builder.getIndexTableDataByGroupSQL(filters).count) as [QueryResult & { total: number }, FieldPacket[]
-      ]
-      
-      return { results: results as unknown as WatcherEntry[], count: count.total };
+      const [results] = (await this.storeConnection.query(
+        builder.getIndexTableDataByGroupSQL(filters).items,
+      )) as [QueryResult, FieldPacket[]];
+
+      const [count] = (await this.storeConnection.query(
+        builder.getIndexTableDataByGroupSQL(filters).count,
+      )) as [any[], FieldPacket[]];
+
+      return {
+        results: results as unknown as WatcherEntry[],
+        count: count[0]?.total ?? 0,
+      };
     } catch (error: unknown) {
-      throw new DatabaseRetrieveError('Failed to get group data from database', {cause: (error as Error)});
+      throw new DatabaseRetrieveError(
+        "Failed to get group data from database",
+        { cause: error as Error },
+      );
     }
   }
 
-  async getRelatedViewdata(conditions: string[], params: string[], type: string, extraCondition = ''): Promise<WatcherEntry[]> {
+  async getRelatedViewdata(
+    conditions: string[],
+    params: string[],
+    type: string,
+    extraCondition = "",
+  ): Promise<WatcherEntry[]> {
     if (!conditions || conditions.length === 0) return [];
 
     try {
@@ -256,28 +310,41 @@ class Base {
       const typeCondition = type ? " AND type != ?" : "";
       const queryParams = type ? [...params, type] : params;
 
-      const [ relatedItems ] = await this.storeConnection.query(
+      const [relatedItems] = (await this.storeConnection.query(
         "SELECT * FROM observatory_entries WHERE " +
           whereClause +
           typeCondition +
           (extraCondition ? " " + extraCondition : ""),
         queryParams,
-      ) as [QueryResult, FieldPacket[]];
+      )) as [QueryResult, FieldPacket[]];
 
       return relatedItems as unknown as WatcherEntry[];
     } catch (error: unknown) {
-      throw new DatabaseRetrieveError('Failed to get related view data from database', {cause: (error as Error)});
+      throw new DatabaseRetrieveError(
+        "Failed to get related view data from database",
+        { cause: error as Error },
+      );
     }
   }
 
-  async getGraphData(filters: any, watcherType: WatcherType, keys: string[], hasDuration?: boolean){
+  async getGraphData(
+    filters: any,
+    watcherType: WatcherType,
+    keys: string[],
+    hasDuration?: boolean,
+  ) {
     const { period, key } = filters;
     const periodSql = this.getPeriodSQL(period);
     const keySql = this.getEqualitySQL(key, "key");
 
     const durationSql = this.getDurationParametersSQL(watcherType);
     const p95Sql = this.getP95SQL(watcherType);
-    const p95Column = p95Sql ? `${p95Sql},` : 'NULL as p95,';
+    const p95Column = p95Sql ? `${p95Sql},` : "NULL as p95,";
+
+    const durationNulls =
+      watcherType !== "log" && watcherType !== "exception"
+        ? "NULL as shortest, NULL as longest, NULL as average,"
+        : "";
 
     try {
       const [results] = (await this.storeConnection.query(
@@ -288,7 +355,7 @@ class Base {
             SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.misses')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.misses')) > 0 THEN 1 ELSE 0 END) as misses,
             SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.hits')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.hits')) > 0 THEN 1 ELSE 0 END) as hits,
             SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.writes')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.writes')) > 0 THEN 1 ELSE 0 END) as writes,
-            ${p95Column},
+            ${p95Column}
             NULL as created_at,
             NULL as content,
             'aggregate' as type
@@ -299,9 +366,7 @@ class Base {
         (
           SELECT
             NULL as total,
-            NULL as shortest,
-            NULL as longest,
-            NULL as average,
+            ${durationNulls}
             NULL as p95,
             NULL as misses,
             NULL as hits,
@@ -313,7 +378,7 @@ class Base {
           WHERE type = ? ${periodSql} ${keySql}
           ORDER BY created_at DESC
         );`,
-        [watcherType, watcherType]
+        [watcherType, watcherType],
       )) as [QueryResult, FieldPacket[]];
 
       //@ts-ignore
@@ -330,8 +395,14 @@ class Base {
         p95: string | null;
       } = cleanResults;
 
-      const countFormattedData = processedCountGraphData(results as unknown as CacheContent[], period, keys);
-      const durationFormattedData = hasDuration ? processedDurationGraphData(results, period): {};
+      const countFormattedData = processedCountGraphData(
+        results as unknown as CacheContent[],
+        period,
+        keys,
+      );
+      const durationFormattedData = hasDuration
+        ? processedDurationGraphData(results, period)
+        : {};
 
       return {
         countFormattedData,
@@ -346,7 +417,10 @@ class Base {
         p95: formatValue(aggregateResults.p95),
       };
     } catch (error) {
-      throw new DatabaseRetrieveError('Failed to get graph data from database', {cause: (error as Error)});
+      throw new DatabaseRetrieveError(
+        "Failed to get graph data from database",
+        { cause: error as Error },
+      );
     }
   }
 }

@@ -1,6 +1,6 @@
 /**
  * RequestWatcher Integration Tests
- * 
+ *
  * Entry structure matches express-common.ts patcher output:
  * {
  *   status: 'completed' | 'failed',
@@ -22,16 +22,23 @@
  *   location?: { file: string, line: string },
  *   error?: { message: string, name: string, stack?: string }
  * }
+ *
+ * @format
  */
 
-import type { RedisClientType } from 'redis';
-import Database from '../../../src/core/databases/sql/Base';
-import GenericWatcher from '../../../src/core/watchers/GenericWatcher';
-import { getRedisClient, getMySQLConnection, resetAll } from '../test-utils';
-import type { Connection } from 'mysql2/promise';
-import { WATCHER_CONFIGS } from '../../../src/core/watcherConfig';
+import type { RedisClientType } from "redis";
+import Database from "../../../src/core/databases/sql/Base";
+import GenericWatcher from "../../../src/core/watchers/GenericWatcher";
+import {
+  getRedisClient,
+  getMySQLConnection,
+  resetAll,
+  registerWatcher,
+} from "../test-utils";
+import type { Connection } from "mysql2/promise";
+import { WATCHER_CONFIGS } from "../../../src/core/watcherConfig";
 
-describe('RequestWatcher Integration', () => {
+describe("RequestWatcher Integration", () => {
   let redisClient: RedisClientType;
   let mysqlConnection: Connection;
   let database: Database;
@@ -39,13 +46,14 @@ describe('RequestWatcher Integration', () => {
 
   const createMockRequest = (
     query: Record<string, string> = {},
-    params: Record<string, string> = {}
-  ): ObservatoryBoardRequest => ({
-    query,
-    params,
-    body: {},
-    requestData: {},
-  } as unknown as ObservatoryBoardRequest);
+    params: Record<string, string> = {},
+  ): ObservatoryBoardRequest =>
+    ({
+      query,
+      params,
+      body: {},
+      requestData: {},
+    }) as unknown as ObservatoryBoardRequest;
 
   /**
    * Creates a request entry in the patcher format
@@ -64,39 +72,43 @@ describe('RequestWatcher Integration', () => {
       ip?: string;
     },
     options: {
-      status?: 'completed' | 'failed';
+      status?: "completed" | "failed";
       duration?: number;
       method?: string;
       request_id?: string;
       job_id?: string;
       schedule_id?: string;
       error?: { message: string; name: string; stack?: string };
-    } = {}
+    } = {},
   ) => ({
     uuid,
-    type: 'request',
+    type: "request",
     content: {
-      status: options.status || (data.statusCode >= 400 ? 'failed' : 'completed'),
+      status:
+        options.status || (data.statusCode >= 400 ? "failed" : "completed"),
       duration: options.duration ?? 100,
-      metadata: { package: 'express' as const, method: options.method || 'get' },
+      metadata: {
+        package: "express" as const,
+        method: options.method || "get",
+      },
       data: {
         route: data.route,
         statusCode: data.statusCode,
         requestSize: data.requestSize ?? 0,
         responseSize: data.responseSize ?? 100,
-        payload: data.payload || '',
+        payload: data.payload || "",
         headers: data.headers || {},
         query: data.query || {},
         params: data.params || {},
-        ip: data.ip || '127.0.0.1',
+        ip: data.ip || "127.0.0.1",
       },
-      location: { file: 'express', line: '0' },
+      location: { file: "express", line: "0" },
       ...(options.error && { error: options.error }),
     },
-    created_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
-    request_id: options.request_id || uuid.replace('request:', 'req-'),
-    job_id: options.job_id || 'null',
-    schedule_id: options.schedule_id || 'null',
+    created_at: new Date().toISOString().replace("T", " ").substring(0, 19),
+    request_id: options.request_id || uuid.replace("request:", "req-"),
+    job_id: options.job_id || "null",
+    schedule_id: options.schedule_id || "null",
   });
 
   beforeAll(async () => {
@@ -107,189 +119,263 @@ describe('RequestWatcher Integration', () => {
 
   beforeEach(async () => {
     await resetAll();
-    watcher = new GenericWatcher(redisClient as any, database, WATCHER_CONFIGS.request);
+    watcher = new GenericWatcher(
+      redisClient as any,
+      database,
+      WATCHER_CONFIGS.request,
+    );
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     watcher.stop();
+    await new Promise((resolve) => setTimeout(resolve, 100));
   });
 
-  describe('index endpoint', () => {
-    it('should return empty results when no data exists', async () => {
-      const req = createMockRequest({ table: 'true', index: 'group', period: '24h' });
+  describe("index endpoint", () => {
+    it("should return empty results when no data exists", async () => {
+      const req = createMockRequest({
+        table: "true",
+        index: "group",
+        period: "24h",
+      });
       const result = await watcher.index(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body.results).toEqual([]);
-      expect(result.body.count).toBe('0');
+      expect(result.body.count).toBe("0");
     });
 
-    it('should return instance data when entries exist', async () => {
+    it("should return instance data when entries exist", async () => {
       await database.insert([
-        createRequestEntry('request:1', { route: '/api/users', statusCode: 200 }, { duration: 100, method: 'get' }),
-        createRequestEntry('request:2', { route: '/api/posts', statusCode: 201 }, { duration: 150, method: 'post' }),
+        createRequestEntry(
+          "request:1",
+          { route: "/api/users", statusCode: 200 },
+          { duration: 100, method: "get" },
+        ),
+        createRequestEntry(
+          "request:2",
+          { route: "/api/posts", statusCode: 201 },
+          { duration: 150, method: "post" },
+        ),
       ]);
 
-      const req = createMockRequest({ table: 'true', index: 'instance', period: '24h' });
+      const req = createMockRequest({
+        table: "true",
+        index: "instance",
+        period: "24h",
+      });
       const result = await watcher.index(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body.results).toHaveLength(2);
-      expect(result.body.count).toBe('2');
+      expect(result.body.count).toBe("2");
     });
 
-    it('should return grouped data by route', async () => {
+    it("should return grouped data by route", async () => {
       await database.insert([
-        createRequestEntry('request:1', { route: '/api/users', statusCode: 200 }, { duration: 100 }),
-        createRequestEntry('request:2', { route: '/api/users', statusCode: 200 }, { duration: 120 }),
+        createRequestEntry(
+          "request:1",
+          { route: "/api/users", statusCode: 200 },
+          { duration: 100 },
+        ),
+        createRequestEntry(
+          "request:2",
+          { route: "/api/users", statusCode: 200 },
+          { duration: 120 },
+        ),
       ]);
 
-      const req = createMockRequest({ table: 'true', index: 'group', period: '24h' });
+      const req = createMockRequest({
+        table: "true",
+        index: "group",
+        period: "24h",
+      });
       const result = await watcher.index(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body.results).toHaveLength(1);
     });
 
-    it('should filter by status code', async () => {
+    it("should filter by status code", async () => {
       await database.insert([
-        createRequestEntry('request:200', { route: '/api/users', statusCode: 200 }, { duration: 100 }),
-        createRequestEntry('request:404', { route: '/api/missing', statusCode: 404 }, { duration: 50 }),
+        createRequestEntry(
+          "request:200",
+          { route: "/api/users", statusCode: 200 },
+          { duration: 100 },
+        ),
+        createRequestEntry(
+          "request:404",
+          { route: "/api/missing", statusCode: 404 },
+          { duration: 50 },
+        ),
       ]);
 
-      const req = createMockRequest({ table: 'true', index: 'instance', period: '24h', status: '2xx' });
+      const req = createMockRequest({
+        table: "true",
+        index: "instance",
+        period: "24h",
+        status: "2xx",
+      });
       const result = await watcher.index(req);
 
       expect(result.statusCode).toBe(200);
     });
 
-    it('should return graph data when isTable is false', async () => {
-      const req = createMockRequest({ table: 'false', period: '24h' });
+    it("should return graph data when isTable is false", async () => {
+      const req = createMockRequest({ table: "false", period: "24h" });
       const result = await watcher.index(req);
 
       expect(result.statusCode).toBe(200);
-      expect(result.body).toHaveProperty('countFormattedData');
-      expect(result.body).toHaveProperty('durationFormattedData');
+      expect(result.body).toHaveProperty("countFormattedData");
+      expect(result.body).toHaveProperty("durationFormattedData");
     });
 
-    it('should handle pagination', async () => {
+    it("should handle pagination", async () => {
       const entries = Array.from({ length: 10 }, (_, i) =>
-        createRequestEntry(`request:${i}`, { route: `/api/item/${i}`, statusCode: 200 }, { duration: 100 })
+        createRequestEntry(
+          `request:${i}`,
+          { route: `/api/item/${i}`, statusCode: 200 },
+          { duration: 100 },
+        ),
       );
       await database.insert(entries);
 
-      const req = createMockRequest({ table: 'true', index: 'instance', period: '24h', limit: '3', offset: '2' });
+      const req = createMockRequest({
+        table: "true",
+        index: "instance",
+        period: "24h",
+        limit: "3",
+        offset: "2",
+      });
       const result = await watcher.index(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body.results).toHaveLength(3);
-      expect(result.body.count).toBe('10');
+      expect(result.body.count).toBe("10");
     });
   });
 
-  describe('view endpoint', () => {
-    it('should return entry data by uuid', async () => {
+  describe("view endpoint", () => {
+    it("should return entry data by uuid", async () => {
       await database.insert([
-        createRequestEntry('request:view-test', { route: '/api/users', statusCode: 200 }, { duration: 100, request_id: 'req-view' }),
+        createRequestEntry(
+          "request:view-test",
+          { route: "/api/users", statusCode: 200 },
+          { duration: 100, request_id: "req-view" },
+        ),
       ]);
 
-      const req = createMockRequest({}, { id: 'request:view-test' });
+      const req = createMockRequest({}, { id: "request:view-test" });
       const result = await watcher.view(req);
 
       expect(result.statusCode).toBe(200);
-      expect(result.body).toHaveProperty('request');
+      expect(result.body).toHaveProperty("request");
     });
 
-    it('should include related entries', async () => {
-      const requestId = 'shared-req-uuid';
+    it("should include related entries", async () => {
+      const requestId = "shared-req-uuid";
       await database.insert([
-        createRequestEntry('request:main', { route: '/api/users', statusCode: 200 }, { duration: 100, request_id: requestId }),
+        createRequestEntry(
+          "request:main",
+          { route: "/api/users", statusCode: 200 },
+          { duration: 100, request_id: requestId },
+        ),
         {
-          uuid: 'log:related',
-          type: 'log',
+          uuid: "log:related",
+          type: "log",
           content: {
-            status: 'completed',
+            status: "completed",
             duration: 0,
-            metadata: { package: 'winston', level: 'info' },
-            data: { message: 'User fetched' },
-            location: { file: 'app.ts', line: '50' },
+            metadata: { package: "winston", level: "info" },
+            data: { message: "User fetched" },
+            location: { file: "app.ts", line: "50" },
           },
-          created_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
+          created_at: new Date()
+            .toISOString()
+            .replace("T", " ")
+            .substring(0, 19),
           request_id: requestId,
-          job_id: 'null',
-          schedule_id: 'null',
+          job_id: "null",
+          schedule_id: "null",
         },
         {
-          uuid: 'query:related',
-          type: 'query',
+          uuid: "query:related",
+          type: "query",
           content: {
-            status: 'completed',
+            status: "completed",
             duration: 50,
-            metadata: { package: 'mysql2', method: 'query' },
-            data: { sql: 'SELECT * FROM users' },
-            location: { file: 'db.ts', line: '20' },
+            metadata: { package: "mysql2", method: "query" },
+            data: { sql: "SELECT * FROM users" },
+            location: { file: "db.ts", line: "20" },
           },
-          created_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
+          created_at: new Date()
+            .toISOString()
+            .replace("T", " ")
+            .substring(0, 19),
           request_id: requestId,
-          job_id: 'null',
-          schedule_id: 'null',
+          job_id: "null",
+          schedule_id: "null",
         },
       ]);
 
-      const req = createMockRequest({}, { id: 'request:main' });
+      const req = createMockRequest({}, { id: "request:main" });
       const result = await watcher.view(req);
 
       expect(result.statusCode).toBe(200);
-      expect(result.body).toHaveProperty('request');
-      expect(result.body).toHaveProperty('log');
-      expect(result.body).toHaveProperty('query');
+      expect(result.body).toHaveProperty("request");
+      expect(result.body).toHaveProperty("log");
+      expect(result.body).toHaveProperty("query");
     });
   });
 
-  describe('insertRedisStream', () => {
-    it('should add entry to Redis stream', async () => {
+  describe("insertRedisStream", () => {
+    it("should add entry to Redis stream", async () => {
       const entry = {
-        status: 'completed' as const,
+        status: "completed" as const,
         duration: 100,
-        metadata: { package: 'express' as const, method: 'get' },
+        metadata: { package: "express" as const, method: "get" },
         data: {
-          route: '/api/users',
+          route: "/api/users",
           statusCode: 200,
           requestSize: 0,
           responseSize: 256,
-          payload: '',
-          headers: { 'content-type': 'application/json' },
+          payload: "",
+          headers: { "content-type": "application/json" },
           query: {},
           params: {},
-          ip: '127.0.0.1',
+          ip: "127.0.0.1",
         },
-        location: { file: 'express', line: '0' },
+        location: { file: "express", line: "0" },
       };
 
       await watcher.insertRedisStream(entry as any);
 
-      const streamLen = await redisClient.xLen('observatory:stream:request');
+      const streamLen = await redisClient.xLen("observatory:stream:request");
       expect(streamLen).toBeGreaterThan(0);
     });
 
-    it('should handle failed requests with error', async () => {
+    it("should handle failed requests with error", async () => {
       const entry = {
-        status: 'failed' as const,
+        status: "failed" as const,
         duration: 50,
-        metadata: { package: 'express' as const, method: 'get' },
+        metadata: { package: "express" as const, method: "get" },
         data: {
-          route: '/api/error',
+          route: "/api/error",
           statusCode: 500,
           requestSize: 0,
           responseSize: 0,
         },
-        location: { file: 'express', line: '0' },
-        error: { name: 'InternalError', message: 'Something went wrong', stack: 'Error...' },
+        location: { file: "express", line: "0" },
+        error: {
+          name: "InternalError",
+          message: "Something went wrong",
+          stack: "Error...",
+        },
       };
 
       await watcher.insertRedisStream(entry as any);
 
-      const streamLen = await redisClient.xLen('observatory:stream:request');
+      const streamLen = await redisClient.xLen("observatory:stream:request");
       expect(streamLen).toBeGreaterThan(0);
     });
   });

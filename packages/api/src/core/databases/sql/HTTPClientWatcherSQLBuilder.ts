@@ -1,3 +1,5 @@
+/** @format */
+
 import { BaseBuilder } from "./BaseBuilder";
 
 class HTTPClientWatcherSQL extends BaseBuilder {
@@ -6,10 +8,10 @@ class HTTPClientWatcherSQL extends BaseBuilder {
    */
   private getStatusSQL(status: string | undefined): string {
     if (!status || status === "all") return "";
-    
+
     // Transforms '2xx' into '2%' for SQL LIKE
     const pattern = status.replace("xx", "%");
-    return `AND JSON_EXTRACT(content, '$.statusCode') LIKE '${pattern}'`;
+    return `AND JSON_EXTRACT(content, '$.data.statusCode') LIKE '${pattern}'`;
   }
 
   /**
@@ -19,13 +21,13 @@ class HTTPClientWatcherSQL extends BaseBuilder {
     const { period, query, status, key, limit, offset } = filters;
 
     const periodSql = this.getPeriodSQL(period);
-    const querySql = query ? this.getInclusionSQL(query, "origin") : "";
-    const keySql = key ? this.getInclusionSQL(key, "origin") : "";
+    const querySql = query ? this.getInclusionSQL(query, "data.origin") : "";
+    const keySql = key ? this.getInclusionSQL(key, "data.origin") : "";
     const statusSql = this.getStatusSQL(status);
 
     const whereClause = `
       WHERE type = 'http' 
-      AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0'
+      AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.statusCode')) != '0'
       ${periodSql} ${querySql} ${statusSql} ${keySql}
     `;
 
@@ -42,24 +44,24 @@ class HTTPClientWatcherSQL extends BaseBuilder {
     const { period, query, key, limit, offset } = filters;
 
     const periodSql = this.getPeriodSQL(period);
-    const querySql = query ? this.getInclusionSQL(query, "request.url") : "";
-    const keySql = key ? this.getEqualitySQL(key, "request.url") : "";
+    const querySql = query ? this.getInclusionSQL(query, "data.origin") : "";
+    const keySql = key ? this.getEqualitySQL(key, "data.origin") : "";
 
     const columns = [
-      "JSON_UNQUOTE(JSON_EXTRACT(content, '$.origin')) AS route",
+      "JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.origin')) AS route",
       "COUNT(*) AS total",
-      "SUM(CASE WHEN JSON_EXTRACT(content, '$.statusCode') LIKE '2%' THEN 1 ELSE 0 END) AS count_200",
-      "SUM(CASE WHEN JSON_EXTRACT(content, '$.statusCode') LIKE '4%' THEN 1 ELSE 0 END) AS count_400",
-      "SUM(CASE WHEN JSON_EXTRACT(content, '$.statusCode') LIKE '5%' THEN 1 ELSE 0 END) AS count_500",
+      "SUM(CASE WHEN JSON_EXTRACT(content, '$.data.statusCode') LIKE '2%' THEN 1 ELSE 0 END) AS count_200",
+      "SUM(CASE WHEN JSON_EXTRACT(content, '$.data.statusCode') LIKE '4%' THEN 1 ELSE 0 END) AS count_400",
+      "SUM(CASE WHEN JSON_EXTRACT(content, '$.data.statusCode') LIKE '5%' THEN 1 ELSE 0 END) AS count_500",
       "CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest",
       "CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest",
       "CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average",
-      this.getP95SQL("http")
+      this.getP95SQL("http"),
     ];
 
     const whereClause = `
       WHERE type = 'http' 
-      AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0'
+      AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.statusCode')) != '0'
       ${periodSql} ${querySql} ${keySql}
     `;
 
@@ -71,7 +73,7 @@ class HTTPClientWatcherSQL extends BaseBuilder {
         GROUP BY route
         ORDER BY total DESC
         LIMIT ${limit} OFFSET ${offset};`,
-      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.origin'))) as total FROM observatory_entries ${whereClause};`,
+      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.origin'))) as total FROM observatory_entries ${whereClause};`,
     };
   }
 
@@ -94,13 +96,21 @@ class HTTPClientWatcherSQL extends BaseBuilder {
       this.getP95SQL("http"),
       "NULL as created_at",
       "NULL as content",
-      "'aggregate' as type"
+      "'aggregate' as type",
     ];
 
     const rowColumns = [
-      "NULL as total", "NULL as shortest", "NULL as longest", "NULL as average",
-      "NULL as count_200", "NULL as count_400", "NULL as count_500", "NULL as p95",
-      "created_at", "content", "'row' as type"
+      "NULL as total",
+      "NULL as shortest",
+      "NULL as longest",
+      "NULL as average",
+      "NULL as count_200",
+      "NULL as count_400",
+      "NULL as count_500",
+      "NULL as p95",
+      "created_at",
+      "content",
+      "'row' as type",
     ];
 
     const commonFilter = `

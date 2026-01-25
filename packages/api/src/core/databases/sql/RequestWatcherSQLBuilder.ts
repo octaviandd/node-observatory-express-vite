@@ -1,3 +1,5 @@
+/** @format */
+
 import { BaseBuilder } from "./BaseBuilder";
 
 class RequestWatcherSQL extends BaseBuilder {
@@ -7,7 +9,7 @@ class RequestWatcherSQL extends BaseBuilder {
   private getStatusSQL(type: string | undefined): string {
     if (!type || type === "all") return "";
     // Takes the first character (e.g., '2' from '2xx') and uses LIKE '2%'
-    return `AND JSON_EXTRACT(content, '$.statusCode') LIKE '${type[0]}%'`;
+    return `AND JSON_EXTRACT(content, '$.data.statusCode') LIKE '${type[0]}%'`;
   }
 
   /**
@@ -16,14 +18,14 @@ class RequestWatcherSQL extends BaseBuilder {
   public getIndexTableDataByInstanceSQL(filters: any) {
     const { period, query, key, status, offset, limit } = filters;
 
-    const routeSql = key ? this.getEqualitySQL(key, "route") : "";
-    const querySql = query ? this.getInclusionSQL(query, "route") : "";
+    const routeSql = key ? this.getEqualitySQL(key, "data.route") : "";
+    const querySql = query ? this.getInclusionSQL(query, "data.route") : "";
     const periodSql = this.getPeriodSQL(period);
     const statusSql = this.getStatusSQL(status);
 
     const whereClause = `
       WHERE type = 'request' 
-      AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0'
+      AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.statusCode')) != '0'
       ${routeSql} ${querySql} ${periodSql} ${statusSql}
     `;
 
@@ -39,25 +41,25 @@ class RequestWatcherSQL extends BaseBuilder {
   public getIndexTableDataByGroupSQL(filters: any) {
     const { period, key, query, offset, limit } = filters;
 
-    const routeSQL = key ? this.getEqualitySQL(key, "route") : "";
+    const routeSQL = key ? this.getEqualitySQL(key, "data.route") : "";
     const timeSQL = period ? this.getPeriodSQL(period) : "";
-    const querySQL = query ? this.getInclusionSQL(query, "route") : "";
+    const querySQL = query ? this.getInclusionSQL(query, "data.route") : "";
 
     const columns = [
-      "JSON_UNQUOTE(JSON_EXTRACT(content, '$.route')) as route",
+      "JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.route')) as route",
       "COUNT(*) as total",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) LIKE '2%' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) LIKE '3%' THEN 1 ELSE 0 END) as count_200",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) LIKE '4%' THEN 1 ELSE 0 END) as count_400",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) LIKE '5%' THEN 1 ELSE 0 END) as count_500",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.statusCode')) LIKE '2%' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.statusCode')) LIKE '3%' THEN 1 ELSE 0 END) as count_200",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.statusCode')) LIKE '4%' THEN 1 ELSE 0 END) as count_400",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.statusCode')) LIKE '5%' THEN 1 ELSE 0 END) as count_500",
       "CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest",
       "CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest",
       "CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average",
-      this.getP95SQL("request")
+      this.getP95SQL("request"),
     ];
 
     const whereClause = `
       WHERE type = 'request' 
-      AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0'
+      AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.statusCode')) != '0'
       ${routeSQL} ${timeSQL} ${querySQL}
     `;
 
@@ -69,7 +71,7 @@ class RequestWatcherSQL extends BaseBuilder {
         GROUP BY route
         ORDER BY total DESC
         LIMIT ${limit} OFFSET ${offset};`,
-      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.route'))) as total FROM observatory_entries ${whereClause};`,
+      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.route'))) as total FROM observatory_entries ${whereClause};`,
     };
   }
 
@@ -79,31 +81,39 @@ class RequestWatcherSQL extends BaseBuilder {
   public getIndexGraphDataSQL(filters: any) {
     const { period, key } = filters;
     const timeSql = period ? this.getPeriodSQL(period) : "";
-    const routeSql = key ? this.getEqualitySQL(key, "route") : "";
+    const routeSql = key ? this.getEqualitySQL(key, "data.route") : "";
 
     const aggregateColumns = [
       "COUNT(*) as total",
       "CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest",
       "CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest",
       "CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) LIKE '2%' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) LIKE '3%' THEN 1 ELSE 0 END) as count_200",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) LIKE '4%' THEN 1 ELSE 0 END) as count_400",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) LIKE '5%' THEN 1 ELSE 0 END) as count_500",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.statusCode')) LIKE '2%' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.statusCode')) LIKE '3%' THEN 1 ELSE 0 END) as count_200",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.statusCode')) LIKE '4%' THEN 1 ELSE 0 END) as count_400",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.statusCode')) LIKE '5%' THEN 1 ELSE 0 END) as count_500",
       this.getP95SQL("request"),
       "NULL as created_at",
       "NULL as content",
-      "'aggregate' as type"
+      "'aggregate' as type",
     ];
 
     const rowColumns = [
-      "NULL as total", "NULL as shortest", "NULL as longest", "NULL as average",
-      "NULL as count_200", "NULL as count_400", "NULL as count_500", "NULL as p95",
-      "created_at", "content", "'row' as type"
+      "NULL as total",
+      "NULL as shortest",
+      "NULL as longest",
+      "NULL as average",
+      "NULL as count_200",
+      "NULL as count_400",
+      "NULL as count_500",
+      "NULL as p95",
+      "created_at",
+      "content",
+      "'row' as type",
     ];
 
     const whereClause = `
       WHERE type = 'request' 
-      AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0'
+      AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.statusCode')) != '0'
       ${routeSql} ${timeSql}
     `;
 

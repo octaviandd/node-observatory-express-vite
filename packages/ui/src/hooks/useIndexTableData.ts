@@ -1,6 +1,20 @@
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+/** @format */
+
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { StoreContext } from "@/store";
 import { useParams } from "react-router";
+import { useResourceHooks } from "./useApiTyped";
+import { components } from "@/types/api";
+
+type ListResponse = components["schemas"]["ListResponse"];
+type IndexType = components["schemas"]["IndexType"];
 
 type Props = {
   key: string;
@@ -23,7 +37,7 @@ export const useIndexTableData = <TInstance, TGroup>({
   const offsetRef = useRef(0);
 
   // UI States
-  const [index, setIndex] = useState<"instance" | "group">("group");
+  const [index, setIndex] = useState<IndexType>("group");
   const [instanceStatusType, setInstanceStatusType] = useState<string>(
     defaultInstanceStatusType,
   );
@@ -45,91 +59,116 @@ export const useIndexTableData = <TInstance, TGroup>({
   });
   const [loading, setLoading] = useState(false);
 
+  const resourceHooks = useResourceHooks(key);
+
   useEffect(() => {
     if (index === "instance") setInstanceStatusType(defaultInstanceStatusType);
     if (modelKey) setIndex("instance");
     else setIndex("group");
-  }, [modelKey]);
+  }, [modelKey, defaultInstanceStatusType]);
 
   useEffect(() => {
-    if (index === "instance") getDataByInstance();
-    else getDataByGroup();
+    offsetRef.current = 0;
+    if (index === "instance") {
+      getDataByInstance();
+    } else {
+      getDataByGroup();
+    }
   }, [index, state.period, instanceStatusType, inputValue, modelKey]);
 
-  const getDataByGroup = async (addedNewItems = false) => {
-    if (addedNewItems) offsetRef.current += 20;
+  const getDataByGroup = useCallback(
+    async (addedNewItems = false) => {
+      if (addedNewItems) offsetRef.current += 20;
 
-    const url = `${window.SERVER_CONFIG.base}/api/${key}?table=true&offset=${offsetRef.current}&index=${index}&period=${
-      state.period
-    }${inputValue ? `&q=${inputValue}` : ""}${
-      instanceStatusType
-        ? `&status=${instanceStatusType
-            .split(",")
-            .map((status: string) => status.toLowerCase())
-            .join(",")}`
-        : ""
-    }`;
+      try {
+        setLoading(true);
+        const statusArray = instanceStatusType
+          ?.split(",")
+          .map((s: string) => s.toLowerCase())
+          .join(",");
 
-    fetchData<"group">(url, addedNewItems, setGroupData, setGroupDataCount);
-  };
+        const period =
+          typeof state.period === "string" ? state.period : undefined;
 
-  const getDataByInstance = async (addedNewItems = false) => {
-    if (addedNewItems) offsetRef.current += 20;
+        const { data, isLoading, error } = await resourceHooks.useList({
+          offset: offsetRef.current,
+          limit: 20,
+          index: "group",
+          period,
+          q: inputValue || undefined,
+          status: statusArray || undefined,
+          table: true,
+        });
 
-    const url = `${window.SERVER_CONFIG.base}/api/${key}?table=true&offset=${offsetRef.current}&index=${index}&period=${
-      state.period
-    }${inputValue ? `&q=${inputValue}` : ""}${
-      modelKey ? `&key=${modelKey}` : ""
-    }&status=${instanceStatusType.toLowerCase()}`;
+        const listData = data as ListResponse;
+        const results = (listData?.results ?? []) as TGroup[];
+        const count = listData?.count ?? "0";
 
-    fetchData<"instance">(
-      url,
-      addedNewItems,
-      setInstanceData,
-      setInstanceDataCount,
-    );
-  };
+        setNoMoreItems(results.length < 20);
+        setGroupData(addedNewItems ? [...groupData, ...results] : results);
+        setGroupDataCount(count);
+      } catch (error) {
+        console.error("Failed to fetch group data:", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [resourceHooks, instanceStatusType, inputValue, state.period, groupData],
+  );
 
-  const fetchData = async <T extends "group" | "instance">(
-    url: string,
-    addedNewItems: boolean,
-    setData: React.Dispatch<
-      T extends "group"
-        ? React.SetStateAction<TGroup[]>
-        : React.SetStateAction<TInstance[]>
-    >,
-    setCount: React.Dispatch<React.SetStateAction<string>>,
-  ) => {
-    try {
-      setLoading(true);
-      const response = await fetch(url);
-      const { results, count } = await response.json();
+  const getDataByInstance = useCallback(
+    async (addedNewItems = false) => {
+      if (addedNewItems) offsetRef.current += 20;
 
-      setNoMoreItems(results.length < 20);
+      try {
+        setLoading(true);
 
-      setData(
-        addedNewItems
-          ? [
-              ...(index === "instance"
-                ? (instanceData as TInstance[])
-                : (groupData as TGroup[])),
-              ...results,
-            ]
-          : results,
-      );
+        const period =
+          typeof state.period === "string" ? state.period : undefined;
 
-      setCount(count);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
+        const { data, isLoading, error } = await resourceHooks.useList({
+          offset: offsetRef.current,
+          limit: 20,
+          index: "instance",
+          period,
+          q: inputValue || undefined,
+          key: modelKey || undefined,
+          status: instanceStatusType.toLowerCase(),
+          table: true,
+        });
+
+        const listData = data as ListResponse;
+        const results = (listData?.results ?? []) as TInstance[];
+        const count = listData?.count ?? "0";
+
+        setNoMoreItems(results.length < 20);
+        setInstanceData(
+          addedNewItems ? [...instanceData, ...results] : results,
+        );
+        setInstanceDataCount(count);
+      } catch (error) {
+        console.error("Failed to fetch instance data:", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [
+      resourceHooks,
+      inputValue,
+      modelKey,
+      state.period,
+      instanceStatusType,
+      instanceData,
+    ],
+  );
+
+  const loadData = useCallback(() => {
+    if (index === "instance") {
+      getDataByInstance(true);
+    } else {
+      getDataByGroup(true);
     }
-  };
-
-  const loadData =
-    index === "instance"
-      ? () => getDataByInstance(true)
-      : () => getDataByGroup(true);
+  }, [index, getDataByInstance, getDataByGroup]);
 
   const message = useMemo(() => {
     return index === "instance"
