@@ -1,100 +1,104 @@
-import { Request } from "express";
-import { BaseWatcher } from "./BaseWatcher.js";
-import Database from '../database-sql.js';
-import { RedisClientType } from "redis";
-import { formatValue, groupItemsByType } from "../helpers/helpers.js";
+// import { Request } from "express";
+// import { BaseWatcher } from "./BaseWatcher.js";
+// import Database from '../databases/sql/Base.js';
+// import { RedisClientType } from "redis";
+// import { formatValue, groupItemsByType } from "../helpers/helpers.js";
 
-class NotificationWatcher extends BaseWatcher {
-  readonly type = "notification";
+// class NotificationWatcher extends BaseWatcher {
+//   readonly type = "notification";
 
-  constructor(redisClient: RedisClientType, DBInstance: Database) {
-    super(redisClient, DBInstance, "notification");
-  }
+//   constructor(redisClient: RedisClientType, DBInstance: Database) {
+//     super(redisClient, DBInstance, "notification");
+//   }
 
-  protected async getTableData(filters: NotificationFilters): Promise<{ results: any, count: string }> {
-    if (filters.index === 'instance') {
-      const results = await this.DBInstance.getByInstance(filters, this.type);
-      const total = await this.DBInstance.getByInstanceCount(filters, this.type, '');
+//   protected async getTableData(filters: NotificationFilters): Promise<{ results: any, count: string }> {
+//     if (filters.index === 'instance') {
+//       const results = await this.DBInstance.getByInstance(filters, this.type);
+//       const total = await this.DBInstance.getByInstanceCount(filters, this.type, '');
 
-      return { results, count: formatValue(total, true) };
-    } else {
-      const results = await this.DBInstance.getByGroup(filters, this.type);
-      const total = await this.DBInstance.getByGroupCount(filters, this.type, '');
+//       return { results, count: formatValue(total, true) };
+//     } else {
+//       const results = await this.DBInstance.getByGroup(filters, this.type);
+//       const total = await this.DBInstance.getByGroupCount(filters, this.type, '');
 
-      return { results, count: formatValue(total, true) };
-    }
-  }
+//       return { results, count: formatValue(total, true) };
+//     }
+//   }
 
-  protected async getViewdata(id: string): Promise<any> {
-    const entry = await this.DBInstance.getEntry(id);
+//   protected async getViewdata(id: string): Promise<any> {
+//     const entry = await this.DBInstance.getEntry(id);
 
-    if (!entry.requestId && !entry.scheduleId && !entry.jobId) {
-      return groupItemsByType([entry]);
-    }
+//     const hasRequestId = entry.request_id && entry.request_id !== 'null';
+//     const hasScheduleId = entry.schedule_id && entry.schedule_id !== 'null';
+//     const hasJobId = entry.job_id && entry.job_id !== 'null';
 
-    const conditions = [
-      ...(entry.requestId ? ["request_id = ?"] : []),
-      ...(entry.scheduleId ? ["schedule_id = ?"] : []),
-      ...(entry.jobId ? ["job_id = ?"] : [])
-    ];
-    const params = [
-      ...(entry.requestId ? [entry.requestId] : []),
-      ...(entry.scheduleId ? [entry.scheduleId] : []),
-      ...(entry.jobId ? [entry.jobId] : [])
-    ];
+//     if (!hasRequestId && !hasScheduleId && !hasJobId) {
+//       return groupItemsByType([entry]);
+//     }
 
-    const jobCondition = entry.jobId
-      ? "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')"
-      : "";
+//     const conditions = [
+//       ...(hasRequestId ? ["request_id = ?"] : []),
+//       ...(hasScheduleId ? ["schedule_id = ?"] : []),
+//       ...(hasJobId ? ["job_id = ?"] : [])
+//     ];
+//     const params = [
+//       ...(hasRequestId ? [entry.request_id!] : []),
+//       ...(hasScheduleId ? [entry.schedule_id!] : []),
+//       ...(hasJobId ? [entry.job_id!] : [])
+//     ];
 
-    const relatedEntries = await this.DBInstance.getRelatedViewdata(conditions, params, this.type, jobCondition);
-    return groupItemsByType(relatedEntries.concat(entry));
-  }
+//     const jobCondition = hasJobId
+//       ? "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')"
+//       : "";
 
-  protected async getMetadata({ requestId, jobId, scheduleId }: { requestId: string, jobId: string, scheduleId: string }): Promise<any> {
-    if (!requestId && !jobId && !scheduleId) return null;
+//     const relatedEntries = await this.DBInstance.getRelatedViewdata(conditions, params, this.type, jobCondition);
+//     return groupItemsByType(relatedEntries.concat(entry));
+//   }
 
-    const conditions = [
-      ...(requestId ? [`AND request_id = ?`] : []),
-      ...(jobId ? [`AND job_id = ?`] : []),
-      ...(scheduleId ? [`AND schedule_id = ?`] : [])
-    ];
-    const params = [
-      ...(requestId ? [requestId] : []),
-      ...(scheduleId ? [scheduleId] : []),
-      ...(jobId ? [jobId] : [])
-    ];
+//   protected async getMetadata({ requestId, jobId, scheduleId }: { requestId: string, jobId: string, scheduleId: string }): Promise<any> {
+//     if (!requestId && !jobId && !scheduleId) return null;
 
-    const jobCondition = jobId
-      ? "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')"
-      : "";
+//     const conditions = [
+//       ...(requestId ? [`AND request_id = ?`] : []),
+//       ...(jobId ? [`AND job_id = ?`] : []),
+//       ...(scheduleId ? [`AND schedule_id = ?`] : [])
+//     ];
+//     const params = [
+//       ...(requestId ? [requestId] : []),
+//       ...(scheduleId ? [scheduleId] : []),
+//       ...(jobId ? [jobId] : [])
+//     ];
 
-    const results = await this.DBInstance.getRelatedViewdata(conditions, params, this.type, jobCondition);
-    return groupItemsByType(results);
-  }
+//     const jobCondition = jobId
+//       ? "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')"
+//       : "";
 
-  protected async getGraphData(filters: NotificationFilters): Promise<any> {
-    return await this.DBInstance.getGraphData(
-      filters,
-      this.type,
-      ['completed', 'failed'],
-      true // notification has duration
-    );
-  }
+//     const results = await this.DBInstance.getRelatedViewdata(conditions, params, this.type, jobCondition);
+//     return groupItemsByType(results);
+//   }
 
-  protected extractFiltersFromRequest(req: ObservatoryBoardRequest): NotificationFilters {
-    return {
-      period: req.query.period as "1h" | "24h" | "7d" | "14d" | "30d",
-      offset: parseInt(req.query.offset as string, 10) || 0,
-      limit: parseInt(req.query.limit as string, 10) || 20,
-      query: req.query.q as string,
-      isTable: req.query.table === "true",
-      type: req.query.type as string,
-      channel: req.query.key as string,
-      status: req.query.status as "all" | "completed" | "failed",
-      index: req.query.index as "instance" | "group",
-    };
-  }
-}
+//   protected async getGraphData(filters: NotificationFilters): Promise<any> {
+//     return await this.DBInstance.getGraphData(
+//       filters,
+//       this.type,
+//       ['completed', 'failed'],
+//       true // notification has duration
+//     );
+//   }
 
-export default NotificationWatcher;
+//   protected extractFiltersFromRequest(req: ObservatoryBoardRequest): NotificationFilters {
+//     return {
+//       period: req.query.period as "1h" | "24h" | "7d" | "14d" | "30d",
+//       offset: parseInt(req.query.offset as string, 10) || 0,
+//       limit: parseInt(req.query.limit as string, 10) || 20,
+//       query: req.query.q as string,
+//       isTable: req.query.table === "true",
+//       type: req.query.type as string,
+//       channel: req.query.key as string,
+//       status: req.query.status as "all" | "completed" | "failed",
+//       index: req.query.index as "instance" | "group",
+//     };
+//   }
+// }
+
+// export default NotificationWatcher;

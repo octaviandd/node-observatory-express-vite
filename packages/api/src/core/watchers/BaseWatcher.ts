@@ -1,6 +1,6 @@
 import Watcher from "./Watcher";
 import { requestLocalStorage, jobLocalStorage, scheduleLocalStorage,} from "../store.js";
-import Database from "../database-sql.js";
+import Database from "../databases/sql/Base.js";
 import { RedisClientType } from "redis";
 import { RedisError } from "../helpers/errors/Errors";
 import { dropUndefinedKeys, sanitizeContent } from "../helpers/helpers";
@@ -14,9 +14,9 @@ export abstract class BaseWatcher implements Watcher {
   protected refreshInterval?: NodeJS.Timeout;
   protected refreshIntervalDuration: number = 5000;
   private isStopped: boolean = false;
-  readonly type: string;
+  readonly type: WatcherType;
 
-  constructor(redisClient: RedisClientType, DBInstance: Database, type: string) {
+  constructor(redisClient: RedisClientType, DBInstance: Database, type: WatcherType) {
     this.RedisClient = redisClient;
     this.DBInstance = DBInstance;
     this.type = type;
@@ -301,16 +301,17 @@ export abstract class BaseWatcher implements Watcher {
     return { body, statusCode: 200 }
   }
 
-  // async metadata(req: Request) {
-  //   const data = await this.DBInstance.getRelatedViewdata(req.body.entry_ids)
+  async metadata(req: ObservatoryBoardRequest) {
+    // const data = await this.DBInstance.getRelatedViewdata(req.body, entry_ids)
     
-  //   return {
-  //     body: data, 
-  //     statusCode: 200
-  //   }
-  // }
+    return {
+      body: {}, 
+      statusCode: 200
+    }
+  }
 
-  protected async refresh() {
+
+  async refresh() {
     this.refreshInterval && clearInterval(this.refreshInterval);
     await this.ingestRedisStream();
     return { body: { message: "Interval has been refreshed." }, statusCode: 200 }

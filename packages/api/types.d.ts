@@ -15,12 +15,13 @@ type IndexType = "instance" | "group";
 type StatusType = "all" | "completed" | "failed";
 type HttpStatusType = "all" | "2xx" | "4xx" | "5xx";
 type LogLevel = "info" | "warn" | "error" | "debug" | "verbose" | "silly" | "log" | "trace" | "fatal";
+type WatcherType = "request" | "cache" | "log" | "mail" | "http" | "notification" | "view" | "schedule" | "model" | "exception" | "job" | "query";
 
 interface WatcherEntry {
   uuid: string;
-  requestId?: string;
-  jobId?: string;
-  scheduleId?: string;
+  request_id?: string;
+  job_id?: string;
+  schedule_id?: string;
   type: string;
   content: string;
   created_at: number | Date;
@@ -30,12 +31,13 @@ interface WatcherEntry {
 // Filter Interfaces
 // ============================================================================
 interface WatcherFilters {
-  period?: Period;
   offset: number;
   limit: number;
+  period: Period;
+  query: string;
   isTable: boolean;
-  query?: string;
-  index: string;
+  index: IndexType;
+  key?: string;
 }
 
 interface IndexedFilters extends WatcherFilters {
@@ -48,13 +50,13 @@ interface ScheduleFilters extends IndexedFilters { status: StatusType; groupFilt
 interface RequestFilters extends IndexedFilters { status: HttpStatusType }
 interface QueryFilters extends IndexedFilters { status: string }
 interface NotificationFilters extends IndexedFilters { type?: string; channel?: string; status: string }
-interface CacheFilters extends IndexedFilters { cacheType: "all" | "misses" | "hits" | "writes" }
+interface CacheFilters extends IndexedFilters { type: "all" | "misses" | "hits" | "writes" }
 interface HTTPClientFilters extends IndexedFilters { status: HttpStatusType }
 interface ModelFilters extends IndexedFilters { model?: string; status?: StatusType }
 interface MailFilters extends IndexedFilters { status: StatusType }
-interface JobFilters extends IndexedFilters { jobStatus: "all" | "released" | "failed" | "completed"; queueFilter: "all" | "errors" | "slow" }
+interface JobFilters extends IndexedFilters { status: "all" | "released" | "failed" | "completed"; queue: "all" | "errors" | "slow" }
 interface LogFilters extends IndexedFilters { logType: "All" | "Info" | "Warn" | "Error" | "Debug" | "Trace" | "Fatal" | "Complete" | "Log" }
-interface ExceptionFilters extends WatcherFilters { type: "all" | "unhandled" | "uncaught"; key?: string }
+interface ExceptionFilters extends IndexedFilters { type: "all" | "unhandled" | "uncaught" }
 
 
 
@@ -81,8 +83,8 @@ interface LogLocation { file: string; line: string }
 interface LogError { name: string; message: string; stack?: string; code?: string }
 
 interface BaseLogEntry<TMetadata = Record<string, any>, TData = Record<string, any>> {
-  status: "completed" | "failed";
-  duration: number;
+  status?: "completed" | "failed";
+  duration?: number;
   metadata: TMetadata & { package: string };
   data: TData;
   location?: LogLocation;

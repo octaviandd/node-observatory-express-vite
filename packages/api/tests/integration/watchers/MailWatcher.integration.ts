@@ -22,16 +22,17 @@
  */
 
 import type { RedisClientType } from 'redis';
-import Database from '../../../src/core/database-sql';
-import MailWatcher from '../../../src/core/watchers/MailWatcher';
+import Database from '../../../src/core/databases/sql/Base';
+import GenericWatcher from '../../../src/core/watchers/GenericWatcher';
 import { getRedisClient, getMySQLConnection, resetAll } from '../test-utils';
 import type { Connection } from 'mysql2/promise';
+import { WATCHER_CONFIGS } from '../../../src/core/watcherConfig';
 
 describe('MailWatcher Integration', () => {
   let redisClient: RedisClientType;
   let mysqlConnection: Connection;
   let database: Database;
-  let watcher: MailWatcher;
+  let watcher: GenericWatcher;
 
   const createMockRequest = (
     query: Record<string, string> = {},
@@ -101,7 +102,7 @@ describe('MailWatcher Integration', () => {
 
   beforeEach(async () => {
     await resetAll();
-    watcher = new MailWatcher(redisClient as any, database);
+    watcher = new GenericWatcher(redisClient as any, database, WATCHER_CONFIGS.mail);
   });
 
   afterEach(() => {

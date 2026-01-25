@@ -76,32 +76,32 @@ function formatCodeContext(filePath: string, line: number) {
 /**
  * Monkey patch for uncaught exceptions to record errors
  */
-function uncaughtPatcher() {
-  process.on("uncaughtException", (error) => {
-    const details = extractErrorDetails(error);
-    if (watchers?.errors) {
-      watchers?.errors.insertRedisStream({
-        type: "uncaughtException",
-        ...details,
-      });
-    }
-  });
-}
+// function uncaughtPatcher() {
+//   process.on("uncaughtException", (error) => {
+//     const details = extractErrorDetails(error);
+//     if (watchers?.errors) {
+//       watchers?.errors.insertRedisStream({
+//         type: "uncaughtException",
+//         ...details,
+//       });
+//     }
+//   });
+// }
 
 /**
  * Monkey patch for unhandled rejections to record errors
  */
-function unhandledRejectionPatcher() {
-  process.on("unhandledRejection", (reason) => {
-    const details = extractErrorDetails(reason);
-    if (watchers?.errors) {
-      watchers?.errors.insertRedisStream({
-        type: "unhandledRejection",
-        ...details,
-      });
-    }
-  });
-}
+// function unhandledRejectionPatcher() {
+//   process.on("unhandledRejection", (reason) => {
+//     const details = extractErrorDetails(reason);
+//     if (watchers?.errors) {
+//       watchers?.errors.insertRedisStream({
+//         type: "unhandledRejection",
+//         ...details,
+//       });
+//     }
+//   });
+// }
 
 if (process.env.NODE_OBSERVATORY_ERRORS) {
   // Check if exceptions have already been patched

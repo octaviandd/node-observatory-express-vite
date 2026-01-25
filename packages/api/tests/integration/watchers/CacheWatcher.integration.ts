@@ -13,16 +13,17 @@
  */
 
 import type { RedisClientType } from 'redis';
-import Database from '../../../src/core/database-sql';
-import CacheWatcher from '../../../src/core/watchers/CacheWatcher';
+import Database from '../../../src/core/databases/sql/Base';
+import GenericWatcher from '../../../src/core/watchers/GenericWatcher';
 import { getRedisClient, getMySQLConnection, resetAll } from '../test-utils';
 import type { Connection } from 'mysql2/promise';
+import { WATCHER_CONFIGS } from '../../../src/core/watcherConfig';
 
 describe('CacheWatcher Integration', () => {
   let redisClient: RedisClientType;
   let mysqlConnection: Connection;
   let database: Database;
-  let watcher: CacheWatcher;
+  let watcher: GenericWatcher;
 
   const createMockRequest = (
     query: Record<string, string> = {},
@@ -74,7 +75,7 @@ describe('CacheWatcher Integration', () => {
 
   beforeEach(async () => {
     await resetAll();
-    watcher = new CacheWatcher(redisClient as any, database);
+    watcher = new GenericWatcher(redisClient as any, database, WATCHER_CONFIGS.cache);
   });
 
   afterEach(() => {

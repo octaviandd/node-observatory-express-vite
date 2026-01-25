@@ -18,16 +18,17 @@
  */
 
 import type { RedisClientType } from 'redis';
-import Database from '../../../src/core/database-sql';
-import ViewsWatcher from '../../../src/core/watchers/ViewsWatcher';
+import Database from '../../../src/core/databases/sql/Base';
+import GenericWatcher from '../../../src/core/watchers/GenericWatcher';
 import { getRedisClient, getMySQLConnection, resetAll } from '../test-utils';
 import type { Connection } from 'mysql2/promise';
+import { WATCHER_CONFIGS } from '../../../src/core/watcherConfig';
 
 describe('ViewsWatcher Integration', () => {
   let redisClient: RedisClientType;
   let mysqlConnection: Connection;
   let database: Database;
-  let watcher: ViewsWatcher;
+  let watcher: GenericWatcher;
 
   const createMockRequest = (
     query: Record<string, string> = {},
@@ -92,7 +93,7 @@ describe('ViewsWatcher Integration', () => {
 
   beforeEach(async () => {
     await resetAll();
-    watcher = new ViewsWatcher(redisClient as any, database);
+    watcher = new GenericWatcher(redisClient as any, database, WATCHER_CONFIGS.view);
   });
 
   afterEach(() => {

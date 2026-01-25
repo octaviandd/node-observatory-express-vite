@@ -17,16 +17,17 @@
  */
 
 import type { RedisClientType } from 'redis';
-import Database from '../../../src/core/database-sql';
-import ScheduleWatcher from '../../../src/core/watchers/ScheduleWatcher';
+import Database from '../../../src/core/databases/sql/Base';
+import GenericWatcher from '../../../src/core/watchers/GenericWatcher';
 import { getRedisClient, getMySQLConnection, resetAll } from '../test-utils';
 import type { Connection } from 'mysql2/promise';
+import { WATCHER_CONFIGS } from '../../../src/core/watcherConfig';
 
 describe('ScheduleWatcher Integration', () => {
   let redisClient: RedisClientType;
   let mysqlConnection: Connection;
   let database: Database;
-  let watcher: ScheduleWatcher;
+  let watcher: GenericWatcher;
 
   const createMockRequest = (
     query: Record<string, string> = {},
@@ -89,7 +90,7 @@ describe('ScheduleWatcher Integration', () => {
 
   beforeEach(async () => {
     await resetAll();
-    watcher = new ScheduleWatcher(redisClient as any, database);
+    watcher = new GenericWatcher(redisClient as any, database, WATCHER_CONFIGS.schedule);
   });
 
   afterEach(() => {

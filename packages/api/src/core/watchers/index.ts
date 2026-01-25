@@ -1,12 +1,1 @@
-export { default as LogWatcher } from "./LogWatcher.js";
-export { default as MailWatcher } from "./MailWatcher.js";
-export { default as JobWatcher } from "./JobWatcher.js";
-export { default as ScheduleWatcher } from "./ScheduleWatcher.js";
-export { default as CacheWatcher } from "./CacheWatcher.js";
-export { default as NotificationWatcher } from "./NotificationWatcher.js";
-export { default as RequestWatcher } from "./RequestWatcher.js";
-export { default as HTTPClientWatcher } from "./HTTPClientWatcher.js";
-export { default as QueryWatcher } from "./QueryWatcher.js";
-export { default as ExceptionWatcher } from "./ExceptionWatcher.js";
-export { default as ViewWatcher } from "./ViewsWatcher.js";
-export { default as ModelWatcher } from "./ModelWatcher.js";
+export { default as GenericWatcher } from "./GenericWatcher.js";

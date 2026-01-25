@@ -5,39 +5,36 @@ import path from "path";
 import type { RedisClientType } from "redis";
 import type { Connection } from "mysql2";
 import type { Connection as PromiseConnection } from "mysql2/promise";
-
 import { resolvePackagePath } from "./helpers/helpers.js";
-import Database from "./database-sql.js";
-import { setupMigrations } from "./migrations/index.js";
+import Database from "./databases/sql/Base.js";
+import { setupMigrations } from "./databases/migrations/index.js";
 import apiRoutes from "./routes/routes.js";
 import { BaseWatcher } from "./watchers/BaseWatcher.js";
-import {
-  LogWatcher, MailWatcher, JobWatcher, ScheduleWatcher, CacheWatcher,
-  NotificationWatcher, RequestWatcher, HTTPClientWatcher, QueryWatcher,
-  ExceptionWatcher, ViewWatcher, ModelWatcher,
-} from "./watchers/index.js";
+import { GenericWatcher } from "./watchers/index.js";
+import { WATCHER_CONFIGS } from "./watcherConfig.js";
 
 export const patchedGlobal = global as typeof globalThis & { [key: symbol]: boolean | undefined };
 export const watchers: Record<string, BaseWatcher> = {};
 
-const WATCHER_CONFIG = {
-  requests: RequestWatcher,
-  errors: ExceptionWatcher,
-  http: HTTPClientWatcher,
-  jobs: JobWatcher,
-  logging: LogWatcher,
-  scheduler: ScheduleWatcher,
-  mailer: MailWatcher,
-  cache: CacheWatcher,
-  notifications: NotificationWatcher,
-  query: QueryWatcher,
-  view: ViewWatcher,
-  model: ModelWatcher,
+const WATCHER_ROUTE_MAP = {
+  requests: 'request',
+  errors: 'exception',
+  http: 'http',
+  jobs: 'job',
+  logging: 'log',
+  scheduler: 'schedule',
+  mailer: 'mail',
+  cache: 'cache',
+  notifications: 'notification',
+  query: 'query',
+  view: 'view',
+  model: 'model',
 } as const;
 
 function initializeWatchers(redis: RedisClientType, db: Database) {
-  for (const [key, WatcherClass] of Object.entries(WATCHER_CONFIG)) {
-    watchers[key] = new WatcherClass(redis, db);
+  for (const [routeKey, configKey] of Object.entries(WATCHER_ROUTE_MAP)) {
+    const config = WATCHER_CONFIGS[configKey as keyof typeof WATCHER_CONFIGS];
+    watchers[routeKey] = new GenericWatcher(redis, db, config);
   }
 }
 
@@ -72,7 +69,10 @@ export async function createObserver(
   redisClient: RedisClientType,
 ): Promise<void> {
   // Ensure promise-based connection
-  const promiseConnection = ('promise' in connection ? connection : (connection as any).promise()) as PromiseConnection;
+  const promiseConnection: PromiseConnection = 
+    'promise' in connection && typeof connection.promise === 'function'
+      ? connection.promise()
+      : (connection as PromiseConnection);
   
   await setupMigrations(driver, promiseConnection);
   initializeWatchers(redisClient, new Database(promiseConnection));
@@ -99,6 +99,6 @@ export async function createObserver(
         details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
       },
     }));
-
+  
   console.log('Observatory setup complete');
 }

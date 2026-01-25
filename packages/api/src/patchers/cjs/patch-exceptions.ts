@@ -34,7 +34,11 @@ function logExceptionEntry(content: ExceptionLogEntry) {
   if (watchers?.errors) {
     watchers.errors.insertRedisStream({
       ...content,
-      created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
+      created_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
+      metadata: {
+        ...content.metadata,
+        package: 'node'
+      }
     });
   }
 }
