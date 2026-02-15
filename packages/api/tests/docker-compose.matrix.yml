@@ -1,0 +1,62 @@
+version: '3.8'
+
+# Extends the base test compose with a Node.js container for matrix testing.
+# Usage: docker-compose -f tests/docker-compose.test.yml -f tests/docker-compose.matrix.yml up -d
+
+services:
+  mysql-test:
+    image: mysql:8.0
+    container_name: observatory-mysql-matrix
+    environment:
+      MYSQL_ROOT_PASSWORD: test_password
+      MYSQL_DATABASE: observatory_test
+      MYSQL_USER: test_user
+      MYSQL_PASSWORD: test_password
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ptest_password"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    command: --default-authentication-plugin=mysql_native_password
+
+  redis-test:
+    image: redis:7-alpine
+    container_name: observatory-redis-matrix
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  matrix-runner:
+    build:
+      context: ../../../
+      dockerfile: packages/api/tests/matrix/Dockerfile
+    container_name: observatory-matrix-runner
+    depends_on:
+      mysql-test:
+        condition: service_healthy
+      redis-test:
+        condition: service_healthy
+    environment:
+      OBSERVATORY_REDIS_URL: redis://redis-test:6379
+      MYSQL_HOST: mysql-test
+      MYSQL_PORT: "3306"
+      MYSQL_USER: test_user
+      MYSQL_PASSWORD: test_password
+      MYSQL_DATABASE: observatory_test
+      HTTP_TARGET: https://httpbin.org/get
+    volumes:
+      - ../../../packages/api:/app/packages/api
+      - matrix-node-modules:/app/node_modules
+    working_dir: /app
+    # Keep the container running so run-matrix.sh can exec into it
+    command: ["tail", "-f", "/dev/null"]
+
+volumes:
+  matrix-node-modules:

@@ -25,6 +25,7 @@ import {
 } from "../test-utils";
 import type { Connection } from "mysql2/promise";
 import { WATCHER_CONFIGS } from "../../../src/core/watcherConfig";
+import { addEdgeCaseTests } from "../edge-cases/edgeCaseSuite";
 
 describe("NotificationWatcher Integration", () => {
   let redisClient: RedisClientType;
@@ -411,4 +412,18 @@ describe("NotificationWatcher Integration", () => {
       expect(streamLen).toBeGreaterThan(0);
     });
   });
+
+  // ----- Edge-case suite -----
+  addEdgeCaseTests(
+    {
+      watcherType: "notification",
+      entryType: "notification",
+      packageName: "ably",
+      graphMetrics: ["completed", "failed"],
+      createEntry: (uuid: string) =>
+        createNotificationEntry(uuid, { channel: "test-channel", event: "message" }),
+    },
+    () => watcher,
+    () => database,
+  );
 });

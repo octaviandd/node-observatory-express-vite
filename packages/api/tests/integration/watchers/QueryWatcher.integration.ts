@@ -23,6 +23,7 @@ import {
 } from "../test-utils";
 import type { Connection } from "mysql2/promise";
 import { WATCHER_CONFIGS } from "../../../src/core/watcherConfig";
+import { addEdgeCaseTests } from "../edge-cases/edgeCaseSuite";
 
 describe("QueryWatcher Integration Tests", () => {
   let redisClient: RedisClientType;
@@ -30,16 +31,16 @@ describe("QueryWatcher Integration Tests", () => {
   let database: Database;
   let watcher: GenericWatcher<"query">;
 
-  const createMockRequest = <T extends "true" | "false">(
-    query: { table: T; [key: string]: string },
+  const createMockRequest = (
+    query: Record<string, string> = {},
     params: Record<string, string> = {},
-  ): ObservatoryBoardRequest & { query: { table: T } } =>
+  ): ObservatoryBoardRequest =>
     ({
       query,
       params,
       body: {},
       requestData: {},
-    }) as ObservatoryBoardRequest & { query: { table: T } };
+    }) as unknown as ObservatoryBoardRequest;
 
   /**
    * Creates a query entry matching the BaseLogEntry format
@@ -124,7 +125,7 @@ describe("QueryWatcher Integration Tests", () => {
       file?: string;
       line?: string;
     } = {},
-  ): RedisEntry => ({
+  ): WatcherEntry => ({
     uuid,
     type: "query",
     content: {
@@ -344,13 +345,13 @@ describe("QueryWatcher Integration Tests", () => {
 
   describe("Database Package Handling", () => {
     it("should handle different database packages", async () => {
-      const packages: Array<QueryContent["package"]> = [
+      const packages = [
         "mysql2",
         "pg",
         "sequelize",
         "knex",
         "prisma",
-      ];
+      ] as const;
 
       await database.insert(
         packages.map((pkg, i) =>
@@ -374,7 +375,7 @@ describe("QueryWatcher Integration Tests", () => {
 
       // Verify all packages are present
       const returnedPackages = result.body.results.map(
-        (r: QueryInstanceResponse) => r.content.package,
+        (r: QueryInstanceResponse) => r.content.metadata.package,
       );
       packages.forEach((pkg) => {
         expect(returnedPackages).toContain(pkg);
@@ -656,4 +657,18 @@ describe("QueryWatcher Integration Tests", () => {
       expect(streamLen).toBeGreaterThan(0);
     });
   });
+
+  // ----- Edge-case suite -----
+  addEdgeCaseTests(
+    {
+      watcherType: "query",
+      entryType: "query",
+      packageName: "mysql2",
+      graphMetrics: ["completed", "failed"],
+      createEntry: (uuid: string) =>
+        createQueryEntry(uuid, { sql: `SELECT * FROM test_${uuid}` }),
+    },
+    () => watcher,
+    () => database,
+  );
 });

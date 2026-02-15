@@ -34,6 +34,7 @@ import {
 } from "../test-utils";
 import type { Connection } from "mysql2/promise";
 import { WATCHER_CONFIGS } from "../../../src/core/watcherConfig";
+import { addEdgeCaseTests } from "../edge-cases/edgeCaseSuite";
 
 describe("MailWatcher Integration", () => {
   let redisClient: RedisClientType;
@@ -435,4 +436,18 @@ describe("MailWatcher Integration", () => {
       expect(streamLen).toBeGreaterThan(0);
     });
   });
+
+  // ----- Edge-case suite -----
+  addEdgeCaseTests(
+    {
+      watcherType: "mail",
+      entryType: "mail",
+      packageName: "postmark",
+      graphMetrics: ["completed", "failed"],
+      createEntry: (uuid: string) =>
+        createMailEntry(uuid, { to: ["test@example.com"], from: "noreply@app.com", subject: "Test" }),
+    },
+    () => watcher,
+    () => database,
+  );
 });

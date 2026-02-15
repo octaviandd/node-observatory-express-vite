@@ -19,6 +19,7 @@ import GenericWatcher from "../../../src/core/watchers/GenericWatcher";
 import { getRedisClient, getMySQLConnection, resetAll } from "../test-utils";
 import type { Connection } from "mysql2/promise";
 import { WATCHER_CONFIGS } from "../../../src/core/watcherConfig";
+import { addEdgeCaseTests } from "../edge-cases/edgeCaseSuite";
 
 describe("LogWatcher Integration", () => {
   let redisClient: RedisClientType;
@@ -324,4 +325,18 @@ describe("LogWatcher Integration", () => {
       expect(streamLen).toBe(5);
     });
   });
+
+  // ----- Edge-case suite -----
+  addEdgeCaseTests(
+    {
+      watcherType: "log",
+      entryType: "log",
+      packageName: "winston",
+      graphMetrics: ["info", "warn", "error", "log", "debug", "trace", "fatal"],
+      createEntry: (uuid: string) =>
+        createLogEntry(uuid, { message: `Log message ${uuid}` }),
+    },
+    () => watcher,
+    () => database,
+  );
 });

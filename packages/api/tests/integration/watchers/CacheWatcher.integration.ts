@@ -25,6 +25,7 @@ import {
 } from "../test-utils";
 import type { Connection } from "mysql2/promise";
 import { WATCHER_CONFIGS } from "../../../src/core/watcherConfig";
+import { addEdgeCaseTests } from "../edge-cases/edgeCaseSuite";
 
 describe("CacheWatcher Integration", () => {
   let redisClient: RedisClientType;
@@ -298,4 +299,18 @@ describe("CacheWatcher Integration", () => {
       expect(streamLen).toBeGreaterThan(0);
     });
   });
+
+  // ----- Edge-case suite -----
+  addEdgeCaseTests(
+    {
+      watcherType: "cache",
+      entryType: "cache",
+      packageName: "redis",
+      graphMetrics: ["hits", "writes", "misses"],
+      createEntry: (uuid: string) =>
+        createCacheEntry(uuid, { key: `test-key-${uuid}` }),
+    },
+    () => watcher,
+    () => database,
+  );
 });

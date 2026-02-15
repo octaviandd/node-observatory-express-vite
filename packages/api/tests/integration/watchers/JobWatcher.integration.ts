@@ -25,6 +25,7 @@ import {
 } from "../test-utils";
 import type { Connection } from "mysql2/promise";
 import { WATCHER_CONFIGS } from "../../../src/core/watcherConfig";
+import { addEdgeCaseTests } from "../edge-cases/edgeCaseSuite";
 
 describe("JobWatcher Integration", () => {
   let redisClient: RedisClientType;
@@ -380,4 +381,18 @@ describe("JobWatcher Integration", () => {
       expect(streamLen).toBeGreaterThan(0);
     });
   });
+
+  // ----- Edge-case suite -----
+  addEdgeCaseTests(
+    {
+      watcherType: "job",
+      entryType: "job",
+      packageName: "bull",
+      graphMetrics: ["completed", "released", "failed"],
+      createEntry: (uuid: string) =>
+        createJobEntry(uuid, { jobId: `job-${uuid}`, attemptsMade: 1 }),
+    },
+    () => watcher,
+    () => database,
+  );
 });

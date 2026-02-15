@@ -34,6 +34,7 @@ import {
 } from "../test-utils";
 import type { Connection } from "mysql2/promise";
 import { WATCHER_CONFIGS } from "../../../src/core/watcherConfig";
+import { addEdgeCaseTests } from "../edge-cases/edgeCaseSuite";
 
 describe("HTTPClientWatcher Integration", () => {
   let redisClient: RedisClientType;
@@ -399,4 +400,18 @@ describe("HTTPClientWatcher Integration", () => {
       expect(streamLen).toBeGreaterThan(0);
     });
   });
+
+  // ----- Edge-case suite -----
+  addEdgeCaseTests(
+    {
+      watcherType: "http",
+      entryType: "http",
+      packageName: "axios",
+      graphMetrics: ["count_200", "count_400", "count_500"],
+      createEntry: (uuid: string) =>
+        createHTTPClientEntry(uuid, { origin: "https://api.example.com", pathname: "/test", statusCode: 200 }),
+    },
+    () => watcher,
+    () => database,
+  );
 });

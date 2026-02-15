@@ -9,7 +9,10 @@
     "dev": "node --trace-warnings --trace-uncaught -r ts-node/esm index.ts",
     "start": "node dist/index.js",
     "clean": "rm -rf node_modules package-lock.json",
-    "dev-all": "nodemon --watch ../../api/dist --watch ../../express/dist --watch ../../ui/dist -e js,json --exec 'node -r ts-node/register index.ts'"
+    "dev-all": "nodemon --watch ../../api/dist --watch ../../express/dist --watch ../../ui/dist -e js,json --exec 'node -r ts-node/register index.ts'",
+    "stress": "node -r ts-node/register stress.ts",
+    "stress:heavy": "node -r ts-node/register stress.ts --count 200 --parallel 10",
+    "stress:extreme": "node -r ts-node/register stress.ts --count 500 --parallel 20"
   },
   "author": "octavian david",
   "license": "ISC",

@@ -31,6 +31,7 @@ import {
 } from "../test-utils";
 import type { Connection } from "mysql2/promise";
 import { WATCHER_CONFIGS } from "../../../src/core/watcherConfig";
+import { addEdgeCaseTests } from "../edge-cases/edgeCaseSuite";
 
 describe("ExceptionWatcher Integration", () => {
   let redisClient: RedisClientType;
@@ -361,4 +362,18 @@ describe("ExceptionWatcher Integration", () => {
       expect(streamLen).toBeGreaterThan(0);
     });
   });
+
+  // ----- Edge-case suite -----
+  addEdgeCaseTests(
+    {
+      watcherType: "exception",
+      entryType: "exception",
+      packageName: "node",
+      graphMetrics: ["unhandledRejection", "uncaughtException"],
+      createEntry: (uuid: string) =>
+        createExceptionEntry(uuid, { type: "uncaughtException", message: `Error ${uuid}` }),
+    },
+    () => watcher,
+    () => database,
+  );
 });

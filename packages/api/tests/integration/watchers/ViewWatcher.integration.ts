@@ -30,6 +30,7 @@ import {
 } from "../test-utils";
 import type { Connection } from "mysql2/promise";
 import { WATCHER_CONFIGS } from "../../../src/core/watcherConfig";
+import { addEdgeCaseTests } from "../edge-cases/edgeCaseSuite";
 
 describe("ViewsWatcher Integration", () => {
   let redisClient: RedisClientType;
@@ -333,4 +334,18 @@ describe("ViewsWatcher Integration", () => {
       expect(streamLen).toBeGreaterThan(0);
     });
   });
+
+  // ----- Edge-case suite -----
+  addEdgeCaseTests(
+    {
+      watcherType: "view",
+      entryType: "view",
+      packageName: "ejs",
+      graphMetrics: ["completed", "failed"],
+      createEntry: (uuid: string) =>
+        createViewEntry(uuid, { view: "views/home.ejs", size: 2048 }),
+    },
+    () => watcher,
+    () => database,
+  );
 });

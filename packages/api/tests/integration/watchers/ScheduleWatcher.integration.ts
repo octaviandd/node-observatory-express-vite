@@ -29,6 +29,7 @@ import {
 } from "../test-utils";
 import type { Connection } from "mysql2/promise";
 import { WATCHER_CONFIGS } from "../../../src/core/watcherConfig";
+import { addEdgeCaseTests } from "../edge-cases/edgeCaseSuite";
 
 describe("ScheduleWatcher Integration", () => {
   let redisClient: RedisClientType;
@@ -333,4 +334,18 @@ describe("ScheduleWatcher Integration", () => {
       expect(streamLen).toBeGreaterThan(0);
     });
   });
+
+  // ----- Edge-case suite -----
+  addEdgeCaseTests(
+    {
+      watcherType: "schedule",
+      entryType: "schedule",
+      packageName: "node-cron",
+      graphMetrics: ["completed", "failed"],
+      createEntry: (uuid: string) =>
+        createScheduleEntry(uuid, { scheduleId: `sched-${uuid}`, cronExpression: "0 0 * * *" }),
+    },
+    () => watcher,
+    () => database,
+  );
 });

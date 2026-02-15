@@ -29,6 +29,7 @@ import {
 } from "../test-utils";
 import type { Connection } from "mysql2/promise";
 import { WATCHER_CONFIGS } from "../../../src/core/watcherConfig";
+import { addEdgeCaseTests } from "../edge-cases/edgeCaseSuite";
 
 describe("ModelWatcher Integration", () => {
   let redisClient: RedisClientType;
@@ -432,4 +433,18 @@ describe("ModelWatcher Integration", () => {
       expect(streamLen).toBeGreaterThan(0);
     });
   });
+
+  // ----- Edge-case suite -----
+  addEdgeCaseTests(
+    {
+      watcherType: "model",
+      entryType: "model",
+      packageName: "sequelize",
+      graphMetrics: ["completed", "failed"],
+      createEntry: (uuid: string) =>
+        createModelEntry(uuid, { modelName: "User", method: "findAll" }),
+    },
+    () => watcher,
+    () => database,
+  );
 });

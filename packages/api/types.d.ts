@@ -46,7 +46,7 @@ interface WatcherEntry {
   job_id?: string;
   schedule_id?: string;
   type: string;
-  content: string;
+  content: string | Record<string, any>;
   created_at: string | Date;
 }
 
