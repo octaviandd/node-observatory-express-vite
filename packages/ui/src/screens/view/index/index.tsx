@@ -10,12 +10,13 @@ import { Badge } from "@/components/ui/badge";
 import ViewsIndexTable from "../table/index";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
 import { DurationGraph } from "@/components/ui/graphs/duration-graph";
-import { useGraph } from "@/hooks/useGraph";
+import { StoreContext } from "@/store";
+import { useContext } from "react";
+import { useViews } from "@/hooks/useApiTyped";
 
 export default function ViewsIndex() {
-  const { data, currentDate, period } = useGraph({
-    type: "views",
-  });
+  const { state } = useContext(StoreContext);
+  const { data } = useViews.useGraph();
 
   return (
     <div className="flex flex-col gap-6">
@@ -54,8 +55,6 @@ export default function ViewsIndex() {
                   { dataKey: "completed", stackId: "a", fill: "#f1f5f9" },
                   { dataKey: "failed", stackId: "b", fill: "#ef4444" },
                 ]}
-                period={period}
-                currentDate={currentDate}
               />
             </div>
           </CardContent>
@@ -86,11 +85,7 @@ export default function ViewsIndex() {
           </CardHeader>
           <CardContent>
             <div className="h-auto">
-              <DurationGraph
-                data={data.durationFormattedData}
-                period={period}
-                currentDate={currentDate}
-              />
+              <DurationGraph data={data.durationFormattedData} />
             </div>
           </CardContent>
         </Card>

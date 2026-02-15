@@ -2,13 +2,15 @@
 
 import MailsIndexTable from "../table";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
-import { useGraph } from "@/hooks/useGraph";
 import {
   IndexPageLayout,
   StatsCard,
   DurationCard,
   StatsGrid,
 } from "@/components/ui/index-page";
+import { useMails } from "@/hooks/useApiTyped";
+import { StoreContext } from "@/store";
+import { useContext } from "react";
 
 const MAIL_BAR_DATA = [
   { dataKey: "completed", stackId: "a", fill: "#f1f5f9" },
@@ -16,11 +18,10 @@ const MAIL_BAR_DATA = [
 ];
 
 export default function MailsIndex() {
-  const { data, currentDate, period } = useGraph({
-    type: "mails",
-  });
+  const { state } = useContext(StoreContext);
+  const { data } = useMails.useGraph();
 
-  return (
+    return(
     <IndexPageLayout>
       {data && (
         <StatsGrid columns={2}>
@@ -35,8 +36,6 @@ export default function MailsIndex() {
               <CountGraph
                 data={data.countFormattedData}
                 barData={MAIL_BAR_DATA}
-                period={period}
-                currentDate={currentDate}
               />
             }
           />
@@ -46,8 +45,8 @@ export default function MailsIndex() {
             average={data.average}
             p95={data.p95}
             durationFormattedData={data.durationFormattedData}
-            period={period}
-            currentDate={currentDate}
+            period={state.period}
+            currentDate={""}
           />
         </StatsGrid>
       )}

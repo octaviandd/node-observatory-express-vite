@@ -2,12 +2,14 @@
 
 import LogsIndexTable from "../table";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
-import { useGraph } from "@/hooks/useGraph";
 import {
   IndexPageLayout,
   StatsCard,
   StatsGrid,
 } from "@/components/ui/index-page";
+import { useLogs } from "@/hooks/useApiTyped";
+import { StoreContext } from "@/store";
+import { useContext } from "react";
 
 const LOG_LEVELS = [
   { dataKey: "info", variant: "secondary", fill: "#F3F7FA" },
@@ -20,9 +22,8 @@ const LOG_LEVELS = [
 ] as const;
 
 export default function LogsIndex() {
-  const { data, currentDate, period } = useGraph({
-    type: "logs",
-  });
+  const { state } = useContext(StoreContext);
+  const { data } = useLogs.useGraph();
 
   return (
     <IndexPageLayout>
@@ -48,8 +49,6 @@ export default function LogsIndex() {
                   stackId: level.dataKey,
                   fill: level.fill,
                 }))}
-                period={period}
-                currentDate={currentDate}
               />
             }
           />

@@ -30,9 +30,31 @@ export interface ExpressRequestLogEntry {
   error?: { message: string; name: string; stack?: string };
 }
 
+export interface ExpressViewLogEntry {
+  status: "completed" | "failed";
+  duration: number;
+  metadata: { package: string, method: "render" },
+  data: {
+    view: string,
+    options: Record<string, any>,
+    size: number
+    cacheInfo: {
+      cacheEnabled: boolean
+    },
+  }
+  location?: { file: string; line: string };
+  error?: { message: string; name: string; stack?: string };
+}
+
 const timestamp = () => new Date().toISOString().replace("T", " ").substring(0, 19);
 
 function log(entry: ExpressRequestLogEntry) {
+  if (watchers?.requests) {
+    watchers.requests.insertRedisStream({ ...entry, created_at: timestamp() })
+  }
+}
+
+function logView(entry: ExpressRequestLogEntry) {
   if (watchers?.requests) {
     watchers.requests.insertRedisStream({ ...entry, created_at: timestamp() })
   }

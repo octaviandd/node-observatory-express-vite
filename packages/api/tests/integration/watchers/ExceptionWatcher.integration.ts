@@ -121,7 +121,7 @@ describe("ExceptionWatcher Integration", () => {
         index: "group",
         period: "24h",
       });
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body.results).toEqual([]);
@@ -149,7 +149,7 @@ describe("ExceptionWatcher Integration", () => {
         index: "instance",
         period: "24h",
       });
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body.results).toHaveLength(2);
@@ -172,7 +172,7 @@ describe("ExceptionWatcher Integration", () => {
         index: "group",
         period: "24h",
       });
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body.results).toHaveLength(1);
@@ -196,14 +196,14 @@ describe("ExceptionWatcher Integration", () => {
         period: "24h",
         status: "uncaughtException",
       });
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
 
       expect(result.statusCode).toBe(200);
     });
 
     it("should return graph data when isTable is false", async () => {
       const req = createMockRequest({ table: "false", period: "24h" });
-      const result = await watcher.index(req);
+      const result = await watcher.indexGraph(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body).toHaveProperty("countFormattedData");

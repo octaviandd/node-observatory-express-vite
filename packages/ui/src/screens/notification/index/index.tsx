@@ -2,13 +2,15 @@
 
 import NotificationsIndexTable from "../table";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
-import { useGraph } from "@/hooks/useGraph";
 import {
   IndexPageLayout,
   StatsCard,
   DurationCard,
   StatsGrid,
 } from "@/components/ui/index-page";
+import { useNotifications } from "@/hooks/useApiTyped";
+import { StoreContext } from "@/store";
+import { useContext } from "react";
 
 const NOTIFICATION_BAR_DATA = [
   { dataKey: "completed", stackId: "a", fill: "#f1f5f9" },
@@ -16,9 +18,8 @@ const NOTIFICATION_BAR_DATA = [
 ];
 
 export default function NotificationsIndex() {
-  const { data, currentDate, period } = useGraph({
-    type: "notifications",
-  });
+  const { state } = useContext(StoreContext);
+  const { data } = useNotifications.useGraph();
 
   return (
     <IndexPageLayout>
@@ -34,9 +35,7 @@ export default function NotificationsIndex() {
             graph={
                 <CountGraph
                   data={data.countFormattedData}
-                barData={NOTIFICATION_BAR_DATA}
-                  period={period}
-                  currentDate={currentDate}
+                  barData={NOTIFICATION_BAR_DATA}
                 />
             }
           />
@@ -46,9 +45,9 @@ export default function NotificationsIndex() {
             average={data.average}
             p95={data.p95}
             durationFormattedData={data.durationFormattedData}
-                  period={period}
-                  currentDate={currentDate}
-                />
+            period={state.period}
+            currentDate={""}
+           />
         </StatsGrid>
       )}
       <NotificationsIndexTable />

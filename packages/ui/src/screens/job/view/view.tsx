@@ -10,18 +10,7 @@ import {
   useViewData,
   Source,
 } from "@/components/ui/view-page";
-import {
-  JobInstanceResponse,
-  HttpClientInstanceResponse,
-  ModelInstanceResponse,
-  NotificationInstanceResponse,
-  MailInstanceResponse,
-  LogInstanceResponse,
-  ExceptionInstanceResponse,
-  CacheInstanceResponse,
-  RequestInstanceResponse,
-  QueryInstanceResponse,
-} from "../../../../types";
+import { CacheInstanceResponse, ExceptionInstanceResponse, HttpClientInstanceResponse, JobInstanceResponse, LogInstanceResponse, MailInstanceResponse, ModelInstanceResponse, NotificationInstanceResponse, QueryInstanceResponse, RequestInstanceResponse } from "@/hooks/useApiTyped";
 
 export default function JobPreview() {
   const [activeTab, setActiveTab] = useState("raw");

@@ -1,6 +1,6 @@
 /** @format */
 
-import { JobInstanceResponse } from "../../../../types";
+import { JobInstanceResponse } from "@/hooks/useApiTyped";
 import { BaseCard } from "./base-card";
 
 export default function JobCard({ item }: { item: JobInstanceResponse }) {

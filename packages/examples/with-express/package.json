@@ -8,7 +8,8 @@
     "build:deps": "cd ../../api && npm run build && cd ../express  npm run build && ../ui npm run build",
     "dev": "node --trace-warnings --trace-uncaught -r ts-node/esm index.ts",
     "start": "node dist/index.js",
-    "clean": "rm -rf node_modules package-lock.json"
+    "clean": "rm -rf node_modules package-lock.json",
+    "dev-all": "nodemon --watch ../../api/dist --watch ../../express/dist --watch ../../ui/dist -e js,json --exec 'node -r ts-node/register index.ts'"
   },
   "author": "octavian david",
   "license": "ISC",

@@ -1,13 +1,11 @@
 import express, { Express, NextFunction, Request, Response, Router } from 'express';
 import { wrapAsync } from './helpers/wrapAsync';
 import fs from "node:fs"
-import swaggerUi from "swagger-ui-express";
 
 export class ExpressAdapter {
   protected readonly app: Express;
   protected basePath = '';
   protected requestData = [];
-  private swaggerSpec?: any;
   protected errorHandler: ((error: Error & { statusCode: HTTPStatus }) => ControllerHandlerReturnType) | undefined;
 
   constructor() {
@@ -16,26 +14,6 @@ export class ExpressAdapter {
 
   public setBasePath(path: string): ExpressAdapter {
     this.basePath = path;
-    return this;
-  }
-
-  public enableOpenAPI(spec: any, options?: {
-    docsPath?: string;
-    jsonPath?: string;
-  }): ExpressAdapter {
-    const docsPath = options?.docsPath || '/api-docs';
-    const jsonPath = options?.jsonPath || '/api-docs.json';
-
-    this.swaggerSpec = spec;
-
-    this.app.get(jsonPath, (_req, res) => {
-      res.setHeader('Content-Type', 'application/json');
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.json(spec);
-    });
-
-    this.app.use(docsPath, swaggerUi.serve, swaggerUi.setup(spec));
-
     return this;
   }
 
@@ -140,12 +118,6 @@ export class ExpressAdapter {
         this.app[routeDef.method]('', viewHandler);
       }
     }
-    return this;
-  }
-
-  // do i need this?
-  public setRequestData(requestData: any): ExpressAdapter {
-    this.requestData = requestData;
     return this;
   }
 

@@ -2,12 +2,14 @@
 
 import ExceptionsIndexTable from "../table";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
-import { useGraph } from "@/hooks/useGraph";
 import {
   IndexPageLayout,
   StatsCard,
   StatsGrid,
 } from "@/components/ui/index-page";
+import { useExceptions } from "@/hooks/useApiTyped";
+import { StoreContext } from "@/store";
+import { useContext } from "react";
 
 const EXCEPTION_BAR_DATA = [
   { dataKey: "unhandledRejection", stackId: "a", fill: "#f1f5f9" },
@@ -15,9 +17,8 @@ const EXCEPTION_BAR_DATA = [
 ];
 
 export default function ExceptionsIndex() {
-  const { data, currentDate, period } = useGraph({
-    type: "exceptions",
-  });
+  const { state } = useContext(StoreContext);
+  const { data } = useExceptions.useGraph({});
 
   return (
     <IndexPageLayout>
@@ -34,8 +35,6 @@ export default function ExceptionsIndex() {
               <CountGraph
                 data={data.countFormattedData}
                 barData={EXCEPTION_BAR_DATA}
-                period={period}
-                currentDate={currentDate}
               />
             }
           />

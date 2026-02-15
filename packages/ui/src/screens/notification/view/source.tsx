@@ -3,15 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLinkIcon } from "lucide-react";
 import { Link } from "react-router";
-import {
-  NotificationInstanceResponse,
-  RequestInstanceResponse,
-  JobInstanceResponse,
-  ScheduleInstanceResponse,
-  RequestContent,
-  JobContent,
-  ScheduleContent,
-} from "../../../../types";
+import { NotificationInstanceResponse, RequestInstanceResponse, JobInstanceResponse, ScheduleInstanceResponse } from "@/hooks/useApiTyped";
 
 export default function Source({
   source,
@@ -34,13 +26,7 @@ export default function Source({
             <div className="col-span-9 flex items-center gap-x-2">
               {source.uuid}
               <Link
-                to={
-                  source.type === "request"
-                    ? `/request/${source.uuid}`
-                    : source.type === "job"
-                      ? `/job/${source.uuid}`
-                      : `/schedule/${source.uuid}`
-                }
+                to={`/${source.type}/${source.uuid}`}
                 className="ml-auto"
               >
                 <Button variant="outline" size="sm">
@@ -60,10 +46,10 @@ export default function Source({
             </div>
             <div className="col-span-9">
               {source.type === "request"
-                ? (source.content as RequestContent).route
+                ? (source.content.data as any).route
                 : source.type === "job"
-                  ? (source.content as JobContent).jobId
-                  : (source.content as ScheduleContent).scheduleId}
+                  ? (source.content.data as any).jobId
+                  : (source.content.metadata as any).scheduleId}
             </div>
           </div>
 
@@ -77,7 +63,7 @@ export default function Source({
               <div className="col-span-3 text-muted-foreground">Method</div>
               <div className="col-span-9">
                 <Badge variant="outline">
-                  {(source.content as RequestContent).method.toUpperCase()}
+                  {((source.content.metadata as any)?.method ?? "").toUpperCase()}
                 </Badge>
               </div>
             </div>

@@ -11,6 +11,7 @@ import {
   StatusFilter,
   LoadMoreButton,
 } from "@/components/ui/table-page";
+import { JobInstanceResponse, JobGroupResponse } from "@/hooks/useApiTyped";
 
 const STATUS_OPTIONS = ["all", "completed", "released", "failed"];
 
@@ -23,26 +24,25 @@ export default function JobsIndexTable() {
     index,
     instanceStatusType,
     inputValue,
-    sidePanelData,
+    drawer,
     message,
-    setSidePanelData,
+    setDrawer,
     setInstanceStatusType,
     setInputValue,
-    loadData,
+    loadMore,
   } = useIndexTableData({
     key: "jobs",
     defaultInstanceStatusType: "all",
   });
 
-  const Table = index === "instance" ? InstanceTable : GroupTable;
   const count = index === "instance" ? instanceDataCount : groupDataCount;
   const label = index === "group" ? "Queue" : "ATTEMPT";
 
   return (
     <TablePageLayout
-      sidePanelData={sidePanelData}
-          setSidePanelData={setSidePanelData}
-          type="jobs"
+      drawer={drawer}
+      setDrawer={setDrawer}
+      type="jobs"
     >
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
@@ -69,13 +69,15 @@ export default function JobsIndexTable() {
           )}
         </div>
       </div>
-      {/* @ts-expect-error dumb ts*/}
-      <Table
-        data={index === "instance" ? instanceData : groupData}
-        setSidePanelData={setSidePanelData}
-      >
-        <LoadMoreButton message={message} onLoadMore={loadData} />
-      </Table>
+      {index === "instance" ? (
+        <InstanceTable data={instanceData as JobInstanceResponse[]} drawer={setDrawer}>
+          <LoadMoreButton message={message} onLoadMore={loadMore} />
+        </InstanceTable>
+      ) : (
+        <GroupTable data={groupData as JobGroupResponse[]}>
+          <LoadMoreButton message={message} onLoadMore={loadMore} />
+        </GroupTable>
+      )}
     </TablePageLayout>
   );
 }

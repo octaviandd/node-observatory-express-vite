@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { LogCrumbs } from "./crumbs";
-import { LogInstanceResponse } from "../../../../types";
 import ContentTabs from "./tabs";
 import Details from "./details";
 import {
@@ -10,6 +9,7 @@ import {
   useViewData,
   Source,
 } from "@/components/ui/view-page";
+import { LogInstanceResponse } from "@/hooks/useApiTyped";
 
 export default function LogView() {
   const [activeTab, setActiveTab] = useState("raw");

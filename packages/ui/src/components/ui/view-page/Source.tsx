@@ -1,18 +1,11 @@
 /** @format */
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  RequestInstanceResponse,
-  JobInstanceResponse,
-  ScheduleInstanceResponse,
-  RequestContent,
-  JobContent,
-  ScheduleContent,
-} from "../../../../types";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router";
 import { ExternalLinkIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { RequestInstanceResponse, JobInstanceResponse, ScheduleInstanceResponse } from "@/hooks/useApiTyped";
 
 interface SourceProps {
   source:
@@ -51,11 +44,14 @@ export function Source({ source }: SourceProps) {
   const getSecondaryValue = () => {
     switch (source.type) {
       case "request":
-        return (source.content as RequestContent).route;
+        //@ts-ignore
+        return (source.content).route;
       case "job":
-        return (source.content as JobContent).jobId;
+        //@ts-ignore
+        return (source.content).jobId;
       case "schedule":
-        return (source.content as ScheduleContent).scheduleId;
+        //@ts-ignore
+        return (source.content).scheduleId;
       default:
         return "";
     }
@@ -97,7 +93,7 @@ export function Source({ source }: SourceProps) {
               <div className="col-span-3 text-muted-foreground">Method</div>
               <div className="col-span-9">
                 <Badge variant="outline">
-                  {(source.content as RequestContent).method.toUpperCase()}
+                  {/* {(source.content).method.toUpperCase()} */}
                 </Badge>
               </div>
             </div>

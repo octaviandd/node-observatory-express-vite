@@ -11,12 +11,13 @@ import { Badge } from "@/components/ui/badge";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
 import SchedulesIndexTable from "../table";
 import { DurationGraph } from "@/components/ui/graphs/duration-graph";
-import { useGraph } from "@/hooks/useGraph";
+import { StoreContext } from "@/store";
+import { useContext } from "react";
+import { useSchedules } from "@/hooks/useApiTyped";
 
 export default function SchedulesIndex() {
-  const { data, currentDate, period } = useGraph({
-    type: "schedules",
-  });
+  const { state } = useContext(StoreContext);
+  const { data } = useSchedules.useGraph();
 
   return (
     <div className="flex flex-col gap-6">
@@ -55,8 +56,6 @@ export default function SchedulesIndex() {
                     { dataKey: "completed", stackId: "a", fill: "#f1f5f9" },
                     { dataKey: "failed", stackId: "c", fill: "#ef4444" },
                   ]}
-                  period={period}
-                  currentDate={currentDate}
                 />
               </div>
             </CardContent>
@@ -87,11 +86,7 @@ export default function SchedulesIndex() {
             </CardHeader>
             <CardContent>
               <div className="h-auto">
-                <DurationGraph
-                  data={data.durationFormattedData}
-                  period={period}
-                  currentDate={currentDate}
-                />
+                <DurationGraph data={data.durationFormattedData} />
               </div>
             </CardContent>
           </Card>

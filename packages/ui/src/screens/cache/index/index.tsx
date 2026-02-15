@@ -2,13 +2,15 @@
 
 import CacheIndexTable from "../table";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
-import { useGraph } from "@/hooks/useGraph";
 import {
   IndexPageLayout,
   StatsCard,
   DurationCard,
   StatsGrid,
 } from "@/components/ui/index-page";
+import { useCaches } from "@/hooks/useApiTyped";
+import { StoreContext } from "@/store";
+import { useContext } from "react";
 
 const CACHE_BAR_DATA = [
   { dataKey: "hits", stackId: "a", fill: "#f1f5f9" },
@@ -17,9 +19,10 @@ const CACHE_BAR_DATA = [
 ];
 
 export default function CacheIndex() {
-  const { data, currentDate, period } = useGraph({
-    type: "cache",
-  });
+  const { state } = useContext(StoreContext);
+  const { isLoading, data } = useCaches.useGraph({});
+
+   if (isLoading || !data) return null;
 
   return (
     <IndexPageLayout>
@@ -37,8 +40,6 @@ export default function CacheIndex() {
               <CountGraph
                 data={data.countFormattedData}
                 barData={CACHE_BAR_DATA}
-                period={period}
-                currentDate={currentDate}
               />
             }
           />
@@ -48,8 +49,8 @@ export default function CacheIndex() {
             average={data.average}
             p95={data.p95}
             durationFormattedData={data.durationFormattedData}
-            period={period}
-            currentDate={currentDate}
+            period={state.period}
+            currentDate={""}
           />
         </StatsGrid>
       )}

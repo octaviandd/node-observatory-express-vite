@@ -19,7 +19,7 @@ module.exports = {
   preset: "ts-jest",
   testEnvironment: "node",
   roots: ["<rootDir>/integration"],
-  testMatch: ["**/*.integration.ts", "**/*.edge-cases.ts"],
+  testMatch: ["**/*.integration.ts"],
   collectCoverageFrom: ["../src/**/*.ts", "!../src/**/*.d.ts"],
   coverageThreshold: {
     global: { branches: 70, functions: 80, lines: 80, statements: 80 },

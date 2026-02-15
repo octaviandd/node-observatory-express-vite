@@ -1,5 +1,5 @@
 /** @format */
-import { RequestInstanceResponse } from "../../../../types";
+import { RequestInstanceResponse } from "@/hooks/useApiTyped";
 import { BaseCard } from "./base-card";
 
 export default function RequestCard({

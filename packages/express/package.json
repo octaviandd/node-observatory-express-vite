@@ -22,7 +22,8 @@
   ],
   "scripts": {
     "build": "tsc",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "dev": "tsc --watch"
   },
   "dependencies": {
     "@node-observatory/api": "^1.3.4",

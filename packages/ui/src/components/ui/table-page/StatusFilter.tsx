@@ -3,7 +3,7 @@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface StatusFilterProps {
-  options: string[];
+  options: readonly string[];
   value: string;
   onChange: (value: string) => void;
 }

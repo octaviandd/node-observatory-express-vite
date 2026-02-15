@@ -169,7 +169,7 @@ export const testPaginationBoundaries = async (
     });
 
     try {
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
       if (testFn) testFn(result, scenario.name);
     } catch (error) {
       // Some scenarios may error - document expected behavior
@@ -200,7 +200,7 @@ export const testPeriodBoundaries = async (
       limit: 1000,
     });
 
-    const result = await watcher.index(req);
+    const result = await watcher.indexTable(req);
     if (testFn) testFn(result, period);
   }
 };
@@ -262,7 +262,7 @@ export const testInvalidFilters = async (
     });
 
     try {
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
       if (testFn) testFn(result, scenario.name);
     } catch (error) {
       console.warn(
@@ -525,7 +525,7 @@ export const testGraphDataEdgeCases = async (
     });
 
     try {
-      const result = await watcher.index(req);
+      const result = await watcher.indexGraph(req);
       if (testFn) testFn(result, scenario.name);
     } catch (error) {
       console.warn(

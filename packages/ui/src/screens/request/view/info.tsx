@@ -4,7 +4,7 @@ import React from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { timeAgo } from "@/utils.js";
-import { RequestInstanceResponse } from "../../../../types";
+import { RequestInstanceResponse } from "@/hooks/useApiTyped";
 
 export const RequestPreviewInfo = React.memo(
   ({ request }: { request: RequestInstanceResponse }) => {
@@ -57,35 +57,35 @@ export const RequestPreviewInfo = React.memo(
             <span className="text-sm text-muted-foreground uppercase">
               Status
             </span>
-            <span>{request.content.statusCode}</span>
+            <span>{request.content.data.statusCode}</span>
           </div>
           <Separator />
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground uppercase">
               Duration
             </span>
-            <span>{formatDuration(request.content.duration)}</span>
+            {/* <span>{formatDuration(request.content.duration)}</span> */}
           </div>
           <Separator />
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground uppercase">
               Request Size
             </span>
-            <span>{formatSize(request.content.requestSize)}</span>
+            <span>{formatSize(request.content.data.requestSize as number)}</span>
           </div>
           <Separator />
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground uppercase">
               Response Size
             </span>
-            <span>{formatSize(request.content.responseSize)}</span>
+            <span>{formatSize(request.content.data.responseSize as number)}</span>
           </div>
           <Separator />
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground uppercase">
               Peak Memory
             </span>
-            <span>{formatMemory(request.content.memoryUsage.rss)}</span>
+            <span>{formatMemory(request.content.data?.memoryUsage?.rss as number)}</span>
           </div>
         </CardContent>
       </Card>

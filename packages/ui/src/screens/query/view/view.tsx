@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { QueryCrumbs } from "./crumbs";
-import { QueryInstanceResponse } from "../../../../types";
 import Details from "./details";
 import ContentTabs from "./tabs";
 import {
@@ -10,6 +9,7 @@ import {
   useViewData,
   Source,
 } from "@/components/ui/view-page";
+import { QueryInstanceResponse } from "@/hooks/useApiTyped";
 
 export default function QueryPreview() {
   const [activeTab, setActiveTab] = useState("raw");
@@ -33,7 +33,7 @@ export default function QueryPreview() {
           <ContentTabs
             activeTab={activeTab}
             setActiveTab={setActiveTab}
-            data={{ query, loading: false, error: null, source }}
+            data={{ query }}
           />
         </>
       )}

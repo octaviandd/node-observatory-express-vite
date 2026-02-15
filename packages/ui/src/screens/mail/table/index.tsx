@@ -11,6 +11,7 @@ import {
   StatusFilter,
   LoadMoreButton,
 } from "@/components/ui/table-page";
+import { MailInstanceResponse, MailGroupResponse } from "@/hooks/useApiTyped";
 
 const STATUS_OPTIONS = ["all", "completed", "failed"];
 
@@ -23,27 +24,26 @@ export default function MailsIndexTable() {
     index,
     instanceStatusType,
     inputValue,
-    sidePanelData,
+    setDrawer,
     modelKey,
     message,
-    setSidePanelData,
+    drawer,
     setInstanceStatusType,
     setInputValue,
-    loadData,
-  } = useIndexTableData({
+    loadMore,
+  } = useIndexTableData<MailInstanceResponse, MailGroupResponse>({
     key: "mails",
     defaultInstanceStatusType: "all",
   });
 
-  const Table = index === "instance" ? InstanceTable : GroupTable;
   const count = index === "instance" ? instanceDataCount : groupDataCount;
   const label = index === "instance" ? "Mail" : "Receiver";
 
   return (
     <TablePageLayout
-      sidePanelData={sidePanelData}
-          setSidePanelData={setSidePanelData}
-          type="mails"
+      setDrawer={setDrawer}
+      drawer={drawer}
+      type="mails"
     >
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
@@ -68,13 +68,15 @@ export default function MailsIndexTable() {
           />
         )}
       </div>
-      {/* @ts-expect-error dumb ts*/}
-      <Table
-        data={index === "instance" ? instanceData : groupData}
-        setSidePanelData={setSidePanelData}
-      >
-        <LoadMoreButton message={message} onLoadMore={loadData} />
-      </Table>
+      {index === "instance" ? (
+        <InstanceTable data={instanceData as MailInstanceResponse[]} drawer={setDrawer}>
+          <LoadMoreButton message={message} onLoadMore={loadMore} />
+        </InstanceTable>
+      ) : (
+        <GroupTable data={groupData as MailGroupResponse[]}>
+          <LoadMoreButton message={message} onLoadMore={loadMore} />
+        </GroupTable>
+      )}
     </TablePageLayout>
   );
 }

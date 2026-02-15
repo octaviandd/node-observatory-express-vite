@@ -73,8 +73,8 @@ class ModelWatcherSQL extends BaseBuilder {
       "CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest",
       "CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest",
       "CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as count_completed",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as count_failed",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed",
       this.getP95SQL("model"),
       "NULL as created_at",
       "NULL as content",
@@ -83,7 +83,7 @@ class ModelWatcherSQL extends BaseBuilder {
 
     const rowColumns = [
       "NULL as total", "NULL as shortest", "NULL as longest", "NULL as average",
-      "NULL as count_completed", "NULL as count_failed", "NULL as p95",
+      "NULL as completed", "NULL as failed", "NULL as p95",
       "created_at", "content", "'row' as type"
     ];
 

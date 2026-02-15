@@ -9,7 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronRight } from "lucide-react";
-import { RequestInstanceResponse } from "../../../../types";
+import { RequestInstanceResponse } from "@/hooks/useApiTyped";
 
 export const RequestCrumbs = React.memo(
   ({ request }: { request: RequestInstanceResponse }) => {
@@ -37,16 +37,16 @@ export const RequestCrumbs = React.memo(
             </BreadcrumbItem>
             <BreadcrumbItem>
               <BreadcrumbLink className="text-muted-foreground">
-                {request.content.route}
+                {request.content.data.route}
               </BreadcrumbLink>
             </BreadcrumbItem>
           </Breadcrumb>
           <div className="flex items-center gap-x-4">
             <Badge variant="secondary">
-              {request.content.method.toUpperCase()}
+              {request.content.metadata.method.toUpperCase()}
             </Badge>
-            <Badge variant={getStatusColor(request.content.statusCode)}>
-              {request.content.statusCode}
+            <Badge variant={getStatusColor(request.content.data.statusCode)}>
+              {request.content.data.statusCode}
             </Badge>
           </div>
         </CardContent>

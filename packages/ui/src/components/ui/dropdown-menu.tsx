@@ -32,7 +32,7 @@ const DropdownMenuSubTrigger = React.forwardRef<
       className,
     )}
     { 
-    watchers...props}
+    ...props}
   >
     {children}
     <ChevronRight className="ml-auto" />
@@ -52,7 +52,7 @@ const DropdownMenuSubContent = React.forwardRef<
       className,
     )}
     { 
-    watchers...props}
+    ...props}
   />
 ));
 DropdownMenuSubContent.displayName =
@@ -72,7 +72,7 @@ const DropdownMenuContent = React.forwardRef<
         className,
       )}
       { 
-    watchers...props}
+    ...props}
     />
   </DropdownMenuPrimitive.Portal>
 ));
@@ -92,7 +92,7 @@ const DropdownMenuItem = React.forwardRef<
       className,
     )}
     { 
-    watchers...props}
+    ...props}
   />
 ));
 DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName;
@@ -109,7 +109,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
     )}
     checked={checked}
     { 
-    watchers...props}
+    ...props}
   >
     <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
       <DropdownMenuPrimitive.ItemIndicator>
@@ -133,7 +133,7 @@ const DropdownMenuRadioItem = React.forwardRef<
       className,
     )}
     { 
-    watchers...props}
+    ...props}
   >
     <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
       <DropdownMenuPrimitive.ItemIndicator>
@@ -159,7 +159,7 @@ const DropdownMenuLabel = React.forwardRef<
       className,
     )}
     { 
-    watchers...props}
+    ...props}
   />
 ));
 DropdownMenuLabel.displayName = DropdownMenuPrimitive.Label.displayName;
@@ -172,7 +172,7 @@ const DropdownMenuSeparator = React.forwardRef<
     ref={ref}
     className={cn("-mx-1 my-1 h-px bg-muted", className)}
     { 
-    watchers...props}
+    ...props}
   />
 ));
 DropdownMenuSeparator.displayName = DropdownMenuPrimitive.Separator.displayName;
@@ -185,7 +185,7 @@ const DropdownMenuShortcut = ({
     <span
       className={cn("ml-auto text-xs tracking-widest opacity-60", className)}
       { 
-    watchers...props}
+    ...props}
     />
   );
 };

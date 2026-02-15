@@ -118,8 +118,6 @@ export default function Dashboard() {
                       { dataKey: "400", stackId: "b", fill: "#808080" },
                       { dataKey: "500", stackId: "c", fill: "#ff8042" },
                     ]}
-                    period={period}
-                    currentDate={currentDate}
                   />
                 </div>
               </CardContent>
@@ -154,8 +152,6 @@ export default function Dashboard() {
                 <div className="h-auto">
                   <DurationGraph
                     data={requests.durationFormattedData}
-                    period={period}
-                    currentDate={currentDate}
                   />
                 </div>
               </CardContent>
@@ -218,8 +214,6 @@ export default function Dashboard() {
                         fill: "#ffc658",
                       },
                     ]}
-                    period={period}
-                    currentDate={currentDate}
                   />
                 </div>
 
@@ -382,8 +376,6 @@ export default function Dashboard() {
                       { dataKey: "released", stackId: "b", fill: "#ffc658" },
                       { dataKey: "failed", stackId: "c", fill: "#ef4444" },
                     ]}
-                    period={period}
-                    currentDate={currentDate}
                   />
                 </div>
 
@@ -397,8 +389,6 @@ export default function Dashboard() {
                   <div className="h-auto">
                     <DurationGraph
                       data={jobs.durationFormattedData}
-                      period={period}
-                      currentDate={currentDate}
                     />
                   </div>
                 </div>

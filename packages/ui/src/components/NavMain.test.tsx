@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
-import { NavMain } from "./nav-main";
+import { NavMain } from "./NavMain";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Home, Settings, Users } from "lucide-react";
 

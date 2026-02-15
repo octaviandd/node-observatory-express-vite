@@ -13,7 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { memo, ReactNode } from "react";
-import { LogGroupResponse } from "../../../../types";
+import { LogGroupResponse } from "@/hooks/useApiTyped";
 
 const LOG_LEVELS = [
   { dataKey: "info", variant: "secondary" },

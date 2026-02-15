@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { getSize, formatDuration } from "@/utils.js";
-import { ViewGroupResponse } from "../../../../types";
+import { ViewGroupResponse } from "@/hooks/useApiTyped";
 
 export const GroupTable = memo(
   ({ data, children }: { data: ViewGroupResponse[]; children: ReactNode }) => {

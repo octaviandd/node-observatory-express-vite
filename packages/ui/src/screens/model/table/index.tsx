@@ -11,6 +11,7 @@ import {
   StatusFilter,
   LoadMoreButton,
 } from "@/components/ui/table-page";
+import { ModelInstanceResponse, ModelGroupResponse } from "@/hooks/useApiTyped";
 
 const STATUS_OPTIONS = ["all", "completed", "failed"];
 
@@ -23,27 +24,26 @@ export default function ModelsIndexTable() {
     index,
     instanceStatusType,
     inputValue,
-    sidePanelData,
+    setDrawer,
     modelKey,
     message,
-    setSidePanelData,
+    drawer,
     setInstanceStatusType,
     setInputValue,
-    loadData,
-  } = useIndexTableData({
+    loadMore,
+  } = useIndexTableData<ModelInstanceResponse, ModelGroupResponse>({
     key: "models",
     defaultInstanceStatusType: "all",
   });
 
-  const Table = index === "instance" ? InstanceTable : GroupTable;
   const count = index === "instance" ? instanceDataCount : groupDataCount;
   const label = index === "instance" ? "Instance" : "Model";
 
   return (
     <TablePageLayout
-      sidePanelData={sidePanelData}
-          setSidePanelData={setSidePanelData}
-          type="models"
+      setDrawer={setDrawer}
+      drawer={drawer}
+      type="models"
     >
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
@@ -66,13 +66,15 @@ export default function ModelsIndexTable() {
           />
         )}
       </div>
-      {/* @ts-expect-error dumb ts*/}
-      <Table
-        data={index === "instance" ? instanceData : groupData}
-        setSidePanelData={setSidePanelData}
-      >
-        <LoadMoreButton message={message} onLoadMore={loadData} />
-      </Table>
+      {index === "instance" ? (
+        <InstanceTable data={instanceData as ModelInstanceResponse[]} drawer={setDrawer}>
+          <LoadMoreButton message={message} onLoadMore={loadMore} />
+        </InstanceTable>
+      ) : (
+        <GroupTable data={groupData as ModelGroupResponse[]}>
+          <LoadMoreButton message={message} onLoadMore={loadMore} />
+        </GroupTable>
+      )}
     </TablePageLayout>
   );
 }

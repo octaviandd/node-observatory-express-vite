@@ -23,13 +23,13 @@ export default function ExceptionsIndexTable() {
     index,
     instanceStatusType,
     inputValue,
-    sidePanelData,
+    drawer,
     modelKey,
     message,
-    setSidePanelData,
+    setDrawer,
     setInstanceStatusType,
     setInputValue,
-    loadData,
+    loadMore,
   } = useIndexTableData({
     key: "exceptions",
     defaultInstanceStatusType: "all",
@@ -41,8 +41,8 @@ export default function ExceptionsIndexTable() {
 
   return (
     <TablePageLayout
-      sidePanelData={sidePanelData}
-      setSidePanelData={setSidePanelData}
+      drawer={drawer}
+      setDrawer={setDrawer}
       type="exceptions"
     >
       <div className="py-3 flex justify-between">
@@ -68,13 +68,12 @@ export default function ExceptionsIndexTable() {
           />
         )}
       </div>
-      {/* @ts-expect-error dumb ts*/}
-      <Table
+      {/* <Table
         data={index === "instance" ? instanceData : groupData}
-        setSidePanelData={setSidePanelData}
+        setDrawer={setDrawer}
       >
-        <LoadMoreButton message={message} onLoadMore={loadData} />
-      </Table>
+        <LoadMoreButton message={message} onLoadMore={loadMore} />
+      </Table> */}
     </TablePageLayout>
   );
 }

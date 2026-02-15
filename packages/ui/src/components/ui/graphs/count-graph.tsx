@@ -1,5 +1,8 @@
 /** @format */
 import { Card, CardContent } from "@/components/ui/card";
+import { StoreContext } from "@/store";
+import { getDateFromPeriod, formatGraphDate } from "@/utils";
+import { useContext } from "react";
 import { BarChart, Bar, ResponsiveContainer, Tooltip } from "recharts";
 
 type Props = {
@@ -10,11 +13,18 @@ type Props = {
     fill: string;
     name?: string;
   }[];
-  period: string;
-  currentDate: string;
 };
 
-export const CountGraph = ({ data, barData, period, currentDate }: Props) => {
+export const CountGraph = ({ data, barData }: Props) => {
+  const { state } = useContext(StoreContext);
+  const period = state.period;
+
+  const startDate = getDateFromPeriod(period);
+
+  const currentDate = new Date();
+  const formattedEndDate = formatGraphDate(currentDate);
+  const formattedStartDate = formatGraphDate(startDate)
+
   return (
     <Card className="col-span-4 p-1 border-none shadow-none">
       <CardContent className="p-0">
@@ -71,8 +81,8 @@ export const CountGraph = ({ data, barData, period, currentDate }: Props) => {
           </ResponsiveContainer>
         </div>
         <div className="flex justify-between text-xs text-muted-foreground mt-4">
-          <span>{period}</span>
-          <span>{currentDate}</span>
+          <span>{formattedStartDate}</span>
+          <span>{formattedEndDate}</span>
         </div>
       </CardContent>
     </Card>

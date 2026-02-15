@@ -11,6 +11,7 @@ import {
   StatusFilter,
   LoadMoreButton,
 } from "@/components/ui/table-page";
+import { NotificationInstanceResponse, NotificationGroupResponse } from "@/hooks/useApiTyped";
 
 const STATUS_OPTIONS = ["all", "completed", "failed"];
 
@@ -23,26 +24,25 @@ export default function NotificationsIndexTable() {
     index,
     instanceStatusType,
     inputValue,
-    sidePanelData,
+    setDrawer,
     modelKey,
     message,
-    setSidePanelData,
+    drawer,
     setInstanceStatusType,
     setInputValue,
-    loadData,
-  } = useIndexTableData({
+    loadMore,
+  } = useIndexTableData<NotificationInstanceResponse, NotificationGroupResponse>({
     key: "notifications",
     defaultInstanceStatusType: "all",
   });
 
-  const Table = index === "instance" ? InstanceTable : GroupTable;
   const count = index === "group" ? groupDataCount : instanceDataCount;
   const label = index === "group" ? "Channel" : "Notification";
 
   return (
     <TablePageLayout
-      sidePanelData={sidePanelData}
-      setSidePanelData={setSidePanelData}
+      setDrawer={setDrawer}
+      drawer={drawer}
       type="notifications"
     >
       <div className="py-3 flex justify-between">
@@ -68,13 +68,15 @@ export default function NotificationsIndexTable() {
           />
         )}
       </div>
-      {/* @ts-expect-error dumb ts*/}
-      <Table
-        data={index === "instance" ? instanceData : groupData}
-        setSidePanelData={setSidePanelData}
-      >
-        <LoadMoreButton message={message} onLoadMore={loadData} />
-      </Table>
+      {index === "instance" ? (
+        <InstanceTable data={instanceData as NotificationInstanceResponse[]} drawer={setDrawer}>
+          <LoadMoreButton message={message} onLoadMore={loadMore} />
+        </InstanceTable>
+      ) : (
+        <GroupTable data={groupData as NotificationGroupResponse[]}>
+          <LoadMoreButton message={message} onLoadMore={loadMore} />
+        </GroupTable>
+      )}
     </TablePageLayout>
   );
 }

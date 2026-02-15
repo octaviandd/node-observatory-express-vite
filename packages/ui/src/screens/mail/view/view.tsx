@@ -4,12 +4,12 @@ import { useState } from "react";
 import MailCrumbs from "./crumbs";
 import MailPreviewInfo from "./info";
 import ContentTabs from "./tabs";
-import { MailInstanceResponse } from "../../../../types";
 import {
   ViewPageLayout,
   useViewData,
   Source,
 } from "@/components/ui/view-page";
+import { MailInstanceResponse } from "@/hooks/useApiTyped";
 
 export default function MailPreview() {
   const [activeTab, setActiveTab] = useState("raw");

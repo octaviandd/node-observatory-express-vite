@@ -18,12 +18,18 @@ export function resolvePackagePath(packageName: string, metaUrl?: string): strin
  * @returns 
  */
 export const formatValue = (value: string | number | null, isCount = false): string => {
-  if (!value) return "0" + (isCount ? "" : "ms");
-  const num = Number(value);
+  if (!value || value === null) return "0" + (isCount ? "" : "ms");
+  
+  const num = parseFloat(value.toString());
+  
+  if (isNaN(num) || num === 0) return "0" + (isCount ? "" : "ms");
+  
   if (num > 999) {
     return `${(num / 1000).toFixed(2)}${isCount ? "K" : "s"}`;
   }
-  return `${num}${isCount ? "" : "ms"}`;
+  
+  const formatted = num % 1 === 0 ? num.toString() : num.toFixed(2);
+  return `${formatted}${isCount ? "" : "ms"}`;
 };
 
 /**
@@ -141,7 +147,7 @@ export const sanitizeContent = <T>(content: T): T => {
   return sanitize(content);
 }
 
-export const processedDurationGraphData = (data: any, period: string) => {
+export const processedDurationGraphData = (data: any[], period: string) => {
   const totalDuration = PERIODS[period].duration; // in minutes
   const slotsCount = 120; // how many time slots (bars) we want
   const intervalDuration = totalDuration / slotsCount; // each slot in minutes
@@ -157,16 +163,17 @@ export const processedDurationGraphData = (data: any, period: string) => {
     label: getLabel(index, period),
   }));
 
-  data.forEach((request: any) => {
-    const requestTime = new Date(request.created_at).getTime();
-    const duration = parseFloat(request.content.duration); // assume it's in ms
+  data.forEach((entry: any) => {
+    const createdAt = new Date(entry.created_at).getTime();
+    // duration lives at the top level of the BaseLogEntry stored in content
+    const duration = parseFloat(entry.content?.duration);
 
     // Figure out which interval slot this request belongs to
     const intervalIndex = Math.floor(
-      (requestTime - startDate) / (intervalDuration * 60 * 1000),
+      (createdAt - startDate) / (intervalDuration * 60 * 1000),
     );
 
-    if (intervalIndex >= 0 && intervalIndex < slotsCount) {
+    if (intervalIndex >= 0 && intervalIndex < slotsCount && !isNaN(duration)) {
       groupedData[intervalIndex].durations.push(duration);
     }
   });
@@ -188,7 +195,65 @@ export const processedDurationGraphData = (data: any, period: string) => {
   return groupedData;
 }
 
-export const processedCountGraphData = <T extends readonly string[]>(data: CacheContent[], period: string, keys: T): Array<Record<T[number], number> & {label: string}> => {
+/**
+ * Extracts a 0/1 metric value from a BaseLogEntry-shaped content object
+ * for the given graph metric key. Handles all watcher type patterns:
+ *
+ *  - status keys:     "completed" | "failed"        → content.status
+ *  - cache data keys: "hits" | "misses" | "writes"  → content.data[key] > 0
+ *  - HTTP status:     "count_200/400/500"            → content.data.statusCode ranges
+ *  - log levels:      "error" | "warning" | "info" … → content.metadata.level
+ *  - exception types: "unhandledRejection" | "uncaughtException" → content.metadata.type
+ */
+function getMetricValue(content: any, key: string): number {
+  if (!content) return 0;
+
+  // Status-based keys (query, notification, mail, schedule, view, model, job)
+  if (key === "completed" || key === "failed" || key === "released") {
+    return content.status === key ? 1 : 0;
+  }
+
+  // Cache data keys (cache, also used by job config currently)
+  if (key === "hits" || key === "misses" || key === "writes") {
+    const val = content.data?.[key];
+    return val !== undefined && val !== null && val > 0 ? 1 : 0;
+  }
+
+  // HTTP status-code range keys (request, http)
+  if (key === "count_200") {
+    const code = content.data?.statusCode;
+    return code !== undefined && code >= 200 && code < 400 ? 1 : 0;
+  }
+  if (key === "count_400") {
+    const code = content.data?.statusCode;
+    return code !== undefined && code >= 400 && code < 500 ? 1 : 0;
+  }
+  if (key === "count_500") {
+    const code = content.data?.statusCode;
+    return code !== undefined && code >= 500 ? 1 : 0;
+  }
+
+  // Log-level keys (log)
+  if (["error", "warning", "warn", "info", "debug", "trace", "fatal", "log", "verbose", "silly"].includes(key)) {
+    const level = content.metadata?.level;
+    // The config uses "warning" but patchers store "warn"
+    if (key === "warning") return level === "warn" ? 1 : 0;
+    return level === key ? 1 : 0;
+  }
+
+  // Exception-type keys (exception)
+  if (key === "unhandledRejection" || key === "uncaughtException") {
+    return content.metadata?.type === key ? 1 : 0;
+  }
+
+  // Fallback: check top-level, then nested data
+  if (content[key]) return 1;
+  if (content.data?.[key]) return 1;
+  return 0;
+}
+
+export const processedCountGraphData = <T extends readonly string[]>
+  (data: any[], period: string, keys: T): Array<Record<T[number], number> & { label: string }> => {
   const totalDuration = PERIODS[period].duration;
   const intervalDuration = totalDuration / 120;
   const now = new Date().getTime();
@@ -211,9 +276,9 @@ export const processedCountGraphData = <T extends readonly string[]>(data: Cache
     const intervalIndex = Math.floor((createdAt - startDate) / (intervalDuration * 60 * 1000));
 
     if (intervalIndex >= 0 && intervalIndex < 120) {
+      const content = row.content;
       keys.forEach((key: T[number]) => {
-        const value = row.content[key] ? 1 : 0;
-        (groupedData[intervalIndex] as any)[(key)] += value;
+        (groupedData[intervalIndex] as any)[key] += getMetricValue(content, key);
       })
     }
   });
@@ -597,102 +662,102 @@ function stringUrlToHttpOptions(
  * @param data The raw HTTP request data from any supported library
  * @returns A standardized HttpRequestData object
  */
-export function standardizeHttpRequestData(data: any): HttpRequestData {
-  // Ensure all required fields are present
-  const standardized: HttpRequestData = {
-    // Required fields with fallbacks
-    method: (data.method || "GET").toUpperCase(),
-    origin: data.origin || "",
-    pathname: data.pathname || data.path || "/",
-    protocol: data.protocol || "http:",
-    statusCode: data.statusCode || 0,
-    statusMessage: data.statusMessage || "",
-    duration: data.duration || 0,
-    aborted: data.aborted || false,
-    headers: data.headers || {},
-    responseBody: data.responseBody || "",
-    responseBodySize: data.responseBodySize || 0,
-    isMedia: data.isMedia || false,
-    library: data.library || "unknown",
-    file: data.file || "",
-    line: data.line || "",
-    ...data,
-  };
+// export function standardizeHttpRequestData(data: any): HttpRequestData {
+//   // Ensure all required fields are present
+//   const standardized: HttpRequestData = {
+//     // Required fields with fallbacks
+//     method: (data.method || "GET").toUpperCase(),
+//     origin: data.origin || "",
+//     pathname: data.pathname || data.path || "/",
+//     protocol: data.protocol || "http:",
+//     statusCode: data.statusCode || 0,
+//     statusMessage: data.statusMessage || "",
+//     duration: data.duration || 0,
+//     aborted: data.aborted || false,
+//     headers: data.headers || {},
+//     responseBody: data.responseBody || "",
+//     responseBodySize: data.responseBodySize || 0,
+//     isMedia: data.isMedia || false,
+//     library: data.library || "unknown",
+//     file: data.file || "",
+//     line: data.line || "",
+//     ...data,
+//   };
 
-  // Normalize hostname/host
-  if (!standardized.hostname && standardized.host) {
-    standardized.hostname = standardized.host;
-  } else if (!standardized.host && standardized.hostname) {
-    standardized.host = standardized.hostname;
-  }
+//   // Normalize hostname/host
+//   if (!standardized.hostname && standardized.host) {
+//     standardized.hostname = standardized.host;
+//   } else if (!standardized.host && standardized.hostname) {
+//     standardized.host = standardized.hostname;
+//   }
 
-  // Normalize path/pathname
-  if (!standardized.path && standardized.pathname) {
-    standardized.path = standardized.pathname;
-  }
+//   // Normalize path/pathname
+//   if (!standardized.path && standardized.pathname) {
+//     standardized.path = standardized.pathname;
+//   }
 
-  // Ensure responseBody is properly handled
-  if (
-    standardized.responseBody &&
-    typeof standardized.responseBody !== "string" &&
-    !(standardized.responseBody instanceof Buffer)
-  ) {
-    try {
-      // Try to stringify if it's an object
-      standardized.responseBody = JSON.stringify(standardized.responseBody);
-    } catch (error) {
-      // If stringification fails, convert to string
-      standardized.responseBody = String(standardized.responseBody);
-    }
-  }
+//   // Ensure responseBody is properly handled
+//   if (
+//     standardized.responseBody &&
+//     typeof standardized.responseBody !== "string" &&
+//     !(standardized.responseBody instanceof Buffer)
+//   ) {
+//     try {
+//       // Try to stringify if it's an object
+//       standardized.responseBody = JSON.stringify(standardized.responseBody);
+//     } catch (error) {
+//       // If stringification fails, convert to string
+//       standardized.responseBody = String(standardized.responseBody);
+//     }
+//   }
 
-  // Calculate responseBodySize if not provided
-  if (!standardized.responseBodySize && standardized.responseBody) {
-    if (typeof standardized.responseBody === "string") {
-      standardized.responseBodySize = Buffer.byteLength(
-        standardized.responseBody,
-      );
-    } else if (standardized.responseBody instanceof Buffer) {
-      standardized.responseBodySize = standardized.responseBody.length;
-    }
-  }
+//   // Calculate responseBodySize if not provided
+//   if (!standardized.responseBodySize && standardized.responseBody) {
+//     if (typeof standardized.responseBody === "string") {
+//       standardized.responseBodySize = Buffer.byteLength(
+//         standardized.responseBody,
+//       );
+//     } else if (standardized.responseBody instanceof Buffer) {
+//       standardized.responseBodySize = standardized.responseBody.length;
+//     }
+//   }
 
-  standardized.fullUrl = `${standardized.origin}${standardized.pathname}`;
+//   standardized.fullUrl = `${standardized.origin}${standardized.pathname}`;
 
-  // Remove undefined values
-  return dropUndefinedKeys(standardized);
-}
+//   // Remove undefined values
+//   return dropUndefinedKeys(standardized);
+// }
 
-/**
- * Extracts the most important information from HTTP request data for display
- * This is useful for creating summaries or table views of HTTP requests
- *
- * @param data The standardized HTTP request data
- * @returns An object with the most relevant fields for display
- */
-export function extractHttpDisplayData(data: HttpRequestData): {
-  id?: string;
-  method: string;
-  url: string;
-  statusCode: number;
-  duration: number;
-  size: number;
-  library: string;
-  timestamp?: string;
-} {
-  // Create the full URL from components
-  const url = `${data.origin}${data.pathname}`;
+// /**
+//  * Extracts the most important information from HTTP request data for display
+//  * This is useful for creating summaries or table views of HTTP requests
+//  *
+//  * @param data The standardized HTTP request data
+//  * @returns An object with the most relevant fields for display
+//  */
+// export function extractHttpDisplayData(data: HttpRequestData): {
+//   id?: string;
+//   method: string;
+//   url: string;
+//   statusCode: number;
+//   duration: number;
+//   size: number;
+//   library: string;
+//   timestamp?: string;
+// } {
+//   // Create the full URL from components
+//   const url = `${data.origin}${data.pathname}`;
 
-  return {
-    id: data.uuid,
-    method: data.method,
-    url: url,
-    statusCode: data.statusCode,
-    duration: data.duration ?? 0,
-    size: data.responseBodySize,
-    library: data.library,
-    timestamp: data.created_at
-      ? new Date(data.created_at).toISOString()
-      : undefined,
-  };
-}
+//   return {
+//     id: data.uuid,
+//     method: data.method,
+//     url: url,
+//     statusCode: data.statusCode,
+//     duration: data.duration ?? 0,
+//     size: data.responseBodySize,
+//     library: data.library,
+//     timestamp: data.created_at
+//       ? new Date(data.created_at).toISOString()
+//       : undefined,
+//   };
+// }

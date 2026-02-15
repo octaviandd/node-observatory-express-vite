@@ -6,15 +6,12 @@ import { GroupTable } from "./group";
 import { Input } from "@/components/ui/input";
 import { useIndexTableData } from "@/hooks/useIndexTableData";
 import {
-  QueryGroupResponse,
-  QueryInstanceResponse,
-} from "../../../../types";
-import {
   TablePageLayout,
   TableHeader,
   StatusFilter,
   LoadMoreButton,
 } from "@/components/ui/table-page";
+import { QueryGroupResponse, QueryInstanceResponse } from "@/hooks/useApiTyped";
 
 const STATUS_OPTIONS = ["all", "select", "insert", "update", "delete"];
 
@@ -27,19 +24,18 @@ export default function QueryIndexTable() {
     index,
     instanceStatusType,
     inputValue,
-    sidePanelData,
+    setDrawer,
     modelKey,
     message,
-    setSidePanelData,
+    drawer,
     setInstanceStatusType,
     setInputValue,
-    loadData,
-  } = useIndexTableData<QueryGroupResponse, QueryInstanceResponse>({
+    loadMore,
+  } = useIndexTableData<QueryInstanceResponse, QueryGroupResponse>({
     key: "queries",
     defaultInstanceStatusType: "all",
   });
 
-  const Table = index === "instance" ? InstanceTable : GroupTable;
   const count = index === "instance" ? instanceDataCount : groupDataCount;
   const label = index === "instance" ? "Query" : "Endpoint";
   // Keep "Queries" plural label when in instance mode
@@ -47,8 +43,8 @@ export default function QueryIndexTable() {
 
   return (
     <TablePageLayout
-      sidePanelData={sidePanelData}
-      setSidePanelData={setSidePanelData}
+      setDrawer={setDrawer}
+      drawer={drawer}
       type="queries"
     >
       <div className="py-3 flex justify-between">
@@ -81,13 +77,15 @@ export default function QueryIndexTable() {
           )}
         </div>
       </div>
-      {/* @ts-expect-error dumb ts*/}
-      <Table
-        data={index === "instance" ? instanceData : groupData}
-        setSidePanelData={setSidePanelData}
-      >
-        <LoadMoreButton message={message} onLoadMore={loadData} />
-      </Table>
+      {index === "instance" ? (
+        <InstanceTable data={instanceData as QueryInstanceResponse[]} drawer={setDrawer}>
+          <LoadMoreButton message={message} onLoadMore={loadMore} />
+        </InstanceTable>
+      ) : (
+        <GroupTable data={groupData as QueryGroupResponse[]}>
+          <LoadMoreButton message={message} onLoadMore={loadMore} />
+        </GroupTable>
+      )}
     </TablePageLayout>
   );
 }

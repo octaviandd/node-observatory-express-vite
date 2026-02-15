@@ -13,11 +13,11 @@ import { Button } from "@/components/ui/button";
 import { memo, ReactNode } from "react";
 import { Link } from "react-router";
 import { formatDate } from "@/utils.js";
-import { ExceptionInstanceResponse } from "../../../../types";
+import { ExceptionInstanceResponse } from "@/hooks/useApiTyped";
 
 type Props = {
   data: ExceptionInstanceResponse[];
-  setSidePanelData: ({
+  setDrawer: ({
     isOpen,
     modelId,
     requestId,
@@ -34,7 +34,7 @@ type Props = {
 };
 
 export const InstanceTable = memo(
-  ({ data, setSidePanelData, children }: Props) => {
+  ({ data, setDrawer, children }: Props) => {
     return (
       <div className="rounded-md border">
         <Table>
@@ -63,7 +63,7 @@ export const InstanceTable = memo(
                       variant="outline"
                       size="icon"
                       onClick={() =>
-                        setSidePanelData({
+                        setDrawer({
                           isOpen: true,
                           modelId: exception.uuid ?? "",
                           requestId: exception.request_id ?? "",

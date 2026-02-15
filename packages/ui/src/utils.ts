@@ -1,6 +1,7 @@
 /** @format */
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { PeriodState } from "./store";
 
 export const timeAgo = (time: string) => {
   const currentTime = new Date();
@@ -72,3 +73,38 @@ export const formatDuration = (value: number) =>
   value > 999 ? `${(value / 1000).toFixed(2)}s` : `${value}ms`;
 export const formatCount = (count: number) =>
   count > 999 ? `${(count / 1000).toFixed(1)}K` : count;
+
+
+export const getDateFromPeriod = (period: PeriodState): Date => {
+  const now = new Date();
+  
+  if (typeof period === 'object' && period.label === 'custom') {
+    return new Date(period.startDate);
+  }
+  
+  switch (period) {
+    case '1h':
+      return new Date(now.getTime() - 60 * 60 * 1000);
+    case '24h':
+      return new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    case '7d':
+      return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    case '14d':
+      return new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+    case '30d':
+      return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    default:
+      return new Date(now.getTime() - 60 * 60 * 1000);
+  }
+};
+  
+export const formatGraphDate = (date: Date) => {
+  const day = date.getUTCDate();
+  const month = date.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' });
+  const year = date.getUTCFullYear();
+  const hours = String(date.getUTCHours()).padStart(2, '0');
+  const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+  const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+
+  return `${day} ${month} ${year} ${hours}:${minutes}:${seconds} UTC`;
+}

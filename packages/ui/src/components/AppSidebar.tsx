@@ -19,8 +19,8 @@ import {
   SquareTerminal,
 } from "lucide-react";
 
-import { NavMain } from "@/components/nav-main";
-import { AppSettings } from "@/components/app-settings";
+import { NavMain } from "@/components/NavMain";
+import { AppSettings } from "@/components/AppSettings";
 import {
   Sidebar,
   SidebarContent,
@@ -145,8 +145,7 @@ const data = {
 export const AppSidebar = memo(
   ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
     return (
-      <Sidebar collapsible="icon" { 
-    watchers...props}>
+      <Sidebar collapsible="icon" {...props}>
         <SidebarHeader>
           <Link
             to="/"

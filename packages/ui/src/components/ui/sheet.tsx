@@ -24,7 +24,7 @@ const SheetOverlay = React.forwardRef<
       className,
     )}
     { 
-    watchers...props}
+    ...props}
     ref={ref}
   />
 ));
@@ -63,7 +63,7 @@ const SheetContent = React.forwardRef<
       ref={ref}
       className={cn(sheetVariants({ side }), className)}
       { 
-    watchers...props}
+    ...props}
     >
       {children}
     </SheetPrimitive.Content>
@@ -81,7 +81,7 @@ const SheetHeader = ({
       className,
     )}
     { 
-    watchers...props}
+    ...props}
   />
 );
 SheetHeader.displayName = "SheetHeader";
@@ -96,7 +96,7 @@ const SheetFooter = ({
       className,
     )}
     { 
-    watchers...props}
+    ...props}
   />
 );
 SheetFooter.displayName = "SheetFooter";
@@ -109,7 +109,7 @@ const SheetTitle = React.forwardRef<
     ref={ref}
     className={cn("text-lg font-semibold text-foreground", className)}
     { 
-    watchers...props}
+    ...props}
   />
 ));
 SheetTitle.displayName = SheetPrimitive.Title.displayName;
@@ -122,7 +122,7 @@ const SheetDescription = React.forwardRef<
     ref={ref}
     className={cn("text-sm text-muted-foreground", className)}
     { 
-    watchers...props}
+    ...props}
   />
 ));
 SheetDescription.displayName = SheetPrimitive.Description.displayName;

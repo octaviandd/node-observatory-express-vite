@@ -5,7 +5,7 @@ import { Slot } from "@radix-ui/react-slot";
 import { VariantProps, cva } from "class-variance-authority";
 import { PanelLeft } from "lucide-react";
 
-import { useIsMobile } from "@/hooks/useMobile";
+import { useMobile } from "@/hooks/useMobile";
 import { cn } from "@/utils.js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -67,7 +67,7 @@ const SidebarProvider = React.forwardRef<
     },
     ref,
   ) => {
-    const isMobile = useIsMobile();
+    const isMobile = useMobile();
     const [openMobile, setOpenMobile] = React.useState(false);
 
     // This is the internal state of the sidebar.
@@ -154,7 +154,7 @@ const SidebarProvider = React.forwardRef<
             )}
             ref={ref}
             { 
-    watchers...props}
+    ...props}
           >
             {children}
           </div>
@@ -195,7 +195,7 @@ const Sidebar = React.forwardRef<
           )}
           ref={ref}
           { 
-    watchers...props}
+    ...props}
         >
           {children}
         </div>
@@ -205,7 +205,7 @@ const Sidebar = React.forwardRef<
     if (isMobile) {
       return (
         <Sheet open={openMobile} onOpenChange={setOpenMobile} { 
-    watchers...props}>
+    ...props}>
           <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"
@@ -255,7 +255,7 @@ const Sidebar = React.forwardRef<
             className,
           )}
           { 
-    watchers...props}
+    ...props}
         >
           <div
             data-sidebar="sidebar"
@@ -281,7 +281,7 @@ const SidebarTrigger = React.forwardRef<
       size="icon"
       className={cn("h-7 w-7", className)}
       { 
-    watchers...props}
+    ...props}
     >
       <PanelLeft />
       <span className="sr-only">Toggle Sidebar</span>
@@ -302,7 +302,7 @@ const SidebarRail = React.forwardRef<
       tabIndex={-1}
       title="Toggle Sidebar"
       { 
-    watchers...props}
+    ...props}
     />
   );
 });
@@ -321,7 +321,7 @@ const SidebarInset = React.forwardRef<
         className,
       )}
       { 
-    watchers...props}
+    ...props}
     />
   );
 });
@@ -340,7 +340,7 @@ const SidebarInput = React.forwardRef<
         className,
       )}
       { 
-    watchers...props}
+    ...props}
     />
   );
 });
@@ -356,7 +356,7 @@ const SidebarHeader = React.forwardRef<
       data-sidebar="header"
       className={cn("flex flex-col gap-2 p-2", className)}
       { 
-    watchers...props}
+    ...props}
     />
   );
 });
@@ -372,7 +372,7 @@ const SidebarFooter = React.forwardRef<
       data-sidebar="footer"
       className={cn("flex flex-col gap-2 p-2", className)}
       { 
-    watchers...props}
+    ...props}
     />
   );
 });
@@ -388,7 +388,7 @@ const SidebarSeparator = React.forwardRef<
       data-sidebar="separator"
       className={cn("mx-2 w-auto bg-sidebar-border", className)}
       { 
-    watchers...props}
+    ...props}
     />
   );
 });
@@ -407,7 +407,7 @@ const SidebarContent = React.forwardRef<
         className,
       )}
       { 
-    watchers...props}
+    ...props}
     />
   );
 });
@@ -423,7 +423,7 @@ const SidebarGroup = React.forwardRef<
       data-sidebar="group"
       className={cn("relative flex w-full min-w-0 flex-col p-2", className)}
       { 
-    watchers...props}
+    ...props}
     />
   );
 });
@@ -445,7 +445,7 @@ const SidebarGroupLabel = React.forwardRef<
         className,
       )}
       { 
-    watchers...props}
+    ...props}
     />
   );
 });
@@ -469,7 +469,7 @@ const SidebarGroupAction = React.forwardRef<
         className,
       )}
       { 
-    watchers...props}
+    ...props}
     />
   );
 });
@@ -484,7 +484,7 @@ const SidebarGroupContent = React.forwardRef<
     data-sidebar="group-content"
     className={cn("w-full text-sm", className)}
     { 
-    watchers...props}
+    ...props}
   />
 ));
 SidebarGroupContent.displayName = "SidebarGroupContent";
@@ -498,7 +498,7 @@ const SidebarMenu = React.forwardRef<
     data-sidebar="menu"
     className={cn("flex w-full min-w-0 flex-col gap-1", className)}
     { 
-    watchers...props}
+    ...props}
   />
 ));
 SidebarMenu.displayName = "SidebarMenu";
@@ -512,7 +512,7 @@ const SidebarMenuItem = React.forwardRef<
     data-sidebar="menu-item"
     className={cn("group/menu-item relative", className)}
     { 
-    watchers...props}
+    ...props}
   />
 ));
 SidebarMenuItem.displayName = "SidebarMenuItem";
@@ -570,7 +570,7 @@ const SidebarMenuButton = React.forwardRef<
         data-active={isActive}
         className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
         { 
-    watchers...props}
+    ...props}
       />
     );
 
@@ -591,8 +591,7 @@ const SidebarMenuButton = React.forwardRef<
           side="right"
           align="center"
           hidden={state !== "collapsed" || isMobile}
-          { 
-    watchers...tooltip}
+          {...tooltip}
         />
       </Tooltip>
     );
@@ -626,7 +625,7 @@ const SidebarMenuAction = React.forwardRef<
         className,
       )}
       { 
-    watchers...props}
+    ...props}
     />
   );
 });
@@ -649,7 +648,7 @@ const SidebarMenuBadge = React.forwardRef<
       className,
     )}
     { 
-    watchers...props}
+    ...props}
   />
 ));
 SidebarMenuBadge.displayName = "SidebarMenuBadge";
@@ -671,7 +670,7 @@ const SidebarMenuSkeleton = React.forwardRef<
       data-sidebar="menu-skeleton"
       className={cn("flex h-8 items-center gap-2 rounded-md px-2", className)}
       { 
-    watchers...props}
+    ...props}
     >
       {showIcon && (
         <Skeleton
@@ -706,7 +705,7 @@ const SidebarMenuSub = React.forwardRef<
       className,
     )}
     { 
-    watchers...props}
+    ...props}
   />
 ));
 SidebarMenuSub.displayName = "SidebarMenuSub";
@@ -715,7 +714,7 @@ const SidebarMenuSubItem = React.forwardRef<
   HTMLLIElement,
   React.ComponentProps<"li">
 >(({ ...props }, ref) => <li ref={ref} { 
-    watchers...props} />);
+    ...props} />);
 SidebarMenuSubItem.displayName = "SidebarMenuSubItem";
 
 const SidebarMenuSubButton = React.forwardRef<
@@ -743,7 +742,7 @@ const SidebarMenuSubButton = React.forwardRef<
         className,
       )}
       { 
-    watchers...props}
+    ...props}
     />
   );
 });

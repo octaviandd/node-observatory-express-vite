@@ -112,12 +112,18 @@ describe("ModelWatcher Integration", () => {
 
   describe("index endpoint", () => {
     it("should return empty results when no data exists", async () => {
+      /**
+       * Validates behavior when the model table has no records.
+       * Calls the grouped table index endpoint for model entries.
+       * Ensures the API responds successfully (HTTP 200).
+       * Confirms results are empty and count is zero.
+       */
       const req = createMockRequest({
         table: "true",
         index: "group",
         period: "24h",
       });
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body.results).toEqual([]);
@@ -125,6 +131,12 @@ describe("ModelWatcher Integration", () => {
     });
 
     it("should return model entries", async () => {
+      /**
+       * Inserts multiple model operation entries into the database.
+       * Queries the instance index to retrieve raw model rows.
+       * Verifies the endpoint returns a successful response.
+       * Confirms both inserted model entries are returned.
+       */
       await database.insert([
         createModelEntry(
           "model:1",
@@ -143,13 +155,19 @@ describe("ModelWatcher Integration", () => {
         index: "instance",
         period: "24h",
       });
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body.results).toHaveLength(2);
     });
 
     it("should group by model name", async () => {
+      /**
+       * Inserts multiple operations targeting the same model name.
+       * Uses grouped index mode to aggregate by modelName.
+       * Ensures grouping collapses multiple rows into one.
+       * Verifies only one grouped result is returned.
+       */
       await database.insert([
         createModelEntry(
           "model:1",
@@ -168,13 +186,19 @@ describe("ModelWatcher Integration", () => {
         index: "group",
         period: "24h",
       });
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body.results).toHaveLength(1);
     });
 
     it("should filter by model name", async () => {
+      /**
+       * Inserts operations for multiple distinct models.
+       * Calls the instance index with a modelName filter applied.
+       * Confirms the endpoint responds successfully (HTTP 200).
+       * Ensures filtering logic does not break request handling.
+       */
       await database.insert([
         createModelEntry("model:user", {
           modelName: "User",
@@ -192,12 +216,18 @@ describe("ModelWatcher Integration", () => {
         period: "24h",
         model: "User",
       });
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
 
       expect(result.statusCode).toBe(200);
     });
 
     it("should filter by status", async () => {
+      /**
+       * Inserts one completed and one failed model operation.
+       * Queries the instance index with a status filter for failures.
+       * Confirms the endpoint returns successfully (HTTP 200).
+       * Ensures failed entries can be requested without errors.
+       */
       await database.insert([
         createModelEntry(
           "model:completed",
@@ -220,14 +250,20 @@ describe("ModelWatcher Integration", () => {
         period: "24h",
         status: "failed",
       });
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
 
       expect(result.statusCode).toBe(200);
     });
 
     it("should return graph data when isTable is false", async () => {
+      /**
+       * Calls the graph endpoint instead of the table endpoint.
+       * Simulates a request for aggregated model-operation metrics.
+       * Validates a successful HTTP response is returned.
+       * Confirms graph-formatted data exists in response.
+       */
       const req = createMockRequest({ table: "false", period: "24h" });
-      const result = await watcher.index(req);
+      const result = await watcher.indexGraph(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body).toHaveProperty("countFormattedData");
@@ -236,6 +272,12 @@ describe("ModelWatcher Integration", () => {
 
   describe("view endpoint", () => {
     it("should return entry data by uuid", async () => {
+      /**
+       * Inserts a single model operation entry into the database.
+       * Requests detailed view using that model entry UUID.
+       * Ensures the endpoint returns a successful response.
+       * Confirms the model payload is present in response body.
+       */
       await database.insert([
         createModelEntry("model:view-test", {
           modelName: "User",
@@ -251,6 +293,12 @@ describe("ModelWatcher Integration", () => {
     });
 
     it("should include related request", async () => {
+      /**
+       * Inserts a model entry linked to a specific request_id.
+       * Adds related request and query entries sharing that request_id.
+       * Calls the view endpoint for the model entry UUID.
+       * Verifies model plus related request and query are returned.
+       */
       const requestId = "shared-request";
       await database.insert([
         createModelEntry(
@@ -313,6 +361,12 @@ describe("ModelWatcher Integration", () => {
 
   describe("insertRedisStream", () => {
     it("should add entry to Redis stream", async () => {
+      /**
+       * Creates a successful model operation stream payload.
+       * Pushes the entry into the observatory model Redis stream.
+       * Checks that the stream key length increases.
+       * Confirms at least one record now exists in stream.
+       */
       const entry = {
         status: "completed" as const,
         duration: 100,
@@ -328,6 +382,12 @@ describe("ModelWatcher Integration", () => {
     });
 
     it("should handle different ORM packages", async () => {
+      /**
+       * Iterates through supported ORM packages in metadata.
+       * Sends one stream entry per package value.
+       * Ensures the watcher accepts each package identifier.
+       * Verifies stream length matches the number inserted.
+       */
       const packages = ["sequelize", "mongoose", "typeorm"] as const;
 
       for (const pkg of packages) {
@@ -347,6 +407,12 @@ describe("ModelWatcher Integration", () => {
     });
 
     it("should handle failed operations with error", async () => {
+      /**
+       * Creates a failed model operation payload with error details.
+       * Pushes the failure entry into the model Redis stream.
+       * Ensures error objects are supported by stream ingestion.
+       * Confirms the stream contains the inserted failure entry.
+       */
       const entry = {
         status: "failed" as const,
         duration: 10,

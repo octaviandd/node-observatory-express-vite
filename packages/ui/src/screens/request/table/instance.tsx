@@ -14,11 +14,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { memo, ReactNode } from "react";
 import { formatDate, formatDuration } from "@/utils.js";
-import { RequestInstanceResponse } from "../../../../types";
+import { RequestInstanceResponse } from "@/hooks/useApiTyped";
 
 type Props = {
   data: RequestInstanceResponse[];
-  setSidePanelData: ({
+  setDrawer: ({
     isOpen,
     modelId,
     requestId,
@@ -35,7 +35,7 @@ type Props = {
 };
 
 export const InstanceTable = memo(
-  ({ data, setSidePanelData, children }: Props) => {
+  ({ data, setDrawer, children }: Props) => {
     const getStatusVariant = (status: number) => {
       if (String(status).startsWith("2") || String(status).startsWith("3"))
         return "secondary";
@@ -60,7 +60,7 @@ export const InstanceTable = memo(
               <TableRow
                 key={request.uuid}
                 className={
-                  request.content.statusCode.toString().startsWith("5")
+                  request.content.data.statusCode.toString().startsWith("5")
                     ? "bg-red-800/20"
                     : ""
                 }
@@ -69,26 +69,28 @@ export const InstanceTable = memo(
                   {formatDate(request.created_at)}
                 </TableCell>
                 <TableCell className="flex font-medium items-center gap-2 text-muted-foreground h-[53px]">
-                  <span>{request.content.method.toUpperCase()}</span>
+                  <span>{request?.content?.metadata?.type?.toUpperCase()}</span>
                   <ArrowUpDown className="h-4 w-4" />
                   <span className="truncate max-w-[400px] text-black dark:text-white">
-                    {request.content.route}
+                    {request.content.data.route}
                   </span>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={getStatusVariant(request.content.statusCode)}>
-                    {request.content.statusCode}
+                  <Badge variant={getStatusVariant(request.content.data.statusCode)}>
+                    {request.content.data.statusCode}
                   </Badge>
                 </TableCell>
                 <TableCell>
                   <p
                     className={
-                      request.content.duration > 999
+                      typeof request.content.duration === "number" && request.content.duration > 999
                         ? "text-yellow-600"
                         : "text-black dark:text-white"
                     }
                   >
-                    {formatDuration(request.content.duration)}
+                    {typeof request.content.duration === "number"
+                      ? formatDuration(request.content.duration)
+                      : "-"}
                   </p>
                 </TableCell>
                 <TableCell>
@@ -97,7 +99,7 @@ export const InstanceTable = memo(
                       variant="outline"
                       size="icon"
                       onClick={() =>
-                        setSidePanelData({
+                        setDrawer({
                           isOpen: true,
                           modelId: request.request_id ?? "",
                           requestId: request.request_id ?? "",

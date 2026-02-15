@@ -76,34 +76,22 @@ class LogWatcherSQL extends BaseBuilder {
     const periodSql = period ? this.getPeriodSQL(period) : "";
     const messageSql = key ? `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.message')) = '${key}'` : "";
 
-    const levels = ["info", "warn", "error", "debug", "trace", "fatal", "log"];
-    
-    // Aggregate columns for the top half of the UNION
+    const levels = ["info", "warn", "error", "log", "debug", "trace", "fatal"];
+
     const aggregateColumns = [
       "COUNT(*) as total",
       ...levels.map(lvl => `SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.level')) LIKE '${lvl}' THEN 1 ELSE 0 END) as ${lvl}`),
       "NULL as created_at",
       "NULL as content",
-      "NULL as uuid",
-      "NULL as type",
-      "NULL as request_id",
-      "NULL as job_id",
-      "NULL as schedule_id",
-      "'aggregate' as row_type"
+      "'aggregate' as type"
     ];
 
-    // Row columns for the bottom half of the UNION
     const rowColumns = [
       "NULL as total",
-      ...levels.map(() => "NULL"), // level placeholders
+      ...levels.map(lvl => `NULL as ${lvl}`),
       "created_at",
       "content",
-      "uuid",
-      "type",
-      "request_id",
-      "job_id",
-      "schedule_id",
-      "'row' as row_type"
+      "'row' as type"
     ];
 
     const whereClause = `WHERE type = 'log' ${periodSql} ${messageSql}`;

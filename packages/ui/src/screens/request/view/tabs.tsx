@@ -3,19 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { useState, memo } from "react";
-import {
-  CacheInstanceResponse,
-  ExceptionInstanceResponse,
-  HttpClientInstanceResponse,
-  JobInstanceResponse,
-  LogInstanceResponse,
-  MailInstanceResponse,
-  ModelInstanceResponse,
-  NotificationInstanceResponse,
-  QueryInstanceResponse,
-  RequestInstanceResponse,
-  ViewInstanceResponse,
-} from "../../../../types";
+import { RequestInstanceResponse, NotificationInstanceResponse, MailInstanceResponse, LogInstanceResponse, QueryInstanceResponse, HttpClientInstanceResponse, JobInstanceResponse, CacheInstanceResponse, ExceptionInstanceResponse, ViewInstanceResponse, ModelInstanceResponse } from "@/hooks/useApiTyped";
 
 export const RequestPreviewTabs = memo(
   ({
@@ -85,7 +73,7 @@ export const RequestPreviewTabs = memo(
                   },
                 }}
               >
-                {JSON.stringify(data.request.content?.payload || {}, null, 2)}
+                {JSON.stringify(data.request.content?.data.payload || {}, null, 2)}
               </SyntaxHighlighter>
             </TabsContent>
             <TabsContent value="headers" className="mt-0">
@@ -101,7 +89,7 @@ export const RequestPreviewTabs = memo(
                   },
                 }}
               >
-                {JSON.stringify(data.request.content?.headers || {}, null, 2)}
+                {JSON.stringify(data.request.content?.data.headers || {}, null, 2)}
               </SyntaxHighlighter>
             </TabsContent>
             <TabsContent value="queries" className="mt-0">

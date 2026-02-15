@@ -9,7 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronRight } from "lucide-react";
-import { ExceptionInstanceResponse } from "../../../../types";
+import { ExceptionInstanceResponse } from "@/hooks/useApiTyped";
 
 export const ExceptionCrumbs = React.memo(
   ({ exception }: { exception: ExceptionInstanceResponse }) => {

@@ -2,13 +2,15 @@
 
 import JobsIndexTable from "../table";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
-import { useGraph } from "@/hooks/useGraph";
 import {
   IndexPageLayout,
   StatsCard,
   DurationCard,
   StatsGrid,
 } from "@/components/ui/index-page";
+import { useJobs } from "@/hooks/useApiTyped";
+import { StoreContext } from "@/store";
+import { useContext } from "react";
 
 const JOB_BAR_DATA = [
   { dataKey: "completed", stackId: "a", fill: "#f1f5f9" },
@@ -17,9 +19,8 @@ const JOB_BAR_DATA = [
 ];
 
 export default function JobsIndex() {
-  const { data, currentDate, period } = useGraph({
-    type: "jobs",
-  });
+  const { state } = useContext(StoreContext);
+  const { data } = useJobs.useGraph();
 
   return (
     <IndexPageLayout>
@@ -36,9 +37,7 @@ export default function JobsIndex() {
             graph={
                 <CountGraph
                   data={data.countFormattedData}
-                barData={JOB_BAR_DATA}
-                  period={period}
-                  currentDate={currentDate}
+                  barData={JOB_BAR_DATA}
                 />
             }
           />
@@ -48,9 +47,9 @@ export default function JobsIndex() {
             average={data.average}
             p95={data.p95}
             durationFormattedData={data.durationFormattedData}
-                  period={period}
-                  currentDate={currentDate}
-                />
+            period={state.period}
+            currentDate={""}
+          />
         </StatsGrid>
       )}
       <JobsIndexTable />

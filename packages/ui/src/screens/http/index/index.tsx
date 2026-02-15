@@ -2,13 +2,15 @@
 
 import HttpIndexTable from "../table";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
-import { useGraph } from "@/hooks/useGraph";
 import {
   IndexPageLayout,
   StatsCard,
   DurationCard,
   StatsGrid,
 } from "@/components/ui/index-page";
+import { useHttps } from "@/hooks/useApiTyped";
+import { StoreContext } from "@/store";
+import { useContext } from "react";
 
 const HTTP_BAR_DATA = [
   { dataKey: "200", stackId: "a", fill: "#f1f5f9" },
@@ -17,11 +19,10 @@ const HTTP_BAR_DATA = [
 ];
 
 export default function HttpsIndex() {
-  const { data, currentDate, period } = useGraph({
-    type: "https",
-  });
+  const { state } = useContext(StoreContext);
+  const { data } = useHttps.useGraph();
 
-  return (
+   return (
     <IndexPageLayout>
       {data && (
         <StatsGrid columns={2}>
@@ -36,9 +37,7 @@ export default function HttpsIndex() {
             graph={
                 <CountGraph
                   data={data.countFormattedData}
-                barData={HTTP_BAR_DATA}
-                  period={period}
-                  currentDate={currentDate}
+                  barData={HTTP_BAR_DATA}
                 />
             }
           />
@@ -48,9 +47,9 @@ export default function HttpsIndex() {
             average={data.average}
             p95={data.p95}
             durationFormattedData={data.durationFormattedData}
-                  period={period}
-                  currentDate={currentDate}
-                />
+            period={state.period}
+            currentDate={""}
+          />
         </StatsGrid>
       )}
       <HttpIndexTable />

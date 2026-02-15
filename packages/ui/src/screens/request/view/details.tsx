@@ -2,15 +2,7 @@
 import React from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import {
-  CacheInstanceResponse,
-  ExceptionInstanceResponse,
-  HttpClientInstanceResponse,
-  JobInstanceResponse,
-  ModelInstanceResponse,
-  QueryInstanceResponse,
-  ViewInstanceResponse,
-} from "../../../../types";
+import { QueryInstanceResponse, JobInstanceResponse, CacheInstanceResponse, HttpClientInstanceResponse, ExceptionInstanceResponse, ViewInstanceResponse, ModelInstanceResponse } from "@/hooks/useApiTyped";
 
 export const RequestPreviewDetails = React.memo(
   ({
@@ -45,27 +37,27 @@ export const RequestPreviewDetails = React.memo(
 
     const stats = {
       queryCount: queryItems.length,
-      queryAverage: averageOf(queryItems, (item) => item.content.duration),
+      queryAverage: averageOf(queryItems, (item) => Number(item.content.duration)),
       queryWrites: sumOf(queryItems, (item) =>
         item.content.status !== "failed" &&
-          (item.content.sqlType === "WRITE" ||
-            item.content.sqlType === "INSERT" ||
-            item.content.sqlType === "UPDATE" ||
-            item.content.sqlType === "DELETE")
+          (item.content.metadata.sqlType === "WRITE" ||
+            item.content.metadata.sqlType === "INSERT" ||
+            item.content.metadata.sqlType === "UPDATE" ||
+            item.content.metadata.sqlType === "DELETE")
           ? 1
           : 0,
       ),
       queryReads: sumOf(queryItems, (item) =>
         item.content.status !== "failed" &&
-          (item.content.sqlType === "SELECT" || item.content.sqlType === "SHOW")
+          (item.content.metadata.sqlType === "SELECT" || item.content.metadata.sqlType === "SHOW")
           ? 1
           : 0,
       ),
       httpCount: filterByType(https, "http").length,
       jobCount: filterByType(jobs, "job").length,
-      cacheHits: sumOf(caches, (item) => (item.content.hits ? 1 : 0)),
-      cacheMisses: sumOf(caches, (item) => (item.content.misses ? 1 : 0)),
-      cacheWrites: sumOf(caches, (item) => (item.content.writes ? 1 : 0)),
+      cacheHits: sumOf(caches, (item) => (item.content.data.hits ? 1 : 0)),
+      cacheMisses: sumOf(caches, (item) => (item.content.data.misses ? 1 : 0)),
+      cacheWrites: sumOf(caches, (item) => (item.content.data.writes ? 1 : 0)),
       exceptionCount: filterByType(exceptions, "exception").length,
       viewCount: filterByType(views, "view").length,
       modelCount: filterByType(models, "model").length,

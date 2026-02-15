@@ -9,7 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronRight } from "lucide-react";
-import { ModelInstanceResponse } from "../../../../types";
+import { ModelInstanceResponse } from "@/hooks/useApiTyped";
 
 export const ModelCrumbs = React.memo(
   ({ model }: { model: ModelInstanceResponse }) => {
@@ -33,16 +33,16 @@ export const ModelCrumbs = React.memo(
             </BreadcrumbItem>
             <BreadcrumbItem>
               <BreadcrumbLink className="text-muted-foreground">
-                {model.content.modelName}
+                {model.content.data.modelName}
               </BreadcrumbLink>
             </BreadcrumbItem>
           </Breadcrumb>
           <div className="flex items-center gap-x-4">
             <Badge variant="secondary">
-              {model.content.package.toUpperCase()}
+              {model.content.metadata.package.toUpperCase()}
             </Badge>
-            <Badge variant={getStatusColor(model.content.status)}>
-              {model.content.status.toUpperCase()}
+            <Badge variant={getStatusColor(model.content.status as string)}>
+              {model.content.status?.toUpperCase()}
             </Badge>
           </div>
         </CardContent>

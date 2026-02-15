@@ -9,13 +9,13 @@ import {
   useViewData,
   Source,
 } from "@/components/ui/view-page";
-import { HttpClientInstanceResponse } from "../../../../types";
+import { HttpClientInstanceResponse } from "@/hooks/useApiTyped";
 
 export default function HTTPView() {
   const [activeTab, setActiveTab] = useState("raw");
   
   const { data, loading, error, source } = useViewData<HttpClientInstanceResponse>({
-    endpoint: "http",
+    endpoint: "https",
     dataKey: "http",
   });
 

@@ -127,12 +127,18 @@ describe("MailWatcher Integration", () => {
 
   describe("index endpoint", () => {
     it("should return empty results when no data exists", async () => {
+      /**
+       * Verifies baseline behavior with an empty database.
+       * Calls the table index endpoint with grouping enabled.
+       * Ensures the API responds successfully (HTTP 200).
+       * Confirms no rows are returned and count is zero.
+       */
       const req = createMockRequest({
         table: "true",
         index: "group",
         period: "24h",
       });
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body.results).toEqual([]);
@@ -140,6 +146,12 @@ describe("MailWatcher Integration", () => {
     });
 
     it("should return mail entries", async () => {
+      /**
+       * Inserts one successful email and one failed email entry.
+       * Calls the instance index to fetch raw mail rows.
+       * Validates the endpoint responds successfully (HTTP 200).
+       * Confirms both inserted entries are returned in results.
+       */
       await database.insert([
         createMailEntry(
           "mail:1",
@@ -172,13 +184,19 @@ describe("MailWatcher Integration", () => {
         index: "instance",
         period: "24h",
       });
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body.results).toHaveLength(2);
     });
 
     it("should group by recipient", async () => {
+      /**
+       * Inserts multiple mail entries to the same recipient.
+       * Uses grouped index mode to aggregate by recipient.
+       * Ensures grouping logic merges entries into one row.
+       * Verifies only one grouped result is returned.
+       */
       await database.insert([
         createMailEntry(
           "mail:1",
@@ -205,21 +223,23 @@ describe("MailWatcher Integration", () => {
         index: "group",
         period: "24h",
       });
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body.results).toHaveLength(1);
     });
 
     it("should filter by status", async () => {
+      /**
+       * Inserts both completed and failed mail entries.
+       * Queries the instance index with a status filter.
+       * Confirms the endpoint returns successfully (HTTP 200).
+       * Ensures filtering does not break the response flow.
+       */
       await database.insert([
         createMailEntry(
           "mail:completed",
-          {
-            to: ["user@example.com"],
-            from: "noreply@app.com",
-            subject: "OK",
-          },
+          { to: ["user@example.com"], from: "noreply@app.com", subject: "OK" },
           { status: "completed", duration: 500 },
         ),
         createMailEntry(
@@ -243,14 +263,20 @@ describe("MailWatcher Integration", () => {
         period: "24h",
         status: "failed",
       });
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
 
       expect(result.statusCode).toBe(200);
     });
 
     it("should return graph data when isTable is false", async () => {
+      /**
+       * Calls the graph endpoint instead of the table endpoint.
+       * Simulates a request for aggregated mail metrics.
+       * Validates a successful HTTP response is returned.
+       * Confirms graph-formatted data exists in response.
+       */
       const req = createMockRequest({ table: "false", period: "24h" });
-      const result = await watcher.index(req);
+      const result = await watcher.indexGraph(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body).toHaveProperty("countFormattedData");
@@ -259,6 +285,12 @@ describe("MailWatcher Integration", () => {
 
   describe("view endpoint", () => {
     it("should return entry data by uuid", async () => {
+      /**
+       * Inserts a single mail record into the database.
+       * Requests detailed view using that mail UUID.
+       * Ensures the endpoint returns a successful response.
+       * Confirms the mail payload is present in response body.
+       */
       await database.insert([
         createMailEntry(
           "mail:view-test",
@@ -280,6 +312,12 @@ describe("MailWatcher Integration", () => {
     });
 
     it("should handle template emails", async () => {
+      /**
+       * Inserts a template-based email entry (no raw body/subject).
+       * Marks the command as SendTemplateEmail in metadata.
+       * Calls the view endpoint for the template mail UUID.
+       * Confirms the mail payload is returned successfully.
+       */
       await database.insert([
         createMailEntry(
           "mail:template",
@@ -302,6 +340,12 @@ describe("MailWatcher Integration", () => {
 
   describe("insertRedisStream", () => {
     it("should add entry to Redis stream", async () => {
+      /**
+       * Creates a standard SendMail payload for the watcher.
+       * Pushes the entry into the observatory mail Redis stream.
+       * Checks that the stream key length increases.
+       * Confirms at least one record now exists in stream.
+       */
       const entry = {
         status: "completed" as const,
         duration: 500,
@@ -327,6 +371,12 @@ describe("MailWatcher Integration", () => {
     });
 
     it("should handle template emails in stream", async () => {
+      /**
+       * Creates a SendTemplateEmail payload for the watcher.
+       * Pushes the template entry into the mail Redis stream.
+       * Validates template metadata/fields are accepted.
+       * Confirms the stream contains at least one record.
+       */
       const entry = {
         status: "completed" as const,
         duration: 600,
@@ -351,6 +401,12 @@ describe("MailWatcher Integration", () => {
     });
 
     it("should handle failed emails with error", async () => {
+      /**
+       * Creates a failed SendMail payload including an error object.
+       * Pushes the failure entry into the mail Redis stream.
+       * Ensures error payloads are supported by stream ingestion.
+       * Verifies the stream key length increases after insert.
+       */
       const entry = {
         status: "failed" as const,
         duration: 100,

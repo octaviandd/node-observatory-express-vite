@@ -14,11 +14,12 @@ import { Button } from "@/components/ui/button";
 import { ReactNode, memo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { formatDate, formatDuration } from "@/utils.js";
-import { HttpClientInstanceResponse } from "../../../../types";
+import { HttpClientInstanceResponse } from "@/hooks/useApiTyped";
+
 
 type Props = {
   data: HttpClientInstanceResponse[];
-  setSidePanelData: ({
+  setDrawer: ({
     isOpen,
     modelId,
     requestId,
@@ -35,7 +36,7 @@ type Props = {
 };
 
 export const InstanceTable = memo(
-  ({ data, setSidePanelData, children }: Props) => {
+  ({ data, setDrawer, children }: Props) => {
     const getStatusVariant = (status: number) => {
       if (String(status).startsWith("2") || String(status).startsWith("3"))
         return "secondary";
@@ -63,19 +64,21 @@ export const InstanceTable = memo(
                 </TableCell>
                 <TableCell className="flex items-center gap-2 h-[53px]">
                   <span className="text-black">
-                    {request.content.method.toUpperCase()}
+                    {(request.content.data.method ?? "").toUpperCase()}
                   </span>
                   <Globe className="h-4 w-4 text-muted-foreground" />
                   <span className="truncate max-w-[400px] text-black dark:text-white">
-                    {request.content.href ||
-                      (request.content.origin ?? "") +
-                      (request.content.path ?? "")}
+                    {
+                      request.content.data.origin
+                        ? (request.content.data.origin + (request.content.data.pathname ?? request.content.data.path ?? ""))
+                        : (request.content.data.hostname ?? "") + (request.content.data.pathname ?? "")
+                    }
                   </span>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={getStatusVariant(request.content.statusCode)}>
-                    {request.content.statusCode !== 0
-                      ? request.content.statusCode
+                  <Badge variant={getStatusVariant(request.content.data.statusCode as number)}>
+                    {request.content.data.statusCode !== 0
+                      ? request.content.data.statusCode
                       : "Internal Error"}
                   </Badge>
                 </TableCell>
@@ -87,7 +90,7 @@ export const InstanceTable = memo(
                         : "text-black dark:text-white"
                     }
                   >
-                    {formatDuration(request.content.duration)}
+                    {formatDuration(request.content.duration as number)}
                   </p>
                 </TableCell>
                 <TableCell>
@@ -96,7 +99,7 @@ export const InstanceTable = memo(
                       variant="outline"
                       size="icon"
                       onClick={() =>
-                        setSidePanelData({
+                        setDrawer({
                           isOpen: true,
                           modelId: request.uuid ?? "",
                           requestId: request.request_id ?? "",

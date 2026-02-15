@@ -112,12 +112,18 @@ describe("NotificationWatcher Integration", () => {
 
   describe("index endpoint", () => {
     it("should return empty results when no data exists", async () => {
+      /**
+       * Validates behavior when the notification table has no records.
+       * Calls the grouped table index endpoint for notification entries.
+       * Ensures the API responds successfully (HTTP 200).
+       * Confirms results are empty and count is zero.
+       */
       const req = createMockRequest({
         table: "true",
         index: "group",
         period: "24h",
       });
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body.results).toEqual([]);
@@ -125,6 +131,12 @@ describe("NotificationWatcher Integration", () => {
     });
 
     it("should return notification entries", async () => {
+      /**
+       * Inserts multiple notification publish/presence entries.
+       * Queries the instance index to retrieve raw notification rows.
+       * Verifies the endpoint returns a successful response.
+       * Confirms both inserted entries are returned in results.
+       */
       await database.insert([
         createNotificationEntry(
           "notification:1",
@@ -151,13 +163,19 @@ describe("NotificationWatcher Integration", () => {
         index: "instance",
         period: "24h",
       });
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body.results).toHaveLength(2);
     });
 
     it("should group by channel", async () => {
+      /**
+       * Inserts multiple notification entries for the same channel.
+       * Uses grouped index mode to aggregate by channel identifier.
+       * Ensures grouping collapses multiple rows into one.
+       * Verifies only one grouped result is returned.
+       */
       await database.insert([
         createNotificationEntry(
           "notification:1",
@@ -176,13 +194,19 @@ describe("NotificationWatcher Integration", () => {
         index: "group",
         period: "24h",
       });
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body.results).toHaveLength(1);
     });
 
     it("should filter by status", async () => {
+      /**
+       * Inserts one completed and one failed notification entry.
+       * Calls the instance index with a status filter for failures.
+       * Confirms the endpoint returns successfully (HTTP 200).
+       * Ensures failed entries can be requested without errors.
+       */
       await database.insert([
         createNotificationEntry(
           "notification:completed",
@@ -205,14 +229,20 @@ describe("NotificationWatcher Integration", () => {
         period: "24h",
         status: "failed",
       });
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
 
       expect(result.statusCode).toBe(200);
     });
 
     it("should return graph data when isTable is false", async () => {
+      /**
+       * Calls the graph endpoint instead of the table endpoint.
+       * Simulates a request for aggregated notification metrics.
+       * Validates a successful HTTP response is returned.
+       * Confirms graph-formatted data exists in response.
+       */
       const req = createMockRequest({ table: "false", period: "24h" });
-      const result = await watcher.index(req);
+      const result = await watcher.indexGraph(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body).toHaveProperty("countFormattedData");
@@ -221,6 +251,12 @@ describe("NotificationWatcher Integration", () => {
 
   describe("view endpoint", () => {
     it("should return entry data by uuid", async () => {
+      /**
+       * Inserts a single notification entry into the database.
+       * Requests detailed view using that notification UUID.
+       * Ensures the endpoint returns a successful response.
+       * Confirms the notification payload is present in body.
+       */
       await database.insert([
         createNotificationEntry("notification:view-test", {
           channel: "private-user-1",
@@ -237,6 +273,12 @@ describe("NotificationWatcher Integration", () => {
     });
 
     it("should include related request", async () => {
+      /**
+       * Inserts a notification entry tied to a specific request_id.
+       * Adds a related request entry sharing the same request_id.
+       * Calls the view endpoint for the notification UUID.
+       * Verifies both notification and related request are returned.
+       */
       const requestId = "shared-req";
       await database.insert([
         createNotificationEntry(
@@ -280,6 +322,12 @@ describe("NotificationWatcher Integration", () => {
 
   describe("insertRedisStream", () => {
     it("should add entry to Redis stream", async () => {
+      /**
+       * Creates a successful publish payload for the watcher.
+       * Pushes the entry into the observatory notification Redis stream.
+       * Checks that the stream key length increases after insertion.
+       * Confirms at least one record now exists in the stream.
+       */
       const entry = {
         status: "completed" as const,
         duration: 50,
@@ -305,6 +353,12 @@ describe("NotificationWatcher Integration", () => {
     });
 
     it("should handle different methods", async () => {
+      /**
+       * Iterates through multiple Ably method names (presence + publish).
+       * Sends one Redis stream entry per method value.
+       * Ensures the watcher accepts each method in metadata.
+       * Verifies stream length matches the number inserted.
+       */
       const methods = ["publish", "enter", "update", "leave"];
 
       for (const method of methods) {
@@ -330,6 +384,12 @@ describe("NotificationWatcher Integration", () => {
     });
 
     it("should handle failed notifications with error", async () => {
+      /**
+       * Creates a failed notification payload including an error object.
+       * Pushes the failure entry into the notification Redis stream.
+       * Ensures error payloads are supported by stream ingestion.
+       * Confirms the stream length increases after insertion.
+       */
       const entry = {
         status: "failed" as const,
         duration: 100,

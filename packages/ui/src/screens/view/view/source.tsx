@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router";
 import { ExternalLinkIcon } from "lucide-react";
-import { RequestInstanceResponse } from "../../../../types";
+import { RequestInstanceResponse } from "@/hooks/useApiTyped";
 
 export default function Source({
   source,
@@ -36,14 +36,14 @@ export default function Source({
 
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Route</div>
-            <div className="col-span-9">{source.content.route}</div>
+            <div className="col-span-9">{source.content.data.route}</div>
           </div>
 
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Method</div>
             <div className="col-span-9">
               <Badge variant="outline">
-                {source.content.method.toUpperCase()}
+                {source.content.metadata.method.toUpperCase()}
               </Badge>
             </div>
           </div>

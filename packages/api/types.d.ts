@@ -1,10 +1,12 @@
+/** @format */
+
 declare global {
   namespace Express {
     interface Request {
       session?: { id: string; [key: string]: any };
     }
   }
-  const WINSTON_PATCHED_SYMBOL: unique symbol
+  // const WINSTON_PATCHED_SYMBOL: unique symbol;
 }
 
 // ============================================================================
@@ -14,8 +16,29 @@ type Period = "1h" | "24h" | "7d" | "14d" | "30d";
 type IndexType = "instance" | "group";
 type StatusType = "all" | "completed" | "failed";
 type HttpStatusType = "all" | "2xx" | "4xx" | "5xx";
-type LogLevel = "info" | "warn" | "error" | "debug" | "verbose" | "silly" | "log" | "trace" | "fatal";
-type WatcherType = "request" | "cache" | "log" | "mail" | "http" | "notification" | "view" | "schedule" | "model" | "exception" | "job" | "query";
+type LogLevel =
+  | "info"
+  | "warn"
+  | "error"
+  | "debug"
+  | "verbose"
+  | "silly"
+  | "log"
+  | "trace"
+  | "fatal";
+type WatcherType =
+  | "request"
+  | "cache"
+  | "log"
+  | "mail"
+  | "http"
+  | "notification"
+  | "view"
+  | "schedule"
+  | "model"
+  | "exception"
+  | "job"
+  | "query";
 
 interface WatcherEntry {
   uuid: string;
@@ -24,7 +47,7 @@ interface WatcherEntry {
   schedule_id?: string;
   type: string;
   content: string;
-  created_at: number | Date;
+  created_at: string | Date;
 }
 
 // ============================================================================
@@ -45,45 +68,125 @@ interface IndexedFilters extends WatcherFilters {
   key?: string;
 }
 
-interface ViewFilters extends IndexedFilters { path?: string; status: StatusType }
-interface ScheduleFilters extends IndexedFilters { status: StatusType; groupFilter: "all" | "errors" | "slow" }
-interface RequestFilters extends IndexedFilters { status: HttpStatusType }
-interface QueryFilters extends IndexedFilters { status: string }
-interface NotificationFilters extends IndexedFilters { type?: string; channel?: string; status: string }
-interface CacheFilters extends IndexedFilters { type: "all" | "misses" | "hits" | "writes" }
-interface HTTPClientFilters extends IndexedFilters { status: HttpStatusType }
-interface ModelFilters extends IndexedFilters { model?: string; status?: StatusType }
-interface MailFilters extends IndexedFilters { status: StatusType }
-interface JobFilters extends IndexedFilters { status: "all" | "released" | "failed" | "completed"; queue: "all" | "errors" | "slow" }
-interface LogFilters extends IndexedFilters { logType: "All" | "Info" | "Warn" | "Error" | "Debug" | "Trace" | "Fatal" | "Complete" | "Log" }
-interface ExceptionFilters extends IndexedFilters { type: "all" | "unhandled" | "uncaught" }
-
-
+interface ViewFilters extends IndexedFilters {
+  path?: string;
+  status: StatusType;
+}
+interface ScheduleFilters extends IndexedFilters {
+  status: StatusType;
+  groupFilter: "all" | "errors" | "slow";
+}
+interface RequestFilters extends IndexedFilters {
+  status: HttpStatusType;
+}
+interface QueryFilters extends IndexedFilters {
+  status: string;
+}
+interface NotificationFilters extends IndexedFilters {
+  type?: string;
+  channel?: string;
+  status: string;
+}
+interface CacheFilters extends IndexedFilters {
+  type: "all" | "misses" | "hits" | "writes";
+}
+interface HTTPClientFilters extends IndexedFilters {
+  status: HttpStatusType;
+}
+interface ModelFilters extends IndexedFilters {
+  model?: string;
+  status?: StatusType;
+}
+interface MailFilters extends IndexedFilters {
+  status: StatusType;
+}
+interface JobFilters extends IndexedFilters {
+  status: "all" | "released" | "failed" | "completed";
+  queue: "all" | "errors" | "slow";
+}
+interface LogFilters extends IndexedFilters {
+  logType:
+    | "All"
+    | "Info"
+    | "Warn"
+    | "Error"
+    | "Debug"
+    | "Trace"
+    | "Fatal"
+    | "Complete"
+    | "Log";
+}
+interface ExceptionFilters extends IndexedFilters {
+  type: "all" | "unhandled" | "uncaught";
+}
 
 // ============================================================================
 // Library Types
 // ============================================================================
 type Logger = "winston" | "pino" | "bunyan" | "log4js" | "signale" | "loglevel";
 type Scheduler = "node-schedule" | "node-cron" | "bree";
-type Mailer = "nodemailer" | "@sendgrid/mail" | "mailgun.js" | "postmark" | "@aws-sdk/client-ses";
-type CachePackages = "redis" | "ioredis" | "node-cache" | "lru-cache" | "memjs" | "level" | "keyv";
+type Mailer =
+  | "nodemailer"
+  | "@sendgrid/mail"
+  | "mailgun.js"
+  | "postmark"
+  | "@aws-sdk/client-ses";
+type CachePackages =
+  | "redis"
+  | "ioredis"
+  | "node-cache"
+  | "lru-cache"
+  | "memjs"
+  | "level"
+  | "keyv";
 type Notifications = "pusher" | "ably";
-type Http = "axios" | "http" | "https" | "fetch" | "got" | "superagent" | "undici" | "ky" | "needle" | "phin" | "node-fetch";
+type Http =
+  | "axios"
+  | "http"
+  | "https"
+  | "fetch"
+  | "got"
+  | "superagent"
+  | "undici"
+  | "ky"
+  | "needle"
+  | "phin"
+  | "node-fetch";
 type Jobs = "bull" | "agenda";
 type Errors = "uncaught" | "unhandled";
-type Queries = "knex" | "sequelize" | "sqlite3" | "typeorm" | "prisma" | "mysql2" | "mysql" | "mongodb" | "pg";
-type Model = "typeorm" | "sequelize" | "prisma" | "knex" | "sqlite3";
+type Queries =
+  | "knex"
+  | "sequelize"
+  | "sqlite3"
+  | "typeorm"
+  | "prisma"
+  | "mysql2"
+  | "mysql"
+  | "mongodb"
+  | "pg";
+type Model = "typeorm" | "sequelize" | "prisma" | "knex" | "sqlite3" | "mongoose";
 type Views = "ejs" | "pug" | "handlebars";
 type StoreDriver = "mysql2";
 
 // ============================================================================
 // Base Log Entry Types (for insertRedisStream)
 // ============================================================================
-interface LogLocation { file: string; line: string }
-interface LogError { name: string; message: string; stack?: string; code?: string }
+interface LogLocation {
+  file: string;
+  line: string;
+}
+interface LogError {
+  name: string;
+  message: string;
+  stack?: string;
+  code?: string;
+}
 
-interface BaseLogEntry<TMetadata = Record<string, any>, TData = Record<string, any>> {
-  status?: "completed" | "failed";
+interface BaseLogEntry<
+  TMetadata = Record<string, any>,
+  TData = Record<string, any>,
+> {
+  status?: "completed" | "failed" | "released";
   duration?: number;
   metadata: TMetadata & { package: string };
   data: TData;
@@ -93,157 +196,380 @@ interface BaseLogEntry<TMetadata = Record<string, any>, TData = Record<string, a
 }
 
 // ============================================================================
-// Base Content Types
+// Content Types (matching patcher log entry shapes)
 // ============================================================================
-interface ContentError { message: string; name: string }
-interface BaseContent { file: string; line: string; duration?: number; error?: ContentError | null }
 
-interface HttpRequestData extends BaseContent {
-  method: string; origin: string; pathname: string; protocol: string;
-  statusCode: number; statusMessage: string; aborted: boolean;
-  headers: Record<string, string | string[] | undefined>;
-  responseBody: string | Buffer; responseBodySize: number; isMedia: boolean; library: string;
-  host?: string; hostname?: string; path?: string; port?: string | number | null;
-  // Library-specific (Axios, Got, Node-fetch, Superagent, Needle)
-  maxRedirects?: number; maxBodyLength?: number | null; beforeRedirects?: Record<string, any>;
-  hooks?: Record<string, any[]>; retry?: Record<string, any>; pagination?: Record<string, any>;
-  throwHttpErrors?: boolean; followRedirect?: boolean; methodRewriting?: boolean;
-  resolveBodyOnly?: boolean; ignoreInvalidCookies?: boolean;
-  href?: string; slashes?: boolean; auth?: string | null; hash?: string | null;
-  search?: string | null; query?: string | null;
-  agent?: boolean | any; rejectUnauthorized?: boolean; signal?: any;
-  url?: string | Record<string, any>;
-  [key: string]: any;
-}
+// -- Request (express-common, http-common server) --
+type RequestMetadata = { package: "express" | "http"; method: string; type?: string };
+type RequestData = {
+  route?: string;
+  statusCode: number;
+  requestSize?: number;
+  responseSize?: number;
+  payload?: string;
+  headers?: Record<string, any>;
+  query?: Record<string, any>;
+  params?: Record<string, any>;
+  ip?: string;
+  ipAddress?: string;
+  memoryUsage?: NodeJS.MemoryUsage;
+  session?: Record<string, any>;
+};
+type RequestContent = BaseLogEntry<RequestMetadata, RequestData>;
 
-// ============================================================================
-// Content Interfaces
-// ============================================================================
+// -- View (express-common render) --
+type ViewMetadata = { package: string; method: "render" };
+type ViewData = {
+  view: string;
+  options: Record<string, any>;
+  size: number;
+  cacheInfo: { cacheEnabled: boolean };
+};
+type ViewContent = BaseLogEntry<ViewMetadata, ViewData>;
+
+// -- Exception (not from a patcher – caught by the framework) --
 interface ExceptionContent {
-  type: "exception"; message: string; stack: string; file: string; line: string; title: string; fullError: string;
+  type: "exception";
+  message: string;
+  stack: string;
+  file: string;
+  line: string;
+  title: string;
+  fullError: string;
   codeContext: { lineNumber: number; content: string; isErrorLine: boolean }[];
 }
 
-interface ViewContent extends BaseContent {
-  type: "view"; view: string; data: string; size: number; status: StatusType; package: Views; options: Record<string, any>;
-  cacheInfo: { cacheEnabled: boolean };
-}
+// -- Cache (redis, ioredis, node-cache, lru-cache, memjs, level, keyv) --
+type CacheMetadata = { package: CachePackages; command: string; host?: string; port?: number };
+type CacheData = { key?: any; hits?: number; misses?: number; writes?: number };
+type CacheContent = BaseLogEntry<CacheMetadata, CacheData>;
 
-interface ScheduleContent extends BaseContent {
-  type: "schedule"; package: Scheduler; scheduleId: string; cronExpression: string; status: StatusType; jobId: string;
-  nextInvocation?: string; newRule?: string; rule?: string; method?: string; name?: string; data?: Record<string, any>;
-}
+// -- Log (winston, pino, bunyan, log4js, signale, loglevel) --
+type LogMetadata = { package: Logger; level: string; logger?: string };
+type LogData = { message: any };
+type LogContent = BaseLogEntry<LogMetadata, LogData>;
 
-interface JobContent extends BaseContent {
-  type: "job"; package: Jobs; queue: string; connectionName: string;
-  method: "process" | "add" | "retryJob" | "start" | "pause" | "resume" | "processJob";
-  status: "started" | "processing" | "completed" | "failed" | "released";
-  jobData?: Record<string, any>; attemptsMade?: number; failedReason?: string; returnValue?: any; jobId?: string; token?: string;
-}
+// -- Notification (pusher, ably) --
+type NotificationMetadata =
+  | { package: "pusher"; method: "trigger" | "triggerBatch" }
+  | { package: "ably"; method: string; mode: "realtime" | "rest" };
+type NotificationData = {
+  channel?: string;
+  event?: string;
+  payload?: any;
+  batch?: any[];
+  options?: any;
+};
+type NotificationContent = BaseLogEntry<NotificationMetadata, NotificationData>;
 
-interface LogContent extends BaseContent {
-  type: "log"; package: "bunyan" | "log4js" | "signale" | "loglevel"; message: string;
-  level: "info" | "warn" | "error" | "debug" | "verbose" | "silly" | "log";
-}
+// -- Mail (nodemailer, sendgrid, mailgun, postmark, aws-ses) --
+type MailMetadata = { package: Mailer; command: string };
+type MailData = {
+  to: string[];
+  cc: string[];
+  bcc: string[];
+  from: string;
+  subject?: string;
+  body?: string;
+  templateId?: string;
+  messageId?: string;
+};
+type MailContent = BaseLogEntry<MailMetadata, MailData>;
 
-interface NotificationContent extends BaseContent {
-  type: "notification"; method: "trigger" | "triggerBatch"; status: StatusType; package: Notifications;
-  channel?: string; event?: string; data?: Record<string, any>; options?: Record<string, any>; response?: Record<string, any>;
-}
+// -- Query (pg, mysql2, mysql, knex, sqlite3) --
+type QueryMetadata = { package: Queries; context?: string; sqlType?: string; method?: string };
+type QueryData = {
+  sql?: string;
+  query?: string;
+  hostname?: string;
+  port?: string | number;
+  database?: string;
+  rowCount?: number;
+};
+type QueryContent = BaseLogEntry<QueryMetadata, QueryData>;
 
-interface MailContent extends BaseContent {
-  type: "mail"; status: StatusType; package: Mailer;
-  info?: { messageId: string; response: string } | null; command?: string;
-  to?: string[]; cc?: string[]; bcc?: string[]; from?: string; subject?: string; text?: string; body?: string;
-}
+// -- Model (prisma, sequelize, typeorm, mongoose) --
+type ModelMetadata = { package: Model; method: string; modelName: string };
+type ModelData = Record<string, any>;
+type ModelContent = BaseLogEntry<ModelMetadata, ModelData>;
 
-interface CacheContent extends BaseContent {
-  type: "cache"; package: CachePackages; hits: number; misses: number; writes: number;
-  result?: any; key?: string; value?: any; checkPeriod?: number; stdTTL?: number;
-}
+// -- Job (bull, agenda) --
+type JobMetadata = { package: Jobs; method: string; queue?: string; connectionName?: string };
+type JobData = {
+  queue?: string;
+  connectionName?: string;
+  jobId?: string;
+  attemptsMade?: number;
+  failedReason?: string;
+};
+type JobContent = BaseLogEntry<JobMetadata, JobData>;
 
-interface QueryContent extends BaseContent {
-  type: "query"; context: string; sql: string; hostname: string; port: string; database: string; status: StatusType; sqlType: string;
-  package: "mysql2" | "pg" | "sequelize" | "knex" | "prisma" | "sqlite3" | "typeorm"; params?: any;
-}
+// -- HTTP Client (axios, fetch, http/https, undici) --
+type HttpClientMetadata = { package: string; method?: string };
+type HttpClientData = {
+  method?: string;
+  hostname?: string;
+  pathname?: string;
+  statusCode?: number;
+  origin?: string;
+  port?: number | string;
+  path?: string;
+  headers?: Record<string, any>;
+  requestBody?: string;
+  requestBodySize?: number;
+  responseBody?: string;
+  responseBodySize?: number;
+  statusMessage?: string;
+  isRedirect?: boolean;
+  redirectFrom?: string;
+  isMedia?: boolean;
+  aborted?: boolean;
+};
+type HttpClientContent = BaseLogEntry<HttpClientMetadata, HttpClientData>;
 
-type ModelMethod = "create" | "find" | "findById" | "findByPk" | "findAll" | "update" | "destroy" | "count" | "sum" | "min" | "max" | "avg" | "median" | "mode" | "group" | "groupBy" | "groupByCount" | "groupBySum" | "groupByMin" | "groupByMax" | "groupByAvg" | "groupByMedian" | "groupByMode";
-
-interface ModelContent extends BaseContent {
-  type: "model"; method: ModelMethod; status: StatusType; package: Model; modelName: string; arguments: any[]; result: any;
-}
-
-interface RequestContent extends BaseContent {
-  type: "request"; method: string; route: string; statusCode: number; package: "express";
-  headers: Record<string, string>; query: Record<string, string>; params: Record<string, string>;
-  ip: string; payload: any; responseSize: number; requestSize: number; session: Record<string, any>;
-  memoryUsage: { rss: number; heapTotal: number; heapUsed: number; external: number };
-}
-
-interface HttpClientContent extends BaseContent {
-  type: "http"; method: string; route: string; statusCode: number; package: string;
-  headers: Record<string, string>; query: Record<string, string>; params: Record<string, string>;
-  responseBody: string; responseBodySize: number; requestBody: string; requestBodySize: number; responseHeaders: Record<string, string>;
-  href?: string; slashes?: boolean; auth?: string | null; hash?: string | null; search?: string | null;
-  origin?: string; pathname?: string; path?: string; protocol?: string; statusMessage?: string; aborted?: boolean; fullUrl?: string;
-}
+// -- Schedule (node-schedule, node-cron, bree) --
+type ScheduleMetadata = {
+  package: Scheduler;
+  type: string;
+  scheduleId: string;
+  breeId?: string;
+  jobId?: string;
+};
+type ScheduleData = {
+  cronExpression?: string;
+  name?: string | null;
+  rule?: any;
+  jobName?: string;
+};
+type ScheduleContent = BaseLogEntry<ScheduleMetadata, ScheduleData>;
 
 // ============================================================================
 // Response Types
 // ============================================================================
-type ContentType = "view" | "exception" | "request" | "model" | "cache" | "job" | "query" | "log" | "notification" | "mail" | "schedule" | "http";
-type AllContent = ViewContent | ExceptionContent | RequestContent | ModelContent | CacheContent | JobContent | QueryContent | LogContent | NotificationContent | MailContent | ScheduleContent | HttpClientContent;
+type ContentType =
+  | "view"
+  | "exception"
+  | "request"
+  | "model"
+  | "cache"
+  | "job"
+  | "query"
+  | "log"
+  | "notification"
+  | "mail"
+  | "schedule"
+  | "http";
+type AllContent =
+  | ViewContent
+  | ExceptionContent
+  | RequestContent
+  | ModelContent
+  | CacheContent 
+  | JobContent
+  | QueryContent
+  | LogContent
+  | NotificationContent
+  | MailContent
+  | ScheduleContent
+  | HttpClientContent;
 
 interface ClientResponse {
-  uuid: string; request_id?: string; job_id?: string; schedule_id?: string;
-  created_at: string; updated_at: string; type: ContentType; content: AllContent;
+  uuid: string;
+  request_id?: string;
+  job_id?: string;
+  schedule_id?: string;
+  created_at: string;
+  updated_at: string;
+  type: ContentType;
+  content: AllContent;
 }
 
-interface BaseGroupResponse { count: number; shortest?: number; longest?: number; average?: number; p95?: number }
+interface BaseGroupResponse {
+  count: number;
+  shortest?: number;
+  longest?: number;
+  average?: number;
+  p95?: number;
+}
+
+type WatcherTypeToInstanceResponse = {
+  request: RequestInstanceResponse;
+  cache: CacheInstanceResponse;
+  log: LogInstanceResponse;
+  mail: MailInstanceResponse;
+  http: HttpClientInstanceResponse;
+  notification: NotificationInstanceResponse;
+  view: ViewInstanceResponse;
+  schedule: ScheduleInstanceResponse;
+  model: ModelInstanceResponse;
+  exception: ExceptionInstanceResponse;
+  job: JobInstanceResponse;
+  query: QueryInstanceResponse;
+};
+
+type ViewDataResponse = Partial<{
+  [K in WatcherType]: WatcherTypeToInstanceResponse[K][];
+}>;
 
 // Instance Responses
-interface CacheInstanceResponse extends ClientResponse { content: CacheContent }
-interface RequestInstanceResponse extends ClientResponse { content: RequestContent }
-interface JobInstanceResponse extends ClientResponse { content: JobContent }
-interface ScheduleInstanceResponse extends ClientResponse { content: ScheduleContent }
-interface ViewInstanceResponse extends ClientResponse { content: ViewContent }
-interface ExceptionInstanceResponse extends ClientResponse { content: ExceptionContent }
-interface HttpClientInstanceResponse extends ClientResponse { content: HttpClientContent }
-interface MailInstanceResponse extends ClientResponse { content: MailContent }
-interface LogInstanceResponse extends ClientResponse { content: LogContent }
-interface NotificationInstanceResponse extends ClientResponse { content: NotificationContent }
-interface QueryInstanceResponse extends ClientResponse { content: QueryContent; average: number; p95: number }
-interface ModelInstanceResponse extends ClientResponse { content: ModelContent }
+interface CacheInstanceResponse extends ClientResponse {
+  content: CacheContent;
+}
+interface RequestInstanceResponse extends ClientResponse {
+  content: RequestContent;
+}
+interface JobInstanceResponse extends ClientResponse {
+  content: JobContent;
+}
+interface ScheduleInstanceResponse extends ClientResponse {
+  content: ScheduleContent;
+}
+interface ViewInstanceResponse extends ClientResponse {
+  content: ViewContent;
+}
+interface ExceptionInstanceResponse extends ClientResponse {
+  content: ExceptionContent;
+}
+interface HttpClientInstanceResponse extends ClientResponse {
+  content: HttpClientContent;
+}
+interface MailInstanceResponse extends ClientResponse {
+  content: MailContent;
+}
+interface LogInstanceResponse extends ClientResponse {
+  content: LogContent;
+}
+interface NotificationInstanceResponse extends ClientResponse {
+  content: NotificationContent;
+}
+interface QueryInstanceResponse extends ClientResponse {
+  content: QueryContent;
+  average: number;
+  p95: number;
+}
+interface ModelInstanceResponse extends ClientResponse {
+  content: ModelContent;
+}
 
 // Group Responses
-interface CacheGroupResponse extends BaseGroupResponse { cache_key: string; misses: number; hits: number; writes: number }
-interface ExceptionGroupResponse extends BaseGroupResponse { header: string; total: number }
-interface HttpClientGroupResponse extends BaseGroupResponse { route: string; average: number; p95: number; count_200: number; count_400: number; count_500: number }
-interface JobGroupResponse extends BaseGroupResponse { queue: string; completed: number; released: number; failed: number }
-interface RequestGroupResponse extends BaseGroupResponse { route: string; average: number; p95: number; count_200: number; count_400: number; count_500: number }
-interface LogGroupResponse extends BaseGroupResponse { level: string; message: string; info: number; warn: number; error: number; debug: number; trace: number; fatal: number; log: number }
-interface MailGroupResponse extends BaseGroupResponse { mail_to: string; success_count: number; failed_count: number }
-interface ModelGroupResponse extends BaseGroupResponse { modelName: string }
-interface NotificationGroupResponse extends BaseGroupResponse { channel: string; completed: number; failed: number }
-interface QueryGroupResponse extends BaseGroupResponse { endpoint: string; completed: number; failed: number; p95: number; average: number }
-interface ViewGroupResponse extends BaseGroupResponse { size: string; view: string; completed: number; failed: number }
-interface ScheduleGroupResponse extends BaseGroupResponse { scheduleId: string; cronExpression: string; completed: number; failed: number }
+interface CacheGroupResponse extends BaseGroupResponse {
+  cache_key: string;
+  misses: number;
+  hits: number;
+  writes: number;
+}
+interface ExceptionGroupResponse extends BaseGroupResponse {
+  header: string;
+  total: number;
+}
+interface HttpClientGroupResponse extends BaseGroupResponse {
+  route: string;
+  average: number;
+  p95: number;
+  count_200: number;
+  count_400: number;
+  count_500: number;
+}
+interface JobGroupResponse extends BaseGroupResponse {
+  queue: string;
+  completed: number;
+  released: number;
+  failed: number;
+}
+interface RequestGroupResponse extends BaseGroupResponse {
+  route: string;
+  average: number;
+  p95: number;
+  count_200: number;
+  count_400: number;
+  count_500: number;
+}
+interface LogGroupResponse extends BaseGroupResponse {
+  level: string;
+  message: string;
+  info: number;
+  warn: number;
+  error: number;
+  debug: number;
+  trace: number;
+  fatal: number;
+  log: number;
+}
+interface MailGroupResponse extends BaseGroupResponse {
+  mail_to: string;
+  success_count: number;
+  failed_count: number;
+}
+interface ModelGroupResponse extends BaseGroupResponse {
+  modelName: string;
+}
+interface NotificationGroupResponse extends BaseGroupResponse {
+  channel: string;
+  completed: number;
+  failed: number;
+}
+interface QueryGroupResponse extends BaseGroupResponse {
+  endpoint: string;
+  completed: number;
+  failed: number;
+  p95: number;
+  average: number;
+}
+interface ViewGroupResponse extends BaseGroupResponse {
+  size: string;
+  view: string;
+  completed: number;
+  failed: number;
+}
+interface ScheduleGroupResponse extends BaseGroupResponse {
+  scheduleId: string;
+  cronExpression: string;
+  completed: number;
+  failed: number;
+}
+
+type ClientGroupResponses =
+  | CacheGroupResponse
+  | ExceptionGroupResponse
+  | HttpClientGroupResponse
+  | JobGroupResponse
+  | RequestGroupResponse
+  | LogGroupResponse
+  | MailGroupResponse
+  | ModelGroupResponse
+  | NotificationGroupResponse
+  | QueryGroupResponse
+  | ViewGroupResponse
+  | ScheduleGroupResponse;
 
 // ============================================================================
 // App/Router Types
 // ============================================================================
-type HTTPMethod = 'get' | 'post' | 'put' | 'patch';
+type HTTPMethod = "get" | "post" | "put" | "patch";
 type HTTPStatus = number;
 type Promisify<T> = T | Promise<T>;
 
-interface ControllerHandlerReturnType { status?: HTTPStatus; body: string | Record<string, any> }
-interface ViewHandlerReturnType { name: string; params: Record<string, string> }
-interface ObservatoryBoardRequest { requestData: any; query: Record<string, any>; params: Record<string, any>; body: Record<string, any> }
+interface ControllerHandlerReturnType {
+  status?: HTTPStatus;
+  body: string | Record<string, any>;
+}
+interface ViewHandlerReturnType {
+  name: string;
+  params: Record<string, string>;
+}
+interface ObservatoryBoardRequest {
+  requestData: any;
+  query: Record<string, any>;
+  params: Record<string, any>;
+  body: Record<string, any>;
+}
 
 interface AppControllerRoute {
   method: HTTPMethod | HTTPMethod[];
   route: string | string[];
-  handler(request?: ObservatoryBoardRequest): Promisify<ControllerHandlerReturnType>;
+  handler(
+    request?: ObservatoryBoardRequest,
+  ): Promisify<ControllerHandlerReturnType>;
 }
 
 interface AppViewRoute {
@@ -252,16 +578,52 @@ interface AppViewRoute {
   handler(params: { basePath: string }): ViewHandlerReturnType;
 }
 
-interface SidePanelState { requestId?: string; jobId?: string; scheduleId?: string; modelId?: string; isOpen: boolean }
-
 interface IServerAdapter {
   setStaticPath(staticsRoute: string, staticsPath: string): IServerAdapter;
   setEntryRoute(route: AppViewRoute): IServerAdapter;
-  setErrorHandler(handler: (error: Error & { statusCode: HTTPStatus }) => ControllerHandlerReturnType): IServerAdapter;
+  setErrorHandler(
+    handler: (
+      error: Error & { statusCode: HTTPStatus },
+    ) => ControllerHandlerReturnType,
+  ): IServerAdapter;
   setApiRoutes(routes: AppControllerRoute[]): IServerAdapter;
 }
 
-interface RedisEntry {
-  uuid: string; type: string; content: Record<string, any>;
-  created_at: string; schedule_id: string; job_id: string; request_id: string;
+interface ApiResponse<T> {
+  body: T;
+  statusCode: HTTPStatus;
+}
+
+interface TableDataResponse<
+  T extends WatcherType,
+  I extends "instance" | "group",
+> {
+  results: WatcherResults<T, I>;
+  count: string;
+}
+interface GraphDataResponse {
+  countFormattedData: Record<string, string | number>[];
+  durationFormattedData: Record<
+    string,
+    {
+      durations: number[];
+      avgDuration: number;
+      p95: number;
+      count: number;
+      label: string;
+    }
+  >;
+  count: string;
+  indexCountOne: string;
+  indexCountTwo: string;
+  indexCountThree: string;
+  indexCountFour?: string;
+  indexCountFive?: string;
+  indexCountSix?: string;
+  indexCountSeven?: string;
+  indexCountEight?: string;
+  shortest: string;
+  longest: string;
+  average: string;
+  p95: string;
 }

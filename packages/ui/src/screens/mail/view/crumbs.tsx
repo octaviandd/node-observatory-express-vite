@@ -8,7 +8,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronRight } from "lucide-react";
-import { MailInstanceResponse } from "../../../../types";
+import { MailInstanceResponse } from "@/hooks/useApiTyped";
 
 export default function MailCrumbs({ mail }: { mail: MailInstanceResponse }) {
   return (
@@ -25,18 +25,18 @@ export default function MailCrumbs({ mail }: { mail: MailInstanceResponse }) {
           </BreadcrumbItem>
           <BreadcrumbItem>
             <BreadcrumbLink className="text-muted-foreground">
-              {mail.content.to}
+              {mail.content.data.to}
             </BreadcrumbLink>
           </BreadcrumbItem>
         </Breadcrumb>
         <div className="flex items-center gap-x-4">
-          <Badge variant="secondary">{mail.content.package}</Badge>
+          <Badge variant="secondary">{mail.content.metadata.package}</Badge>
           <Badge
             variant={
               mail.content.status === "completed" ? "secondary" : "destructive"
             }
           >
-            {mail.content.status.toUpperCase()}
+            {mail?.content?.status?.toUpperCase()}
           </Badge>
         </div>
       </CardContent>

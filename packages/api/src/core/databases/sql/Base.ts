@@ -11,6 +11,9 @@ import {
   MigrationError,
   DatabaseRetrieveError,
 } from "../../helpers/errors/Errors.js";
+
+// SQL builders: each watcher type has its own query builder implementation.
+// Builders generate watcher-specific SQL for list (instance/group) and graph queries.
 import ModelWatcherSQL from "./ModelWatcherSQLBuilder.js";
 import RequestWatcherSQL from "./RequestWatcherSQLBuilder.js";
 import ScheduleWatcherSQL from "./ScheduleViewerSQLBuilder.js";
@@ -24,8 +27,29 @@ import HTTPClientWatcherSQL from "./HTTPClientWatcherSQLBuilder.js";
 import JobWatcherSQL from "./JobWatcherSQLBuilder.js";
 import MailWatcherSQL from "./MailWatcherSQLBuilder.js";
 
+/**
+ * Base (Database Adapter)
+ *
+ * Central DB layer used by all watchers. Responsibilities:
+ * - migrations (create/drop observatory_entries)
+ * - inserts (batch insert from Redis stream)
+ * - single entry retrieval
+ * - list queries via watcher-specific SQL builders:
+ *     - instance mode (raw rows)
+ *     - group mode (aggregated rows)
+ * - view linkage queries (related entries by request/job/schedule id)
+ * - graph queries (aggregate + time-series rows in one call)
+ *
+ * Note: "builders" are responsible for generating watcher-specific SQL fragments.
+ */
 class Base {
+  /** mysql2/promise connection used for all queries */
   storeConnection!: Connection;
+
+  /**
+   * Watcher SQL builders indexed by watcher type.
+   * Each builder knows how to build instance/group SQL for that watcher.
+   */
   private builders: {
     request: RequestWatcherSQL;
     model: ModelWatcherSQL;
@@ -44,6 +68,7 @@ class Base {
   constructor(storeConnection: Connection) {
     this.storeConnection = storeConnection;
 
+    // Instantiate all watcher builders once so DB queries can select by watcher type.
     this.builders = {
       request: new RequestWatcherSQL(),
       model: new ModelWatcherSQL(),
@@ -60,8 +85,17 @@ class Base {
     };
   }
 
+  // ---------------------------------------------------------------------------
+  // Migration helpers
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Creates the observatory_entries table if it does not exist.
+   * Uses information_schema to avoid failing if table already exists.
+   */
   async up(connection: Connection): Promise<void> {
     try {
+      // Check if the table exists in the current schema
       const [rows]: any = await connection.query(`
         SELECT COUNT(*) as count 
         FROM information_schema.tables 
@@ -69,18 +103,30 @@ class Base {
         AND table_name = 'observatory_entries'
       `);
 
+      // Only create the table if it doesn't exist
       if (rows[0].count === 0) {
         await connection.query(`
           CREATE TABLE observatory_entries (
             id BIGINT AUTO_INCREMENT PRIMARY KEY,
+
+            -- uuid is the stable unique identifier used across UI and DB
             uuid CHAR(36) NOT NULL UNIQUE,
+
+            -- linkage columns to join related entries in "view" screens
             request_id CHAR(36) NULL,
             job_id CHAR(36) NULL,
             schedule_id CHAR(36) NULL,
+
+            -- watcher type (request/log/job/etc)
             type VARCHAR(20) NOT NULL,
+
+            -- raw patcher output stored as JSON (status/metadata/data/error/etc)
             content JSON NOT NULL,
+
+            -- microsecond timestamps for correct ordering and tight time windows
             created_at TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6),
 
+            -- indices for common query patterns (by uuid, linkage, type, time)
             INDEX idx_uuid (uuid),
             INDEX idx_request_id (request_id),
             INDEX idx_job_id (job_id),
@@ -98,6 +144,10 @@ class Base {
     }
   }
 
+  /**
+   * Drops observatory_entries table.
+   * Intended for local dev/test or full reset migrations.
+   */
   async down(connection: Connection): Promise<void> {
     try {
       await connection.query("DROP TABLE IF EXISTS observatory_entries;");
@@ -109,15 +159,28 @@ class Base {
     }
   }
 
-  async insert(redisEntries: RedisEntry[]) {
+  // ---------------------------------------------------------------------------
+  // Writes
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Batch insert of Redis stream entries into SQL.
+   * Wraps inserts in a transaction for consistency across batch.
+   *
+   * NOTE: uuid is UNIQUE so duplicates will error; caller should handle retries.
+   */
+  async insert(redisEntries: WatcherEntry[]) {
     if (redisEntries.length === 0) return;
 
     try {
       await this.storeConnection.query("START TRANSACTION");
 
+      // Build a single INSERT with multiple VALUES (...) blocks
       const placeholders = redisEntries
         .map(() => "(?, ?, ?, ?, ?, ?, ?)")
         .join(", ");
+
+      // Flatten entry fields to match placeholder order
       const values = redisEntries.flatMap((entry) => [
         entry.uuid,
         entry.request_id,
@@ -137,6 +200,7 @@ class Base {
 
       await this.storeConnection.query("COMMIT");
     } catch (error) {
+      // If anything fails, rollback entire batch insert
       await this.storeConnection.query("ROLLBACK");
       throw new MigrationError("Failed to insert into database", {
         cause: error as Error,
@@ -144,6 +208,10 @@ class Base {
     }
   }
 
+  /**
+   * Delete a single entry by uuid.
+   * Returns boolean for convenience; throws on DB errors.
+   */
   async delete(uuid: string): Promise<boolean> {
     try {
       this.storeConnection.query(
@@ -158,6 +226,14 @@ class Base {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Reads: simple lookup
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Fetch a single entry row by UUID.
+   * This is used by watcher view endpoints to render the main record.
+   */
   async getEntry(uuid: string): Promise<WatcherEntry> {
     try {
       const [rows] = (await this.storeConnection.query(
@@ -173,6 +249,9 @@ class Base {
     }
   }
 
+  /**
+   * Fetch all entries by watcher type (used in tests/debug tooling).
+   */
   async getAllEntriesByType(type: string): Promise<WatcherEntry[]> {
     try {
       const [results] = (await this.storeConnection.query(
@@ -189,6 +268,9 @@ class Base {
     }
   }
 
+  /**
+   * Used by watcher startup cleanup: check which pending Redis ids already exist in DB.
+   */
   async findExistingUuids(uuids: string[]): Promise<string[]> {
     if (uuids.length === 0) return [];
 
@@ -200,29 +282,57 @@ class Base {
     return (rows as { uuid: string }[]).map((r) => r.uuid);
   }
 
+  // ---------------------------------------------------------------------------
+  // SQL fragment helpers (used by builders or graph queries)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Period clause: limits results to the selected time window using UTC timestamps.
+   */
   getPeriodSQL = (period: string): string =>
     period
       ? `AND created_at >= UTC_TIMESTAMP() - ${PERIODS[period].interval}`
       : "";
+
+  /**
+   * Equality match for JSON field: content.$.{type} = value.
+   * WARNING: This interpolates value directly; only safe if value is sanitized/controlled.
+   */
   getEqualitySQL = (value: string, type: string): string =>
     value
       ? `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.${type}')) = '${value}'`
       : "";
+
+  /**
+   * Inclusion match for JSON field: LOWER(content.$.{type}) LIKE %value%.
+   * WARNING: This interpolates value directly; only safe if value is sanitized/controlled.
+   */
   getInclusionSQL = (value: string, type: string): string =>
     value
       ? `AND LOWER(JSON_UNQUOTE(JSON_EXTRACT(content, '$.${type}'))) LIKE '%${value.toLowerCase()}%'`
       : "";
 
+  /**
+   * Adds MIN/MAX/AVG duration aggregations for watcher types that emit duration.
+   * Exceptions + logs do not emit duration so we omit these columns.
+   */
   private getDurationParametersSQL = (watcherType: WatcherType): string => {
     if (watcherType === "exception" || watcherType === "log") {
       return ``;
     }
+
     return `MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10, 6))) as shortest,
       MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10, 6))) as longest,
       AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10, 6))) as average,
     `;
   };
 
+  /**
+   * p95 duration calculation using GROUP_CONCAT sorting.
+   * This is a MySQL-compatible approximation when window functions are unavailable.
+   *
+   * Exceptions/logs do not include duration so p95 is omitted.
+   */
   getP95SQL(watcherType: WatcherType): string {
     if (watcherType === "exception" || watcherType === "log") return "";
 
@@ -245,22 +355,34 @@ class Base {
     `;
   }
 
+  // ---------------------------------------------------------------------------
+  // Reads: list table queries (instance/group)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Instance mode:
+   * Returns raw rows matching filters + separate count query.
+   * SQL is produced by the watcher-specific builder.
+   */
   async getByInstance(
     filters: any,
     watcherType: WatcherType,
-  ): Promise<{ results: WatcherEntry[]; count: number }> {
+  ): Promise<{ results: ClientResponse[]; count: number }> {
     const builder = this.builders[watcherType];
+
     try {
+      // Query for page items
       const [results] = (await this.storeConnection.query(
         builder.getIndexTableDataByInstanceSQL(filters).items,
       )) as [QueryResult, FieldPacket[]];
 
+      // Query for total count
       const [count] = (await this.storeConnection.query(
         builder.getIndexTableDataByInstanceSQL(filters).count,
       )) as [any[], FieldPacket[]];
 
       return {
-        results: results as unknown as WatcherEntry[],
+        results: results as unknown as ClientResponse[],
         count: count[0]?.total ?? 0,
       };
     } catch (error: unknown) {
@@ -270,23 +392,29 @@ class Base {
     }
   }
 
+  /**
+   * Group mode:
+   * Returns aggregated rows based on watcher-specific grouping rules + count query.
+   */
   async getByGroup(
     filters: any,
     watcherType: WatcherType,
-  ): Promise<{ results: WatcherEntry[]; count: number }> {
+  ): Promise<{ results: ClientGroupResponses[]; count: number }> {
     const builder = this.builders[watcherType];
 
     try {
+      // Query for grouped page items
       const [results] = (await this.storeConnection.query(
         builder.getIndexTableDataByGroupSQL(filters).items,
       )) as [QueryResult, FieldPacket[]];
 
+      // Query for grouped total count
       const [count] = (await this.storeConnection.query(
         builder.getIndexTableDataByGroupSQL(filters).count,
       )) as [any[], FieldPacket[]];
 
       return {
-        results: results as unknown as WatcherEntry[],
+        results: results as unknown as ClientGroupResponses[],
         count: count[0]?.total ?? 0,
       };
     } catch (error: unknown) {
@@ -297,6 +425,18 @@ class Base {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Reads: view linkage queries
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Fetch "related" view data by matching any of the given conditions (OR group).
+   * - conditions: ["request_id = ?", "job_id = ?"]
+   * - params: ["req-123", "job-456"]
+   *
+   * `type` is excluded (type != ?) so view doesn't redundantly include the root type
+   * if caller wants to remove duplicates; extraCondition is appended when needed.
+   */
   async getRelatedViewdata(
     conditions: string[],
     params: string[],
@@ -306,7 +446,10 @@ class Base {
     if (!conditions || conditions.length === 0) return [];
 
     try {
+      // OR together the linkage conditions
       const whereClause = "(" + conditions.join(" OR ") + ")";
+
+      // Optionally exclude a type (used when viewing a single type)
       const typeCondition = type ? " AND type != ?" : "";
       const queryParams = type ? [...params, type] : params;
 
@@ -327,94 +470,88 @@ class Base {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Reads: graph query (aggregate + raw rows, then processed in JS)
+  // ---------------------------------------------------------------------------
+  
+  /**
+   * Graph data query:
+   * Delegates SQL generation to the watcher-specific builder, then:
+   * - separates the aggregate row from raw data rows
+   * - builds time-bucketed count series (processedCountGraphData)
+   * - builds duration series when applicable (processedDurationGraphData)
+   * - maps watcher-specific aggregate metrics to indexed UI fields
+   */
   async getGraphData(
-    filters: any,
+    filters: WatcherFilters,
     watcherType: WatcherType,
     keys: string[],
-    hasDuration?: boolean,
   ) {
-    const { period, key } = filters;
-    const periodSql = this.getPeriodSQL(period);
-    const keySql = this.getEqualitySQL(key, "key");
-
-    const durationSql = this.getDurationParametersSQL(watcherType);
-    const p95Sql = this.getP95SQL(watcherType);
-    const p95Column = p95Sql ? `${p95Sql},` : "NULL as p95,";
-
-    const durationNulls =
-      watcherType !== "log" && watcherType !== "exception"
-        ? "NULL as shortest, NULL as longest, NULL as average,"
-        : "";
+    const { period } = filters;
 
     try {
+      // Delegate SQL generation to the watcher-specific builder
+      const sql = this.builders[watcherType].getIndexGraphDataSQL(filters);
+
       const [results] = (await this.storeConnection.query(
-        `(
-          SELECT
-            COUNT(*) as total,
-            ${durationSql}
-            SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.misses')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.misses')) > 0 THEN 1 ELSE 0 END) as misses,
-            SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.hits')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.hits')) > 0 THEN 1 ELSE 0 END) as hits,
-            SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.writes')) IS NOT NULL AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.writes')) > 0 THEN 1 ELSE 0 END) as writes,
-            ${p95Column}
-            NULL as created_at,
-            NULL as content,
-            'aggregate' as type
-          FROM observatory_entries
-          WHERE type = ? ${periodSql} ${keySql}
-        )
-        UNION ALL
-        (
-          SELECT
-            NULL as total,
-            ${durationNulls}
-            NULL as p95,
-            NULL as misses,
-            NULL as hits,
-            NULL as writes,
-            created_at,
-            content,
-            'row' as type
-          FROM observatory_entries
-          WHERE type = ? ${periodSql} ${keySql}
-          ORDER BY created_at DESC
-        );`,
-        [watcherType, watcherType],
+        sql,
       )) as [QueryResult, FieldPacket[]];
 
+      // First row is the aggregate; remaining rows are raw event data
       //@ts-ignore
-      let cleanResults = results.shift();
+      const aggregateRow = (results as any[]).shift();
 
-      const aggregateResults: {
-        total: number;
-        shortest: string | null;
-        longest: string | null;
-        average: string | null;
-        misses: string | null;
-        hits: string | null;
-        writes: string | null;
-        p95: string | null;
-      } = cleanResults;
-
+      // Build count series (bucketed based on period + watcher keys)
       const countFormattedData = processedCountGraphData(
-        results as unknown as CacheContent[],
+        results as any[],
         period,
         keys,
       );
+
+      const hasDuration = watcherType !== 'exception' && watcherType !== 'log';
+
+      // Optionally build duration series (some watchers may not have duration)
       const durationFormattedData = hasDuration
-        ? processedDurationGraphData(results, period)
+        ? processedDurationGraphData(results as any[], period)
         : {};
 
+      // Dynamically map keys to indexCountOne/Two/Three/etc.
+      const indexCountNames = [
+        "indexCountOne", "indexCountTwo", "indexCountThree",
+        "indexCountFour", "indexCountFive", "indexCountSix",
+        "indexCountSeven", "indexCountEight",
+      ] as const;
+
+      const indexCounts: Record<string, string> = {};
+      keys.forEach((key, i) => {
+        if (i < indexCountNames.length) {
+          indexCounts[indexCountNames[i]] = formatValue(aggregateRow?.[key], true);
+        }
+      });
+
+       // Dynamically map keys to indexCountOne/Two/Three/etc.
+      const kv = (i: number) => formatValue(aggregateRow?.[keys[i]], true);
+
+      // Return UI-friendly formatted values
       return {
         countFormattedData,
         durationFormattedData,
-        count: formatValue(aggregateResults.total, true),
-        indexCountOne: formatValue(aggregateResults.hits, true),
-        indexCountTwo: formatValue(aggregateResults.writes, true),
-        indexCountThree: formatValue(aggregateResults.misses, true),
-        shortest: formatValue(aggregateResults.shortest),
-        longest: formatValue(aggregateResults.longest),
-        average: formatValue(aggregateResults.average),
-        p95: formatValue(aggregateResults.p95),
+        count: formatValue(aggregateRow?.total, true),
+        // Required fields — always populated (defaults to "0" if key doesn't exist)
+        indexCountOne: kv(0),
+        indexCountTwo: kv(1),
+        indexCountThree: kv(2),
+
+        // Optional fields — only populated if the watcher has that many metrics
+        ...(keys[3] !== undefined && { indexCountFour: kv(3) }),
+        ...(keys[4] !== undefined && { indexCountFive: kv(4) }),
+        ...(keys[5] !== undefined && { indexCountSix: kv(5) }),
+        ...(keys[6] !== undefined && { indexCountSeven: kv(6) }),
+        ...(keys[7] !== undefined && { indexCountEight: kv(7) }),
+        shortest: formatValue(aggregateRow?.shortest),
+        longest: formatValue(aggregateRow?.longest),
+        average: formatValue(aggregateRow?.average),
+        p95: formatValue(aggregateRow?.p95),
       };
     } catch (error) {
       throw new DatabaseRetrieveError(

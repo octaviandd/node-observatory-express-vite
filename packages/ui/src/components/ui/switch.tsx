@@ -15,7 +15,7 @@ const Switch = React.forwardRef<
       className,
     )}
     { 
-    watchers...props}
+    ...props}
     ref={ref}
   >
     <SwitchPrimitives.Thumb

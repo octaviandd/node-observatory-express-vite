@@ -1,14 +1,9 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { JobInstanceResponse, RequestInstanceResponse, ScheduleInstanceResponse } from "@/hooks/useApiTyped";
 import { ExternalLinkIcon } from "lucide-react";
 import { Link } from "react-router";
-import {
-  JobInstanceResponse,
-  RequestInstanceResponse,
-  ScheduleInstanceResponse,
-  RequestContent,
-} from "../../../../types";
 
 export default function Source({
   source,
@@ -29,7 +24,7 @@ export default function Source({
             <div className="col-span-3 text-muted-foreground">UUID</div>
             <div className="col-span-9 flex items-center gap-x-2">
               {source.uuid}
-              <Link to={`/request/${source.uuid}`} className="ml-auto">
+              <Link to={`/${source.type}/${source.uuid}`} className="ml-auto">
                 <Button variant="outline" size="sm">
                   <ExternalLinkIcon className="h-3 w-3" />
                 </Button>
@@ -39,21 +34,23 @@ export default function Source({
 
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Type</div>
-            <div className="col-span-9">Request</div>
+            <div className="col-span-9">{source.type}</div>
           </div>
 
-          <div className="grid items-center grid-cols-12">
-            <div className="col-span-3 text-muted-foreground">Route</div>
-            <div className="col-span-9">
-              {(source.content as RequestContent).route}
+          {"data" in source.content && "route" in (source.content.data as any) && (
+            <div className="grid items-center grid-cols-12">
+              <div className="col-span-3 text-muted-foreground">Route</div>
+              <div className="col-span-9">
+                {(source.content.data as any).route}
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Method</div>
             <div className="col-span-9">
               <Badge variant="outline">
-                {(source.content as RequestContent).method.toUpperCase()}
+                {((source.content.metadata as any)?.method ?? "").toUpperCase()}
               </Badge>
             </div>
           </div>

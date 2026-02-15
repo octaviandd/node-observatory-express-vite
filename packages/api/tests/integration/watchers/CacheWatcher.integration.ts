@@ -96,7 +96,7 @@ describe("CacheWatcher Integration", () => {
 
   afterEach(async () => {
     if (watcher) {
-      await watcher.stop();
+      watcher.stop();
       // Wait for any pending async operations to complete
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
@@ -114,7 +114,8 @@ describe("CacheWatcher Integration", () => {
         index: "group",
         period: "24h",
       });
-      const result = await watcher.index(req);
+
+      const result = await watcher.indexTable(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body.results).toEqual([]);
@@ -140,7 +141,7 @@ describe("CacheWatcher Integration", () => {
         index: "instance",
         period: "24h",
       });
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body.results).toHaveLength(2);
@@ -166,7 +167,7 @@ describe("CacheWatcher Integration", () => {
         index: "group",
         period: "24h",
       });
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body.results).toHaveLength(1);
@@ -174,7 +175,7 @@ describe("CacheWatcher Integration", () => {
 
     it("should return graph data when isTable is false", async () => {
       const req = createMockRequest({ table: "false", period: "24h" });
-      const result = await watcher.index(req);
+      const result = await watcher.indexGraph(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body).toHaveProperty("countFormattedData");
@@ -196,7 +197,7 @@ describe("CacheWatcher Integration", () => {
         period: "24h",
         status: "hits",
       });
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
 
       expect(result.statusCode).toBe(200);
     });

@@ -1,5 +1,5 @@
 /** @format */
-import { ViewInstanceResponse } from "../../../../types";
+import { ViewInstanceResponse } from "@/hooks/useApiTyped";
 import { BaseCard } from "./base-card";
 
 export default function ViewCard({ view }: { view: ViewInstanceResponse }) {

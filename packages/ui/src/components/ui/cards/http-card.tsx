@@ -1,5 +1,5 @@
 /** @format */
-import { HttpClientInstanceResponse } from "../../../../types";
+import { HttpClientInstanceResponse } from "@/hooks/useApiTyped";
 import { BaseCard } from "./base-card";
 
 export default function HttpCard({

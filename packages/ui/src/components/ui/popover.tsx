@@ -23,7 +23,7 @@ const PopoverContent = React.forwardRef<
         className,
       )}
       { 
-    watchers...props}
+    ...props}
     />
   </PopoverPrimitive.Portal>
 ));

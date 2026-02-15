@@ -3,11 +3,7 @@
 import React from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import {
-  MailInstanceResponse,
-  NotificationInstanceResponse,
-  LogInstanceResponse,
-} from "../../../../types";
+import { LogInstanceResponse, MailInstanceResponse, NotificationInstanceResponse } from "@/hooks/useApiTyped";
 
 type Props = {
   mails: MailInstanceResponse[];

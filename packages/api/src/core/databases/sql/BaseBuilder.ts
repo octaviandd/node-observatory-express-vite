@@ -83,13 +83,13 @@ export abstract class BaseBuilder {
     return { limit: parsedLimit, offset: parsedOffset };
   }
 
-  abstract getIndexTableDataByInstanceSQL(filters: any): {
+  abstract getIndexTableDataByInstanceSQL(filters: WatcherFilters): {
     items: string;
     count: string;
   };
-  abstract getIndexTableDataByGroupSQL(filters: any): {
+  abstract getIndexTableDataByGroupSQL(filters: WatcherFilters): {
     items: string;
     count: string;
   };
-  abstract getIndexGraphDataSQL(filters: any): string;
+  abstract getIndexGraphDataSQL(filters: WatcherFilters): string;
 }

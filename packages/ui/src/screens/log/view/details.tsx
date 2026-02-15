@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LogInstanceResponse } from "@/hooks/useApiTyped";
 import { timeAgo } from "@/utils.js";
-import { LogInstanceResponse } from "../../../../types";
 
 export default function Details({ log }: { log: LogInstanceResponse }) {
   const LOG_LEVELS = [
@@ -47,7 +47,7 @@ export default function Details({ log }: { log: LogInstanceResponse }) {
               <Badge
                 variant={
                   LOG_LEVELS.find(
-                    (level) => level.dataKey === log.content.level,
+                    (level) => level.dataKey === log.content.metadata.level,
                   )?.variant as
                   | "secondary"
                   | "warning"
@@ -63,58 +63,58 @@ export default function Details({ log }: { log: LogInstanceResponse }) {
                   | undefined
                 }
               >
-                {log.content.level.toUpperCase()}
+                {log.content.metadata.level.toUpperCase()}
               </Badge>
             </div>
           </div>
 
-          {log.content.message && (
+          {log.content.data.message != null && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-sm text-muted-foreground">
                 Message
               </div>
               <div className="col-span-9">
                 <Badge variant="secondary" className="capitalize">
-                  {typeof log.content.message === 'object' ? JSON.stringify(log.content.message) : log.content.message}
+                  {typeof log.content.data.message === 'object' ? JSON.stringify(log.content.data.message) : String(log.content.data.message ?? "")}
                 </Badge>
               </div>
             </div>
           )}
 
-          {log.content.package && (
+          {log.content.metadata.package && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-sm text-muted-foreground">
                 Package
               </div>
               <div className="col-span-9">
                 <Badge variant="secondary" className="capitalize">
-                  {log.content.package}
+                  {log.content.metadata.package}
                 </Badge>
               </div>
             </div>
           )}
 
-          {log.content.file && (
+          {log.content.location?.file && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-sm text-muted-foreground">
                 File
               </div>
               <div className="col-span-9">
                 <Badge variant="secondary" className="capitalize">
-                  {log.content.file}
+                  {log.content.location.file}
                 </Badge>
               </div>
             </div>
           )}
 
-          {log.content.line && (
+          {log.content.location?.line && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-sm text-muted-foreground">
-                Lile
+                Line
               </div>
               <div className="col-span-9">
                 <Badge variant="secondary" className="capitalize">
-                  {log.content.line}
+                  {log.content.location.line}
                 </Badge>
               </div>
             </div>

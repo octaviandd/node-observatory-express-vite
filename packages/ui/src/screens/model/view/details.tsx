@@ -1,7 +1,7 @@
-import { ModelInstanceResponse } from "../../../../types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDuration, timeAgo } from "@/utils.js";
 import { Badge } from "@/components/ui/badge";
+import { ModelInstanceResponse } from "@/hooks/useApiTyped";
 
 export default function Details({ model }: { model: ModelInstanceResponse }) {
   return (
@@ -37,7 +37,7 @@ export default function Details({ model }: { model: ModelInstanceResponse }) {
                     : "destructive"
                 }
               >
-                {model.content.status.toUpperCase()}
+                {model.content.status?.toUpperCase()}
               </Badge>
             </div>
           </div>
@@ -45,30 +45,30 @@ export default function Details({ model }: { model: ModelInstanceResponse }) {
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Package</div>
             <div className="col-span-9">
-              <Badge variant="outline">{model.content.package}</Badge>
+              <Badge variant="outline">{model.content.metadata.package}</Badge>
             </div>
           </div>
 
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Model</div>
-            <div className="col-span-9">{model.content.modelName}</div>
+            <div className="col-span-9">{model.content.data.modelName}</div>
           </div>
 
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Method</div>
             <div className="col-span-9">
-              <Badge variant="secondary">{model.content.method}</Badge>
+              <Badge variant="secondary">{model.content.metadata.method}</Badge>
             </div>
           </div>
 
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">File</div>
-            <div className="col-span-9">{model.content.file}</div>
+            <div className="col-span-9">{model.content.location?.file}</div>
           </div>
 
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Line</div>
-            <div className="col-span-9">{model.content.line}</div>
+            <div className="col-span-9">{model.content.location?.line}</div>
           </div>
 
           {model.content.duration && (

@@ -14,11 +14,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { memo } from "react";
 import { formatDate, formatDuration } from "@/utils.js";
-import { NotificationInstanceResponse } from "../../../../types";
+import { NotificationInstanceResponse } from "@/hooks/useApiTyped";
 
 type Props = {
   data: NotificationInstanceResponse[];
-  setSidePanelData: ({
+  drawer: ({
     isOpen,
     modelId,
     requestId,
@@ -35,7 +35,7 @@ type Props = {
 };
 
 export const InstanceTable = memo(
-  ({ data, setSidePanelData, children }: Props) => {
+  ({ data, drawer, children }: Props) => {
     return (
       <div className="rounded-md border">
         <Table>
@@ -64,9 +64,9 @@ export const InstanceTable = memo(
                 <TableCell className="flex items-center gap-2 h-[53px]">
                   <Bell className="h-4 w-4 text-muted-foreground" />
                   <span className="truncate max-w-[400px] text-black dark:text-white">
-                    {notification.content.channel === ""
+                    {notification.content.data.channel === ""
                       ? "No channel [error]"
-                      : notification.content.channel}
+                      : notification.content.data.channel}
                   </span>
                 </TableCell>
                 <TableCell>
@@ -77,7 +77,7 @@ export const InstanceTable = memo(
                         : "error"
                     }
                   >
-                    {notification.content.status.toUpperCase()}
+                    {notification.content.status?.toUpperCase()}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -97,7 +97,7 @@ export const InstanceTable = memo(
                       variant="outline"
                       size="icon"
                       onClick={() =>
-                        setSidePanelData({
+                        drawer({
                           isOpen: true,
                           modelId: notification.uuid ?? "",
                           requestId: notification.request_id ?? "",

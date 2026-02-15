@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { CacheCrumbs } from "./crumbs";
 import { CachePreviewInfo } from "./info";
-import { CacheInstanceResponse } from "../../../../types";
 import ContentTabs from "./tabs";
 import {
   ViewPageLayout,
   useViewData,
   Source,
 } from "@/components/ui/view-page";
+import { CacheInstanceResponse } from "@/hooks/useApiTyped";
 
 export default function CachePreview() {
   const [activeTab, setActiveTab] = useState("raw");
@@ -29,7 +29,7 @@ export default function CachePreview() {
           <ContentTabs
             activeTab={activeTab}
             setActiveTab={setActiveTab}
-            data={{ cache, loading: false, error: null, source }}
+            data={{ cache, loading: false }}
           />
         </>
       )}

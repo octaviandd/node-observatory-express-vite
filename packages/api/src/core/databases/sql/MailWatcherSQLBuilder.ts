@@ -76,7 +76,7 @@ class MailWatcherSQL extends BaseBuilder {
       "MIN(CAST(JSON_EXTRACT(content, '$.duration') AS DECIMAL)) as shortest",
       "MAX(CAST(JSON_EXTRACT(content, '$.duration') AS DECIMAL)) as longest",
       "AVG(CAST(JSON_EXTRACT(content, '$.duration') AS DECIMAL)) as average",
-      "SUM(CASE WHEN JSON_EXTRACT(content, '$.status') = 'completed' THEN 1 ELSE 0 END) as success",
+      "SUM(CASE WHEN JSON_EXTRACT(content, '$.status') = 'completed' THEN 1 ELSE 0 END) as completed",
       "SUM(CASE WHEN JSON_EXTRACT(content, '$.status') = 'failed' THEN 1 ELSE 0 END) as failed",
       this.getP95SQL("mail"),
       "NULL as created_at",
@@ -86,7 +86,7 @@ class MailWatcherSQL extends BaseBuilder {
 
     const rowColumns = [
       "NULL as total", "NULL as shortest", "NULL as longest", "NULL as average",
-      "NULL as success", "NULL as failed", "NULL as p95",
+      "NULL as completed", "NULL as failed", "NULL as p95",
       "created_at", "content", "'row' as type"
     ];
 

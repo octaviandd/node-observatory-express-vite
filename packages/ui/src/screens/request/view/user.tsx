@@ -3,7 +3,7 @@
 import React from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { RequestInstanceResponse } from "../../../../types";
+import { RequestInstanceResponse } from "@/hooks/useApiTyped";
 
 export const RequestPreviewUser = React.memo(
   ({ request }: { request: RequestInstanceResponse }) => {
@@ -17,16 +17,16 @@ export const RequestPreviewUser = React.memo(
             <span className="text-sm text-muted-foreground uppercase">
               IP Address
             </span>
-            <span>{request.content.ip}</span>
+            <span>{request.content.data.ip}</span>
           </div>
-          {request.content.session && (
+          {request.content.data.session && (
             <>
               <Separator />
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground uppercase">
                   Session
                 </span>
-                <span>{JSON.stringify(request.content.session)}</span>
+                <span>{JSON.stringify(request.content.data.session)}</span>
               </div>
             </>
           )}

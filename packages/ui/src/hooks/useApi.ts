@@ -10,31 +10,44 @@ import {
   type UseMutationOptions,
   type UseInfiniteQueryOptions,
   type QueryKey,
+  type InfiniteData
 } from "@tanstack/react-query";
 export { QueryClientProvider } from "@tanstack/react-query";
 import { StoreContext, type PeriodState, type CustomDateRange } from "@/store";
+
+// ============================================================================
+// Query Client
+// ============================================================================
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60, // 1 minute
-      gcTime: 1000 * 60 * 5, // 5 minutes (formerly cacheTime)
+      gcTime: 1000 * 60 * 5, // 5 minutes
       retry: 1,
       refetchOnWindowFocus: false,
     },
   },
 });
 
+// ============================================================================
+// Helpers
+// ============================================================================
+
+//@ts-ignore
 const getBaseUrl = (): string => window.SERVER_CONFIG?.base ?? "";
 
 const buildPeriodParams = (period: PeriodState): string => {
   if (typeof period === "string") {
     return `period=${period}`;
   }
-  // Custom date range
   const { startDate, endDate } = period as CustomDateRange;
   return `startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`;
 };
+
+// ============================================================================
+// Error
+// ============================================================================
 
 export class ApiError extends Error {
   status: number;
@@ -54,6 +67,10 @@ export class ApiError extends Error {
     this.data = data;
   }
 }
+
+// ============================================================================
+// Fetcher
+// ============================================================================
 
 async function fetcher<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const baseUrl = getBaseUrl();
@@ -85,6 +102,10 @@ async function fetcher<T>(endpoint: string, options?: RequestInit): Promise<T> {
   return response.json();
 }
 
+// ============================================================================
+// useApiQuery
+// ============================================================================
+
 export interface UseApiQueryOptions<TData> extends Omit<
   UseQueryOptions<TData, ApiError>,
   "queryKey" | "queryFn"
@@ -111,6 +132,10 @@ export function useApiQuery<TData = unknown>(
   });
 }
 
+// ============================================================================
+// useApiMutation
+// ============================================================================
+
 export interface UseApiMutationOptions<TData, TVariables> extends Omit<
   UseMutationOptions<TData, ApiError, TVariables>,
   "mutationFn"
@@ -131,19 +156,16 @@ export function useApiMutation<TData = unknown, TVariables = unknown>(
   });
 }
 
-interface PaginatedResponse<T> {
+// ============================================================================
+// useApiInfiniteQuery
+// ============================================================================
+
+export interface PaginatedResponse<T> {
   results: T[];
   count: string;
 }
 
-interface UseApiInfiniteQueryOptions<TData> extends Omit<
-  UseInfiniteQueryOptions<
-    PaginatedResponse<TData>,
-    ApiError,
-    PaginatedResponse<TData>,
-    QueryKey,
-    number
-  >,
+export interface UseApiInfiniteQueryOptions<TData> extends Omit<UseInfiniteQueryOptions <PaginatedResponse<TData>,ApiError,InfiniteData<PaginatedResponse<TData>>,QueryKey,number>,
   "queryKey" | "queryFn" | "initialPageParam" | "getNextPageParam"
 > {
   includePeriod?: boolean;
@@ -165,7 +187,7 @@ export function useApiInfiniteQuery<TData = unknown>(
   return useInfiniteQuery<
     PaginatedResponse<TData>,
     ApiError,
-    PaginatedResponse<TData>,
+    InfiniteData<PaginatedResponse<TData>>,
     QueryKey,
     number
   >({
@@ -191,67 +213,8 @@ export function useApiInfiniteQuery<TData = unknown>(
   });
 }
 
-export function useGraphData<TData = unknown>(type: string, key?: string) {
-  const endpoint = `/api/${type}${key ? `?key=${encodeURIComponent(key)}` : ""}`;
-  return useApiQuery<TData>(endpoint, ["graph", type, key ?? "all"]);
-}
-
-export function useTableData<TData = unknown>(
-  type: string,
-  params: {
-    index: "group" | "instance";
-    status?: string;
-    key?: string;
-    query?: string;
-  },
-) {
-  const { index, status, key, query } = params;
-
-  const searchParams = new URLSearchParams({
-    table: "true",
-    index,
-    ...(status && { status: status.toLowerCase() }),
-    ...(key && { key }),
-    ...(query && { q: query }),
-  });
-
-  const endpoint = `/api/${type}?${searchParams.toString()}`;
-
-  return useApiInfiniteQuery<TData>(endpoint, [
-    "table",
-    type,
-    index,
-    status ?? "all",
-    key ?? "all",
-    query ?? "",
-  ]);
-}
-
-export function useItemById<TData = unknown>(
-  type: string,
-  id: string | undefined,
-  options?: UseApiQueryOptions<TData>,
-) {
-  return useApiQuery<TData>(`/api/${type}/${id}`, [type, id ?? ""], {
-    enabled: !!id,
-    includePeriod: false,
-    ...options,
-  });
-}
-
-export function useDeleteItem(type: string) {
-  return useApiMutation<{ success: boolean }, { id: string }>(
-    `/api/${type}`,
-    "DELETE",
-    {
-      onSuccess: () => {
-        // Invalidate related queries
-        queryClient.invalidateQueries({ queryKey: [type] });
-        queryClient.invalidateQueries({ queryKey: ["table", type] });
-        queryClient.invalidateQueries({ queryKey: ["graph", type] });
-      },
-    },
-  );
-}
+// ============================================================================
+// Exports
+// ============================================================================
 
 export { fetcher, buildPeriodParams, getBaseUrl };

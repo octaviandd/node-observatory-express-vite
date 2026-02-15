@@ -4,12 +4,12 @@ import { useState } from "react";
 import { ExceptionCrumbs } from "./crumbs";
 import { ExceptionInfo } from "./info";
 import ContentTabs from "./tabs";
-import { ExceptionInstanceResponse } from "../../../../types";
 import {
   ViewPageLayout,
   useViewData,
   Source,
 } from "@/components/ui/view-page";
+import { ExceptionInstanceResponse } from "@/hooks/useApiTyped";
 
 export default function ExceptionView() {
   const [activeTab, setActiveTab] = useState("raw");
@@ -29,7 +29,7 @@ export default function ExceptionView() {
           <ContentTabs
             activeTab={activeTab}
             setActiveTab={setActiveTab}
-            data={{ exception, source, loading: false, error: null }}
+            data={{ exception }}
           />
         </>
       )}

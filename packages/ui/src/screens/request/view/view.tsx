@@ -11,19 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RequestPreviewTabs } from "./tabs";
-import {
-  CacheInstanceResponse,
-  ExceptionInstanceResponse,
-  HttpClientInstanceResponse,
-  JobInstanceResponse,
-  LogInstanceResponse,
-  MailInstanceResponse,
-  ModelInstanceResponse,
-  NotificationInstanceResponse,
-  QueryInstanceResponse,
-  RequestInstanceResponse,
-  ViewInstanceResponse,
-} from "../../../../types";
+import { RequestInstanceResponse, NotificationInstanceResponse, MailInstanceResponse, LogInstanceResponse, QueryInstanceResponse, HttpClientInstanceResponse, JobInstanceResponse, CacheInstanceResponse, ExceptionInstanceResponse, ViewInstanceResponse, ModelInstanceResponse } from "@/hooks/useApiTyped";
 
 export default function RequestPreview() {
   const params = useParams();
@@ -64,6 +52,7 @@ export default function RequestPreview() {
     setError(null);
     try {
       const response = await fetch(
+        //@ts-ignore
         `${window.SERVER_CONFIG.base}/api/requests/${params.id}`,
       );
       if (!response.ok) {

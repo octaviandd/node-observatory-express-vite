@@ -2,15 +2,7 @@
 import React from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import {
-  CacheInstanceResponse,
-  ExceptionInstanceResponse,
-  HttpClientInstanceResponse,
-  LogInstanceResponse,
-  MailInstanceResponse,
-  NotificationInstanceResponse,
-  QueryInstanceResponse,
-} from "../../../../types";
+import { QueryInstanceResponse, CacheInstanceResponse, HttpClientInstanceResponse, NotificationInstanceResponse, MailInstanceResponse, LogInstanceResponse, ExceptionInstanceResponse } from "@/hooks/useApiTyped";
 
 export const JobMetadata = React.memo(
   ({
@@ -46,13 +38,13 @@ export const JobMetadata = React.memo(
     const queryItems = filterByType(queries, "query");
     const stats = {
       queryCount: queryItems.length,
-      queryAverage: averageOf(queryItems, (item) => item.content.duration),
+      queryAverage: averageOf(queryItems, (item) => Number(item.content.duration)),
       httpCount: filterByType(https, "http").length,
       notificationCount: filterByType(notifications, "notification").length,
       queryWrites: filterByType(queries, "write").length,
       queryReads: filterByType(queries, "read").length,
-      cacheHits: sumOf(caches, (item) => (!item.content.hits ? 1 : 0)),
-      cacheMisses: sumOf(caches, (item) => (item.content.misses ? 1 : 0)),
+      cacheHits: sumOf(caches, (item) => (item.content.data.hits ? 1 : 0)),
+      cacheMisses: sumOf(caches, (item) => (item.content.data.misses ? 1 : 0)),
       mailCount: mails.length,
       logCount: logs.length,
       exceptionCount: exceptions.length,

@@ -10,6 +10,7 @@ import {
   TableHeader,
   LoadMoreButton,
 } from "@/components/ui/table-page";
+import { LogInstanceResponse, LogGroupResponse } from "@/hooks/useApiTyped";
 
 export default function LogsIndexTable() {
   const {
@@ -19,25 +20,24 @@ export default function LogsIndexTable() {
     groupDataCount,
     index,
     inputValue,
-    sidePanelData,
+    drawer,
     modelKey,
     message,
-    setSidePanelData,
+    setDrawer,
     setInputValue,
-    loadData,
-  } = useIndexTableData({
+    loadMore,
+  } = useIndexTableData<LogInstanceResponse, LogGroupResponse>({
     key: "logs",
     defaultInstanceStatusType: "all",
   });
 
-  const Table = index === "instance" ? InstanceTable : GroupTable;
   const count = index === "instance" ? instanceDataCount : groupDataCount;
   const label = index === "instance" ? "Log" : "Source";
 
   return (
     <TablePageLayout
-      sidePanelData={sidePanelData}
-      setSidePanelData={setSidePanelData}
+      setDrawer={setDrawer}
+      drawer={drawer}
       type="logs"
     >
       <div className="py-3 flex justify-between">
@@ -56,13 +56,15 @@ export default function LogsIndexTable() {
           </div>
         </div>
       </div>
-      {/* @ts-expect-error dumb ts*/}
-      <Table
-        data={index === "instance" ? instanceData : groupData}
-        setSidePanelData={setSidePanelData}
-      >
-        <LoadMoreButton message={message} onLoadMore={loadData} />
-      </Table>
+      {index === "instance" ? (
+        <InstanceTable data={instanceData as LogInstanceResponse[]} drawer={setDrawer}>
+          <LoadMoreButton message={message} onLoadMore={loadMore} />
+        </InstanceTable>
+      ) : (
+        <GroupTable data={groupData as LogGroupResponse[]}>
+          <LoadMoreButton message={message} onLoadMore={loadMore} />
+        </GroupTable>
+      )}
     </TablePageLayout>
   );
 }

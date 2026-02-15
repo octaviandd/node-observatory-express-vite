@@ -11,8 +11,9 @@ import {
   StatusFilter,
   LoadMoreButton,
 } from "@/components/ui/table-page";
+import { CacheInstanceResponse, CacheGroupResponse } from "@/hooks/useApiTyped";
 
-const STATUS_OPTIONS = ["all", "hits", "misses", "writes"];
+const STATUS_OPTIONS = ["all", "hits", "misses", "writes"] as const;
 
 export default function CacheIndexTable() {
   const {
@@ -23,26 +24,25 @@ export default function CacheIndexTable() {
     index,
     instanceStatusType,
     inputValue,
-    sidePanelData,
+    drawer,
     message,
     modelKey,
     setInputValue,
-    setSidePanelData,
+    setDrawer,
     setInstanceStatusType,
-    loadData,
-  } = useIndexTableData({
+    loadMore,
+  } = useIndexTableData<CacheInstanceResponse, CacheGroupResponse>({
     key: "cache",
     defaultInstanceStatusType: "all",
   });
 
-  const Table = index === "instance" ? InstanceTable : GroupTable;
   const count = index === "instance" ? instanceDataCount : groupDataCount;
   const label = index === "instance" ? "Transaction" : "Key";
 
   return (
     <TablePageLayout
-      sidePanelData={sidePanelData}
-      setSidePanelData={setSidePanelData}
+      drawer={drawer}
+      setDrawer={setDrawer}
       type="cache"
     >
       <div className="py-3 flex justify-between">
@@ -68,13 +68,16 @@ export default function CacheIndexTable() {
           />
         )}
       </div>
-      {/* @ts-expect-error dumb ts*/}
-      <Table
-        data={index === "instance" ? instanceData : groupData}
-        setSidePanelData={setSidePanelData}
-      >
-        <LoadMoreButton message={message} onLoadMore={loadData} />
-      </Table>
+
+      {index === "instance" ? (
+        <InstanceTable data={instanceData as CacheInstanceResponse[]} setDrawer={setDrawer}>
+          <LoadMoreButton message={message} onLoadMore={loadMore} />
+        </InstanceTable>
+      ) : (
+        <GroupTable data={groupData as CacheGroupResponse[]}>
+          <LoadMoreButton message={message} onLoadMore={loadMore} />
+        </GroupTable>
+      )}
     </TablePageLayout>
   );
 }

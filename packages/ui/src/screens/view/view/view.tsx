@@ -1,15 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { ViewCrumbs } from "./crumbs";
-import {
-  RequestInstanceResponse,
-  ViewInstanceResponse,
-} from "../../../../types";
 import Source from "./source";
 import Details from "./details";
 import ContentTabs from "./tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ViewInstanceResponse, RequestInstanceResponse } from "@/hooks/useApiTyped";
 
 export default function ViewPreview() {
   const params = useParams();
@@ -34,6 +31,7 @@ export default function ViewPreview() {
   const getItem = async () => {
     try {
       setData((prev) => ({ ...prev, loading: true }));
+      //@ts-ignore
       const response = await fetch(`${window.SERVER_CONFIG.base}/api/views/${params.id}`);
       const { request, view } = await response.json();
 

@@ -115,12 +115,18 @@ describe("JobWatcher Integration", () => {
 
   describe("index endpoint", () => {
     it("should return empty results when no data exists", async () => {
+      /**
+       * Verifies baseline behavior with an empty database.
+       * Calls the table index endpoint with grouping enabled.
+       * Ensures the API responds successfully (HTTP 200).
+       * Confirms no rows are returned and count is zero.
+       */
       const req = createMockRequest({
         table: "true",
         index: "group",
         period: "24h",
       });
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body.results).toEqual([]);
@@ -128,6 +134,12 @@ describe("JobWatcher Integration", () => {
     });
 
     it("should return job entries", async () => {
+      /**
+       * Inserts both successful and failed job records.
+       * Hits the instance index to fetch raw job rows.
+       * Validates the endpoint returns a success response.
+       * Confirms both inserted jobs are included in results.
+       */
       await database.insert([
         createJobEntry(
           "job:1",
@@ -161,13 +173,19 @@ describe("JobWatcher Integration", () => {
         index: "instance",
         period: "24h",
       });
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body.results).toHaveLength(2);
     });
 
     it("should group jobs by queue", async () => {
+      /**
+       * Inserts multiple jobs belonging to the same queue.
+       * Uses the grouped index mode instead of instance mode.
+       * Ensures aggregation logic merges entries by queue name.
+       * Verifies only one grouped result is returned.
+       */
       await database.insert([
         createJobEntry(
           "job:1",
@@ -186,13 +204,19 @@ describe("JobWatcher Integration", () => {
         index: "group",
         period: "24h",
       });
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body.results).toHaveLength(1);
     });
 
     it("should filter by job status", async () => {
+      /**
+       * Inserts both completed and failed job records.
+       * Calls the index endpoint with a status filter applied.
+       * Confirms the request succeeds under filtered conditions.
+       * Ensures filtering logic does not break the response flow.
+       */
       await database.insert([
         createJobEntry(
           "job:completed",
@@ -216,14 +240,20 @@ describe("JobWatcher Integration", () => {
         period: "24h",
         status: "completed",
       });
-      const result = await watcher.index(req);
+      const result = await watcher.indexTable(req);
 
       expect(result.statusCode).toBe(200);
     });
 
     it("should return graph data when isTable is false", async () => {
+      /**
+       * Calls the graph endpoint instead of the table endpoint.
+       * Simulates a request for time-series/aggregated metrics.
+       * Validates a successful HTTP response is returned.
+       * Confirms graph-specific formatted data is present.
+       */
       const req = createMockRequest({ table: "false", period: "24h" });
-      const result = await watcher.index(req);
+      const result = await watcher.indexGraph(req);
 
       expect(result.statusCode).toBe(200);
       expect(result.body).toHaveProperty("countFormattedData");
@@ -232,6 +262,12 @@ describe("JobWatcher Integration", () => {
 
   describe("view endpoint", () => {
     it("should return entry data by uuid", async () => {
+      /**
+       * Inserts a single job record into the database.
+       * Calls the view endpoint with that job’s UUID.
+       * Ensures the endpoint returns a successful response.
+       * Confirms the job payload is included in the body.
+       */
       await database.insert([
         createJobEntry(
           "job:view-test",
@@ -248,6 +284,12 @@ describe("JobWatcher Integration", () => {
     });
 
     it("should include related entries", async () => {
+      /**
+       * Inserts a job and a related log sharing the same job_id.
+       * Calls the view endpoint for the main job UUID.
+       * Tests correlation logic between job and other entry types.
+       * Verifies both job and related log appear in response.
+       */
       const jobId = "shared-job-id";
       await database.insert([
         createJobEntry("job:main", { jobId }, { job_id: jobId }),
@@ -282,6 +324,12 @@ describe("JobWatcher Integration", () => {
 
   describe("insertRedisStream", () => {
     it("should add entry to Redis stream", async () => {
+      /**
+       * Creates a successful job event payload.
+       * Pushes the entry into the watcher’s Redis stream.
+       * Checks that the Redis stream key is updated.
+       * Confirms at least one record now exists in stream.
+       */
       const entry = {
         status: "completed" as const,
         duration: 500,
@@ -302,6 +350,12 @@ describe("JobWatcher Integration", () => {
     });
 
     it("should handle failed jobs with error", async () => {
+      /**
+       * Creates a failed job event including error metadata.
+       * Sends the failure entry through Redis stream ingestion.
+       * Ensures the watcher does not reject error payloads.
+       * Verifies the stream length increases after insertion.
+       */
       const entry = {
         status: "failed" as const,
         duration: 100,

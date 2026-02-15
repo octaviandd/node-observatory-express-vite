@@ -2,13 +2,15 @@
 
 import QueryIndexTable from "../table";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
-import { useGraph } from "@/hooks/useGraph";
 import {
   IndexPageLayout,
   StatsCard,
   DurationCard,
   StatsGrid,
 } from "@/components/ui/index-page";
+import { useQueries } from "@/hooks/useApiTyped";
+import { StoreContext } from "@/store";
+import { useContext } from "react";
 
 const QUERY_BAR_DATA = [
   { dataKey: "completed", stackId: "a", fill: "#f1f5f9" },
@@ -16,9 +18,8 @@ const QUERY_BAR_DATA = [
 ];
 
 export default function QueryIndex() {
-  const { data, currentDate, period } = useGraph({
-    type: "queries",
-  });
+  const { state } = useContext(StoreContext);
+  const { data } = useQueries.useGraph();
 
   return (
     <IndexPageLayout>
@@ -35,8 +36,6 @@ export default function QueryIndex() {
               <CountGraph
                 data={data.countFormattedData}
                 barData={QUERY_BAR_DATA}
-                period={period}
-                currentDate={currentDate}
               />
             }
           />
@@ -46,8 +45,8 @@ export default function QueryIndex() {
             average={data.average}
             p95={data.p95}
             durationFormattedData={data.durationFormattedData}
-            period={period}
-            currentDate={currentDate}
+            period={state.period}
+            currentDate={""}
           />
         </StatsGrid>
       )}

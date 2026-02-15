@@ -14,7 +14,7 @@
   },
   "scripts": {
     "prepublish": "rm -rf ./dist && npm run build",
-    "dev": "vite",
+    "dev": "vite build --watch",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",

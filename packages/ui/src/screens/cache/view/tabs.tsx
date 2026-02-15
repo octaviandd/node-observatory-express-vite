@@ -1,14 +1,15 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { CacheInstanceResponse } from "@/hooks/useApiTyped";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { CacheInstanceResponse } from "../../../../types";
 
 type Props = {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   data: {
     cache: CacheInstanceResponse;
+    loading: boolean
   };
 };
 export default function ContentTabs({ activeTab, setActiveTab, data }: Props) {

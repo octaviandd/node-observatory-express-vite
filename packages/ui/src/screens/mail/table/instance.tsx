@@ -14,12 +14,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { memo, ReactNode } from "react";
 import { formatDuration, formatDate } from "@/utils.js";
-import { MailInstanceResponse } from "../../../../types";
+import { MailInstanceResponse } from "@/hooks/useApiTyped";
 
 type Props = {
   data: MailInstanceResponse[];
   children: ReactNode;
-  setSidePanelData: ({
+  drawer: ({
     isOpen,
     modelId,
     requestId,
@@ -35,7 +35,7 @@ type Props = {
 };
 
 export const InstanceTable = memo(
-  ({ data, children, setSidePanelData }: Props) => {
+  ({ data, children, drawer }: Props) => {
     return (
       <div className="rounded-md border">
         <Table>
@@ -57,7 +57,7 @@ export const InstanceTable = memo(
                 <TableCell className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-muted-foreground" />
                   <span className="truncate max-w-[400px] text-black dark:text-white">
-                    {mail.content.to}
+                    {mail.content.data.to}
                   </span>
                 </TableCell>
                 <TableCell>
@@ -68,7 +68,7 @@ export const InstanceTable = memo(
                         : "error"
                     }
                   >
-                    {mail.content.status.toUpperCase()}
+                    {mail?.content?.status?.toUpperCase()}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -88,7 +88,7 @@ export const InstanceTable = memo(
                       variant="outline"
                       size="icon"
                       onClick={() =>
-                        setSidePanelData({
+                        drawer({
                           isOpen: true,
                           modelId: mail.uuid ?? "",
                           requestId: mail.request_id ?? "",

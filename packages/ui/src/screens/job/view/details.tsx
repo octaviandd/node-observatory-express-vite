@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDuration, timeAgo } from "@/utils.js";
-import { JobInstanceResponse } from "../../../../types";
+import { JobInstanceResponse } from "@/hooks/useApiTyped";
 
 export default function Details({ job }: { job: JobInstanceResponse }) {
   return (
@@ -42,7 +42,7 @@ export default function Details({ job }: { job: JobInstanceResponse }) {
                     : "secondary"
                 }
               >
-                {job.content.status.toUpperCase()}
+                {(job.content.status ?? "").toUpperCase()}
               </Badge>
             </div>
           </div>
@@ -58,25 +58,25 @@ export default function Details({ job }: { job: JobInstanceResponse }) {
             </div>
           )}
 
-          {job.content.package && (
+          {job.content.metadata.package && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-sm text-muted-foreground">
                 Package
               </div>
               <div className="col-span-9">
                 <Badge variant="secondary" className="capitalize">
-                  {job.content.package}
+                  {job.content.metadata.package}
                 </Badge>
               </div>
             </div>
           )}
 
-          {job.content.queue && (
+          {job.content.data.queue && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-sm text-muted-foreground">
                 Queue
               </div>
-              <div className="col-span-9 text-sm">{job.content.queue}</div>
+              <div className="col-span-9 text-sm">{job.content.data.queue}</div>
             </div>
           )}
 
@@ -84,42 +84,42 @@ export default function Details({ job }: { job: JobInstanceResponse }) {
             <div className="col-span-3 text-sm text-muted-foreground">
               Attempts Made
             </div>
-            <div className="col-span-9 text-sm">{job.content.attemptsMade}</div>
+            <div className="col-span-9 text-sm">{job.content.data.attemptsMade}</div>
           </div>
 
-          {job.content.failedReason && (
+          {job.content.data.failedReason && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-sm text-muted-foreground">
                 Failed Reason
               </div>
-              <div className="col-span-9 text-sm">{job.content.failedReason}</div>
+              <div className="col-span-9 text-sm">{job.content.data.failedReason}</div>
             </div>
           )}
 
-          {job.content.method && (
+          {job.content.metadata.method && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-sm text-muted-foreground">
                 Method
               </div>
-              <div className="col-span-9 text-sm">{job.content.method}</div>
+              <div className="col-span-9 text-sm">{job.content.metadata.method}</div>
             </div>
           )}
 
-          {job.content.file && (
+          {job.content.location?.file && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-sm text-muted-foreground">
                 File
               </div>
-              <div className="col-span-9 text-sm">{job.content.file}</div>
+              <div className="col-span-9 text-sm">{job.content.location.file}</div>
             </div>
           )}
 
-          {job.content.line && (
+          {job.content.location?.line && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-sm text-muted-foreground">
                 Line
               </div>
-              <div className="col-span-9 text-sm">{job.content.line}</div>
+              <div className="col-span-9 text-sm">{job.content.location.line}</div>
             </div>
           )}
         </div>

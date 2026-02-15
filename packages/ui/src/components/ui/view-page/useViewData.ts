@@ -1,12 +1,8 @@
 /** @format */
 
+import { RequestInstanceResponse, JobInstanceResponse, ScheduleInstanceResponse } from "@/hooks/useApiTyped";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router";
-import {
-  RequestInstanceResponse,
-  JobInstanceResponse,
-  ScheduleInstanceResponse,
-} from "../../../../types";
 
 interface UseViewDataOptions {
   /** The API endpoint (e.g., "http", "mails", "queries") */
@@ -43,6 +39,7 @@ export function useViewData<T>({
       
       try {
         const response = await fetch(
+          //@ts-ignore
           `${window.SERVER_CONFIG.base}/api/${endpoint}/${params.id}`
         );
         

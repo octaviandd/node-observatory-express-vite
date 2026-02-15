@@ -21,7 +21,7 @@ const Separator = React.forwardRef<
         className,
       )}
       { 
-    watchers...props}
+    ...props}
     />
   ),
 );

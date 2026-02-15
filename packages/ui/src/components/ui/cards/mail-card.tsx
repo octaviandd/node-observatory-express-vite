@@ -1,5 +1,5 @@
 /** @format */
-import { MailInstanceResponse } from "../../../../types";
+import { MailInstanceResponse } from "@/hooks/useApiTyped";
 import { BaseCard } from "./base-card";
 
 export default function MailCard({ item }: { item: MailInstanceResponse }) {

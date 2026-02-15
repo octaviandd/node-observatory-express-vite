@@ -4,59 +4,24 @@
  */
 
 export interface paths {
-    "/api/": {
+    "/api/requests/table": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Dashboard overview */
+        /** Get requests table data */
         get: {
             parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Dashboard data */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ListResponse"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/requests": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get requests */
-        get: {
-            parameters: {
-                query?: {
+                query: {
                     offset?: number;
                     limit?: number;
                     period?: components["schemas"]["Period"];
-                    index?: components["schemas"]["IndexType"];
                     q?: string;
-                    table?: boolean;
+                    key?: string;
+                    status?: "2xx" | "3xx" | "4xx" | "5xx" | "all";
+                    index: components["schemas"]["IndexType"];
                 };
                 header?: never;
                 path?: never;
@@ -70,7 +35,56 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["ListResponse"];
+                        "application/json": {
+                            results: components["schemas"]["RequestInstanceResponse"][];
+                            count: string;
+                        } | {
+                            results: components["schemas"]["RequestGroupResponse"][];
+                            count: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/requests/graph": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get requests graph data */
+        get: {
+            parameters: {
+                query?: {
+                    offset?: number;
+                    limit?: number;
+                    period?: components["schemas"]["Period"];
+                    q?: string;
+                    key?: string;
+                    status?: "2xx" | "3xx" | "4xx" | "5xx" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GraphDataResponse"];
                     };
                 };
             };
@@ -108,7 +122,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["ViewDataResponse"];
                     };
                 };
             };
@@ -140,7 +154,15 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        requestId?: string;
+                        jobId?: string;
+                        scheduleId?: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Success */
                 200: {
@@ -148,7 +170,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["ViewDataResponse"];
                     };
                 };
             };
@@ -197,23 +219,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/queries": {
+    "/api/queries/table": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get queries */
+        /** Get queries table data */
         get: {
             parameters: {
-                query?: {
+                query: {
                     offset?: number;
                     limit?: number;
                     period?: components["schemas"]["Period"];
-                    index?: components["schemas"]["IndexType"];
                     q?: string;
-                    table?: boolean;
+                    key?: string;
+                    status?: "completed" | "failed" | "all";
+                    index: components["schemas"]["IndexType"];
                 };
                 header?: never;
                 path?: never;
@@ -227,7 +250,56 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["ListResponse"];
+                        "application/json": {
+                            results: components["schemas"]["QueryInstanceResponse"][];
+                            count: string;
+                        } | {
+                            results: components["schemas"]["QueryGroupResponse"][];
+                            count: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/queries/graph": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get queries graph data */
+        get: {
+            parameters: {
+                query?: {
+                    offset?: number;
+                    limit?: number;
+                    period?: components["schemas"]["Period"];
+                    q?: string;
+                    key?: string;
+                    status?: "completed" | "failed" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GraphDataResponse"];
                     };
                 };
             };
@@ -247,7 +319,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get query by ID */
+        /** Get querie by ID */
         get: {
             parameters: {
                 query?: never;
@@ -265,7 +337,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["ViewDataResponse"];
                     };
                 };
             };
@@ -287,7 +359,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Get related query metadata */
+        /** Get related querie metadata */
         post: {
             parameters: {
                 query?: never;
@@ -297,7 +369,15 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        requestId?: string;
+                        jobId?: string;
+                        scheduleId?: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Success */
                 200: {
@@ -305,7 +385,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["ViewDataResponse"];
                     };
                 };
             };
@@ -354,23 +434,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/notifications": {
+    "/api/notifications/table": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get notifications */
+        /** Get notifications table data */
         get: {
             parameters: {
-                query?: {
+                query: {
                     offset?: number;
                     limit?: number;
                     period?: components["schemas"]["Period"];
-                    index?: components["schemas"]["IndexType"];
                     q?: string;
-                    table?: boolean;
+                    key?: string;
+                    status?: "completed" | "failed" | "all";
+                    index: components["schemas"]["IndexType"];
                 };
                 header?: never;
                 path?: never;
@@ -384,7 +465,56 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["ListResponse"];
+                        "application/json": {
+                            results: components["schemas"]["NotificationInstanceResponse"][];
+                            count: string;
+                        } | {
+                            results: components["schemas"]["NotificationGroupResponse"][];
+                            count: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notifications/graph": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get notifications graph data */
+        get: {
+            parameters: {
+                query?: {
+                    offset?: number;
+                    limit?: number;
+                    period?: components["schemas"]["Period"];
+                    q?: string;
+                    key?: string;
+                    status?: "completed" | "failed" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GraphDataResponse"];
                     };
                 };
             };
@@ -422,7 +552,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["ViewDataResponse"];
                     };
                 };
             };
@@ -454,7 +584,15 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        requestId?: string;
+                        jobId?: string;
+                        scheduleId?: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Success */
                 200: {
@@ -462,7 +600,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["ViewDataResponse"];
                     };
                 };
             };
@@ -511,23 +649,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/mails": {
+    "/api/mails/table": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get mails */
+        /** Get mails table data */
         get: {
             parameters: {
-                query?: {
+                query: {
                     offset?: number;
                     limit?: number;
                     period?: components["schemas"]["Period"];
-                    index?: components["schemas"]["IndexType"];
                     q?: string;
-                    table?: boolean;
+                    key?: string;
+                    status?: "completed" | "failed" | "all";
+                    index: components["schemas"]["IndexType"];
                 };
                 header?: never;
                 path?: never;
@@ -541,7 +680,56 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["ListResponse"];
+                        "application/json": {
+                            results: components["schemas"]["MailInstanceResponse"][];
+                            count: string;
+                        } | {
+                            results: components["schemas"]["MailGroupResponse"][];
+                            count: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/mails/graph": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get mails graph data */
+        get: {
+            parameters: {
+                query?: {
+                    offset?: number;
+                    limit?: number;
+                    period?: components["schemas"]["Period"];
+                    q?: string;
+                    key?: string;
+                    status?: "completed" | "failed" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GraphDataResponse"];
                     };
                 };
             };
@@ -579,7 +767,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["ViewDataResponse"];
                     };
                 };
             };
@@ -611,7 +799,15 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        requestId?: string;
+                        jobId?: string;
+                        scheduleId?: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Success */
                 200: {
@@ -619,7 +815,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["ViewDataResponse"];
                     };
                 };
             };
@@ -668,24 +864,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/exceptions": {
+    "/api/exceptions/table": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get exceptions */
+        /** Get exceptions table data */
         get: {
             parameters: {
-                query?: {
+                query: {
                     offset?: number;
                     limit?: number;
                     period?: components["schemas"]["Period"];
-                    status?: "all" | "unhandled" | "uncaught";
-                    index?: components["schemas"]["IndexType"];
                     q?: string;
-                    table?: boolean;
+                    key?: string;
+                    status?: "all" | "unhandledRejection" | "uncaughtException";
+                    index: components["schemas"]["IndexType"];
                 };
                 header?: never;
                 path?: never;
@@ -699,7 +895,56 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["ListResponse"];
+                        "application/json": {
+                            results: components["schemas"]["ExceptionInstanceResponse"][];
+                            count: string;
+                        } | {
+                            results: components["schemas"]["ExceptionGroupResponse"][];
+                            count: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/exceptions/graph": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get exceptions graph data */
+        get: {
+            parameters: {
+                query?: {
+                    offset?: number;
+                    limit?: number;
+                    period?: components["schemas"]["Period"];
+                    q?: string;
+                    key?: string;
+                    status?: "all" | "unhandledRejection" | "uncaughtException";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GraphDataResponse"];
                     };
                 };
             };
@@ -737,7 +982,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Exception"];
+                        "application/json": components["schemas"]["ViewDataResponse"];
                     };
                 };
             };
@@ -769,7 +1014,15 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        requestId?: string;
+                        jobId?: string;
+                        scheduleId?: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Success */
                 200: {
@@ -777,7 +1030,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["ViewDataResponse"];
                     };
                 };
             };
@@ -826,23 +1079,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/jobs": {
+    "/api/jobs/table": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get jobs */
+        /** Get jobs table data */
         get: {
             parameters: {
-                query?: {
+                query: {
                     offset?: number;
                     limit?: number;
                     period?: components["schemas"]["Period"];
-                    index?: components["schemas"]["IndexType"];
                     q?: string;
-                    table?: boolean;
+                    key?: string;
+                    status?: string;
+                    queue?: string;
+                    index: components["schemas"]["IndexType"];
                 };
                 header?: never;
                 path?: never;
@@ -856,7 +1111,57 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["ListResponse"];
+                        "application/json": {
+                            results: components["schemas"]["JobInstanceResponse"][];
+                            count: string;
+                        } | {
+                            results: components["schemas"]["JobGroupResponse"][];
+                            count: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/jobs/graph": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get jobs graph data */
+        get: {
+            parameters: {
+                query?: {
+                    offset?: number;
+                    limit?: number;
+                    period?: components["schemas"]["Period"];
+                    q?: string;
+                    key?: string;
+                    status?: string;
+                    queue?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GraphDataResponse"];
                     };
                 };
             };
@@ -894,7 +1199,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["ViewDataResponse"];
                     };
                 };
             };
@@ -926,7 +1231,15 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        requestId?: string;
+                        jobId?: string;
+                        scheduleId?: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Success */
                 200: {
@@ -934,7 +1247,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["ViewDataResponse"];
                     };
                 };
             };
@@ -983,23 +1296,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/schedules": {
+    "/api/schedules/table": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get schedules */
+        /** Get schedules table data */
         get: {
             parameters: {
-                query?: {
+                query: {
                     offset?: number;
                     limit?: number;
                     period?: components["schemas"]["Period"];
-                    index?: components["schemas"]["IndexType"];
                     q?: string;
-                    table?: boolean;
+                    key?: string;
+                    status?: string;
+                    groupFilter?: string;
+                    index: components["schemas"]["IndexType"];
                 };
                 header?: never;
                 path?: never;
@@ -1013,7 +1328,57 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["ListResponse"];
+                        "application/json": {
+                            results: components["schemas"]["ScheduleInstanceResponse"][];
+                            count: string;
+                        } | {
+                            results: components["schemas"]["ScheduleGroupResponse"][];
+                            count: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/schedules/graph": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get schedules graph data */
+        get: {
+            parameters: {
+                query?: {
+                    offset?: number;
+                    limit?: number;
+                    period?: components["schemas"]["Period"];
+                    q?: string;
+                    key?: string;
+                    status?: string;
+                    groupFilter?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GraphDataResponse"];
                     };
                 };
             };
@@ -1051,7 +1416,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["ViewDataResponse"];
                     };
                 };
             };
@@ -1083,7 +1448,15 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        requestId?: string;
+                        jobId?: string;
+                        scheduleId?: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Success */
                 200: {
@@ -1091,7 +1464,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["ViewDataResponse"];
                     };
                 };
             };
@@ -1140,23 +1513,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/https": {
+    "/api/https/table": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get HTTP entries */
+        /** Get https table data */
         get: {
             parameters: {
-                query?: {
+                query: {
                     offset?: number;
                     limit?: number;
                     period?: components["schemas"]["Period"];
-                    index?: components["schemas"]["IndexType"];
                     q?: string;
-                    table?: boolean;
+                    key?: string;
+                    status?: "2xx" | "3xx" | "4xx" | "5xx" | "all";
+                    index: components["schemas"]["IndexType"];
                 };
                 header?: never;
                 path?: never;
@@ -1170,7 +1544,56 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["ListResponse"];
+                        "application/json": {
+                            results: components["schemas"]["HttpClientInstanceResponse"][];
+                            count: string;
+                        } | {
+                            results: components["schemas"]["HttpClientGroupResponse"][];
+                            count: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/https/graph": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get https graph data */
+        get: {
+            parameters: {
+                query?: {
+                    offset?: number;
+                    limit?: number;
+                    period?: components["schemas"]["Period"];
+                    q?: string;
+                    key?: string;
+                    status?: "2xx" | "3xx" | "4xx" | "5xx" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GraphDataResponse"];
                     };
                 };
             };
@@ -1190,7 +1613,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get HTTP entry by ID */
+        /** Get http by ID */
         get: {
             parameters: {
                 query?: never;
@@ -1208,7 +1631,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["ViewDataResponse"];
                     };
                 };
             };
@@ -1230,7 +1653,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Get related HTTP metadata */
+        /** Get related http metadata */
         post: {
             parameters: {
                 query?: never;
@@ -1240,7 +1663,15 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        requestId?: string;
+                        jobId?: string;
+                        scheduleId?: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Success */
                 200: {
@@ -1248,7 +1679,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["ViewDataResponse"];
                     };
                 };
             };
@@ -1266,7 +1697,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Refresh HTTP data */
+        /** Refresh https data */
         get: {
             parameters: {
                 query?: never;
@@ -1297,23 +1728,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/cache": {
+    "/api/cache/table": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get cache entries */
+        /** Get cache table data */
         get: {
             parameters: {
-                query?: {
+                query: {
                     offset?: number;
                     limit?: number;
                     period?: components["schemas"]["Period"];
-                    index?: components["schemas"]["IndexType"];
                     q?: string;
-                    table?: boolean;
+                    key?: string;
+                    status?: "hits" | "misses" | "writes" | "all";
+                    index: components["schemas"]["IndexType"];
                 };
                 header?: never;
                 path?: never;
@@ -1327,7 +1759,56 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["ListResponse"];
+                        "application/json": {
+                            results: components["schemas"]["CacheInstanceResponse"][];
+                            count: string;
+                        } | {
+                            results: components["schemas"]["CacheGroupResponse"][];
+                            count: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/cache/graph": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get cache graph data */
+        get: {
+            parameters: {
+                query?: {
+                    offset?: number;
+                    limit?: number;
+                    period?: components["schemas"]["Period"];
+                    q?: string;
+                    key?: string;
+                    status?: "hits" | "misses" | "writes" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GraphDataResponse"];
                     };
                 };
             };
@@ -1347,7 +1828,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get cache entry by ID */
+        /** Get cach by ID */
         get: {
             parameters: {
                 query?: never;
@@ -1365,7 +1846,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["ViewDataResponse"];
                     };
                 };
             };
@@ -1387,7 +1868,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Get related cache metadata */
+        /** Get related cach metadata */
         post: {
             parameters: {
                 query?: never;
@@ -1397,7 +1878,15 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        requestId?: string;
+                        jobId?: string;
+                        scheduleId?: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Success */
                 200: {
@@ -1405,7 +1894,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["ViewDataResponse"];
                     };
                 };
             };
@@ -1454,23 +1943,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/logs": {
+    "/api/logs/table": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get logs */
+        /** Get logs table data */
         get: {
             parameters: {
-                query?: {
+                query: {
                     offset?: number;
                     limit?: number;
                     period?: components["schemas"]["Period"];
-                    index?: components["schemas"]["IndexType"];
                     q?: string;
-                    table?: boolean;
+                    key?: string;
+                    status?: "error" | "warning" | "info" | "all";
+                    index: components["schemas"]["IndexType"];
                 };
                 header?: never;
                 path?: never;
@@ -1484,7 +1974,56 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["ListResponse"];
+                        "application/json": {
+                            results: components["schemas"]["LogInstanceResponse"][];
+                            count: string;
+                        } | {
+                            results: components["schemas"]["LogGroupResponse"][];
+                            count: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/logs/graph": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get logs graph data */
+        get: {
+            parameters: {
+                query?: {
+                    offset?: number;
+                    limit?: number;
+                    period?: components["schemas"]["Period"];
+                    q?: string;
+                    key?: string;
+                    status?: "error" | "warning" | "info" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GraphDataResponse"];
                     };
                 };
             };
@@ -1522,7 +2061,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["ViewDataResponse"];
                     };
                 };
             };
@@ -1554,7 +2093,15 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        requestId?: string;
+                        jobId?: string;
+                        scheduleId?: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Success */
                 200: {
@@ -1562,7 +2109,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["ViewDataResponse"];
                     };
                 };
             };
@@ -1611,23 +2158,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/views": {
+    "/api/views/table": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get views */
+        /** Get views table data */
         get: {
             parameters: {
-                query?: {
+                query: {
                     offset?: number;
                     limit?: number;
                     period?: components["schemas"]["Period"];
-                    index?: components["schemas"]["IndexType"];
                     q?: string;
-                    table?: boolean;
+                    key?: string;
+                    status?: "completed" | "failed" | "all";
+                    index: components["schemas"]["IndexType"];
                 };
                 header?: never;
                 path?: never;
@@ -1641,7 +2189,56 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["ListResponse"];
+                        "application/json": {
+                            results: components["schemas"]["ViewInstanceResponse"][];
+                            count: string;
+                        } | {
+                            results: components["schemas"]["ViewGroupResponse"][];
+                            count: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/views/graph": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get views graph data */
+        get: {
+            parameters: {
+                query?: {
+                    offset?: number;
+                    limit?: number;
+                    period?: components["schemas"]["Period"];
+                    q?: string;
+                    key?: string;
+                    status?: "completed" | "failed" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GraphDataResponse"];
                     };
                 };
             };
@@ -1679,7 +2276,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["ViewDataResponse"];
                     };
                 };
             };
@@ -1711,7 +2308,15 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        requestId?: string;
+                        jobId?: string;
+                        scheduleId?: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Success */
                 200: {
@@ -1719,7 +2324,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["ViewDataResponse"];
                     };
                 };
             };
@@ -1768,23 +2373,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/models": {
+    "/api/models/table": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get models */
+        /** Get models table data */
         get: {
             parameters: {
-                query?: {
+                query: {
                     offset?: number;
                     limit?: number;
                     period?: components["schemas"]["Period"];
-                    index?: components["schemas"]["IndexType"];
                     q?: string;
-                    table?: boolean;
+                    key?: string;
+                    status?: "completed" | "failed" | "all";
+                    index: components["schemas"]["IndexType"];
                 };
                 header?: never;
                 path?: never;
@@ -1798,7 +2404,56 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["ListResponse"];
+                        "application/json": {
+                            results: components["schemas"]["ModelInstanceResponse"][];
+                            count: string;
+                        } | {
+                            results: components["schemas"]["ModelGroupResponse"][];
+                            count: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/models/graph": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get models graph data */
+        get: {
+            parameters: {
+                query?: {
+                    offset?: number;
+                    limit?: number;
+                    period?: components["schemas"]["Period"];
+                    q?: string;
+                    key?: string;
+                    status?: "completed" | "failed" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GraphDataResponse"];
                     };
                 };
             };
@@ -1836,7 +2491,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["ViewDataResponse"];
                     };
                 };
             };
@@ -1868,7 +2523,15 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        requestId?: string;
+                        jobId?: string;
+                        scheduleId?: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Success */
                 200: {
@@ -1876,7 +2539,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["ViewDataResponse"];
                     };
                 };
             };
@@ -1933,40 +2596,1185 @@ export interface components {
         Period: "1h" | "24h" | "7d" | "14d" | "30d";
         /** @enum {string} */
         IndexType: "instance" | "group";
-        BaseFilters: {
-            /** @default 0 */
-            offset: number;
-            /** @default 20 */
-            limit: number;
-            period?: components["schemas"]["Period"];
-            query?: string;
-            isTable?: boolean;
-            index?: components["schemas"]["IndexType"];
-            key?: string;
-        };
-        Exception: {
-            id?: string;
-            /** @enum {string} */
-            type?: "exception";
-            content?: {
-                message?: string;
+        RequestInstanceResponse: {
+            content: {
                 /** @enum {string} */
-                type?: "unhandledRejection" | "uncaughtException";
-                stack?: string;
-                title?: string;
+                status?: "completed" | "failed";
+                duration?: number;
+                metadata: {
+                    /** @enum {string} */
+                    package: "express" | "http";
+                    method: string;
+                    type?: string;
+                } & {
+                    package: string;
+                };
+                data: {
+                    route?: string;
+                    statusCode: number;
+                    requestSize?: number;
+                    responseSize?: number;
+                    payload?: string;
+                    headers?: Record<string, never>;
+                    query?: Record<string, never>;
+                    params?: Record<string, never>;
+                    ip?: string;
+                    ipAddress?: string;
+                    memoryUsage?: {
+                        /**
+                         * @description Resident Set Size, is the amount of space occupied in the main memory device (that is a subset of the total allocated memory) for the
+                         *     process, including all C++ and JavaScript objects and code.
+                         */
+                        rss: number;
+                        /** @description Refers to V8's memory usage. */
+                        heapTotal: number;
+                        /** @description Refers to V8's memory usage. */
+                        heapUsed: number;
+                        external: number;
+                        /**
+                         * @description Refers to memory allocated for `ArrayBuffer`s and `SharedArrayBuffer`s, including all Node.js Buffers. This is also included
+                         *     in the external value. When Node.js is used as an embedded library, this value may be `0` because allocations for `ArrayBuffer`s
+                         *     may not be tracked in that case.
+                         */
+                        arrayBuffers: number;
+                    };
+                    session?: Record<string, never>;
+                };
+                location?: {
+                    file: string;
+                    line: string;
+                };
+                error?: {
+                    name: string;
+                    message: string;
+                    stack?: string;
+                    code?: string;
+                };
+                created_at?: string;
             };
-            /** Format: date-time */
-            created_at?: string;
-            request_id?: string | null;
-            job_id?: string | null;
-            schedule_id?: string | null;
+            uuid: string;
+            request_id?: string;
+            job_id?: string;
+            schedule_id?: string;
+            created_at: string;
+            updated_at: string;
+            /** @enum {string} */
+            type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
         };
-        ListResponse: {
-            results?: Record<string, never>[];
-            count?: string;
+        CacheInstanceResponse: {
+            content: {
+                /** @enum {string} */
+                status?: "completed" | "failed";
+                duration?: number;
+                metadata: {
+                    /** @enum {string} */
+                    package: "ioredis" | "keyv" | "level" | "lru-cache" | "memjs" | "node-cache" | "redis";
+                    command: string;
+                    host?: string;
+                    port?: number;
+                } & {
+                    package: string;
+                };
+                data: {
+                    key?: unknown;
+                    hits?: number;
+                    misses?: number;
+                    writes?: number;
+                };
+                location?: {
+                    file: string;
+                    line: string;
+                };
+                error?: {
+                    name: string;
+                    message: string;
+                    stack?: string;
+                    code?: string;
+                };
+                created_at?: string;
+            };
+            uuid: string;
+            request_id?: string;
+            job_id?: string;
+            schedule_id?: string;
+            created_at: string;
+            updated_at: string;
+            /** @enum {string} */
+            type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
         };
-        GraphResponse: {
-            [key: string]: unknown;
+        JobInstanceResponse: {
+            content: {
+                /** @enum {string} */
+                status?: "completed" | "failed";
+                duration?: number;
+                metadata: {
+                    /** @enum {string} */
+                    package: "agenda" | "bull";
+                    method: string;
+                    queue?: string;
+                    connectionName?: string;
+                } & {
+                    package: string;
+                };
+                data: {
+                    queue?: string;
+                    connectionName?: string;
+                    jobId?: string;
+                    attemptsMade?: number;
+                    failedReason?: string;
+                };
+                location?: {
+                    file: string;
+                    line: string;
+                };
+                error?: {
+                    name: string;
+                    message: string;
+                    stack?: string;
+                    code?: string;
+                };
+                created_at?: string;
+            };
+            uuid: string;
+            request_id?: string;
+            job_id?: string;
+            schedule_id?: string;
+            created_at: string;
+            updated_at: string;
+            /** @enum {string} */
+            type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
+        };
+        QueryInstanceResponse: {
+            content: {
+                /** @enum {string} */
+                status?: "completed" | "failed";
+                duration?: number;
+                metadata: {
+                    /** @enum {string} */
+                    package: "knex" | "mongodb" | "mysql" | "mysql2" | "pg" | "prisma" | "sequelize" | "sqlite3" | "typeorm";
+                    context?: string;
+                    sqlType?: string;
+                    method?: string;
+                } & {
+                    package: string;
+                };
+                data: {
+                    sql?: string;
+                    query?: string;
+                    hostname?: string;
+                    port?: string | number;
+                    database?: string;
+                    rowCount?: number;
+                };
+                location?: {
+                    file: string;
+                    line: string;
+                };
+                error?: {
+                    name: string;
+                    message: string;
+                    stack?: string;
+                    code?: string;
+                };
+                created_at?: string;
+            };
+            average: number;
+            p95: number;
+            uuid: string;
+            request_id?: string;
+            job_id?: string;
+            schedule_id?: string;
+            created_at: string;
+            updated_at: string;
+            /** @enum {string} */
+            type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
+        };
+        HttpClientInstanceResponse: {
+            content: {
+                /** @enum {string} */
+                status?: "completed" | "failed";
+                duration?: number;
+                metadata: {
+                    package: string;
+                    method?: string;
+                } & {
+                    package: string;
+                };
+                data: {
+                    method?: string;
+                    hostname?: string;
+                    pathname?: string;
+                    statusCode?: number;
+                    origin?: string;
+                    port?: string | number;
+                    path?: string;
+                    headers?: Record<string, never>;
+                    requestBody?: string;
+                    requestBodySize?: number;
+                    responseBody?: string;
+                    responseBodySize?: number;
+                    statusMessage?: string;
+                    isRedirect?: boolean;
+                    redirectFrom?: string;
+                    isMedia?: boolean;
+                    aborted?: boolean;
+                };
+                location?: {
+                    file: string;
+                    line: string;
+                };
+                error?: {
+                    name: string;
+                    message: string;
+                    stack?: string;
+                    code?: string;
+                };
+                created_at?: string;
+            };
+            uuid: string;
+            request_id?: string;
+            job_id?: string;
+            schedule_id?: string;
+            created_at: string;
+            updated_at: string;
+            /** @enum {string} */
+            type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
+        };
+        ScheduleInstanceResponse: {
+            content: {
+                /** @enum {string} */
+                status?: "completed" | "failed";
+                duration?: number;
+                metadata: {
+                    /** @enum {string} */
+                    package: "bree" | "node-cron" | "node-schedule";
+                    type: string;
+                    scheduleId: string;
+                    breeId?: string;
+                    jobId?: string;
+                } & {
+                    package: string;
+                };
+                data: {
+                    cronExpression?: string;
+                    name?: null | string;
+                    rule?: unknown;
+                    jobName?: string;
+                };
+                location?: {
+                    file: string;
+                    line: string;
+                };
+                error?: {
+                    name: string;
+                    message: string;
+                    stack?: string;
+                    code?: string;
+                };
+                created_at?: string;
+            };
+            uuid: string;
+            request_id?: string;
+            job_id?: string;
+            schedule_id?: string;
+            created_at: string;
+            updated_at: string;
+            /** @enum {string} */
+            type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
+        };
+        MailInstanceResponse: {
+            content: {
+                /** @enum {string} */
+                status?: "completed" | "failed";
+                duration?: number;
+                metadata: {
+                    /** @enum {string} */
+                    package: "@aws-sdk/client-ses" | "@sendgrid/mail" | "mailgun.js" | "nodemailer" | "postmark";
+                    command: string;
+                } & {
+                    package: string;
+                };
+                data: {
+                    to: string[];
+                    cc: string[];
+                    bcc: string[];
+                    from: string;
+                    subject?: string;
+                    body?: string;
+                    templateId?: string;
+                    messageId?: string;
+                };
+                location?: {
+                    file: string;
+                    line: string;
+                };
+                error?: {
+                    name: string;
+                    message: string;
+                    stack?: string;
+                    code?: string;
+                };
+                created_at?: string;
+            };
+            uuid: string;
+            request_id?: string;
+            job_id?: string;
+            schedule_id?: string;
+            created_at: string;
+            updated_at: string;
+            /** @enum {string} */
+            type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
+        };
+        LogInstanceResponse: {
+            content: {
+                /** @enum {string} */
+                status?: "completed" | "failed";
+                duration?: number;
+                metadata: {
+                    /** @enum {string} */
+                    package: "bunyan" | "log4js" | "loglevel" | "pino" | "signale" | "winston";
+                    level: string;
+                    logger?: string;
+                } & {
+                    package: string;
+                };
+                data: {
+                    message: unknown;
+                };
+                location?: {
+                    file: string;
+                    line: string;
+                };
+                error?: {
+                    name: string;
+                    message: string;
+                    stack?: string;
+                    code?: string;
+                };
+                created_at?: string;
+            };
+            uuid: string;
+            request_id?: string;
+            job_id?: string;
+            schedule_id?: string;
+            created_at: string;
+            updated_at: string;
+            /** @enum {string} */
+            type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
+        };
+        ExceptionInstanceResponse: {
+            content: {
+                /** @constant */
+                type: "exception";
+                message: string;
+                stack: string;
+                file: string;
+                line: string;
+                title: string;
+                fullError: string;
+                codeContext: {
+                    lineNumber: number;
+                    content: string;
+                    isErrorLine: boolean;
+                }[];
+            };
+            uuid: string;
+            request_id?: string;
+            job_id?: string;
+            schedule_id?: string;
+            created_at: string;
+            updated_at: string;
+            /** @enum {string} */
+            type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
+        };
+        ModelInstanceResponse: {
+            content: {
+                /** @enum {string} */
+                status?: "completed" | "failed";
+                duration?: number;
+                metadata: {
+                    /** @enum {string} */
+                    package: "knex" | "mongoose" | "prisma" | "sequelize" | "sqlite3" | "typeorm";
+                    method: string;
+                    modelName: string;
+                } & {
+                    package: string;
+                };
+                data: Record<string, never>;
+                location?: {
+                    file: string;
+                    line: string;
+                };
+                error?: {
+                    name: string;
+                    message: string;
+                    stack?: string;
+                    code?: string;
+                };
+                created_at?: string;
+            };
+            uuid: string;
+            request_id?: string;
+            job_id?: string;
+            schedule_id?: string;
+            created_at: string;
+            updated_at: string;
+            /** @enum {string} */
+            type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
+        };
+        ViewInstanceResponse: {
+            content: {
+                /** @enum {string} */
+                status?: "completed" | "failed";
+                duration?: number;
+                metadata: {
+                    package: string;
+                    /** @constant */
+                    method: "render";
+                } & {
+                    package: string;
+                };
+                data: {
+                    view: string;
+                    options: Record<string, never>;
+                    size: number;
+                    cacheInfo: {
+                        cacheEnabled: boolean;
+                    };
+                };
+                location?: {
+                    file: string;
+                    line: string;
+                };
+                error?: {
+                    name: string;
+                    message: string;
+                    stack?: string;
+                    code?: string;
+                };
+                created_at?: string;
+            };
+            uuid: string;
+            request_id?: string;
+            job_id?: string;
+            schedule_id?: string;
+            created_at: string;
+            updated_at: string;
+            /** @enum {string} */
+            type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
+        };
+        NotificationInstanceResponse: {
+            content: {
+                /** @enum {string} */
+                status?: "completed" | "failed";
+                duration?: number;
+                metadata: ({
+                    /** @constant */
+                    package: "pusher";
+                    /** @enum {string} */
+                    method: "trigger" | "triggerBatch";
+                } & {
+                    package: string;
+                }) | ({
+                    /** @constant */
+                    package: "ably";
+                    method: string;
+                    /** @enum {string} */
+                    mode: "realtime" | "rest";
+                } & {
+                    package: string;
+                });
+                data: {
+                    channel?: string;
+                    event?: string;
+                    payload?: unknown;
+                    batch?: unknown[];
+                    options?: unknown;
+                };
+                location?: {
+                    file: string;
+                    line: string;
+                };
+                error?: {
+                    name: string;
+                    message: string;
+                    stack?: string;
+                    code?: string;
+                };
+                created_at?: string;
+            };
+            uuid: string;
+            request_id?: string;
+            job_id?: string;
+            schedule_id?: string;
+            created_at: string;
+            updated_at: string;
+            /** @enum {string} */
+            type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
+        };
+        RequestGroupResponse: {
+            route: string;
+            average: number;
+            p95: number;
+            count_200: number;
+            count_400: number;
+            count_500: number;
+            count: number;
+            shortest?: number;
+            longest?: number;
+        };
+        CacheGroupResponse: {
+            cache_key: string;
+            misses: number;
+            hits: number;
+            writes: number;
+            count: number;
+            shortest?: number;
+            longest?: number;
+            average?: number;
+            p95?: number;
+        };
+        JobGroupResponse: {
+            queue: string;
+            completed: number;
+            released: number;
+            failed: number;
+            count: number;
+            shortest?: number;
+            longest?: number;
+            average?: number;
+            p95?: number;
+        };
+        QueryGroupResponse: {
+            endpoint: string;
+            completed: number;
+            failed: number;
+            p95: number;
+            average: number;
+            count: number;
+            shortest?: number;
+            longest?: number;
+        };
+        HttpClientGroupResponse: {
+            route: string;
+            average: number;
+            p95: number;
+            count_200: number;
+            count_400: number;
+            count_500: number;
+            count: number;
+            shortest?: number;
+            longest?: number;
+        };
+        ScheduleGroupResponse: {
+            scheduleId: string;
+            cronExpression: string;
+            completed: number;
+            failed: number;
+            count: number;
+            shortest?: number;
+            longest?: number;
+            average?: number;
+            p95?: number;
+        };
+        MailGroupResponse: {
+            mail_to: string;
+            success_count: number;
+            failed_count: number;
+            count: number;
+            shortest?: number;
+            longest?: number;
+            average?: number;
+            p95?: number;
+        };
+        LogGroupResponse: {
+            level: string;
+            message: string;
+            info: number;
+            warn: number;
+            error: number;
+            debug: number;
+            trace: number;
+            fatal: number;
+            log: number;
+            count: number;
+            shortest?: number;
+            longest?: number;
+            average?: number;
+            p95?: number;
+        };
+        ExceptionGroupResponse: {
+            header: string;
+            total: number;
+            count: number;
+            shortest?: number;
+            longest?: number;
+            average?: number;
+            p95?: number;
+        };
+        ModelGroupResponse: {
+            modelName: string;
+            count: number;
+            shortest?: number;
+            longest?: number;
+            average?: number;
+            p95?: number;
+        };
+        ViewGroupResponse: {
+            size: string;
+            view: string;
+            completed: number;
+            failed: number;
+            count: number;
+            shortest?: number;
+            longest?: number;
+            average?: number;
+            p95?: number;
+        };
+        NotificationGroupResponse: {
+            channel: string;
+            completed: number;
+            failed: number;
+            count: number;
+            shortest?: number;
+            longest?: number;
+            average?: number;
+            p95?: number;
+        };
+        GraphDataResponse: {
+            countFormattedData: Record<string, never>[];
+            durationFormattedData: Record<string, never>;
+            count: string;
+            indexCountOne: string;
+            indexCountTwo: string;
+            indexCountThree: string;
+            indexCountFour?: string;
+            indexCountFive?: string;
+            indexCountSix?: string;
+            indexCountSeven?: string;
+            indexCountEight?: string;
+            shortest: string;
+            longest: string;
+            average: string;
+            p95: string;
+        };
+        ViewDataResponse: {
+            view?: {
+                content: {
+                    /** @enum {string} */
+                    status?: "completed" | "failed";
+                    duration?: number;
+                    metadata: {
+                        package: string;
+                        /** @constant */
+                        method: "render";
+                    } & {
+                        package: string;
+                    };
+                    data: {
+                        view: string;
+                        options: Record<string, never>;
+                        size: number;
+                        cacheInfo: {
+                            cacheEnabled: boolean;
+                        };
+                    };
+                    location?: {
+                        file: string;
+                        line: string;
+                    };
+                    error?: {
+                        name: string;
+                        message: string;
+                        stack?: string;
+                        code?: string;
+                    };
+                    created_at?: string;
+                };
+                uuid: string;
+                request_id?: string;
+                job_id?: string;
+                schedule_id?: string;
+                created_at: string;
+                updated_at: string;
+                /** @enum {string} */
+                type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
+            }[];
+            log?: {
+                content: {
+                    /** @enum {string} */
+                    status?: "completed" | "failed";
+                    duration?: number;
+                    metadata: {
+                        /** @enum {string} */
+                        package: "bunyan" | "log4js" | "loglevel" | "pino" | "signale" | "winston";
+                        level: string;
+                        logger?: string;
+                    } & {
+                        package: string;
+                    };
+                    data: {
+                        message: unknown;
+                    };
+                    location?: {
+                        file: string;
+                        line: string;
+                    };
+                    error?: {
+                        name: string;
+                        message: string;
+                        stack?: string;
+                        code?: string;
+                    };
+                    created_at?: string;
+                };
+                uuid: string;
+                request_id?: string;
+                job_id?: string;
+                schedule_id?: string;
+                created_at: string;
+                updated_at: string;
+                /** @enum {string} */
+                type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
+            }[];
+            request?: {
+                content: {
+                    /** @enum {string} */
+                    status?: "completed" | "failed";
+                    duration?: number;
+                    metadata: {
+                        /** @enum {string} */
+                        package: "express" | "http";
+                        method: string;
+                        type?: string;
+                    } & {
+                        package: string;
+                    };
+                    data: {
+                        route?: string;
+                        statusCode: number;
+                        requestSize?: number;
+                        responseSize?: number;
+                        payload?: string;
+                        headers?: Record<string, never>;
+                        query?: Record<string, never>;
+                        params?: Record<string, never>;
+                        ip?: string;
+                        ipAddress?: string;
+                        memoryUsage?: {
+                            /**
+                             * @description Resident Set Size, is the amount of space occupied in the main memory device (that is a subset of the total allocated memory) for the
+                             *     process, including all C++ and JavaScript objects and code.
+                             */
+                            rss: number;
+                            /** @description Refers to V8's memory usage. */
+                            heapTotal: number;
+                            /** @description Refers to V8's memory usage. */
+                            heapUsed: number;
+                            external: number;
+                            /**
+                             * @description Refers to memory allocated for `ArrayBuffer`s and `SharedArrayBuffer`s, including all Node.js Buffers. This is also included
+                             *     in the external value. When Node.js is used as an embedded library, this value may be `0` because allocations for `ArrayBuffer`s
+                             *     may not be tracked in that case.
+                             */
+                            arrayBuffers: number;
+                        };
+                        session?: Record<string, never>;
+                    };
+                    location?: {
+                        file: string;
+                        line: string;
+                    };
+                    error?: {
+                        name: string;
+                        message: string;
+                        stack?: string;
+                        code?: string;
+                    };
+                    created_at?: string;
+                };
+                uuid: string;
+                request_id?: string;
+                job_id?: string;
+                schedule_id?: string;
+                created_at: string;
+                updated_at: string;
+                /** @enum {string} */
+                type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
+            }[];
+            cache?: {
+                content: {
+                    /** @enum {string} */
+                    status?: "completed" | "failed";
+                    duration?: number;
+                    metadata: {
+                        /** @enum {string} */
+                        package: "ioredis" | "keyv" | "level" | "lru-cache" | "memjs" | "node-cache" | "redis";
+                        command: string;
+                        host?: string;
+                        port?: number;
+                    } & {
+                        package: string;
+                    };
+                    data: {
+                        key?: unknown;
+                        hits?: number;
+                        misses?: number;
+                        writes?: number;
+                    };
+                    location?: {
+                        file: string;
+                        line: string;
+                    };
+                    error?: {
+                        name: string;
+                        message: string;
+                        stack?: string;
+                        code?: string;
+                    };
+                    created_at?: string;
+                };
+                uuid: string;
+                request_id?: string;
+                job_id?: string;
+                schedule_id?: string;
+                created_at: string;
+                updated_at: string;
+                /** @enum {string} */
+                type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
+            }[];
+            mail?: {
+                content: {
+                    /** @enum {string} */
+                    status?: "completed" | "failed";
+                    duration?: number;
+                    metadata: {
+                        /** @enum {string} */
+                        package: "@aws-sdk/client-ses" | "@sendgrid/mail" | "mailgun.js" | "nodemailer" | "postmark";
+                        command: string;
+                    } & {
+                        package: string;
+                    };
+                    data: {
+                        to: string[];
+                        cc: string[];
+                        bcc: string[];
+                        from: string;
+                        subject?: string;
+                        body?: string;
+                        templateId?: string;
+                        messageId?: string;
+                    };
+                    location?: {
+                        file: string;
+                        line: string;
+                    };
+                    error?: {
+                        name: string;
+                        message: string;
+                        stack?: string;
+                        code?: string;
+                    };
+                    created_at?: string;
+                };
+                uuid: string;
+                request_id?: string;
+                job_id?: string;
+                schedule_id?: string;
+                created_at: string;
+                updated_at: string;
+                /** @enum {string} */
+                type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
+            }[];
+            http?: {
+                content: {
+                    /** @enum {string} */
+                    status?: "completed" | "failed";
+                    duration?: number;
+                    metadata: {
+                        package: string;
+                        method?: string;
+                    } & {
+                        package: string;
+                    };
+                    data: {
+                        method?: string;
+                        hostname?: string;
+                        pathname?: string;
+                        statusCode?: number;
+                        origin?: string;
+                        port?: string | number;
+                        path?: string;
+                        headers?: Record<string, never>;
+                        requestBody?: string;
+                        requestBodySize?: number;
+                        responseBody?: string;
+                        responseBodySize?: number;
+                        statusMessage?: string;
+                        isRedirect?: boolean;
+                        redirectFrom?: string;
+                        isMedia?: boolean;
+                        aborted?: boolean;
+                    };
+                    location?: {
+                        file: string;
+                        line: string;
+                    };
+                    error?: {
+                        name: string;
+                        message: string;
+                        stack?: string;
+                        code?: string;
+                    };
+                    created_at?: string;
+                };
+                uuid: string;
+                request_id?: string;
+                job_id?: string;
+                schedule_id?: string;
+                created_at: string;
+                updated_at: string;
+                /** @enum {string} */
+                type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
+            }[];
+            notification?: {
+                content: {
+                    /** @enum {string} */
+                    status?: "completed" | "failed";
+                    duration?: number;
+                    metadata: ({
+                        /** @constant */
+                        package: "pusher";
+                        /** @enum {string} */
+                        method: "trigger" | "triggerBatch";
+                    } & {
+                        package: string;
+                    }) | ({
+                        /** @constant */
+                        package: "ably";
+                        method: string;
+                        /** @enum {string} */
+                        mode: "realtime" | "rest";
+                    } & {
+                        package: string;
+                    });
+                    data: {
+                        channel?: string;
+                        event?: string;
+                        payload?: unknown;
+                        batch?: unknown[];
+                        options?: unknown;
+                    };
+                    location?: {
+                        file: string;
+                        line: string;
+                    };
+                    error?: {
+                        name: string;
+                        message: string;
+                        stack?: string;
+                        code?: string;
+                    };
+                    created_at?: string;
+                };
+                uuid: string;
+                request_id?: string;
+                job_id?: string;
+                schedule_id?: string;
+                created_at: string;
+                updated_at: string;
+                /** @enum {string} */
+                type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
+            }[];
+            schedule?: {
+                content: {
+                    /** @enum {string} */
+                    status?: "completed" | "failed";
+                    duration?: number;
+                    metadata: {
+                        /** @enum {string} */
+                        package: "bree" | "node-cron" | "node-schedule";
+                        type: string;
+                        scheduleId: string;
+                        breeId?: string;
+                        jobId?: string;
+                    } & {
+                        package: string;
+                    };
+                    data: {
+                        cronExpression?: string;
+                        name?: null | string;
+                        rule?: unknown;
+                        jobName?: string;
+                    };
+                    location?: {
+                        file: string;
+                        line: string;
+                    };
+                    error?: {
+                        name: string;
+                        message: string;
+                        stack?: string;
+                        code?: string;
+                    };
+                    created_at?: string;
+                };
+                uuid: string;
+                request_id?: string;
+                job_id?: string;
+                schedule_id?: string;
+                created_at: string;
+                updated_at: string;
+                /** @enum {string} */
+                type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
+            }[];
+            model?: {
+                content: {
+                    /** @enum {string} */
+                    status?: "completed" | "failed";
+                    duration?: number;
+                    metadata: {
+                        /** @enum {string} */
+                        package: "knex" | "mongoose" | "prisma" | "sequelize" | "sqlite3" | "typeorm";
+                        method: string;
+                        modelName: string;
+                    } & {
+                        package: string;
+                    };
+                    data: Record<string, never>;
+                    location?: {
+                        file: string;
+                        line: string;
+                    };
+                    error?: {
+                        name: string;
+                        message: string;
+                        stack?: string;
+                        code?: string;
+                    };
+                    created_at?: string;
+                };
+                uuid: string;
+                request_id?: string;
+                job_id?: string;
+                schedule_id?: string;
+                created_at: string;
+                updated_at: string;
+                /** @enum {string} */
+                type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
+            }[];
+            exception?: {
+                content: {
+                    /** @constant */
+                    type: "exception";
+                    message: string;
+                    stack: string;
+                    file: string;
+                    line: string;
+                    title: string;
+                    fullError: string;
+                    codeContext: {
+                        lineNumber: number;
+                        content: string;
+                        isErrorLine: boolean;
+                    }[];
+                };
+                uuid: string;
+                request_id?: string;
+                job_id?: string;
+                schedule_id?: string;
+                created_at: string;
+                updated_at: string;
+                /** @enum {string} */
+                type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
+            }[];
+            job?: {
+                content: {
+                    /** @enum {string} */
+                    status?: "completed" | "failed";
+                    duration?: number;
+                    metadata: {
+                        /** @enum {string} */
+                        package: "agenda" | "bull";
+                        method: string;
+                        queue?: string;
+                        connectionName?: string;
+                    } & {
+                        package: string;
+                    };
+                    data: {
+                        queue?: string;
+                        connectionName?: string;
+                        jobId?: string;
+                        attemptsMade?: number;
+                        failedReason?: string;
+                    };
+                    location?: {
+                        file: string;
+                        line: string;
+                    };
+                    error?: {
+                        name: string;
+                        message: string;
+                        stack?: string;
+                        code?: string;
+                    };
+                    created_at?: string;
+                };
+                uuid: string;
+                request_id?: string;
+                job_id?: string;
+                schedule_id?: string;
+                created_at: string;
+                updated_at: string;
+                /** @enum {string} */
+                type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
+            }[];
+            query?: {
+                content: {
+                    /** @enum {string} */
+                    status?: "completed" | "failed";
+                    duration?: number;
+                    metadata: {
+                        /** @enum {string} */
+                        package: "knex" | "mongodb" | "mysql" | "mysql2" | "pg" | "prisma" | "sequelize" | "sqlite3" | "typeorm";
+                        context?: string;
+                        sqlType?: string;
+                        method?: string;
+                    } & {
+                        package: string;
+                    };
+                    data: {
+                        sql?: string;
+                        query?: string;
+                        hostname?: string;
+                        port?: string | number;
+                        database?: string;
+                        rowCount?: number;
+                    };
+                    location?: {
+                        file: string;
+                        line: string;
+                    };
+                    error?: {
+                        name: string;
+                        message: string;
+                        stack?: string;
+                        code?: string;
+                    };
+                    created_at?: string;
+                };
+                average: number;
+                p95: number;
+                uuid: string;
+                request_id?: string;
+                job_id?: string;
+                schedule_id?: string;
+                created_at: string;
+                updated_at: string;
+                /** @enum {string} */
+                type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
+            }[];
         };
     };
     responses: never;

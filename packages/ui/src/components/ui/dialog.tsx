@@ -23,7 +23,7 @@ const DialogOverlay = React.forwardRef<
       className,
     )}
     { 
-    watchers...props}
+    ...props}
   />
 ));
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
@@ -41,7 +41,7 @@ const DialogContent = React.forwardRef<
         className,
       )}
       { 
-    watchers...props}
+    ...props}
     >
       {children}
       <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
@@ -63,7 +63,7 @@ const DialogHeader = ({
       className,
     )}
     { 
-    watchers...props}
+    ...props}
   />
 );
 DialogHeader.displayName = "DialogHeader";
@@ -78,7 +78,7 @@ const DialogFooter = ({
       className,
     )}
     { 
-    watchers...props}
+    ...props}
   />
 );
 DialogFooter.displayName = "DialogFooter";
@@ -94,7 +94,7 @@ const DialogTitle = React.forwardRef<
       className,
     )}
     { 
-    watchers...props}
+    ...props}
   />
 ));
 DialogTitle.displayName = DialogPrimitive.Title.displayName;
@@ -107,7 +107,7 @@ const DialogDescription = React.forwardRef<
     ref={ref}
     className={cn("text-sm text-muted-foreground", className)}
     { 
-    watchers...props}
+    ...props}
   />
 ));
 DialogDescription.displayName = DialogPrimitive.Description.displayName;

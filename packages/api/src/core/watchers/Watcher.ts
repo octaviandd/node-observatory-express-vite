@@ -1,16 +1,16 @@
-interface WatcherResponse {
-  body?: any;
-  statusCode: number;
-}
+/** @format */
+interface Watcher<T extends WatcherType = WatcherType> {
+  readonly type: T;
 
-interface Watcher {
-  readonly type: string;
-
-  index(req: ObservatoryBoardRequest): Promise<WatcherResponse>;
-  view(req: ObservatoryBoardRequest): Promise<WatcherResponse>;
+  indexTable(
+    req: ObservatoryBoardRequest,
+  ): Promise<ApiResponse<TableDataResponse<T, "instance" | "group">>>;
+  indexGraph(
+    req: ObservatoryBoardRequest,
+  ): Promise<ApiResponse<GraphDataResponse>>;
+  view(req: ObservatoryBoardRequest): Promise<ApiResponse<ViewDataResponse>>;
   insertRedisStream(entry: BaseLogEntry): Promise<void>;
   stop(): void;
 }
 
 export default Watcher;
-export type { WatcherResponse };

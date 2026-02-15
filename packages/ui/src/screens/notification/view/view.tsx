@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { NotificationCrumbs } from "./crumbs";
-import { NotificationInstanceResponse } from "../../../../types";
 import Details from "./details";
 import ContentTabs from "./tabs";
 import {
@@ -10,6 +9,7 @@ import {
   useViewData,
   Source,
 } from "@/components/ui/view-page";
+import { NotificationInstanceResponse } from "@/hooks/useApiTyped";
 
 export default function NotificationView() {
   const [activeTab, setActiveTab] = useState("raw");
@@ -29,7 +29,7 @@ export default function NotificationView() {
           <ContentTabs
             activeTab={activeTab}
             setActiveTab={setActiveTab}
-            data={{ notification, loading: false, error: null, source }}
+            data={{ notification }}
           />
         </>
       )}
