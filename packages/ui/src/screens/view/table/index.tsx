@@ -1,14 +1,19 @@
 /** @format */
 
 import { FileCode } from "lucide-react";
-import SidePanel from "../../../components/ui/side-panel";
-import { createPortal } from "react-dom";
 import { InstanceTable } from "./instance";
 import { GroupTable } from "./group";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useIndexTableData } from "@/hooks/useIndexTableData";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  TablePageLayout,
+  TableHeader,
+  StatusFilter,
+  LoadMoreButton,
+} from "@/components/ui/table-page";
+import { ViewInstanceResponse, ViewGroupResponse } from "@/hooks/useApiTyped";
+
+const STATUS_OPTIONS = ["all", "completed", "failed"];
 
 export default function ViewsIndexTable() {
   const {
@@ -19,58 +24,30 @@ export default function ViewsIndexTable() {
     index,
     instanceStatusType,
     inputValue,
-    sidePanelData,
+    setDrawer,
     modelKey,
     message,
-    setSidePanelData,
+    drawer,
     setInstanceStatusType,
     setInputValue,
-    loadData,
-  } = useIndexTableData({
+    loadMore,
+  } = useIndexTableData<ViewInstanceResponse, ViewGroupResponse>({
     key: "views",
     defaultInstanceStatusType: "all",
   });
 
-  const Table = index === "instance" ? InstanceTable : GroupTable;
+  const count = index === "instance" ? instanceDataCount : groupDataCount;
+  const label = index === "instance" ? "View" : "Path";
 
   return (
-    <div className="relative">
-      {sidePanelData.isOpen &&
-        createPortal(
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-xs z-50"
-            onClick={() =>
-              setSidePanelData({
-                ...sidePanelData,
-                isOpen: false,
-                requestId: "",
-                jobId: "",
-                scheduleId: "",
-                modelId: "",
-              })
-            }
-          ></div>,
-          document.body,
-        )}
-      {sidePanelData.isOpen && (
-        <SidePanel
-          setSidePanelData={setSidePanelData}
-          requestId={sidePanelData.requestId}
-          jobId={sidePanelData.jobId}
-          scheduleId={sidePanelData.scheduleId}
-          modelId={sidePanelData.modelId}
-          type="views"
-        />
-      )}
+    <TablePageLayout
+      setDrawer={setDrawer}
+      drawer={drawer}
+      type="views"
+    >
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
-          <FileCode className="h-5 w-5 text-muted-foreground" />
-          <span className="font-medium text-sm text-dark dark:text-white">
-            {index === "instance" ? instanceDataCount : groupDataCount}{" "}
-            {index === "instance" ? "View" : "Path"}
-            {index === "instance" && Number(instanceDataCount) > 1 && "s"}
-            {index === "group" && Number(groupDataCount) > 1 && "s"}
-          </span>
+          <TableHeader icon={FileCode} count={count} label={label} />
           {!modelKey && (
             <div className="flex px-4 grow">
               <Input
@@ -83,47 +60,23 @@ export default function ViewsIndexTable() {
             </div>
           )}
         </div>
-        {modelKey ? (
-          <ToggleGroup
-            type="single"
+        {modelKey && (
+          <StatusFilter
+            options={STATUS_OPTIONS}
             value={instanceStatusType}
-            onValueChange={(value) => value && setInstanceStatusType(value)}
-          >
-            <span className="text-sm text-muted-foreground border rounded-md px-2 py-1">
-              SHOW
-            </span>
-            {["all", "completed", "failed"].map((status) => (
-              <ToggleGroupItem
-                key={status}
-                value={status}
-                className="text-black cursor-pointer dark:text-white"
-              >
-                {status.toUpperCase()}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-        ) : null}
+            onChange={setInstanceStatusType}
+          />
+        )}
       </div>
-      {/* @ts-expect-error dumb ts*/}
-      <Table data={index === "instance" ? instanceData : groupData} setSidePanelData={setSidePanelData}>
-        <div className="my-6">
-          <div className="flex items-center justify-center">
-            {message ? (
-              <div className="text-sm text-muted-foreground bg-muted px-4 py-2 rounded-md">
-                {message}
-              </div>
-            ) : (
-              <Button
-                variant="outline"
-                onClick={loadData}
-                className="text-black"
-              >
-                Load older entries
-              </Button>
-            )}
-          </div>
-        </div>
-      </Table>
-    </div>
+      {index === "instance" ? (
+        <InstanceTable data={instanceData as ViewInstanceResponse[]} drawer={setDrawer}>
+          <LoadMoreButton message={message} onLoadMore={loadMore} />
+        </InstanceTable>
+      ) : (
+        <GroupTable data={groupData as ViewGroupResponse[]}>
+          <LoadMoreButton message={message} onLoadMore={loadMore} />
+        </GroupTable>
+      )}
+    </TablePageLayout>
   );
 }

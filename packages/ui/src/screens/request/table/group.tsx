@@ -19,7 +19,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { memo, ReactNode } from "react";
 import { formatCount, formatDuration } from "@/utils.js";
-import { RequestGroupResponse } from "../../../../types";
+import { RequestGroupResponse } from "@/hooks/useApiTyped";
 
 export const GroupTable = memo(
   ({

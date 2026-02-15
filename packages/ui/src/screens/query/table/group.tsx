@@ -18,8 +18,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatCount, formatDuration } from "@/utils.js";
-import { QueryGroupResponse } from "../../../../types";
 import { memo, ReactNode } from "react";
+import { QueryGroupResponse } from "@/hooks/useApiTyped";
 
 export const GroupTable = memo(
   ({ data, children }: { data: QueryGroupResponse[]; children: ReactNode }) => {

@@ -1,6 +1,6 @@
 /** @format */
 
-import { CacheInstanceResponse } from "../../../../types";
+import { CacheInstanceResponse } from "@/hooks/useApiTyped";
 import { BaseCard } from "./base-card";
 
 export default function CacheCard({ item }: { item: CacheInstanceResponse }) {

@@ -1,10 +1,10 @@
 /** @format */
 
 import React from "react";
-import { CacheInstanceResponse } from "../../../../types";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDuration, timeAgo } from "@/utils.js";
+import { CacheInstanceResponse } from "@/hooks/useApiTyped";
 
 export const CachePreviewInfo = React.memo(
   ({ cache }: { cache: CacheInstanceResponse }) => {

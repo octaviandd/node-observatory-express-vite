@@ -1,7 +1,7 @@
 /** @format */
 
 import { X } from "lucide-react";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import QueryCard from "@/components/ui/cards/query-card";
 import JobCard from "@/components/ui/cards/job-card";
 import LogCard from "@/components/ui/cards/log-card";
@@ -22,108 +22,74 @@ import { Badge } from "@/components/ui/badge";
 import RequestCard from "@/components/ui/cards/request-card";
 import ModelCard from "@/components/ui/cards/model-card";
 import ExceptionCard from "@/components/ui/cards/exception-card";
-import {
-  CacheInstanceResponse,
-  ExceptionInstanceResponse,
-  HttpClientInstanceResponse,
-  JobInstanceResponse,
-  LogInstanceResponse,
-  MailInstanceResponse,
-  ModelInstanceResponse,
-  NotificationInstanceResponse,
-  QueryInstanceResponse,
-  RequestInstanceResponse,
-} from "../../../types";
+import { components } from "@/types/api";
+import { useApiMutation } from "@/hooks/useApi";
+import type { ResourceKey } from "@/hooks/useApiTyped";
+import { DrawerState } from "@/hooks/useIndexTableData";
 
-type Props = {
-  setSidePanelData: Dispatch<
-    SetStateAction<{
-      isOpen: boolean;
-      modelId?: string;
-      requestId?: string;
-      jobId?: string;
-      scheduleId?: string;
-    }>
-  >;
-  modelId?: string;
+type ViewDataResponse = components["schemas"]["ViewDataResponse"];
+
+type RelatedRequestBody = {
   requestId?: string;
   jobId?: string;
   scheduleId?: string;
-  type: string;
 };
 
-export default function SidePanel({
-  setSidePanelData,
-  modelId,
-  requestId,
-  jobId,
-  scheduleId,
-  type,
-}: Props) {
-  const [logs, setLogs] = useState<LogInstanceResponse[]>([]);
-  const [queries, setQueries] = useState<QueryInstanceResponse[]>([]);
-  const [notifications, setNotifications] = useState<
-    NotificationInstanceResponse[]
-  >([]);
-  const [jobs, setJobs] = useState<JobInstanceResponse[]>([]);
-  const [http, setHttp] = useState<HttpClientInstanceResponse[]>([]);
-  const [mails, setMails] = useState<MailInstanceResponse[]>([]);
-  const [cache, setCache] = useState<CacheInstanceResponse[]>([]);
-  const [request, setRequest] = useState<RequestInstanceResponse[]>([]);
-  const [model, setModel] = useState<ModelInstanceResponse[]>([]);
-  const [exceptions, setExceptions] = useState<ExceptionInstanceResponse[]>([]);
-  const [isLoading, setLoading] = useState(false);
+type Props = {
+  drawer: DrawerState;
+  setDrawer: (data: DrawerState) => void;
+  type: ResourceKey;
+};
+
+export default function Drawer({ drawer, setDrawer, type }: Props) {
+  const { isOpen, modelId, requestId, jobId, scheduleId } = drawer;
+
+  const closeDrawer = () =>
+    setDrawer({
+      isOpen: false,
+      modelId: "",
+      requestId: "",
+      jobId: "",
+      scheduleId: "",
+    });
+
+  const { mutateAsync: fetchRelated } = useApiMutation<ViewDataResponse, RelatedRequestBody>(
+    `/api/${type}/${modelId}/related`,
+    "POST",
+  );
+
+  const [relatedData, setRelatedData] = useState<ViewDataResponse>({});
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    getRelatedData();
-  }, []);
+    if (!isOpen || !modelId) return;
 
-  const getRelatedData = async () => {
-    setLoading(true);
-    const response = await fetch(
-      `/ui/api/${type}/${modelId}/related`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          requestId,
-          jobId,
-          scheduleId,
-        }),
-      },
-    );
-    const data = await response.json();
+    let cancelled = false;
+    const load = async () => {
+      setIsLoading(true);
+      try {
+        const data = await fetchRelated({ requestId, jobId, scheduleId });
+        if (!cancelled) setRelatedData(data);
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
 
-    const {
-      job,
-      mail,
-      query,
-      cache,
-      http,
-      notification,
-      log,
-      request,
-      model,
-      exception,
-    } = data;
+    load();
+    return () => { cancelled = true; };
+  }, [isOpen, modelId]);
 
-
-    setJobs(type === "jobs" && job ? job : job?.length > 0 ? job : []);
-    setMails(type === "mails" && mail ? mail : mail?.length > 0 ? mail : []);
-    setQueries(type === "queries" && query ? query : query?.length > 0 ? query : []);
-    setCache(type === "caches" && cache ? cache : cache?.length > 0 ? cache : []);
-    setHttp(type === "https" && http ? (http[0] ? http[0] : http) : []);
-    setNotifications(
-      type === "notifications" && notification ? notification : notification?.length > 0 ? notification : [],
-    );
-    setLogs(type === "logs" && log ? log : log?.length > 0 ? log : []);
-    setRequest(type === "requests" && request ? request : request?.length > 0 ? request : []);
-    setModel(type === "models" && model ? model : model?.length > 0 ? model : []);
-    setExceptions(type === "exceptions" && exception ? exception : exception?.length > 0 ? exception : []);
-    setLoading(false);
-  };
+  // Derived arrays directly from the typed response — no intermediate state needed
+  const logs = relatedData.log ?? [];
+  const queries = relatedData.query ?? [];
+  const notifications = relatedData.notification ?? [];
+  const jobs = relatedData.job ?? [];
+  const http = relatedData.http ?? [];
+  const mails = relatedData.mail ?? [];
+  const cache = relatedData.cache ?? [];
+  const requests = relatedData.request ?? [];
+  const models = relatedData.model ?? [];
+  const exceptions = relatedData.exception ?? [];
 
   const renderSection = <T extends object>(
     title: string,
@@ -151,38 +117,25 @@ export default function SidePanel({
     );
   };
 
+  const hasNoData =
+    logs.length === 0 &&
+    models.length === 0 &&
+    exceptions.length === 0 &&
+    notifications.length === 0 &&
+    mails.length === 0 &&
+    queries.length === 0 &&
+    jobs.length === 0 &&
+    http.length === 0 &&
+    requests.length === 0 &&
+    cache.length === 0;
+
   return (
-    <Sheet
-      open={true}
-      onOpenChange={() =>
-        setSidePanelData({
-          isOpen: false,
-          modelId: "",
-          requestId: "",
-          scheduleId: "",
-          jobId: "",
-        })
-      }
-    >
+    <Sheet open={isOpen} onOpenChange={closeDrawer}>
       <SheetContent side="right" className="w-[700px] p-0">
         <SheetHeader className="p-6 flex w-full">
           <div className="flex items-center gap-x-5 justify-between">
-            <SheetTitle className=" text-muted-foreground">
-              Meta-data
-            </SheetTitle>
-            <Button
-              variant="secondary"
-              size="icon"
-              onClick={() =>
-                setSidePanelData({
-                  isOpen: false,
-                  modelId: "",
-                  requestId: "",
-                  scheduleId: "",
-                  jobId: "",
-                })
-              }
-            >
+            <SheetTitle className="text-muted-foreground">Meta-data</SheetTitle>
+            <Button variant="secondary" size="icon" onClick={closeDrawer}>
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -193,21 +146,10 @@ export default function SidePanel({
           "Loading.."
         ) : (
           <ScrollArea className="h-[calc(100vh-5rem)]">
-            {logs.length === 0 &&
-              model.length === 0 &&
-              exceptions.length === 0 &&
-              notifications.length === 0 &&
-              mails.length === 0 &&
-              queries.length === 0 &&
-              jobs.length === 0 &&
-              http.length === 0 &&
-              request.length === 0 &&
-              cache.length === 0 && (
-                <div className="p-6 text-muted-foreground">
-                  No related data found
-                </div>
-              )}
-            {renderSection("REQUESTS", request, RequestCard)}
+            {hasNoData && (
+              <div className="p-6 text-muted-foreground">No related data found</div>
+            )}
+            {renderSection("REQUESTS", requests, RequestCard)}
             {renderSection("LOGS", logs, LogCard)}
             {renderSection("NOTIFICATIONS", notifications, NotificationCard)}
             {renderSection("MAILS", mails, MailCard)}
@@ -215,7 +157,7 @@ export default function SidePanel({
             {renderSection("JOBS", jobs, JobCard)}
             {renderSection("HTTP REQUESTS", http, HttpCard)}
             {renderSection("CACHE ENTRIES", cache, CacheCard)}
-            {renderSection("MODELS", model, ModelCard)}
+            {renderSection("MODELS", models, ModelCard)}
             {renderSection("EXCEPTIONS", exceptions, ExceptionCard)}
           </ScrollArea>
         )}

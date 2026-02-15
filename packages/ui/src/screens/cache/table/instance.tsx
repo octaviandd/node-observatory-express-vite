@@ -13,12 +13,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/utils.js";
-import { CacheInstanceResponse } from "../../../../types";
 import { memo, ReactNode } from "react";
+import { CacheInstanceResponse } from "@/hooks/useApiTyped";
 
 type Props = {
   data: CacheInstanceResponse[];
-  setSidePanelData: ({
+  setDrawer: ({
     isOpen,
     modelId,
     requestId,
@@ -35,25 +35,25 @@ type Props = {
 };
 
 export const InstanceTable = memo((props: Props) => {
-  const { data, setSidePanelData, children } = props;
+  const { data, setDrawer, children } = props;
 
-  const getStatusVariant = (hits: number, writes: number, misses: number) => {
-    if (hits > 0) {
-      if (writes > 0) return "secondary";
+  const getStatusVariant = (hits?: number, writes?: number, misses?: number) => {
+    if (hits && hits > 0) {
+      if (writes && writes > 0) return "secondary";
       return "secondary";
     }
-    if (writes > 0) return "warning";
-    if (misses > 0) return "error";
+    if (writes && writes > 0) return "warning";
+    if (misses && misses > 0) return "error";
     return "secondary";
   };
 
-  const getStatusText = (hits: number, writes: number, misses: number) => {
-    if (hits > 0) {
-      if (writes > 0) return "HIT + WRITE";
+  const getStatusText = (hits?: number, writes?: number, misses?: number) => {
+     if (hits && hits > 0) {
+      if (writes && writes > 0) return "HIT + WRITE";
       return "HIT";
     }
-    if (writes > 0) return "WRITE";
-    if (misses > 0) return "MISS";
+    if (writes && writes > 0) return "WRITE";
+    if (misses && misses > 0) return "MISS";
     return "HIT";
   };
 
@@ -78,25 +78,25 @@ export const InstanceTable = memo((props: Props) => {
               <TableCell>
                 <span className="flex items-center gap-2">
                   <p className="text-muted-foreground">
-                    [{cache.content.type.toUpperCase()}]
+                    [{cache.content.metadata.command.toUpperCase()}]
                   </p>
                   <p className="text-black dark:text-white">
-                    {cache.content.key}
+                    {cache.content.data.key as string}
                   </p>
                 </span>
               </TableCell>
               <TableCell>
                 <Badge
                   variant={getStatusVariant(
-                    cache.content.hits,
-                    cache.content.writes,
-                    cache.content.misses,
+                    cache.content.data.hits,
+                    cache.content.data.writes,
+                    cache.content.data.misses,
                   )}
                 >
                   {getStatusText(
-                    cache.content.hits,
-                    cache.content.writes,
-                    cache.content.misses,
+                    cache.content.data.hits,
+                    cache.content.data.writes,
+                    cache.content.data.misses,
                   )}
                 </Badge>
               </TableCell>
@@ -108,9 +108,7 @@ export const InstanceTable = memo((props: Props) => {
                       : "text-black dark:text-white"
                   }
                 >
-                  {(
-                    parseFloat(cache.content.duration as string) / 1000
-                  ).toFixed(6)}
+                  {cache.content.duration && cache.content?.duration.toFixed(6)}
                 </p>
               </TableCell>
               <TableCell>
@@ -119,7 +117,7 @@ export const InstanceTable = memo((props: Props) => {
                     variant="outline"
                     size="icon"
                     onClick={() =>
-                      setSidePanelData({
+                      setDrawer({
                         isOpen: true,
                         modelId: cache.uuid ?? "",
                         requestId: cache.request_id ?? "",

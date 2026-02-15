@@ -13,12 +13,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatDate, formatDuration } from "@/utils.js";
-import { QueryInstanceResponse } from "../../../../types";
 import { memo, ReactNode } from "react";
+import { QueryInstanceResponse } from "@/hooks/useApiTyped";
 
 type Props = {
   data: QueryInstanceResponse[];
-  setSidePanelData: ({
+  drawer: ({
     isOpen,
     modelId,
     requestId,
@@ -35,7 +35,7 @@ type Props = {
 };
 
 export const InstanceTable = memo(
-  ({ data, setSidePanelData, children }: Props) => {
+  ({ data, drawer, children }: Props) => {
     return (
       <div className="rounded-md border">
         <Table>
@@ -62,7 +62,7 @@ export const InstanceTable = memo(
                 <TableCell className="flex items-center gap-2 h-[53px]">
                   <Database className="h-4 w-4 text-muted-foreground" />
                   <span className="truncate max-w-[400px] text-black dark:text-white">
-                    {query.content.sql}
+                    {query.content.data.sql}
                   </span>
                 </TableCell>
                 <TableCell>
@@ -71,18 +71,18 @@ export const InstanceTable = memo(
                       query.content.status === "failed" ? "error" : "secondary"
                     }
                   >
-                    <span>{query.content.status.toUpperCase()}</span>
+                    <span>{query.content.status?.toUpperCase()}</span>
                   </Badge>
                 </TableCell>
                 <TableCell>
                   <p
                     className={
-                      query.content.duration > 999
+                      Number(query.content.duration ?? 0) > 999
                         ? "text-yellow-600"
                         : "text-black dark:text-white"
                     }
                   >
-                    {formatDuration(query.content.duration)}
+                    {formatDuration(Number(query.content.duration ?? 0))}
                   </p>
                 </TableCell>
                 <TableCell>
@@ -91,7 +91,7 @@ export const InstanceTable = memo(
                       variant="outline"
                       size="icon"
                       onClick={() =>
-                        setSidePanelData({
+                        drawer({
                           isOpen: true,
                           modelId: query.uuid ?? "",
                           requestId: query.request_id ?? "",

@@ -9,7 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronRight } from "lucide-react";
-import { LogInstanceResponse } from "../../../../types";
+import { LogInstanceResponse } from "@/hooks/useApiTyped";
 
 const LOG_LEVELS = [
   { dataKey: "info", variant: "secondary" },
@@ -36,19 +36,19 @@ export const LogCrumbs = React.memo(({ log }: { log: LogInstanceResponse }) => {
           </BreadcrumbItem>
           <BreadcrumbItem>
             <BreadcrumbLink className="text-muted-foreground">
-              {typeof log.content.message === 'object' ? JSON.stringify(log.content.message) : log.content.message}
+              {typeof log.content.data.message === 'object' ? JSON.stringify(log.content.data.message) : String(log.content.data.message ?? "")}
             </BreadcrumbLink>
           </BreadcrumbItem>
         </Breadcrumb>
         <div className="flex items-center gap-x-4">
-          <Badge variant="secondary">{log.content.package.toUpperCase()}</Badge>
+          <Badge variant="secondary">{log.content.metadata.package.toUpperCase()}</Badge>
           <Badge
             variant={
-              LOG_LEVELS.find((level) => level.dataKey === log.content.level)
+              LOG_LEVELS.find((level) => level.dataKey === log.content.metadata.level)
                 ?.variant
             }
           >
-            {log.content.level.toUpperCase()}
+            {log.content.metadata.level.toUpperCase()}
           </Badge>
         </div>
       </CardContent>

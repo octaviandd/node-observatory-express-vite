@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDuration, timeAgo } from "@/utils.js";
-import { QueryInstanceResponse } from "../../../../types";
+import { QueryInstanceResponse } from "@/hooks/useApiTyped";
 
 export default function Details({ query }: { query: QueryInstanceResponse }) {
   return (
@@ -42,7 +42,7 @@ export default function Details({ query }: { query: QueryInstanceResponse }) {
                     : "secondary"
                 }
               >
-                {query.content.status.toUpperCase()}
+                {(query.content.status ?? "").toUpperCase()}
               </Badge>
             </div>
           </div>
@@ -58,71 +58,71 @@ export default function Details({ query }: { query: QueryInstanceResponse }) {
             </div>
           )}
 
-          {query.content.package && (
+          {query.content.metadata.package && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-sm text-muted-foreground">
                 Package
               </div>
               <div className="col-span-9">
                 <Badge variant="secondary" className="capitalize">
-                  {query.content.package}
+                  {query.content.metadata.package}
                 </Badge>
               </div>
             </div>
           )}
 
-          {query.content.sqlType && (
+          {query.content.metadata.sqlType && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-sm text-muted-foreground">
                 SQL Type
               </div>
               <div className="col-span-9">
                 <Badge variant="secondary" className="capitalize">
-                  {query.content.sqlType}
+                  {query.content.metadata.sqlType}
                 </Badge>
               </div>
             </div>
           )}
 
-          {query.content.sql && (
+          {query.content.data.sql && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-sm text-muted-foreground">
-                SQL Type
+                SQL
               </div>
               <div className="col-span-9">
                 <Badge variant="secondary" className="capitalize">
-                  {query.content.sql}
+                  {query.content.data.sql}
                 </Badge>
               </div>
             </div>
           )}
 
-          {query.content.hostname && (
+          {query.content.data.hostname && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-sm text-muted-foreground">
                 Host
               </div>
-              <div className="col-span-9 text-sm">{query.content.hostname}</div>
+              <div className="col-span-9 text-sm">{query.content.data.hostname}</div>
             </div>
           )}
 
-          {query.content.port && (
+          {query.content.data.port && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-sm text-muted-foreground">
                 Port
               </div>
               <div className="col-span-9">
-                <Badge variant="outline">{query.content.port}</Badge>
+                <Badge variant="outline">{query.content.data.port}</Badge>
               </div>
             </div>
           )}
 
-          {query.content.database && (
+          {query.content.data.database && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-sm text-muted-foreground">
                 Database
               </div>
-              <div className="col-span-9 text-sm">{query.content.database}</div>
+              <div className="col-span-9 text-sm">{query.content.data.database}</div>
             </div>
           )}
         </div>

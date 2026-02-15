@@ -1,27 +1,39 @@
 /** @format */
 import { Card, CardContent } from "@/components/ui/card";
+import { StoreContext } from "@/store";
+import { formatGraphDate, getDateFromPeriod } from "@/utils";
+import { useContext } from "react";
 import { ResponsiveContainer, LineChart, Line, Tooltip, YAxis } from "recharts";
 
 type Props = {
-  data: { avgDuration: number; p95: number; label: string }[];
-  period: string;
-  currentDate: string;
+  data: Record<string, {durations: number[], avgDuration: number, p95: number, count: number, label: string}>;
 };
 
-export const DurationGraph = ({ data, period, currentDate }: Props) => {
-  const formattedData = data.map((entry, index: number) => ({
-    name: index,
-    "Average Duration": entry.avgDuration,
-    "95th Percentile": entry.p95,
-    label: entry.label,
-  }));
+export const DurationGraph = ({ data }: Props) => {
+  const { state } = useContext(StoreContext);
+  const period = state.period
 
-  // Calculate max value for domain
-  const maxValue = Math.max(
-    ...formattedData.map((d) =>
-      Math.max(d["Average Duration"], d["95th Percentile"]),
-    ),
-  );
+  const formattedData = [];
+  for (const [key, value] of Object.entries(data)) {
+    formattedData.push({
+      name: key,
+      "Average Duration": value.avgDuration,
+      "95th Percentile": value.p95,
+      label: value.label,
+    });
+  }
+  
+  const startDate = getDateFromPeriod(period);
+
+  const currentDate = new Date();
+  const formattedEndDate = formatGraphDate(currentDate);
+  const formattedStartDate = formatGraphDate(startDate)
+
+    const maxValue = Math.max(
+      ...formattedData.map((d) =>
+        Math.max(d["Average Duration"], d["95th Percentile"]),
+      ),
+    );
 
   return (
     <Card className="col-span-4 p-1 border-none shadow-none">
@@ -88,8 +100,8 @@ export const DurationGraph = ({ data, period, currentDate }: Props) => {
           </ResponsiveContainer>
         </div>
         <div className="flex justify-between text-xs text-muted-foreground mt-4">
-          <span>{period}</span>
-          <span>{currentDate}</span>
+          <span>{formattedStartDate}</span>
+          <span>{formattedEndDate}</span>
         </div>
       </CardContent>
     </Card>

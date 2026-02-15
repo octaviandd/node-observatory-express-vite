@@ -2,7 +2,6 @@
 import RequestIndexTable from "../table/index";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
 import { DurationGraph } from "@/components/ui/graphs/duration-graph";
-import { useIndexData } from "@/hooks/useIndexData";
 import {
   Card,
   CardContent,
@@ -11,11 +10,12 @@ import {
   CardSubtitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useRequests } from "@/hooks/useApiTyped";
 
 export default function RequestsIndex() {
-  const { data, currentDate, period } = useIndexData({
-    type: "requests",
-  });
+  const { data, isLoading } = useRequests.useGraph({});
+
+  if (isLoading || !data) return null;
 
   return (
     <div className="flex flex-col gap-6 w-full">
@@ -55,17 +55,16 @@ export default function RequestsIndex() {
                 data={data.countFormattedData}
                 barData={[
                   {
-                    dataKey: "200",
+                    dataKey: "count_200",
+                    name: "1/2/3XX",
                     stackId: "a",
                     fill: document.documentElement.classList.contains("dark")
                       ? "#242427"
                       : "#f1f5f9",
                   },
-                  { dataKey: "400", stackId: "b", fill: "#ffc658" },
-                  { dataKey: "500", stackId: "c", fill: "#ef4444" },
+                  { dataKey: "count_400", name: "4XX", stackId: "b", fill: "#ffc658" },
+                  { dataKey: "count_500", name: "5XX", stackId: "c", fill: "#ef4444" },
                 ]}
-                period={period}
-                currentDate={currentDate}
               />
             </div>
           </CardContent>
@@ -94,11 +93,7 @@ export default function RequestsIndex() {
           </CardHeader>
           <CardContent>
             <div className="h-auto">
-              <DurationGraph
-                data={data.durationFormattedData}
-                period={period}
-                currentDate={currentDate}
-              />
+              <DurationGraph data={data.durationFormattedData} />
             </div>
           </CardContent>
         </Card>

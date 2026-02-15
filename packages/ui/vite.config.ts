@@ -20,6 +20,8 @@ export default defineConfig({
   },
   build: {
     manifest: true,
+    //disable in prod
+    sourcemap: true,
   },
   server: {
     port: 5173,

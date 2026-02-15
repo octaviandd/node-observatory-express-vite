@@ -9,14 +9,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronRight } from "lucide-react";
-import { HttpClientInstanceResponse } from "../../../../types";
+import { HttpClientInstanceResponse } from "@/hooks/useApiTyped";
 
 export const HTTPCrumbs = React.memo(
   ({ http }: { http: HttpClientInstanceResponse }) => {
     const getStatusColor = (status: number) => {
       if (String(status).startsWith("2")) return "secondary";
       if (String(status).startsWith("3")) return "secondary";
-      if (String(status).startsWith("3")) return "warning";
+      if (String(status).startsWith("4")) return "warning";
       return "destructive";
     };
 
@@ -34,16 +34,18 @@ export const HTTPCrumbs = React.memo(
             </BreadcrumbItem>
             <BreadcrumbItem>
               <BreadcrumbLink className="text-muted-foreground">
-                {http.content.fullUrl}
+                {http.content.data.origin
+                ? (http.content.data.origin + (http.content.data.pathname ?? http.content.data.path ?? ""))
+                : (http.content.data.hostname ?? "") + (http.content.data.pathname ?? "")}
               </BreadcrumbLink>
             </BreadcrumbItem>
           </Breadcrumb>
           <div className="flex items-center gap-x-4">
             <Badge variant="secondary">
-              {http.content.method.toUpperCase()}
+              {(http.content.data.method ?? http.content.metadata?.method ?? "").toUpperCase()}
             </Badge>
-            <Badge variant={getStatusColor(http.content.statusCode)}>
-              {http.content.statusCode}
+            <Badge variant={getStatusColor(http.content.data.statusCode as number)}>
+              {http.content.data.statusCode}
             </Badge>
           </div>
         </CardContent>

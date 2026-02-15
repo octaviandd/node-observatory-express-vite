@@ -1,5 +1,5 @@
 /** @format */
-import { ModelInstanceResponse } from "../../../../types";
+import { ModelInstanceResponse } from "@/hooks/useApiTyped";
 import { BaseCard } from "./base-card";
 
 export default function ModelCard({ item }: { item: ModelInstanceResponse }) {

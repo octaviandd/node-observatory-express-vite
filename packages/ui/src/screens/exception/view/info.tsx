@@ -1,9 +1,9 @@
 /** @format */
 
 import React from "react";
-import { ExceptionInstanceResponse } from "../../../../types";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { timeAgo } from "@/utils.js";
+import { ExceptionInstanceResponse } from "@/hooks/useApiTyped";
 
 export const ExceptionInfo = React.memo(
   ({ exception }: { exception: ExceptionInstanceResponse }) => {

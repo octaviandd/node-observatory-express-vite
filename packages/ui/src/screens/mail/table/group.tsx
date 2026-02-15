@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { memo, ReactNode } from "react";
 import { formatCount, formatDuration } from "@/utils.js";
-import { MailGroupResponse } from "../../../../types";
+import { MailGroupResponse } from "@/hooks/useApiTyped";
 
 export const GroupTable = memo(
   ({ data, children }: { data: MailGroupResponse[]; children: ReactNode }) => {

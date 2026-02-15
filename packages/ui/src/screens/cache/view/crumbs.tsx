@@ -1,7 +1,6 @@
 /** @format */
 
 import React from "react";
-import { CacheInstanceResponse } from "../../../../types";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,6 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronRight } from "lucide-react";
+import { CacheInstanceResponse } from "@/hooks/useApiTyped";
 
 export const CacheCrumbs = React.memo(
   ({ cache }: { cache: CacheInstanceResponse }) => {

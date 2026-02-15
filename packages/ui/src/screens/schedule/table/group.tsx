@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import React from "react";
 import { formatCount, formatDuration } from "@/utils.js";
-import { ScheduleGroupResponse } from "../../../../types";
+import { ScheduleGroupResponse } from "@/hooks/useApiTyped";
 
 export const GroupTable = React.memo(
   ({

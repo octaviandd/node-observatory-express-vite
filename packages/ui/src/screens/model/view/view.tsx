@@ -1,109 +1,38 @@
 /** @format */
 
-import { useEffect, useState } from "react";
-import { useParams } from "react-router";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useState } from "react";
 import { ModelCrumbs } from "./crumbs";
-import {
-  ModelInstanceResponse,
-  RequestInstanceResponse,
-  JobInstanceResponse,
-  ScheduleInstanceResponse,
-} from "../../../../types";
-import Source from "./source";
 import ContentTabs from "./tabs";
 import Details from "./details";
+import {
+  ViewPageLayout,
+  useViewData,
+  Source,
+} from "@/components/ui/view-page";
+import { ModelInstanceResponse } from "@/hooks/useApiTyped";
 
 export default function ModelPreview() {
-  const params = useParams();
-  const [data, setData] = useState<{
-    model: ModelInstanceResponse;
-    loading: boolean;
-    error: string | null;
-    source:
-    | RequestInstanceResponse
-    | JobInstanceResponse
-    | ScheduleInstanceResponse
-    | null;
-  }>({
-    model: {} as ModelInstanceResponse,
-    loading: true,
-    error: null,
-    source: null,
-  });
   const [activeTab, setActiveTab] = useState("raw");
 
-  useEffect(() => {
-    getItem();
-  }, [params.id]);
-
-  const getItem = async () => {
-    try {
-      setData((prev) => ({ ...prev, loading: true }));
-      const response = await fetch(`${window.SERVER_CONFIG.base}/api/models/${params.id}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch model data");
-      }
-      const result = await response.json();
-      const { model, request, job, schedule } = result;
-
-      if (!model) {
-        throw new Error("Model data not found");
-      }
-
-      setData((prev) => ({
-        ...prev,
-        model: model[0],
-        loading: false,
-        error: null,
-        source: request
-          ? request[0]
-          : job
-            ? job[0]
-            : schedule
-              ? schedule[0]
-              : null,
-      }));
-    } catch (error) {
-      console.error("Error fetching model data:", error);
-      setData((prev) => ({
-        ...prev,
-        loading: false,
-        error: error instanceof Error ? error.message : "An error occurred",
-      }));
-    }
-  };
-
-  if (data.loading) {
-    return (
-      <div className="space-y-4">
-        <Skeleton className="h-[200px] w-full" />
-        <Skeleton className="h-[300px] w-full" />
-      </div>
-    );
-  }
-
-  if (data.error) {
-    return (
-      <Alert variant="destructive">
-        <AlertDescription>{data.error}</AlertDescription>
-      </Alert>
-    );
-  }
+  const { data: model, loading, error, source } = useViewData<ModelInstanceResponse>({
+    endpoint: "models",
+    dataKey: "model",
+  });
 
   return (
-    <div className="flex flex-col gap-6">
-      <ModelCrumbs model={data.model} />
-
-      {data.source && <Source source={data.source} />}
-
-      <Details model={data.model} />
-      <ContentTabs
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        data={data}
-      />
-    </div>
+    <ViewPageLayout loading={loading} error={error}>
+      {model && (
+        <>
+          <ModelCrumbs model={model} />
+          {source && <Source source={source} />}
+          <Details model={model} />
+          <ContentTabs
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            data={{ model }}
+          />
+        </>
+      )}
+    </ViewPageLayout>
   );
 }

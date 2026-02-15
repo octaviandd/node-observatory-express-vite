@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { TabsContent, Tabs } from "@/components/ui/tabs";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { NotificationInstanceResponse } from "../../../../types";
+import { NotificationInstanceResponse } from "@/hooks/useApiTyped";
 
 type Props = {
   activeTab: string;

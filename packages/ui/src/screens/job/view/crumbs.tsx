@@ -1,12 +1,12 @@
 /** @format */
 
 import React from "react";
-import { JobInstanceResponse } from "../../../../types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumb, BreadcrumbLink } from "@/components/ui/breadcrumb";
 import { BreadcrumbItem } from "@/components/ui/breadcrumb";
 import { ChevronRight } from "lucide-react";
+import { JobInstanceResponse } from "@/hooks/useApiTyped";
 
 export const JobPreviewCrumbs = React.memo(
   ({ job }: { job: JobInstanceResponse }) => {
@@ -36,15 +36,15 @@ export const JobPreviewCrumbs = React.memo(
               </BreadcrumbItem>
               <BreadcrumbItem>
                 <BreadcrumbLink className="text-muted-foreground">
-                  {job.content.queue}
+                  {job.content.data.queue}
                 </BreadcrumbLink>
               </BreadcrumbItem>
             </Breadcrumb>
             <div className="flex items-center gap-x-4">
               <Badge variant="secondary" className="text-sm">
-                {job.content.jobId} (ID)
+                {job.content.data.jobId} (ID)
               </Badge>
-              <Badge variant={getStatusColor(job.content.status)}>
+              <Badge variant={getStatusColor(job.content.status ?? "")}>
                 {job.content.status}
               </Badge>
             </div>

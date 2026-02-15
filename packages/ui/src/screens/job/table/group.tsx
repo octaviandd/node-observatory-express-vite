@@ -20,7 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { memo } from "react";
 import { formatCount, formatDuration } from "@/utils.js";
-import { JobGroupResponse } from "../../../../types";
+import { JobGroupResponse } from "@/hooks/useApiTyped";
 
 type Props = {
   data: JobGroupResponse[];

@@ -12,11 +12,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatCount, formatDuration } from "@/utils.js";
-import { CacheGroupResponse } from "../../../../types";
 import { memo, ReactNode } from "react";
+import { CacheGroupResponse } from "@/hooks/useApiTyped";
 
 export const GroupTable = memo(
   ({ data, children }: { data: CacheGroupResponse[]; children: ReactNode }) => {
+
     return (
       <div className="rounded-md border">
         <Table>

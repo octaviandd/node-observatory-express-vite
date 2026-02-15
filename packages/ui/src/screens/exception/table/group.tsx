@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { memo, ReactNode } from "react";
 import { formatCount } from "@/utils.js";
-import { ExceptionGroupResponse } from "../../../../types";
+import { ExceptionGroupResponse } from "@/hooks/useApiTyped";
 
 export const GroupTable = memo(
   ({

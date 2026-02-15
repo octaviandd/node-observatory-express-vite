@@ -4,7 +4,7 @@ import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { timeAgo } from "@/utils.js";
 import { formatDuration } from "@/utils.js";
 import { Badge } from "@/components/ui/badge";
-import { MailInstanceResponse } from "../../../../types";
+import { MailInstanceResponse } from "@/hooks/useApiTyped";
 
 export default function MailPreviewInfo({
   mail,
@@ -46,7 +46,7 @@ export default function MailPreviewInfo({
                   : "destructive"
               }
             >
-              {mail.content.status.toUpperCase()}
+              {mail.content.status?.toUpperCase()}
             </Badge>
           </div>
         </div>
@@ -60,28 +60,28 @@ export default function MailPreviewInfo({
           </div>
         </div>
 
-        {mail.content.from && (
+        {mail.content.data.from && (
           <div className="grid grid-cols-12 items-center">
             <div className="col-span-3 text-muted-foreground">From</div>
-            <div className="col-span-9">{mail.content.from}</div>
+            <div className="col-span-9">{mail.content.data.from}</div>
           </div>
         )}
 
-        {mail.content.to && (
+        {mail.content.data.to && (
           <div className="grid grid-cols-12 items-center">
             <div className="col-span-3 text-muted-foreground">To</div>
             <div className="col-span-9">
-              {Array.isArray(mail.content.to)
-                ? mail.content.to.join(", ")
-                : mail.content.to}
+              {Array.isArray(mail.content.data.to)
+                ? mail.content.data.to.join(", ")
+                : mail.content.data.to}
             </div>
           </div>
         )}
 
-        {mail.content.subject && (
+        {mail.content.data.subject && (
           <div className="grid grid-cols-12 items-center">
             <div className="col-span-3 text-muted-foreground">Subject</div>
-            <div className="col-span-9">{mail.content.subject}</div>
+            <div className="col-span-9">{mail.content.data.subject}</div>
           </div>
         )}
       </CardContent>

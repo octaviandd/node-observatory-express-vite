@@ -1,5 +1,5 @@
 /** @format */
-import { LogInstanceResponse } from "../../../../types";
+import { LogInstanceResponse } from "@/hooks/useApiTyped";
 import { BaseCard } from "./base-card";
 
 export default function LogCard({ item }: { item: LogInstanceResponse }) {

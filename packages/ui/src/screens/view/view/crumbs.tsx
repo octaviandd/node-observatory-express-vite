@@ -9,7 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronRight } from "lucide-react";
-import { ViewInstanceResponse } from "../../../../types";
+import { ViewInstanceResponse } from "@/hooks/useApiTyped";
 
 export const ViewCrumbs = React.memo(
   ({ view }: { view: ViewInstanceResponse }) => {

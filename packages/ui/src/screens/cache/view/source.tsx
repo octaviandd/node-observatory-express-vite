@@ -1,16 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScheduleContent } from "../../../../types";
-import { JobContent } from "../../../../types";
 import { ExternalLinkIcon } from "lucide-react";
 import { Link } from "react-router";
-import {
-  JobInstanceResponse,
-  RequestContent,
-  RequestInstanceResponse,
-  ScheduleInstanceResponse,
-} from "../../../../types";
 import { Badge } from "@/components/ui/badge";
+import { JobInstanceResponse, RequestInstanceResponse, ScheduleInstanceResponse } from "@/hooks/useApiTyped";
 
 export default function Source({
   source,
@@ -56,13 +49,13 @@ export default function Source({
                   ? "Job ID"
                   : "Schedule ID"}
             </div>
-            <div className="col-span-9">
+            {/* <div className="col-span-9">
               {source.type === "request"
-                ? (source.content as RequestContent).route
+                ? source.content.
                 : source.type === "job"
-                  ? (source.content as JobContent).jobId
-                  : (source.content as ScheduleContent).scheduleId}
-            </div>
+                  ? (source.content).jobId
+                  : (source.content).scheduleId}
+            </div> */}
           </div>
 
           <div className="grid items-center grid-cols-12">
@@ -75,7 +68,7 @@ export default function Source({
               <div className="col-span-3 text-muted-foreground">Method</div>
               <div className="col-span-9">
                 <Badge variant="outline">
-                  {(source.content as RequestContent).method.toUpperCase()}
+                  {/* {(source.content).method.toUpperCase()} */}
                 </Badge>
               </div>
             </div>

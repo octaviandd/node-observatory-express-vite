@@ -1,166 +1,108 @@
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+/** @format */
+
+import { useContext, useState, useMemo, useEffect } from "react";
 import { StoreContext } from "@/store";
 import { useParams } from "react-router";
+import { AllGroupResponses, AllInstanceResponses, useResourceHooks, type ResourceKey } from "./useApiTyped";
+import { components } from "@/types/api";
+
+type IndexType = components["schemas"]["IndexType"];
 
 type Props = {
-  key: string;
+  key: ResourceKey;
   defaultInstanceStatusType: string;
 };
 
-export const useIndexTableData = <TInstance, TGroup>({
-  key,
-  defaultInstanceStatusType,
-}: Props) => {
+export type DrawerState = {
+  isOpen: boolean;
+  modelId: string;
+  requestId: string
+  jobId: string
+  scheduleId: string
+}
+
+export const useIndexTableData = <TInstance extends AllInstanceResponses, TGroup extends AllGroupResponses>(
+  { key, defaultInstanceStatusType }: Props) => {
   const { state } = useContext(StoreContext);
   const modelKey = useParams<{ key: string }>().key || "";
+  const resourceHooks = useResourceHooks(key);
 
-  const [instanceData, setInstanceData] = useState<TInstance[]>([]);
-  const [groupData, setGroupData] = useState<TGroup[]>([]);
-
-  const [instanceDataCount, setInstanceDataCount] = useState<string>("0");
-  const [groupDataCount, setGroupDataCount] = useState<string>("0");
-
-  const offsetRef = useRef(0);
-
-  // UI States
-  const [index, setIndex] = useState<"instance" | "group">("group");
-  const [instanceStatusType, setInstanceStatusType] = useState<string>(
-    defaultInstanceStatusType,
-  );
-
+  // UI state
+  const [index, setIndex] = useState<IndexType>(modelKey ? "instance" : "group");
+  const [instanceStatusType, setInstanceStatusType] = useState(defaultInstanceStatusType);
   const [inputValue, setInputValue] = useState("");
-  const [noMoreItems, setNoMoreItems] = useState(false);
-  const [sidePanelData, setSidePanelData] = useState<{
-    isOpen: boolean;
-    modelId?: string;
-    requestId?: string;
-    scheduleId?: string;
-    jobId?: string;
-  }>({
+  const [drawer, setDrawer] = useState<DrawerState>({
     isOpen: false,
     modelId: "",
     requestId: "",
     jobId: "",
     scheduleId: "",
   });
-  const [loading, setLoading] = useState(false);
+
+  const instanceQuery = resourceHooks.useTable<"instance">(
+    {
+      index: "instance",
+      q: inputValue || undefined,
+      key: modelKey || undefined,
+      status: instanceStatusType?.toLowerCase(),
+    },
+    { enabled: index === "instance" },
+  );
+
+  const groupQuery = resourceHooks.useTable<"group">(
+    {
+      index: "group",
+      q: inputValue || undefined,
+      status: instanceStatusType?.toLowerCase(),
+    },
+    { enabled: index === "group" },
+  );
+
+  const instanceData = useMemo(() =>
+      //@ts-ignore
+      (instanceQuery.data?.pages ?? []).flatMap((page) => page.results),
+    [instanceQuery.data],
+  );
 
   useEffect(() => {
-    if (index === "instance") setInstanceStatusType(defaultInstanceStatusType);
-    if (modelKey) setIndex("instance");
-    else setIndex("group");
+    setIndex(modelKey ? "instance" : "group");
   }, [modelKey]);
 
-  useEffect(() => {
-    if (index === "instance") getDataByInstance();
-    else getDataByGroup();
-  }, [index, state.period, instanceStatusType, inputValue, modelKey]);
+  const groupData = useMemo(() =>
+      //@ts-ignore
+      (groupQuery.data?.pages ?? []).flatMap((page) => page.results),
+    [groupQuery.data],
+  );
 
-  const getDataByGroup = async (addedNewItems = false) => {
-    if (addedNewItems) offsetRef.current += 20;
+  const instanceDataCount = instanceQuery.data?.pages?.at(-1)?.count ?? "0";
+  const groupDataCount = groupQuery.data?.pages?.at(-1)?.count ?? "0";
 
-    const url = `${window.SERVER_CONFIG.base}/api/${key}?table=true&offset=${offsetRef.current}&index=${index}&period=${
-      state.period
-    }${inputValue ? `&q=${inputValue}` : ""}${
-      instanceStatusType
-        ? `&status=${instanceStatusType
-            .split(",")
-            .map((status: string) => status.toLowerCase())
-            .join(",")}`
-        : ""
-    }`;
-
-    fetchData<"group">(url, addedNewItems, setGroupData, setGroupDataCount);
-  };
-
-  const getDataByInstance = async (addedNewItems = false) => {
-    if (addedNewItems) offsetRef.current += 20;
-
-    const url = `${window.SERVER_CONFIG.base}/api/${key}?table=true&offset=${offsetRef.current}&index=${index}&period=${
-      state.period
-    }${inputValue ? `&q=${inputValue}` : ""}${
-      modelKey ? `&key=${modelKey}` : ""
-    }&status=${instanceStatusType.toLowerCase()}`;
-
-    fetchData<"instance">(
-      url,
-      addedNewItems,
-      setInstanceData,
-      setInstanceDataCount,
-    );
-  };
-
-  const fetchData = async <T extends "group" | "instance">(
-    url: string,
-    addedNewItems: boolean,
-    setData: React.Dispatch<
-      T extends "group"
-        ? React.SetStateAction<TGroup[]>
-        : React.SetStateAction<TInstance[]>
-    >,
-    setCount: React.Dispatch<React.SetStateAction<string>>,
-  ) => {
-    try {
-      setLoading(true);
-      const response = await fetch(url);
-      const { results, count } = await response.json();
-
-      setNoMoreItems(results.length < 20);
-
-      setData(
-        addedNewItems
-          ? [
-              ...(index === "instance"
-                ? (instanceData as TInstance[])
-                : (groupData as TGroup[])),
-              ...results,
-            ]
-          : results,
-      );
-
-      setCount(count);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadData =
-    index === "instance"
-      ? () => getDataByInstance(true)
-      : () => getDataByGroup(true);
+  const activeQuery = index === "instance" ? instanceQuery : groupQuery;
+  const activeCount = index === "instance" ? instanceDataCount : groupDataCount;
 
   const message = useMemo(() => {
-    return index === "instance"
-      ? instanceDataCount === "0"
-        ? "No entries available"
-        : noMoreItems
-          ? "No more entries"
-          : null
-      : groupDataCount === "0"
-        ? "No entries available"
-        : noMoreItems
-          ? "No more entries"
-          : null;
-  }, [index, instanceDataCount, groupDataCount, noMoreItems]);
+    if (activeCount === "0") return "No entries available";
+    if (!activeQuery.hasNextPage) return "No more entries";
+    return null;
+  }, [activeCount, activeQuery.hasNextPage]);
 
   return {
-    instanceData: instanceData as TInstance[],
-    groupData: groupData as TGroup[],
+    instanceData,
+    groupData,
     instanceDataCount,
     groupDataCount,
     index,
     instanceStatusType,
     inputValue,
-    sidePanelData,
+    drawer,
     message,
     modelKey,
-    loading,
-    offsetRef,
+    loading: activeQuery.isLoading,
+    isFetchingMore: activeQuery.isFetchingNextPage,
+    hasNextPage: activeQuery.hasNextPage,
+    loadMore: activeQuery.fetchNextPage,
     setInputValue,
-    loadData,
-    setSidePanelData,
+    setDrawer,
     setInstanceStatusType,
     setIndex,
   };

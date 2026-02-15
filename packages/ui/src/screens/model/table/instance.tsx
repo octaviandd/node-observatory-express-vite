@@ -14,12 +14,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatDate, formatDuration } from "@/utils.js";
-import { ModelInstanceResponse } from "../../../../types";
+import { ModelInstanceResponse } from "@/hooks/useApiTyped";
 
 type Props = {
   data: ModelInstanceResponse[];
   children: ReactNode;
-  setSidePanelData: ({
+  drawer: ({
     isOpen,
     modelId,
     requestId,
@@ -35,7 +35,7 @@ type Props = {
 };
 
 export const InstanceTable = memo(
-  ({ data, children, setSidePanelData }: Props) => {
+  ({ data, children, drawer }: Props) => {
     return (
       <div className="rounded-md border">
         <Table>
@@ -62,7 +62,7 @@ export const InstanceTable = memo(
                 <TableCell className="flex items-center gap-2 h-[53px]">
                   <Cuboid className="h-4 w-4 text-muted-foreground" />
                   <span className="truncate max-w-[400px] text-black dark:text-white">
-                    {model.content.modelName}
+                    {model.content.data.modelName}
                   </span>
                 </TableCell>
                 <TableCell>
@@ -73,7 +73,7 @@ export const InstanceTable = memo(
                         : "secondary"
                     }
                   >
-                    {model.content.status.toUpperCase()}
+                    {model.content.status?.toUpperCase()}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -94,7 +94,7 @@ export const InstanceTable = memo(
                       size="icon"
                       onClick={(e) => {
                         e.preventDefault();
-                        setSidePanelData({
+                        drawer({
                           isOpen: true,
                           modelId: model.uuid ?? "",
                           requestId: model.request_id ?? "",

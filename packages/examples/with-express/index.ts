@@ -4,10 +4,11 @@ import { ExpressAdapter } from "@node-observatory/express";
 import express from "express";
 import cors from "cors";
 import mysql2 from "mysql2/promise";
-import { createClient } from "redis";
+import { createClient, RedisClientType } from "redis";
 import axios from "axios";
 import winston from "winston";
-import NodeCache from "node-cache"
+import NodeCache from "node-cache";
+import { createStressRoutes } from "./routes/stress";
 
 const myCache = new NodeCache();
 
@@ -16,18 +17,20 @@ app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 
-let logger = winston.createLogger({
-  level: 'info',
+const logger = winston.createLogger({
+  level: 'debug',
   format: winston.format.combine(
     winston.format.timestamp(),
-    winston.format.json() 
+    winston.format.json()
   ),
   transports: [
     new winston.transports.Console()
   ]
 });
 
-
+// ---------------------------------------------------------------------------
+// Original demo route
+// ---------------------------------------------------------------------------
 app.get('/home', async (req, res) => {
   try {
     const response = await axios.get('https://jsonplaceholder.typicode.com/todos/1');
@@ -45,32 +48,46 @@ app.get('/home', async (req, res) => {
   logger.info('This is an info log message from Winston in user app');
 })
 
-const PORT = 9999;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
-
+// ---------------------------------------------------------------------------
+// Server bootstrap
+// ---------------------------------------------------------------------------
 async function startServer() {
-  let mysql2Connection = await mysql2.createConnection({
+  const mysql2Connection = await mysql2.createConnection({
     host: "localhost",
     user: "root",
     database: "observatory",
-    timezone: "UTC",
   });
 
-  let redisConnection = createClient({
+  const redisConnection = createClient({
     url: "redis://localhost:6379",
   });
 
-  let expressAdapter = new ExpressAdapter();
-  expressAdapter.setBasePath('/ui');
-
   await redisConnection.connect();
 
-  await createObserver(expressAdapter, {}, "mysql2", mysql2Connection, redisConnection);
+  // Mount stress/sample-data routes (exercises all patcher categories)
+  app.use('/stress', createStressRoutes({
+    mysql2Connection,
+    redisConnection: redisConnection as RedisClientType,
+    logger,
+    cache: myCache,
+  }));
 
+  const expressAdapter = new ExpressAdapter();
+  expressAdapter.setBasePath('/ui');
   app.use('/ui', expressAdapter.getRouter());
+
+  await createObserver(expressAdapter, {}, "mysql2", mysql2Connection, redisConnection as RedisClientType);
+
   console.log("Server started");
+
+  const PORT = 9999;
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+    console.log(`  Home:       http://localhost:${PORT}/home`);
+    console.log(`  UI:         http://localhost:${PORT}/ui`);
+    console.log(`  Stress:     http://localhost:${PORT}/stress/all`);
+    console.log(`  Flood:      http://localhost:${PORT}/stress/flood?count=50&parallel=5`);
+  });
 }
 
 startServer().catch((error) => {

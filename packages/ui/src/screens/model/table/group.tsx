@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { formatDuration } from "@/utils.js";
-import { ModelGroupResponse } from "../../../../types";
+import { ModelGroupResponse } from "@/hooks/useApiTyped";
 
 export const GroupTable = React.memo(
   ({

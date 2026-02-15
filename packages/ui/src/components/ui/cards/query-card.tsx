@@ -1,6 +1,5 @@
 /** @format */
-
-import { QueryInstanceResponse } from "../../../../types";
+import { QueryInstanceResponse } from "@/hooks/useApiTyped";
 import { BaseCard } from "./base-card";
 
 export default function QueryCard({ item }: { item: QueryInstanceResponse }) {

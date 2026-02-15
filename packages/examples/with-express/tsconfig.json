@@ -1,15 +1,23 @@
 {
   "compilerOptions": {
-    "target": "ES2016", // Or adjust as needed
-    "module": "CommonJS", // Set to CommonJS
-    "moduleResolution": "node", // Standard Node resolution
+    "target": "ES2016",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "outDir": "./dist",
-    "rootDir": "./",
     "strict": true,
-    "esModuleInterop": true, // Usually needed for interop
+    "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    // "paths": {
+    //   "@node-observatory/api": ["../../api/index.ts"],
+    //   "@node-observatory/api/*": ["../../api/*"],
+    //   "@node-observatory/express": ["../../express/src/index.ts"],
+    //   "@node-observatory/express/*": ["../../express/src/*"]
+    // }
   },
-  "include": ["**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": ["*.ts"],
+  "exclude": ["node_modules"],
+  // "ts-node": {
+  //   "require": ["tsconfig-paths/register"]
+  // }
 }

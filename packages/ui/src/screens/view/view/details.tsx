@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDuration, getSize, timeAgo } from "@/utils.js";
-import { ViewInstanceResponse } from "../../../../types";
+import { ViewInstanceResponse } from "@/hooks/useApiTyped";
 
 export default function Details({ view }: { view: ViewInstanceResponse }) {
   return (
@@ -37,20 +37,20 @@ export default function Details({ view }: { view: ViewInstanceResponse }) {
                     : "destructive"
                 }
               >
-                {view.content.status.toUpperCase()}
+                {view.content.status?.toUpperCase()}
               </Badge>
             </div>
           </div>
 
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">View</div>
-            <div className="col-span-9">{view.content.view}</div>
+            <div className="col-span-9">{view.content.data.view}</div>
           </div>
 
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Cache</div>
             <div className="col-span-9">
-              {view.content.cacheInfo.cacheEnabled ? (
+              {view.content.data.cacheInfo.cacheEnabled ? (
                 <Badge variant="secondary">ENABLED</Badge>
               ) : (
                 <Badge variant="warning">DISABLED</Badge>
@@ -61,13 +61,13 @@ export default function Details({ view }: { view: ViewInstanceResponse }) {
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Duration</div>
             <div className="col-span-9">
-              {formatDuration(view.content.duration)}
+              {formatDuration(view.content.duration as number)}
             </div>
           </div>
 
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Size</div>
-            <div className="col-span-9">{getSize(view.content.size)}</div>
+            <div className="col-span-9">{getSize(view.content.data.size)}</div>
           </div>
 
           {view.content.error && (

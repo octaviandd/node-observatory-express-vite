@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { NotificationInstanceResponse } from "../../../../types";
+import { NotificationInstanceResponse } from "@/hooks/useApiTyped";
 import { timeAgo } from "@/utils.js";
 
 export default function Details({
@@ -30,15 +30,15 @@ export default function Details({
           </div>
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Channel</div>
-            <div className="col-span-9">{notification.content.channel}</div>
+            <div className="col-span-9">{notification.content.data.channel}</div>
           </div>
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Event</div>
-            <div className="col-span-9">{notification.content.event}</div>
+            <div className="col-span-9">{notification.content.data.event}</div>
           </div>
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Method</div>
-            <div className="col-span-9">{notification.content.method}</div>
+            <div className="col-span-9">{notification.content.metadata.method}</div>
           </div>
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Duration</div>
@@ -48,7 +48,7 @@ export default function Details({
             <div className="col-span-3 text-muted-foreground">Package</div>
             <div className="col-span-9">
               <span className="bg-muted px-2 py-1 rounded-md font-medium">
-                {notification.content.package}
+                {notification.content.metadata.package}
               </span>
             </div>
           </div>

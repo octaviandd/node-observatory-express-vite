@@ -1,11 +1,18 @@
 /** @format */
 
+import { CalendarCheck } from "lucide-react";
 import { InstanceTable } from "./instance";
 import { GroupTable } from "./group";
-import { Button } from "@/components/ui/button";
 import { useIndexTableData } from "@/hooks/useIndexTableData";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { CalendarCheck } from "lucide-react";
+import {
+  TablePageLayout,
+  TableHeader,
+  StatusFilter,
+  LoadMoreButton,
+} from "@/components/ui/table-page";
+import { ScheduleInstanceResponse, ScheduleGroupResponse } from "@/hooks/useApiTyped";
+
+const STATUS_OPTIONS = ["all", "completed", "failed"];
 
 export default function ScheduledIndexTable() {
   const {
@@ -17,89 +24,45 @@ export default function ScheduledIndexTable() {
     instanceStatusType,
     modelKey,
     message,
-    setSidePanelData,
+    drawer,
+    setDrawer,
     setInstanceStatusType,
-    loadData,
-  } = useIndexTableData({
+    loadMore,
+  } = useIndexTableData<ScheduleInstanceResponse, ScheduleGroupResponse>({
     key: "schedules",
     defaultInstanceStatusType: "all",
   });
 
-  const Table = index === "instance" ? InstanceTable : GroupTable;
+  const count = index === "instance" ? instanceDataCount : groupDataCount;
+  const label = index === "instance" ? "Attempt" : "Schedule";
 
   return (
-    <div className="relative">
-      {/* {sidePanelData.isOpen &&
-        createPortal(
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-xs z-50"
-            onClick={() =>
-              setSidePanelData({ ...sidePanelData, isOpen: false, requestId: "", jobId: "", scheduleId: "", modelId: "" })
-            }
-          ></div>,
-          document.body
-        )}
-      {sidePanelData.isOpen && (
-        <SidePanel
-          setSidePanelData={setSidePanelData}
-          requestId={sidePanelData.requestId}
-          jobId={sidePanelData.jobId}
-          scheduleId={sidePanelData.scheduleId}
-          modelId={sidePanelData.modelId}
-          type="schedule"
-        />
-      )} */}
+    <TablePageLayout
+      setDrawer={setDrawer}
+      drawer={drawer}
+      type="schedules"
+    >
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
-          <CalendarCheck className="h-5 w-5 text-muted-foreground" />
-          <span className="font-medium text-sm text-dark dark:text-white">
-            {index === "instance" ? instanceDataCount : groupDataCount}{" "}
-            {index === "instance" ? "ATTEMPTS" : "Schedules"}
-          </span>
+          <TableHeader icon={CalendarCheck} count={count} label={label} />
         </div>
-        {modelKey ? (
-          <ToggleGroup
-            type="single"
+        {modelKey && (
+          <StatusFilter
+            options={STATUS_OPTIONS}
             value={instanceStatusType}
-            onValueChange={(value) => value && setInstanceStatusType(value)}
-          >
-            <span className="text-sm text-muted-foreground border rounded-md px-2 py-1">
-              SHOW
-            </span>
-            {["all", "completed", "failed"].map((status) => (
-              <ToggleGroupItem
-                key={status}
-                value={status}
-                className="text-black cursor-pointer dark:text-white"
-              >
-                {status.toUpperCase()}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-        ) : null}
+            onChange={setInstanceStatusType}
+          />
+        )}
       </div>
-      {/* @ts-expect-error dumb ts*/}
-      <Table data={index === "instance" ? instanceData : groupData}
-        setSidePanelData={setSidePanelData}
-      >
-        <div className="my-6">
-          <div className="flex items-center justify-center">
-            {message ? (
-              <div className="text-sm text-muted-foreground bg-muted px-4 py-2 rounded-md">
-                {message}
-              </div>
-            ) : (
-              <Button
-                variant="outline"
-                onClick={loadData}
-                className="text-black"
-              >
-                Load older entries
-              </Button>
-            )}
-          </div>
-        </div>
-      </Table>
-    </div>
+      {index === "instance" ? (
+        <InstanceTable data={instanceData as ScheduleInstanceResponse[]} drawer={setDrawer}>
+          <LoadMoreButton message={message} onLoadMore={loadMore} />
+        </InstanceTable>
+      ) : (
+        <GroupTable data={groupData as ScheduleGroupResponse[]}>
+          <LoadMoreButton message={message} onLoadMore={loadMore} />
+        </GroupTable>
+      )}
+    </TablePageLayout>
   );
 }

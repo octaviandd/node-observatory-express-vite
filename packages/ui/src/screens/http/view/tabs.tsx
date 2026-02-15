@@ -2,7 +2,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { HttpClientInstanceResponse } from "../../../../types";
+import { HttpClientInstanceResponse } from "@/hooks/useApiTyped";
+
 type Props = {
   activeTab: string;
   setActiveTab: (tab: string) => void;

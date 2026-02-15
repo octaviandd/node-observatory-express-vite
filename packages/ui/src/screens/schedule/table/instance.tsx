@@ -11,11 +11,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { memo, ReactNode } from "react";
 import { formatDate, formatDuration } from "@/utils.js";
-import { ScheduleInstanceResponse } from "../../../../types";
+import { ScheduleInstanceResponse } from "@/hooks/useApiTyped";
 
 type Props = {
   data: ScheduleInstanceResponse[];
-  setSidePanelData: ({
+  drawer: ({
     isOpen,
     modelId,
     requestId,
@@ -47,7 +47,6 @@ export const InstanceTable = memo(({ data, children }: Props) => {
             <TableHead>Job ID</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Duration</TableHead>
-            {/* <TableHead className="w-[100px]"></TableHead> */}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -60,11 +59,11 @@ export const InstanceTable = memo(({ data, children }: Props) => {
                 {formatDate(schedule.created_at)}
               </TableCell>
               <TableCell className="text-black dark:text-white">
-                {schedule.content.jobId}
+                {schedule.content.metadata.jobId}
               </TableCell>
               <TableCell>
-                <Badge variant={getStatusVariant(schedule.content.status)}>
-                  {schedule.content.status.toUpperCase()}
+                <Badge variant={getStatusVariant(schedule.content.status ?? "")}>
+                  {(schedule.content.status ?? "").toUpperCase()}
                 </Badge>
               </TableCell>
               <TableCell>
@@ -80,22 +79,6 @@ export const InstanceTable = memo(({ data, children }: Props) => {
                     : "N/A"}
                 </p>
               </TableCell>
-              {/* <TableCell>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setSidePanelData(schedule.uuid, schedule.request_id ?? '', schedule.job_id ?? '', schedule.schedule_id ?? '')}
-                  >
-                    <Link2 className="h-4 w-4 text-muted-foreground" />
-                  </Button>
-                  <Link to={`/schedule/${schedule.uuid}`}>
-                    <Button variant="outline" size="icon">
-                      <ExternalLink className="h-4 w-4 text-muted-foreground" />
-                    </Button>
-                  </Link>
-                </div>
-              </TableCell> */}
             </TableRow>
           ))}
         </TableBody>

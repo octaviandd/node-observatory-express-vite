@@ -14,11 +14,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/utils.js";
 import { memo, ReactNode } from "react";
-import { LogInstanceResponse } from "../../../../types";
+import { LogInstanceResponse } from "@/hooks/useApiTyped";
 
 type Props = {
   data: LogInstanceResponse[];
-  setSidePanelData: ({
+  drawer: ({
     isOpen,
     modelId,
     requestId,
@@ -35,7 +35,7 @@ type Props = {
 };
 
 export const InstanceTable = memo(
-  ({ data, setSidePanelData, children }: Props) => {
+  ({ data, drawer, children }: Props) => {
     const LOG_LEVELS = [
       { dataKey: "info", variant: "secondary" },
       { dataKey: "warn", variant: "warning" },
@@ -66,17 +66,17 @@ export const InstanceTable = memo(
                   <Badge
                     variant={
                       LOG_LEVELS.find(
-                        (level) => level.dataKey === log.content.level,
+                        (level) => level.dataKey === log.content.metadata.level,
                       )?.variant
                     }
                     className="px-2 py-1 rounded-md font-medium text-xs"
                   >
-                    {log.content.level.toUpperCase()}
+                    {log.content.metadata.level.toUpperCase()}
                   </Badge>
                   <p className="text-black dark:text-white">
-                    {typeof log.content.message === "object"
-                      ? JSON.stringify(log.content.message)
-                      : log.content.message}
+                    {typeof log.content.data.message === "object"
+                      ? JSON.stringify(log.content.data.message)
+                      : String(log.content.data.message ?? "")}
                   </p>
                 </TableCell>
                 <TableCell>
@@ -85,7 +85,7 @@ export const InstanceTable = memo(
                       variant="outline"
                       size="icon"
                       onClick={() =>
-                        setSidePanelData({
+                        drawer({
                           isOpen: true,
                           modelId: log.uuid ?? "",
                           requestId: log.request_id ?? "",

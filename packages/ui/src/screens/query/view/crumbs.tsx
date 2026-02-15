@@ -9,7 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronRight } from "lucide-react";
-import { QueryInstanceResponse } from "../../../../types";
+import { QueryInstanceResponse } from "@/hooks/useApiTyped";
 
 export const QueryCrumbs = memo(
   ({ query }: { query: QueryInstanceResponse }) => {
@@ -35,16 +35,16 @@ export const QueryCrumbs = memo(
             </BreadcrumbItem>
             <BreadcrumbItem>
               <BreadcrumbLink className="text-muted-foreground">
-                {query.content.database}
+                {query.content.data.database}
               </BreadcrumbLink>
             </BreadcrumbItem>
           </Breadcrumb>
           <div className="flex items-center gap-x-4">
             <Badge variant="secondary">
-              {query.content.package.toUpperCase()}
+              {query.content.metadata.package.toUpperCase()}
             </Badge>
-            <Badge variant={getStatusColor(query.content.sqlType)}>
-              {query.content.sqlType}
+            <Badge variant={getStatusColor(query.content.metadata.sqlType as string)}>
+              {query.content.metadata.sqlType}
             </Badge>
           </div>
         </CardContent>

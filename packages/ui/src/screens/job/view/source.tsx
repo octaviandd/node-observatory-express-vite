@@ -6,12 +6,7 @@ import { Card, CardHeader } from "@/components/ui/card";
 import { CardContent } from "@/components/ui/card";
 import { ChevronRight } from "lucide-react";
 import { Link } from "react-router";
-import {
-  JobInstanceResponse,
-  ScheduleInstanceResponse,
-  RequestInstanceResponse,
-  RequestContent,
-} from "../../../../types";
+import { JobInstanceResponse, ScheduleInstanceResponse, RequestInstanceResponse } from "@/hooks/useApiTyped";
 
 export default function Source({
   source,
@@ -36,10 +31,10 @@ export default function Source({
             </BreadcrumbItem>
             <BreadcrumbItem>
               <BreadcrumbLink className="text-muted-foreground">
-                Request
+                {source.type}
               </BreadcrumbLink>
               <Link
-                to={`/request/${source.uuid}`}
+                to={`/${source.type}/${source.uuid}`}
                 className="text-muted-foreground ml-auto"
               >
                 <Button variant="outline" size="sm" className="ml-2">
@@ -53,13 +48,15 @@ export default function Source({
           <div className="flex items-center gap-x-2">
             <span className="font-medium">UUID:</span> {source.uuid}
           </div>
-          <div className="flex items-center gap-x-2">
-            <span className="font-medium">Route:</span>{" "}
-            {(source.content as RequestContent).route}
-          </div>
+          {"data" in source.content && "route" in (source.content.data as any) && (
+            <div className="flex items-center gap-x-2">
+              <span className="font-medium">Route:</span>{" "}
+              {(source.content.data as any).route}
+            </div>
+          )}
           <div className="flex items-center gap-x-2">
             <span className="font-medium">Method:</span>{" "}
-            {(source.content as RequestContent).method.toUpperCase()}
+            {((source.content.metadata as any)?.method ?? "").toUpperCase()}
           </div>
         </div>
       </CardContent>

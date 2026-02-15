@@ -1,5 +1,5 @@
 /** @format */
-import { ExceptionInstanceResponse } from "../../../../types";
+import { ExceptionInstanceResponse } from "@/hooks/useApiTyped";
 import { BaseCard } from "./base-card";
 
 export default function ExceptionCard({

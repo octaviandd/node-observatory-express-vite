@@ -1,5 +1,5 @@
 /** @format */
-import { NotificationInstanceResponse } from "../../../../types";
+import { NotificationInstanceResponse } from "@/hooks/useApiTyped";
 import { BaseCard } from "./base-card";
 
 export default function NotificationCard({

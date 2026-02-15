@@ -12,14 +12,14 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { JobInstanceResponse } from "../../../../types";
 import { formatDate, formatDuration } from "@/utils.js";
 import { ReactNode, memo } from "react";
+import { JobInstanceResponse } from "@/hooks/useApiTyped";
 
 type Props = {
   data: JobInstanceResponse[];
   children: ReactNode;
-  setSidePanelData: ({
+  drawer: ({
     isOpen,
     modelId,
     requestId,
@@ -35,7 +35,7 @@ type Props = {
 };
 
 export const InstanceTable = memo(
-  ({ data, children, setSidePanelData }: Props) => {
+  ({ data, children, drawer }: Props) => {
     const getStatusVariant = (status: string) => {
       if (status === "completed") return "secondary";
       if (status === "released") return "warning";
@@ -69,27 +69,27 @@ export const InstanceTable = memo(
                 </TableCell>
                 <TableCell className="text-black dark:text-white flex flex-col gap-1">
                   <span className="font-medium">
-                    {job.content.connectionName}
+                    {job.content.data.connectionName}
                   </span>
                   <span className="text-muted-foreground">
-                    ({job.content.queue})
+                    ({job.content.data.queue})
                   </span>
                 </TableCell>
                 <TableCell className="text-black dark:text-white">
                   {job.content.status === "completed"
-                    ? (job.content.attemptsMade ?? 0) + 1
-                    : (job.content.attemptsMade ?? 0)}
+                    ? (job.content.data.attemptsMade ?? 0) + 1
+                    : (job.content.data.attemptsMade ?? 0)}
                 </TableCell>
                 <TableCell className="text-black dark:text-white">
-                  {job.content.jobId}
+                  {job.content.data.jobId}
                 </TableCell>
                 <TableCell>
-                  <Badge variant={getStatusVariant(job.content.status)}>
-                    {job.content.status.toUpperCase()}
+                  <Badge variant={getStatusVariant(job.content.status ?? "")}>
+                    {(job.content.status ?? "").toUpperCase()}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  {job.content.status !== "released" && (
+                  {(job.content.status as string) !== "released" && (
                     <p
                       className={
                         Number(job.content.duration) > 999
@@ -107,7 +107,7 @@ export const InstanceTable = memo(
                       variant="outline"
                       size="icon"
                       onClick={() =>
-                        setSidePanelData({
+                        drawer({
                           isOpen: true,
                           modelId: job.uuid ?? "",
                           requestId: job.request_id ?? "",

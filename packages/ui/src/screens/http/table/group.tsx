@@ -20,7 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { memo, ReactNode } from "react";
 import { formatCount, formatDuration } from "@/utils.js";
-import { HttpClientGroupResponse } from "../../../../types";
+import { HttpClientGroupResponse } from "@/hooks/useApiTyped";
 
 type Props = {
   data: HttpClientGroupResponse[];
