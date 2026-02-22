@@ -36,32 +36,32 @@ export const GroupTable = memo(
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((endpoint: QueryGroupResponse) => (
-              <TableRow key={endpoint.endpoint}>
+            {data.map((queryGroupResponse: QueryGroupResponse) => (
+              <TableRow key={queryGroupResponse.endpoint}>
                 <TableCell className="flex gap-2 items-center h-[53px]">
                   <Database className="h-4 w-4 text-muted-foreground" />
                   <span className="truncate max-w-[400px] text-black dark:text-white">
-                    {endpoint.endpoint}
+                    {queryGroupResponse.endpoint}
                   </span>
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-2">
-                    {endpoint.completed > 0 && (
+                    {queryGroupResponse.completed > 0 && (
                       <Badge
                         variant="secondary"
                         className="flex gap-1 items-center"
                       >
                         <CheckCircle className="h-3 w-3" />
-                        {formatCount(endpoint.completed)}
+                        {formatCount(queryGroupResponse.completed)}
                       </Badge>
                     )}
-                    {endpoint.failed > 0 && (
+                    {queryGroupResponse.failed > 0 && (
                       <Badge
                         variant="error"
                         className="flex gap-1 items-center"
                       >
                         <AlertOctagon className="h-3 w-3" />
-                        {formatCount(endpoint.failed)}
+                        {formatCount(queryGroupResponse.failed)}
                       </Badge>
                     )}
                   </div>
@@ -69,29 +69,29 @@ export const GroupTable = memo(
                 <TableCell>
                   <p
                     className={
-                      endpoint.average && endpoint.average > 999
+                      queryGroupResponse.average && queryGroupResponse.average > 999
                         ? "text-yellow-600"
                         : "text-black dark:text-white"
                     }
                   >
-                    {endpoint.average
-                      ? formatDuration(endpoint.average)
+                    {queryGroupResponse.average
+                      ? formatDuration(queryGroupResponse.average)
                       : "N/A"}
                   </p>
                 </TableCell>
                 <TableCell>
                   <p
                     className={
-                      endpoint.p95 && endpoint.p95 > 999
+                      queryGroupResponse.p95 && queryGroupResponse.p95 > 999
                         ? "text-yellow-600"
                         : "text-black dark:text-white"
                     }
                   >
-                    {endpoint.p95 ? formatDuration(endpoint.p95) : "N/A"}
+                    {queryGroupResponse.p95 ? formatDuration(queryGroupResponse.p95) : "N/A"}
                   </p>
                 </TableCell>
                 <TableCell>
-                  <Link to={`${encodeURIComponent(endpoint.endpoint)}`}>
+                  <Link to={`${encodeURIComponent(queryGroupResponse.endpoint)}`}>
                     <Button variant="outline" size="icon">
                       <ExternalLink className="h-4 w-4 text-muted-foreground" />
                     </Button>

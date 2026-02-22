@@ -1,7 +1,7 @@
 /** @format */
 
 import { ExternalLink, FileCode, Link2 } from "lucide-react";
-import { memo, ReactNode } from "react";
+import { memo, ReactNode, useContext } from "react";
 import { Link } from "react-router";
 import {
   Table,
@@ -15,27 +15,16 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatDate, formatDuration, getSize } from "@/utils.js";
 import { ViewInstanceResponse } from "@/hooks/useApiTyped";
+import { StoreContext } from "@/store";
 
 type Props = {
   data: ViewInstanceResponse[];
   children: ReactNode;
-  drawer: ({
-    isOpen,
-    modelId,
-    requestId,
-    jobId,
-    scheduleId,
-  }: {
-    isOpen: boolean;
-    modelId: string;
-    requestId: string;
-    jobId: string;
-    scheduleId: string;
-  }) => void;
 };
 
 export const InstanceTable = memo(
-  ({ data, children, drawer }: Props) => {
+  ({ data, children }: Props) => {
+    const { dispatch } = useContext(StoreContext);
     return (
       <div className="rounded-md border">
         <Table>
@@ -97,12 +86,14 @@ export const InstanceTable = memo(
                       variant="outline"
                       size="icon"
                       onClick={() =>
-                        drawer({
-                          isOpen: true,
-                          modelId: view.uuid ?? "",
-                          requestId: view.request_id ?? "",
-                          jobId: view.job_id ?? "",
-                          scheduleId: view.schedule_id ?? "",
+                        dispatch({
+                          type: "openDrawer",
+                          payload: {
+                            modelId: view.uuid ?? "",
+                            requestId: view.request_id ?? "",
+                            jobId: view.job_id ?? "",
+                            scheduleId: view.schedule_id ?? "",
+                          },
                         })
                       }
                     >

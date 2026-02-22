@@ -12,30 +12,19 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { memo, ReactNode } from "react";
+import { memo, ReactNode, useContext } from "react";
 import { formatDuration, formatDate } from "@/utils.js";
 import { MailInstanceResponse } from "@/hooks/useApiTyped";
+import { StoreContext } from "@/store";
 
 type Props = {
   data: MailInstanceResponse[];
   children: ReactNode;
-  drawer: ({
-    isOpen,
-    modelId,
-    requestId,
-    jobId,
-    scheduleId,
-  }: {
-    isOpen: boolean;
-    modelId: string;
-    requestId: string;
-    jobId: string;
-    scheduleId: string;
-  }) => void;
 };
 
 export const InstanceTable = memo(
-  ({ data, children, drawer }: Props) => {
+  ({ data, children }: Props) => {
+    const { dispatch } = useContext(StoreContext);
     return (
       <div className="rounded-md border">
         <Table>
@@ -88,12 +77,14 @@ export const InstanceTable = memo(
                       variant="outline"
                       size="icon"
                       onClick={() =>
-                        drawer({
-                          isOpen: true,
-                          modelId: mail.uuid ?? "",
-                          requestId: mail.request_id ?? "",
-                          jobId: mail.job_id ?? "",
-                          scheduleId: mail.schedule_id ?? "",
+                        dispatch({
+                          type: "openDrawer",
+                          payload: {
+                            modelId: mail.uuid ?? "",
+                            requestId: mail.request_id ?? "",
+                            jobId: mail.job_id ?? "",
+                            scheduleId: mail.schedule_id ?? "",
+                          },
                         })
                       }
                     >

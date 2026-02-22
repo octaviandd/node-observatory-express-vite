@@ -39,7 +39,8 @@
               "status": {
                 "enum": [
                   "completed",
-                  "failed"
+                  "failed",
+                  "released"
                 ],
                 "type": "string"
               },
@@ -253,7 +254,8 @@
               "status": {
                 "enum": [
                   "completed",
-                  "failed"
+                  "failed",
+                  "released"
                 ],
                 "type": "string"
               },
@@ -308,7 +310,9 @@
               "data": {
                 "type": "object",
                 "properties": {
-                  "key": {},
+                  "key": {
+                    "type": "string"
+                  },
                   "hits": {
                     "type": "number"
                   },
@@ -418,7 +422,8 @@
               "status": {
                 "enum": [
                   "completed",
-                  "failed"
+                  "failed",
+                  "released"
                 ],
                 "type": "string"
               },
@@ -583,7 +588,8 @@
               "status": {
                 "enum": [
                   "completed",
-                  "failed"
+                  "failed",
+                  "released"
                 ],
                 "type": "string"
               },
@@ -768,7 +774,8 @@
               "status": {
                 "enum": [
                   "completed",
-                  "failed"
+                  "failed",
+                  "released"
                 ],
                 "type": "string"
               },
@@ -961,7 +968,8 @@
               "status": {
                 "enum": [
                   "completed",
-                  "failed"
+                  "failed",
+                  "released"
                 ],
                 "type": "string"
               },
@@ -1129,7 +1137,8 @@
               "status": {
                 "enum": [
                   "completed",
-                  "failed"
+                  "failed",
+                  "released"
                 ],
                 "type": "string"
               },
@@ -1315,7 +1324,8 @@
               "status": {
                 "enum": [
                   "completed",
-                  "failed"
+                  "failed",
+                  "released"
                 ],
                 "type": "string"
               },
@@ -1576,7 +1586,8 @@
               "status": {
                 "enum": [
                   "completed",
-                  "failed"
+                  "failed",
+                  "released"
                 ],
                 "type": "string"
               },
@@ -1726,7 +1737,8 @@
               "status": {
                 "enum": [
                   "completed",
-                  "failed"
+                  "failed",
+                  "released"
                 ],
                 "type": "string"
               },
@@ -1893,7 +1905,8 @@
               "status": {
                 "enum": [
                   "completed",
-                  "failed"
+                  "failed",
+                  "released"
                 ],
                 "type": "string"
               },
@@ -2625,7 +2638,8 @@
                     "status": {
                       "enum": [
                         "completed",
-                        "failed"
+                        "failed",
+                        "released"
                       ],
                       "type": "string"
                     },
@@ -2795,7 +2809,8 @@
                     "status": {
                       "enum": [
                         "completed",
-                        "failed"
+                        "failed",
+                        "released"
                       ],
                       "type": "string"
                     },
@@ -2953,7 +2968,8 @@
                     "status": {
                       "enum": [
                         "completed",
-                        "failed"
+                        "failed",
+                        "released"
                       ],
                       "type": "string"
                     },
@@ -3170,7 +3186,8 @@
                     "status": {
                       "enum": [
                         "completed",
-                        "failed"
+                        "failed",
+                        "released"
                       ],
                       "type": "string"
                     },
@@ -3225,7 +3242,9 @@
                     "data": {
                       "type": "object",
                       "properties": {
-                        "key": {},
+                        "key": {
+                          "type": "string"
+                        },
                         "hits": {
                           "type": "number"
                         },
@@ -3338,7 +3357,8 @@
                     "status": {
                       "enum": [
                         "completed",
-                        "failed"
+                        "failed",
+                        "released"
                       ],
                       "type": "string"
                     },
@@ -3527,7 +3547,8 @@
                     "status": {
                       "enum": [
                         "completed",
-                        "failed"
+                        "failed",
+                        "released"
                       ],
                       "type": "string"
                     },
@@ -3723,7 +3744,8 @@
                     "status": {
                       "enum": [
                         "completed",
-                        "failed"
+                        "failed",
+                        "released"
                       ],
                       "type": "string"
                     },
@@ -3926,7 +3948,8 @@
                     "status": {
                       "enum": [
                         "completed",
-                        "failed"
+                        "failed",
+                        "released"
                       ],
                       "type": "string"
                     },
@@ -4097,7 +4120,8 @@
                     "status": {
                       "enum": [
                         "completed",
-                        "failed"
+                        "failed",
+                        "released"
                       ],
                       "type": "string"
                     },
@@ -4359,7 +4383,8 @@
                     "status": {
                       "enum": [
                         "completed",
-                        "failed"
+                        "failed",
+                        "released"
                       ],
                       "type": "string"
                     },
@@ -4527,7 +4552,8 @@
                     "status": {
                       "enum": [
                         "completed",
-                        "failed"
+                        "failed",
+                        "released"
                       ],
                       "type": "string"
                     },

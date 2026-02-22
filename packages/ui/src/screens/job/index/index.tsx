@@ -9,8 +9,6 @@ import {
   StatsGrid,
 } from "@/components/ui/index-page";
 import { useJobs } from "@/hooks/useApiTyped";
-import { StoreContext } from "@/store";
-import { useContext } from "react";
 
 const JOB_BAR_DATA = [
   { dataKey: "completed", stackId: "a", fill: "#f1f5f9" },
@@ -19,7 +17,6 @@ const JOB_BAR_DATA = [
 ];
 
 export default function JobsIndex() {
-  const { state } = useContext(StoreContext);
   const { data } = useJobs.useGraph();
 
   return (
@@ -47,8 +44,6 @@ export default function JobsIndex() {
             average={data.average}
             p95={data.p95}
             durationFormattedData={data.durationFormattedData}
-            period={state.period}
-            currentDate={""}
           />
         </StatsGrid>
       )}

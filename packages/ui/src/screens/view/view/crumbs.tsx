@@ -33,16 +33,16 @@ export const ViewCrumbs = React.memo(
             </BreadcrumbItem>
             <BreadcrumbItem>
               <BreadcrumbLink className="text-muted-foreground">
-                {view.content.view}
+                {view.content.data.view}
               </BreadcrumbLink>
             </BreadcrumbItem>
           </Breadcrumb>
           <div className="flex items-center gap-x-4">
             <Badge variant="secondary">
-              {view.content.package.toUpperCase()}
+              {view.content.metadata.package.toUpperCase()}
             </Badge>
-            <Badge variant={getStatusColor(view.content.status)}>
-              {view.content.status.toUpperCase()}
+            <Badge variant={getStatusColor(view.content.status as string)}>
+              {view.content.status?.toUpperCase()}
             </Badge>
           </div>
         </CardContent>

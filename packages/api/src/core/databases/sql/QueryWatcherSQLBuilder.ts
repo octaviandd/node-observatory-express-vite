@@ -8,10 +8,10 @@ class QueryWatcherSQL extends BaseBuilder {
     if (!status || status === "all") return "";
 
     const mapping: Record<string, string> = {
-      select: "AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.sql')) LIKE '%SELECT%'",
-      insert: "AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.sql')) LIKE '%INSERT%'",
-      update: "AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.sql')) LIKE '%UPDATE%'",
-      delete: "AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.sql')) LIKE '%DELETE%'",
+      select: "AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.sql')) LIKE '%SELECT%'",
+      insert: "AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.sql')) LIKE '%INSERT%'",
+      update: "AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.sql')) LIKE '%UPDATE%'",
+      delete: "AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.sql')) LIKE '%DELETE%'",
     };
 
     return mapping[status] || "";
@@ -20,12 +20,12 @@ class QueryWatcherSQL extends BaseBuilder {
   /**
    * Data for the "Instance" (flat list) view
    */
-  public getIndexTableDataByInstanceSQL(filters: any) {
+  public getIndexTableDataByInstanceSQL(filters: QueryFilters) {
     const { period, limit, offset, query, status, key } = filters;
 
     const periodSql = this.getPeriodSQL(period);
     const querySql = query ? this.getInclusionSQL(query, "query") : "";
-    const keySql = key ? this.getEqualitySQL(key, "sql") : "";
+    const keySql = key ? this.getEqualitySQL(key, "data.sql") : "";
     const statusSql = this.getQueryStatusSQL(status);
 
     const whereClause = `WHERE type = 'query' ${periodSql} ${querySql} ${statusSql} ${keySql}`;
@@ -39,7 +39,7 @@ class QueryWatcherSQL extends BaseBuilder {
   /**
    * Data for the "Grouped" (aggregated by SQL statement) view
    */
-  public getIndexTableDataByGroupSQL(filters: any) {
+  public getIndexTableDataByGroupSQL(filters: QueryFilters) {
     const { period, limit, offset, query } = filters;
 
     const periodSql = this.getPeriodSQL(period);
@@ -48,7 +48,7 @@ class QueryWatcherSQL extends BaseBuilder {
     const whereClause = `WHERE type = 'query' ${periodSql} ${querySql}`;
 
     const columns = [
-      "JSON_UNQUOTE(JSON_EXTRACT(content, '$.sql')) as endpoint",
+      "JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.sql')) as endpoint",
       "COUNT(*) as total",
       "AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL)) as duration",
       "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed",
@@ -67,17 +67,19 @@ class QueryWatcherSQL extends BaseBuilder {
         GROUP BY endpoint
         ORDER BY total DESC
         LIMIT ${limit} OFFSET ${offset};`,
-      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.sql'))) as total FROM observatory_entries ${whereClause};`,
+      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.sql'))) as total FROM observatory_entries ${whereClause};`,
     };
   }
 
   /**
    * Logic for the Query Graph (Aggregates + Rows)
    */
-  public getIndexGraphDataSQL(filters: any) {
-    const { period, key } = filters;
+  public getIndexGraphDataSQL(filters: QueryFilters) {
+    const { period, key, status } = filters;
     const periodSql = this.getPeriodSQL(period);
-    const keySql = key ? this.getEqualitySQL(key, "sql") : "";
+    const keySql = key ? this.getEqualitySQL(key, "data.sql") : "";
+    const statusSql = status ? this.getQueryStatusSQL(status) : "";
+
 
     const aggregateColumns = [
       "COUNT(*) as total",
@@ -105,7 +107,7 @@ class QueryWatcherSQL extends BaseBuilder {
       "'row' as type",
     ];
 
-    const whereClause = `WHERE type = 'query' ${periodSql} ${keySql}`;
+    const whereClause = `WHERE type = 'query' ${periodSql} ${keySql} ${statusSql}`;
 
     return `
       (SELECT ${aggregateColumns.join(", ")} FROM observatory_entries ${whereClause})

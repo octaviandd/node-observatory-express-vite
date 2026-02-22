@@ -9,7 +9,7 @@ class LogWatcherSQL extends BaseBuilder {
 
     const types = logType.split(",");
     const conditions = types.map(
-      (type) => `JSON_EXTRACT(content, '$.level') LIKE '%${type.toLowerCase()}%'`
+      (type) => `JSON_EXTRACT(content, '$.metadata.level') LIKE '%${type.toLowerCase()}%'`
     );
 
     return `AND (${conditions.join(" OR ")})`;
@@ -23,7 +23,7 @@ class LogWatcherSQL extends BaseBuilder {
 
     const typeSql = this.getLogTypeSQL(logType);
     const querySql = query ? this.getInclusionSQL(query, "message") : "";
-    const messageSql = key ? `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.message')) = '${key}'` : "";
+    const messageSql = key ? `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.message')) = '${key}'` : "";
     const periodSql = period ? this.getPeriodSQL(period) : "";
 
     const whereClause = `WHERE type = 'log' ${typeSql} ${querySql} ${messageSql} ${periodSql}`;
@@ -40,16 +40,16 @@ class LogWatcherSQL extends BaseBuilder {
   public getIndexTableDataByGroupSQL(filters: any) {
     const { limit, offset, query, period } = filters;
 
-    const querySql = query ? this.getInclusionSQL(query, "message") : "";
+    const querySql = query ? this.getInclusionSQL(query, "data.message") : "";
     const periodSql = period ? this.getPeriodSQL(period) : "";
 
     const levels = ["info", "warn", "error", "debug", "trace", "fatal", "log"];
     const levelSumColumns = levels.map(
-      (lvl) => `SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.level')) LIKE '${lvl}' THEN 1 ELSE 0 END) as ${lvl}`
+      (lvl) => `SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.level')) LIKE '${lvl}' THEN 1 ELSE 0 END) as ${lvl}`
     );
 
     const columns = [
-      "JSON_UNQUOTE(JSON_EXTRACT(content, '$.message')) as message",
+      "JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.message')) as message",
       "COUNT(*) as total",
       ...levelSumColumns,
     ];
@@ -64,7 +64,7 @@ class LogWatcherSQL extends BaseBuilder {
         GROUP BY message
         ORDER BY total DESC
         LIMIT ${limit} OFFSET ${offset};`,
-      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.message'))) as total FROM observatory_entries ${whereClause};`,
+      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.message'))) as total FROM observatory_entries ${whereClause};`,
     };
   }
 
@@ -74,13 +74,13 @@ class LogWatcherSQL extends BaseBuilder {
   public getIndexGraphDataSQL(filters: any) {
     const { period, key } = filters;
     const periodSql = period ? this.getPeriodSQL(period) : "";
-    const messageSql = key ? `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.message')) = '${key}'` : "";
+    const messageSql = key ? `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.message')) = '${key}'` : "";
 
     const levels = ["info", "warn", "error", "log", "debug", "trace", "fatal"];
 
     const aggregateColumns = [
       "COUNT(*) as total",
-      ...levels.map(lvl => `SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.level')) LIKE '${lvl}' THEN 1 ELSE 0 END) as ${lvl}`),
+      ...levels.map(lvl => `SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.level')) LIKE '${lvl}' THEN 1 ELSE 0 END) as ${lvl}`),
       "NULL as created_at",
       "NULL as content",
       "'aggregate' as type"

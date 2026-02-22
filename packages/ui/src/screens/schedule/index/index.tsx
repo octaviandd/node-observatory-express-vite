@@ -11,12 +11,9 @@ import { Badge } from "@/components/ui/badge";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
 import SchedulesIndexTable from "../table";
 import { DurationGraph } from "@/components/ui/graphs/duration-graph";
-import { StoreContext } from "@/store";
-import { useContext } from "react";
 import { useSchedules } from "@/hooks/useApiTyped";
 
 export default function SchedulesIndex() {
-  const { state } = useContext(StoreContext);
   const { data } = useSchedules.useGraph();
 
   return (

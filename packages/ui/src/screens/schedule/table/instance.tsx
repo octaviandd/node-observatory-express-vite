@@ -15,19 +15,6 @@ import { ScheduleInstanceResponse } from "@/hooks/useApiTyped";
 
 type Props = {
   data: ScheduleInstanceResponse[];
-  drawer: ({
-    isOpen,
-    modelId,
-    requestId,
-    jobId,
-    scheduleId,
-  }: {
-    isOpen: boolean;
-    modelId: string;
-    requestId: string;
-    jobId: string;
-    scheduleId: string;
-  }) => void;
   children: ReactNode;
 };
 

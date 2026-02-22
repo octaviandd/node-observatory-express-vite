@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DurationGraph } from "@/components/ui/graphs/duration-graph";
-import { PeriodState } from "@/store";
 
 interface DurationCardProps {
   shortest: string | number;
@@ -17,8 +16,6 @@ interface DurationCardProps {
   average: string | number;
   p95: string | number;
   durationFormattedData: Record<string, { durations: number[], avgDuration: number, p95: number, count: number, label: string }>;
-  period: PeriodState;
-  currentDate: string;
 }
 
 export function DurationCard({
@@ -27,8 +24,6 @@ export function DurationCard({
   average,
   p95,
   durationFormattedData,
-  period,
-  currentDate,
 }: DurationCardProps) {
   return (
     <Card>

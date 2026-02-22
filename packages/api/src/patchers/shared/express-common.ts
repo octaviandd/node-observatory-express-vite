@@ -83,6 +83,7 @@ export function patchExpressExports(exports: any): any {
         (req.originalUrl.includes("/ui") ||
           /\/api\/(requests|queries|notifications|mails|exceptions|jobs|schedules|https?|cache|logs|views|models)/.test(req.originalUrl))
       ) {
+        console.log("HIT")
         return originalAppHandle.call(this, req, res, next);
       }
 
@@ -102,14 +103,8 @@ export function patchExpressExports(exports: any): any {
 
       return requestLocalStorage.run(new Map(), () => {
         const store = requestLocalStorage.getStore()!;
-        const startTime = performance.now();
 
         store.set("requestId", uuidv4());
-        store.set("startTime", startTime);
-        store.set("payload", "");
-        store.set("totalWrittenBytes", 0);
-        store.set("responseSizeMeasuredBySend", false);
-        store.set("logged", false);
 
         // Capture request payload
         const originalReqOn = req.on;
@@ -275,16 +270,8 @@ export function patchExpressExports(exports: any): any {
   if (typeof exports.response.send === "function") {
     shimmer.wrap(exports.response, "send", (originalSend) =>
       function wrappedSend(this: ExpressResponse, body: any) {
-        const store = requestLocalStorage.getStore();
-        if (store) {
-          const currentTotalBytes = store.get("totalWrittenBytes") || 0;
-          if (currentTotalBytes === 0) {
-            store.set("responseSizeMeasuredBySend", true);
-            store.set("totalWrittenBytes", getByteLength(body, "utf8"));
-          }
-        }
         return originalSend.call(this, body);
-      }
+      } 
     );
   }
 

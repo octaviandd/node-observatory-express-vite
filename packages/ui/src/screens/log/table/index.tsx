@@ -20,10 +20,8 @@ export default function LogsIndexTable() {
     groupDataCount,
     index,
     inputValue,
-    drawer,
     modelKey,
     message,
-    setDrawer,
     setInputValue,
     loadMore,
   } = useIndexTableData<LogInstanceResponse, LogGroupResponse>({
@@ -35,11 +33,7 @@ export default function LogsIndexTable() {
   const label = index === "instance" ? "Log" : "Source";
 
   return (
-    <TablePageLayout
-      setDrawer={setDrawer}
-      drawer={drawer}
-      type="logs"
-    >
+    <TablePageLayout type="logs">
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
           <TableHeader icon={Logs} count={count} label={label} />
@@ -57,7 +51,7 @@ export default function LogsIndexTable() {
         </div>
       </div>
       {index === "instance" ? (
-        <InstanceTable data={instanceData as LogInstanceResponse[]} drawer={setDrawer}>
+        <InstanceTable data={instanceData as LogInstanceResponse[]}>
           <LoadMoreButton message={message} onLoadMore={loadMore} />
         </InstanceTable>
       ) : (

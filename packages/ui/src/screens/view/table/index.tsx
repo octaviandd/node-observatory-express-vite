@@ -24,10 +24,8 @@ export default function ViewsIndexTable() {
     index,
     instanceStatusType,
     inputValue,
-    setDrawer,
     modelKey,
     message,
-    drawer,
     setInstanceStatusType,
     setInputValue,
     loadMore,
@@ -40,11 +38,7 @@ export default function ViewsIndexTable() {
   const label = index === "instance" ? "View" : "Path";
 
   return (
-    <TablePageLayout
-      setDrawer={setDrawer}
-      drawer={drawer}
-      type="views"
-    >
+    <TablePageLayout type="views">
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
           <TableHeader icon={FileCode} count={count} label={label} />
@@ -69,7 +63,7 @@ export default function ViewsIndexTable() {
         )}
       </div>
       {index === "instance" ? (
-        <InstanceTable data={instanceData as ViewInstanceResponse[]} drawer={setDrawer}>
+        <InstanceTable data={instanceData as ViewInstanceResponse[]}>
           <LoadMoreButton message={message} onLoadMore={loadMore} />
         </InstanceTable>
       ) : (

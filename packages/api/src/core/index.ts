@@ -96,6 +96,7 @@ export async function createObserver(
   serverAdapter
     .setStaticPath("/", path.join(uiDistPath, "dist"))
     .setStaticPath("/assets", path.join(uiDistPath, "dist/assets"))
+    .setApiRoutes(apiRoutes)
     .setEntryRoute({
       method: "get",
       route: generateUIRoutes(),
@@ -104,16 +105,18 @@ export async function createObserver(
         params: { basePath },
       }),
     })
-    .setApiRoutes(apiRoutes)
-    .setErrorHandler((error: Error & { statusCode: HTTPStatus }) => ({
-      status: error.statusCode || 500,
-      body: {
-        error: "Internal server error",
-        message: error.message,
-        details:
-          process.env.NODE_ENV === "development" ? error.stack : undefined,
-      },
-    }));
+    .setErrorHandler((error: Error & { statusCode: HTTPStatus }) => {
+      console.log(error, 'hit please')
+      return {
+        status: error.statusCode || 500,
+        body: {
+          error: "Internal server error",
+          message: error.message,
+          details:
+            process.env.NODE_ENV === "development" ? error.stack : undefined,
+        }
+      }
+    });
 
   console.log("Observatory setup complete");
 }

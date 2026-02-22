@@ -124,7 +124,7 @@ class GenericWatcher<
    * graphMetrics comes from config and determines which series are computed.
    */
   protected async getGraphData(
-    filters: WatcherFilters,
+    filters: FiltersByWatcherType[T],
   ): Promise<GraphDataResponse> {
     return await this.DBInstance.getGraphData(
       filters,
@@ -149,8 +149,6 @@ class GenericWatcher<
   protected async getViewdata(id: string): Promise<ViewDataResponse> {
     // Primary entry being viewed.
     const entry = await this.DBInstance.getEntry(id);
-
-    console.log(entry);
 
     // Determine whether this entry has linkage identifiers.
     const hasRequestId = entry?.request_id && entry.request_id !== "null";
@@ -223,47 +221,32 @@ class GenericWatcher<
     jobId: string;
     scheduleId: string;
   }): Promise<any> {
-    // If nothing to match on, there is no "related" set to compute.
     if (!requestId && !jobId && !scheduleId) {
       return null;
     }
 
-    /**
-     * Build optional query fragments based on provided IDs.
-     * These are built with leading AND because DB helper likely appends to a base WHERE clause.
-     */
     const conditions = [
-      ...(requestId ? [`AND request_id = ?`] : []),
-      ...(jobId ? [`AND job_id = ?`] : []),
-      ...(scheduleId ? [`AND schedule_id = ?`] : []),
+      ...(requestId && requestId !== 'null' ? [`request_id = ?`] : []),
+      ...(jobId && jobId !== 'null' ? [`job_id = ?`] : []),
+      ...(scheduleId && scheduleId !== 'null' ? [`schedule_id = ?`] : []),
     ];
 
-    /**
-     * Bound params must match the placeholder order above.
-     * Keep ordering consistent with `conditions`.
-     */
     const params = [
-      ...(requestId ? [requestId] : []),
-      ...(scheduleId ? [scheduleId] : []),
-      ...(jobId ? [jobId] : []),
+      ...(requestId && requestId !== 'null' ? [requestId] : []),
+      ...(jobId && jobId !== 'null' ? [jobId] : []),
+      ...(scheduleId && scheduleId !== 'null' ? [scheduleId] : []),
     ];
 
-    /**
-     * Same job status gating as getViewdata:
-     * only show related job entries in a "relevant" state.
-     */
-    const jobCondition = jobId
+    const jobCondition = jobId && jobId !== 'null'
       ? "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')"
       : "";
 
-    // Execute related query and group results by entry type for UI consumption.
     const results = await this.DBInstance.getRelatedViewdata(
       conditions,
       params,
       this.type,
       jobCondition,
     );
-
     return groupItemsByType(results);
   }
 

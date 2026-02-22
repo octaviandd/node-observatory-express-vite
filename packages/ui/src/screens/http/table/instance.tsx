@@ -11,32 +11,21 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ReactNode, memo } from "react";
+import { ReactNode, memo, useContext } from "react";
 import { Badge } from "@/components/ui/badge";
 import { formatDate, formatDuration } from "@/utils.js";
 import { HttpClientInstanceResponse } from "@/hooks/useApiTyped";
+import { StoreContext } from "@/store";
 
 
 type Props = {
   data: HttpClientInstanceResponse[];
-  setDrawer: ({
-    isOpen,
-    modelId,
-    requestId,
-    jobId,
-    scheduleId,
-  }: {
-    isOpen: boolean;
-    modelId: string;
-    requestId: string;
-    jobId: string;
-    scheduleId: string;
-  }) => void;
   children: ReactNode;
 };
 
 export const InstanceTable = memo(
-  ({ data, setDrawer, children }: Props) => {
+  ({ data, children }: Props) => {
+    const { dispatch } = useContext(StoreContext);
     const getStatusVariant = (status: number) => {
       if (String(status).startsWith("2") || String(status).startsWith("3"))
         return "secondary";
@@ -99,12 +88,14 @@ export const InstanceTable = memo(
                       variant="outline"
                       size="icon"
                       onClick={() =>
-                        setDrawer({
-                          isOpen: true,
-                          modelId: request.uuid ?? "",
-                          requestId: request.request_id ?? "",
-                          jobId: request.job_id ?? "",
-                          scheduleId: request.schedule_id ?? "",
+                        dispatch({
+                          type: "openDrawer",
+                          payload: {
+                            modelId: request.uuid ?? "",
+                            requestId: request.request_id ?? "",
+                            jobId: request.job_id ?? "",
+                            scheduleId: request.schedule_id ?? "",
+                          },
                         })
                       }
                     >

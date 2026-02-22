@@ -24,10 +24,8 @@ export default function ModelsIndexTable() {
     index,
     instanceStatusType,
     inputValue,
-    setDrawer,
     modelKey,
     message,
-    drawer,
     setInstanceStatusType,
     setInputValue,
     loadMore,
@@ -40,11 +38,7 @@ export default function ModelsIndexTable() {
   const label = index === "instance" ? "Instance" : "Model";
 
   return (
-    <TablePageLayout
-      setDrawer={setDrawer}
-      drawer={drawer}
-      type="models"
-    >
+    <TablePageLayout type="models">
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
           <TableHeader icon={Cuboid} count={count} label={label} />
@@ -67,7 +61,7 @@ export default function ModelsIndexTable() {
         )}
       </div>
       {index === "instance" ? (
-        <InstanceTable data={instanceData as ModelInstanceResponse[]} drawer={setDrawer}>
+        <InstanceTable data={instanceData as ModelInstanceResponse[]}>
           <LoadMoreButton message={message} onLoadMore={loadMore} />
         </InstanceTable>
       ) : (

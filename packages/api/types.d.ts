@@ -120,6 +120,21 @@ interface ExceptionFilters extends IndexedFilters {
   type: "all" | "unhandled" | "uncaught";
 }
 
+type FiltersByWatcherType = {
+  request: RequestFilters;
+  query: QueryFilters;
+  cache: CacheFilters;
+  job: JobFilters;
+  log: LogFilters;
+  mail: MailFilters;
+  exception: ExceptionFilters;
+  http: RequestFilters;  
+  schedule: ScheduleFilters;
+  notification: NotificationFilters;
+  model: ModelFilters;
+  view: ViewFilters;
+};
+
 // ============================================================================
 // Library Types
 // ============================================================================
@@ -241,7 +256,7 @@ interface ExceptionContent {
 
 // -- Cache (redis, ioredis, node-cache, lru-cache, memjs, level, keyv) --
 type CacheMetadata = { package: CachePackages; command: string; host?: string; port?: number };
-type CacheData = { key?: any; hits?: number; misses?: number; writes?: number };
+type CacheData = { key?: string; hits?: number; misses?: number; writes?: number };
 type CacheContent = BaseLogEntry<CacheMetadata, CacheData>;
 
 // -- Log (winston, pino, bunyan, log4js, signale, loglevel) --

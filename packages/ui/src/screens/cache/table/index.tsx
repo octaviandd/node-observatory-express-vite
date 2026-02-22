@@ -24,14 +24,12 @@ export default function CacheIndexTable() {
     index,
     instanceStatusType,
     inputValue,
-    drawer,
     message,
     modelKey,
     setInputValue,
-    setDrawer,
     setInstanceStatusType,
     loadMore,
-  } = useIndexTableData<CacheInstanceResponse, CacheGroupResponse>({
+  } = useIndexTableData({
     key: "cache",
     defaultInstanceStatusType: "all",
   });
@@ -40,11 +38,7 @@ export default function CacheIndexTable() {
   const label = index === "instance" ? "Transaction" : "Key";
 
   return (
-    <TablePageLayout
-      drawer={drawer}
-      setDrawer={setDrawer}
-      type="cache"
-    >
+    <TablePageLayout type="cache">
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
           <TableHeader icon={DatabaseZap} count={count} label={label} />
@@ -70,7 +64,7 @@ export default function CacheIndexTable() {
       </div>
 
       {index === "instance" ? (
-        <InstanceTable data={instanceData as CacheInstanceResponse[]} setDrawer={setDrawer}>
+        <InstanceTable data={instanceData as CacheInstanceResponse[]}>
           <LoadMoreButton message={message} onLoadMore={loadMore} />
         </InstanceTable>
       ) : (

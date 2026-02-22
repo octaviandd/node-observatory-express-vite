@@ -9,17 +9,29 @@ import {
   StatsGrid,
 } from "@/components/ui/index-page";
 import { useQueries } from "@/hooks/useApiTyped";
-import { StoreContext } from "@/store";
-import { useContext } from "react";
+import { useSearchParams } from "react-router";
 
 const QUERY_BAR_DATA = [
-  { dataKey: "completed", stackId: "a", fill: "#f1f5f9" },
-  { dataKey: "failed", stackId: "b", fill: "#ef4444" },
+  { dataKey: "COMPLETED", stackId: "a", fill: document.documentElement.classList.contains("dark")
+    ? "#242427"
+    : "#f1f5f9" },
+  { dataKey: "FAILED", stackId: "b", fill: "#ef4444" },
 ];
 
 export default function QueryIndex() {
-  const { state } = useContext(StoreContext);
-  const { data } = useQueries.useGraph();
+  const [searchParams] = useSearchParams();
+
+  const period = searchParams.get("period") as any;
+  const status = searchParams.get("status") || undefined;
+  const q = searchParams.get("q") || undefined;
+  const key = searchParams.get("key") || undefined;
+
+  const { data } = useQueries.useGraph({
+    period,
+    status,
+    q,
+    key,
+  });
 
   return (
     <IndexPageLayout>
@@ -45,8 +57,6 @@ export default function QueryIndex() {
             average={data.average}
             p95={data.p95}
             durationFormattedData={data.durationFormattedData}
-            period={state.period}
-            currentDate={""}
           />
         </StatsGrid>
       )}

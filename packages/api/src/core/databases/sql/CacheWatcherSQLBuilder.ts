@@ -9,9 +9,9 @@ class CacheWatcherSQL extends BaseBuilder {
     if (!type || type === "all") return "";
     
     const mapping: Record<string, string> = {
-      misses: "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.misses')) > 0)",
-      hits: "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.hits')) > 0)",
-      writes: "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.writes')) > 0)",
+      misses: "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.misses')) > 0)",
+      hits: "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.hits')) > 0)",
+      writes: "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.writes')) > 0)",
     };
     
     return mapping[type] || "";
@@ -26,7 +26,7 @@ class CacheWatcherSQL extends BaseBuilder {
     const periodSql = this.getPeriodSQL(period);
     const querySql = this.getInclusionSQL(query, "stats"); // Uses your base helper
     const statusSql = this.getCacheStatusSQL(cacheType);
-    const keySql = this.getEqualitySQL(key, "key");
+    const keySql = this.getEqualitySQL(key, "data.key");
 
     const whereClause = `WHERE type = 'cache' ${periodSql} ${querySql} ${statusSql} ${keySql}`;
 
@@ -47,14 +47,14 @@ class CacheWatcherSQL extends BaseBuilder {
     const keySql = this.getEqualitySQL(key, "key");
 
     // We exclude 'wasSet' entries for grouping to avoid counting setup events as misses/hits
-    const filterConditions = `WHERE type = 'cache' ${periodSql} ${querySql} ${keySql} AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.wasSet')) IS NULL`;
+    const filterConditions = `WHERE type = 'cache' ${periodSql} ${querySql} ${keySql} AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.wasSet')) IS NULL`;
 
     const columns = [
-      "JSON_UNQUOTE(JSON_EXTRACT(content, '$.key')) as cache_key",
+      "JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.key')) as cache_key",
       "COUNT(*) as total",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.misses')) > 0 THEN 1 ELSE 0 END) as misses",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.hits')) > 0 THEN 1 ELSE 0 END) as hits",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.writes')) > 0 THEN 1 ELSE 0 END) as writes",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.misses')) > 0 THEN 1 ELSE 0 END) as misses",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.hits')) > 0 THEN 1 ELSE 0 END) as hits",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.writes')) > 0 THEN 1 ELSE 0 END) as writes",
       "MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10, 6))) as shortest",
       "MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10, 6))) as longest",
       "AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10, 6))) as average",
@@ -69,7 +69,7 @@ class CacheWatcherSQL extends BaseBuilder {
         GROUP BY cache_key
         ORDER BY total DESC
         LIMIT ${limit} OFFSET ${offset};`,
-      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.key'))) as total FROM observatory_entries ${filterConditions};`
+      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.key'))) as total FROM observatory_entries ${filterConditions};`
     };
   }
 
@@ -86,9 +86,9 @@ class CacheWatcherSQL extends BaseBuilder {
       "CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest",
       "CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest",
       "CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.misses')) > 0 THEN 1 ELSE 0 END) as misses",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.hits')) > 0 THEN 1 ELSE 0 END) as hits",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.writes')) > 0 THEN 1 ELSE 0 END) as writes",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.misses')) > 0 THEN 1 ELSE 0 END) as misses",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.hits')) > 0 THEN 1 ELSE 0 END) as hits",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.writes')) > 0 THEN 1 ELSE 0 END) as writes",
       this.getP95SQL('cache'),
       "NULL as created_at",
       "NULL as content",

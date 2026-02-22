@@ -13,29 +13,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatDate, formatDuration } from "@/utils.js";
-import { memo, ReactNode } from "react";
+import { memo, ReactNode, useContext } from "react";
 import { QueryInstanceResponse } from "@/hooks/useApiTyped";
+import { StoreContext } from "@/store";
 
 type Props = {
   data: QueryInstanceResponse[];
-  drawer: ({
-    isOpen,
-    modelId,
-    requestId,
-    jobId,
-    scheduleId,
-  }: {
-    isOpen: boolean;
-    modelId: string;
-    requestId: string;
-    jobId: string;
-    scheduleId: string;
-  }) => void;
   children: ReactNode;
 };
 
 export const InstanceTable = memo(
-  ({ data, drawer, children }: Props) => {
+  ({ data, children }: Props) => {
+    const { dispatch } = useContext(StoreContext);
     return (
       <div className="rounded-md border">
         <Table>
@@ -91,12 +80,14 @@ export const InstanceTable = memo(
                       variant="outline"
                       size="icon"
                       onClick={() =>
-                        drawer({
-                          isOpen: true,
-                          modelId: query.uuid ?? "",
-                          requestId: query.request_id ?? "",
-                          jobId: query.job_id ?? "",
-                          scheduleId: query.schedule_id ?? "",
+                        dispatch({
+                          type: "openDrawer",
+                          payload: {
+                            modelId: query.uuid ?? "",
+                            requestId: query.request_id ?? "",
+                            jobId: query.job_id ?? "",
+                            scheduleId: query.schedule_id ?? "",
+                          },
                         })
                       }
                     >

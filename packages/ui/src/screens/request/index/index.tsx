@@ -11,9 +11,22 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useRequests } from "@/hooks/useApiTyped";
+import { useSearchParams } from "react-router";
 
 export default function RequestsIndex() {
-  const { data, isLoading } = useRequests.useGraph({});
+  const [searchParams] = useSearchParams();
+
+  const period = searchParams.get("period") as any;
+  const status = searchParams.get("status") || undefined;
+  const q = searchParams.get("q") || undefined;
+  const key = searchParams.get("key") || undefined;
+
+  const { data, isLoading } = useRequests.useGraph({
+    period,
+    status,
+    q,
+    key,
+  });
 
   if (isLoading || !data) return null;
 

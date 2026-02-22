@@ -1,7 +1,8 @@
 /** @format */
 
 import { X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { StoreContext } from "@/store";
 import QueryCard from "@/components/ui/cards/query-card";
 import JobCard from "@/components/ui/cards/job-card";
 import LogCard from "@/components/ui/cards/log-card";
@@ -22,12 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import RequestCard from "@/components/ui/cards/request-card";
 import ModelCard from "@/components/ui/cards/model-card";
 import ExceptionCard from "@/components/ui/cards/exception-card";
-import { components } from "@/types/api";
-import { useApiMutation } from "@/hooks/useApi";
-import type { ResourceKey } from "@/hooks/useApiTyped";
-import { DrawerState } from "@/hooks/useIndexTableData";
-
-type ViewDataResponse = components["schemas"]["ViewDataResponse"];
+import { useResourceHooks, type ResourceKey } from "@/hooks/useApiTyped";
 
 type RelatedRequestBody = {
   requestId?: string;
@@ -36,29 +32,23 @@ type RelatedRequestBody = {
 };
 
 type Props = {
-  drawer: DrawerState;
-  setDrawer: (data: DrawerState) => void;
   type: ResourceKey;
 };
 
-export default function Drawer({ drawer, setDrawer, type }: Props) {
+export default function Drawer({ type }: Props) {
+  const { state, dispatch } = useContext(StoreContext);
+  const { drawer } = state;
   const { isOpen, modelId, requestId, jobId, scheduleId } = drawer;
 
-  const closeDrawer = () =>
-    setDrawer({
-      isOpen: false,
-      modelId: "",
-      requestId: "",
-      jobId: "",
-      scheduleId: "",
-    });
+  const closeDrawer = () => {
+    dispatch({ type: "closeDrawer" });
+  };
 
-  const { mutateAsync: fetchRelated } = useApiMutation<ViewDataResponse, RelatedRequestBody>(
-    `/api/${type}/${modelId}/related`,
-    "POST",
-  );
+  const resourceHooks = useResourceHooks(type);
 
-  const [relatedData, setRelatedData] = useState<ViewDataResponse>({});
+ const { mutateAsync: fetchRelated } = resourceHooks.useRelated(encodeURIComponent(modelId));
+
+  const [relatedData, setRelatedData] = useState<any>({});
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -68,8 +58,10 @@ export default function Drawer({ drawer, setDrawer, type }: Props) {
     const load = async () => {
       setIsLoading(true);
       try {
-        const data = await fetchRelated({ requestId, jobId, scheduleId });
+        const data = await fetchRelated({ requestId, jobId, scheduleId } as any);
         if (!cancelled) setRelatedData(data);
+      } catch (error) {
+        console.error('Error fetching related:', error);
       } finally {
         if (!cancelled) setIsLoading(false);
       }
@@ -77,9 +69,9 @@ export default function Drawer({ drawer, setDrawer, type }: Props) {
 
     load();
     return () => { cancelled = true; };
-  }, [isOpen, modelId]);
+  }, [isOpen, modelId, requestId, jobId, scheduleId, fetchRelated]);
 
-  // Derived arrays directly from the typed response — no intermediate state needed
+  // Derived arrays directly from the typed response
   const logs = relatedData.log ?? [];
   const queries = relatedData.query ?? [];
   const notifications = relatedData.notification ?? [];
@@ -143,7 +135,7 @@ export default function Drawer({ drawer, setDrawer, type }: Props) {
         <Separator className="my-4" />
 
         {isLoading ? (
-          "Loading.."
+          <div className="p-6 text-muted-foreground">Loading...</div>
         ) : (
           <ScrollArea className="h-[calc(100vh-5rem)]">
             {hasNoData && (

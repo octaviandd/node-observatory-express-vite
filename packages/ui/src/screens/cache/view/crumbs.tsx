@@ -27,26 +27,26 @@ export const CacheCrumbs = React.memo(
             </BreadcrumbItem>
             <BreadcrumbItem>
               <BreadcrumbLink className="text-muted-foreground">
-                {cache.content.key}
+                {cache.content.data.key}
               </BreadcrumbLink>
             </BreadcrumbItem>
           </Breadcrumb>
           <div className="flex items-center gap-x-4">
             <Badge variant="secondary">
-              {cache.content.package.toUpperCase()}
+              {cache.content.metadata.package.toUpperCase()}
             </Badge>
             <Badge
               variant={
-                cache.content.misses
+                cache.content.data.misses
                   ? "destructive"
-                  : cache.content.writes
+                  : cache.content.data.writes
                     ? "warning"
                     : "secondary"
               }
             >
-              {cache.content.misses
+              {cache.content.data.misses
                 ? "MISS"
-                : cache.content.writes
+                : cache.content.data.writes
                   ? "WRITE"
                   : "HIT"}
             </Badge>

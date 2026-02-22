@@ -9,17 +9,14 @@ import {
   StatsGrid,
 } from "@/components/ui/index-page";
 import { useHttps } from "@/hooks/useApiTyped";
-import { StoreContext } from "@/store";
-import { useContext } from "react";
 
 const HTTP_BAR_DATA = [
-  { dataKey: "200", stackId: "a", fill: "#f1f5f9" },
-  { dataKey: "400", stackId: "b", fill: "#ffc658" },
-  { dataKey: "500", stackId: "c", fill: "#ef4444" },
+  { dataKey: "count_200", name: "2XX", stackId: "a", fill: "#f1f5f9" },
+  { dataKey: "count_400", name: "4XX", stackId: "b", fill: "#ffc658" },
+  { dataKey: "count_500", name: "5XX", stackId: "c", fill: "#ef4444" },
 ];
 
 export default function HttpsIndex() {
-  const { state } = useContext(StoreContext);
   const { data } = useHttps.useGraph();
 
    return (
@@ -47,8 +44,6 @@ export default function HttpsIndex() {
             average={data.average}
             p95={data.p95}
             durationFormattedData={data.durationFormattedData}
-            period={state.period}
-            currentDate={""}
           />
         </StatsGrid>
       )}

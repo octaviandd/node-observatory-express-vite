@@ -1,10 +1,10 @@
 /** @format */
 
-import { useContext, useState, useMemo, useEffect } from "react";
-import { StoreContext } from "@/store";
-import { useParams } from "react-router";
+import { useState, useMemo, useEffect } from "react";
+import { useParams, useSearchParams } from "react-router";
 import { AllGroupResponses, AllInstanceResponses, useResourceHooks, type ResourceKey } from "./useApiTyped";
 import { components } from "@/types/api";
+import { queryClient } from "./useApi";
 
 type IndexType = components["schemas"]["IndexType"];
 
@@ -13,31 +13,53 @@ type Props = {
   defaultInstanceStatusType: string;
 };
 
-export type DrawerState = {
-  isOpen: boolean;
-  modelId: string;
-  requestId: string
-  jobId: string
-  scheduleId: string
-}
-
-export const useIndexTableData = <TInstance extends AllInstanceResponses, TGroup extends AllGroupResponses>(
-  { key, defaultInstanceStatusType }: Props) => {
-  const { state } = useContext(StoreContext);
+export const useIndexTableData =<TInstance extends AllInstanceResponses, TGroup extends AllGroupResponses> ({ key, defaultInstanceStatusType }: Props) => {
   const modelKey = useParams<{ key: string }>().key || "";
   const resourceHooks = useResourceHooks(key);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const urlIndex = searchParams.get("index") as IndexType | null;
+  const urlStatus = searchParams.get("status");
+  const urlQuery = searchParams.get("q");
 
   // UI state
-  const [index, setIndex] = useState<IndexType>(modelKey ? "instance" : "group");
-  const [instanceStatusType, setInstanceStatusType] = useState(defaultInstanceStatusType);
-  const [inputValue, setInputValue] = useState("");
-  const [drawer, setDrawer] = useState<DrawerState>({
-    isOpen: false,
-    modelId: "",
-    requestId: "",
-    jobId: "",
-    scheduleId: "",
-  });
+  const [index, setIndex] = useState<IndexType>(
+    urlIndex || (modelKey ? "instance" : "group")
+  );
+  const [instanceStatusType, setInstanceStatusType] = useState(
+    urlStatus || defaultInstanceStatusType
+  );
+  const [inputValue, setInputValue] = useState(urlQuery || "");
+  
+
+   // Sync state to URL whenever filters change
+  useEffect(() => {
+    const params = new URLSearchParams();
+    
+    if (index !== "group") params.set("index", index);
+    if (modelKey) params.set("key", modelKey);
+    if (instanceStatusType !== defaultInstanceStatusType) {
+      params.set("status", instanceStatusType);
+    }
+
+    console.log(instanceStatusType)
+    if (inputValue) params.set("q", inputValue);
+
+    // Only update URL if params actually changed
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  }, [index, modelKey, instanceStatusType, inputValue, defaultInstanceStatusType]);
+
+  // Reset state when modelKey changes
+  useEffect(() => {
+    setIndex(modelKey ? "instance" : "group");
+    setInstanceStatusType(defaultInstanceStatusType);
+    setInputValue("");
+    
+    // Invalidate queries to trigger refetch
+    queryClient.invalidateQueries({ queryKey: [key, "table"] });
+  }, [modelKey, key, defaultInstanceStatusType]);
 
   const instanceQuery = resourceHooks.useTable<"instance">(
     {
@@ -94,7 +116,6 @@ export const useIndexTableData = <TInstance extends AllInstanceResponses, TGroup
     index,
     instanceStatusType,
     inputValue,
-    drawer,
     message,
     modelKey,
     loading: activeQuery.isLoading,
@@ -102,7 +123,6 @@ export const useIndexTableData = <TInstance extends AllInstanceResponses, TGroup
     hasNextPage: activeQuery.hasNextPage,
     loadMore: activeQuery.fetchNextPage,
     setInputValue,
-    setDrawer,
     setInstanceStatusType,
     setIndex,
   };

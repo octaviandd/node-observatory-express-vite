@@ -46,9 +46,15 @@ export class ExpressAdapter {
     routes.forEach((route) =>
       (Array.isArray(route.method) ? route.method : [route.method]).forEach(
         (method: HTTPMethod) => {
+          console.log(`📝 Registering: ${method.toUpperCase()} ${route.route}`);
           router[method](
             route.route,
             wrapAsync(async (req: Request, res: Response) => {
+              console.log(`✅ REQUEST HIT: ${method.toUpperCase()} ${req.path}`);
+              console.log('Route pattern:', route.route);
+              console.log('Body:', req.body);
+              console.log('Params:', req.params);
+
               const response = await route.handler({
                 requestData: this.requestData,
                 query: req.query,

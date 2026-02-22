@@ -13,29 +13,18 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate, formatDuration } from "@/utils.js";
-import { ReactNode, memo } from "react";
+import { ReactNode, memo, useContext } from "react";
 import { JobInstanceResponse } from "@/hooks/useApiTyped";
+import { StoreContext } from "@/store";
 
 type Props = {
   data: JobInstanceResponse[];
   children: ReactNode;
-  drawer: ({
-    isOpen,
-    modelId,
-    requestId,
-    jobId,
-    scheduleId,
-  }: {
-    isOpen: boolean;
-    modelId: string;
-    requestId: string;
-    jobId: string;
-    scheduleId: string;
-  }) => void;
 };
 
 export const InstanceTable = memo(
-  ({ data, children, drawer }: Props) => {
+  ({ data, children }: Props) => {
+    const { dispatch } = useContext(StoreContext);
     const getStatusVariant = (status: string) => {
       if (status === "completed") return "secondary";
       if (status === "released") return "warning";
@@ -107,12 +96,14 @@ export const InstanceTable = memo(
                       variant="outline"
                       size="icon"
                       onClick={() =>
-                        drawer({
-                          isOpen: true,
-                          modelId: job.uuid ?? "",
-                          requestId: job.request_id ?? "",
-                          jobId: job.job_id ?? "",
-                          scheduleId: job.schedule_id ?? "",
+                        dispatch({
+                          type: "openDrawer",
+                          payload: {
+                            modelId: job.uuid ?? "",
+                            requestId: job.request_id ?? "",
+                            jobId: job.job_id ?? "",
+                            scheduleId: job.schedule_id ?? "",
+                          },
                         })
                       }
                     >

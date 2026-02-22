@@ -24,9 +24,7 @@ export default function JobsIndexTable() {
     index,
     instanceStatusType,
     inputValue,
-    drawer,
     message,
-    setDrawer,
     setInstanceStatusType,
     setInputValue,
     loadMore,
@@ -39,11 +37,7 @@ export default function JobsIndexTable() {
   const label = index === "group" ? "Queue" : "ATTEMPT";
 
   return (
-    <TablePageLayout
-      drawer={drawer}
-      setDrawer={setDrawer}
-      type="jobs"
-    >
+    <TablePageLayout type="jobs">
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
           <TableHeader icon={Layers} count={count} label={label} />
@@ -70,7 +64,7 @@ export default function JobsIndexTable() {
         </div>
       </div>
       {index === "instance" ? (
-        <InstanceTable data={instanceData as JobInstanceResponse[]} drawer={setDrawer}>
+        <InstanceTable data={instanceData as JobInstanceResponse[]}>
           <LoadMoreButton message={message} onLoadMore={loadMore} />
         </InstanceTable>
       ) : (

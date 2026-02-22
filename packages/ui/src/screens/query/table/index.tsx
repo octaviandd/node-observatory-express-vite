@@ -24,10 +24,8 @@ export default function QueryIndexTable() {
     index,
     instanceStatusType,
     inputValue,
-    setDrawer,
     modelKey,
     message,
-    drawer,
     setInstanceStatusType,
     setInputValue,
     loadMore,
@@ -42,11 +40,7 @@ export default function QueryIndexTable() {
   const pluralize = index !== "instance";
 
   return (
-    <TablePageLayout
-      setDrawer={setDrawer}
-      drawer={drawer}
-      type="queries"
-    >
+    <TablePageLayout type="queries">
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
           <TableHeader
@@ -78,7 +72,7 @@ export default function QueryIndexTable() {
         </div>
       </div>
       {index === "instance" ? (
-        <InstanceTable data={instanceData as QueryInstanceResponse[]} drawer={setDrawer}>
+        <InstanceTable data={instanceData as QueryInstanceResponse[]}>
           <LoadMoreButton message={message} onLoadMore={loadMore} />
         </InstanceTable>
       ) : (

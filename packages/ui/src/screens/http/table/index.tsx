@@ -24,10 +24,8 @@ export default function HttpIndexTable() {
     index,
     instanceStatusType,
     inputValue,
-    drawer,
     modelKey,
     message,
-    setDrawer,
     setInstanceStatusType,
     setInputValue,
     loadMore,
@@ -40,11 +38,7 @@ export default function HttpIndexTable() {
   const label = index === "instance" ? "Request" : "Route";
 
   return (
-    <TablePageLayout
-      drawer={drawer}
-      setDrawer={setDrawer}
-      type="https"
-    >
+    <TablePageLayout type="https">
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
           <TableHeader icon={Globe} count={count} label={label} />
@@ -66,7 +60,7 @@ export default function HttpIndexTable() {
       </div>
 
       {index === "instance" ? (
-        <InstanceTable data={instanceData as HttpClientInstanceResponse[]} setDrawer={setDrawer}>
+        <InstanceTable data={instanceData as HttpClientInstanceResponse[]}>
           <LoadMoreButton message={message} onLoadMore={loadMore} />
         </InstanceTable>
       ) : (

@@ -9,8 +9,6 @@ import {
   StatsGrid,
 } from "@/components/ui/index-page";
 import { useCaches } from "@/hooks/useApiTyped";
-import { StoreContext } from "@/store";
-import { useContext } from "react";
 
 const CACHE_BAR_DATA = [
   { dataKey: "hits", stackId: "a", fill: "#f1f5f9" },
@@ -19,41 +17,36 @@ const CACHE_BAR_DATA = [
 ];
 
 export default function CacheIndex() {
-  const { state } = useContext(StoreContext);
   const { isLoading, data } = useCaches.useGraph({});
 
    if (isLoading || !data) return null;
 
   return (
     <IndexPageLayout>
-      {data && (
-        <StatsGrid columns={2}>
-          <StatsCard
-            title="TRANSACTIONS"
-            count={data.count}
-            badges={[
-              { label: "HITS", value: data.indexCountOne, variant: "secondary" },
-              { label: "WRITES", value: data.indexCountTwo, variant: "warning" },
-              { label: "MISSES", value: data.indexCountThree, variant: "error" },
-            ]}
-            graph={
-              <CountGraph
-                data={data.countFormattedData}
-                barData={CACHE_BAR_DATA}
-              />
-            }
-          />
-          <DurationCard
-            shortest={data.shortest}
-            longest={data.longest}
-            average={data.average}
-            p95={data.p95}
-            durationFormattedData={data.durationFormattedData}
-            period={state.period}
-            currentDate={""}
-          />
-        </StatsGrid>
-      )}
+      <StatsGrid columns={2}>
+        <StatsCard
+          title="TRANSACTIONS"
+          count={data.count}
+          badges={[
+            { label: "HITS", value: data.indexCountOne, variant: "secondary" },
+            { label: "WRITES", value: data.indexCountTwo, variant: "warning" },
+            { label: "MISSES", value: data.indexCountThree, variant: "error" },
+          ]}
+          graph={
+            <CountGraph
+              data={data.countFormattedData}
+              barData={CACHE_BAR_DATA}
+            />
+          }
+        />
+        <DurationCard
+          shortest={data.shortest}
+          longest={data.longest}
+          average={data.average}
+          p95={data.p95}
+          durationFormattedData={data.durationFormattedData}
+        />
+      </StatsGrid>
       <CacheIndexTable />
     </IndexPageLayout>
   );

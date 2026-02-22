@@ -10,12 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import ViewsIndexTable from "../table/index";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
 import { DurationGraph } from "@/components/ui/graphs/duration-graph";
-import { StoreContext } from "@/store";
-import { useContext } from "react";
 import { useViews } from "@/hooks/useApiTyped";
 
 export default function ViewsIndex() {
-  const { state } = useContext(StoreContext);
   const { data } = useViews.useGraph();
 
   return (

@@ -135,7 +135,6 @@ class Base {
             INDEX idx_created_at (created_at)
           );
         `);
-        console.log("observatory_entries table created via mysql2/promise");
       }
     } catch (error: unknown) {
       throw new MigrationError("Failed to up base tables", {
@@ -151,7 +150,6 @@ class Base {
   async down(connection: Connection): Promise<void> {
     try {
       await connection.query("DROP TABLE IF EXISTS observatory_entries;");
-      console.log("observatory_entries table droped via mysql2/promise");
     } catch (error) {
       throw new MigrationError("Failed to down base tables", {
         cause: error as Error,
@@ -482,16 +480,16 @@ class Base {
    * - builds duration series when applicable (processedDurationGraphData)
    * - maps watcher-specific aggregate metrics to indexed UI fields
    */
-  async getGraphData(
-    filters: WatcherFilters,
-    watcherType: WatcherType,
+  async getGraphData<T extends WatcherType>(
+    filters: FiltersByWatcherType[T],
+    watcherType: T,
     keys: string[],
   ) {
     const { period } = filters;
 
     try {
       // Delegate SQL generation to the watcher-specific builder
-      const sql = this.builders[watcherType].getIndexGraphDataSQL(filters);
+      const sql = this.builders[watcherType].getIndexGraphDataSQL(filters as any);
 
       const [results] = (await this.storeConnection.query(
         sql,

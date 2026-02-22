@@ -11,6 +11,7 @@ import {
   StatusFilter,
   LoadMoreButton,
 } from "@/components/ui/table-page";
+import { ExceptionGroupResponse, ExceptionInstanceResponse } from "@/hooks/useApiTyped";
 
 const STATUS_OPTIONS = ["all", "unhandled", "uncaught"];
 
@@ -23,10 +24,8 @@ export default function ExceptionsIndexTable() {
     index,
     instanceStatusType,
     inputValue,
-    drawer,
     modelKey,
     message,
-    setDrawer,
     setInstanceStatusType,
     setInputValue,
     loadMore,
@@ -40,11 +39,7 @@ export default function ExceptionsIndexTable() {
   const label = index === "instance" ? "Exception" : "Type";
 
   return (
-    <TablePageLayout
-      drawer={drawer}
-      setDrawer={setDrawer}
-      type="exceptions"
-    >
+    <TablePageLayout type="exceptions">
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
           <TableHeader icon={Bug} count={count} label={label} />
@@ -68,12 +63,15 @@ export default function ExceptionsIndexTable() {
           />
         )}
       </div>
-      {/* <Table
-        data={index === "instance" ? instanceData : groupData}
-        setDrawer={setDrawer}
-      >
-        <LoadMoreButton message={message} onLoadMore={loadMore} />
-      </Table> */}
+        {index === "instance" ? (
+        <InstanceTable data={instanceData as ExceptionInstanceResponse[]}>
+          <LoadMoreButton message={message} onLoadMore={loadMore} />
+        </InstanceTable>
+      ) : (
+        <GroupTable data={groupData as ExceptionGroupResponse[]}>
+          <LoadMoreButton message={message} onLoadMore={loadMore} />
+        </GroupTable>
+      )}
     </TablePageLayout>
   );
 }

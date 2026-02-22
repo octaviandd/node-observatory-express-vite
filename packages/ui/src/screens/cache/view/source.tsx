@@ -49,13 +49,15 @@ export default function Source({
                   ? "Job ID"
                   : "Schedule ID"}
             </div>
-            {/* <div className="col-span-9">
+            <div className="col-span-9">
+                 <div className="col-span-9">
               {source.type === "request"
-                ? source.content.
+                ? (source.content as any).data.route
                 : source.type === "job"
-                  ? (source.content).jobId
-                  : (source.content).scheduleId}
-            </div> */}
+                  ? (source.content as any).data.jobId
+                  : (source.content as any).metadata.scheduleId}
+            </div>
+            </div>
           </div>
 
           <div className="grid items-center grid-cols-12">
@@ -68,7 +70,7 @@ export default function Source({
               <div className="col-span-3 text-muted-foreground">Method</div>
               <div className="col-span-9">
                 <Badge variant="outline">
-                  {/* {(source.content).method.toUpperCase()} */}
+                  {(source.content as any).method.toUpperCase()}
                 </Badge>
               </div>
             </div>

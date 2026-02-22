@@ -13,29 +13,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/utils.js";
-import { memo, ReactNode } from "react";
+import { memo, ReactNode, useContext } from "react";
 import { LogInstanceResponse } from "@/hooks/useApiTyped";
+import { StoreContext } from "@/store";
 
 type Props = {
   data: LogInstanceResponse[];
-  drawer: ({
-    isOpen,
-    modelId,
-    requestId,
-    jobId,
-    scheduleId,
-  }: {
-    isOpen: boolean;
-    modelId: string;
-    requestId: string;
-    jobId: string;
-    scheduleId: string;
-  }) => void;
   children: ReactNode;
 };
 
 export const InstanceTable = memo(
-  ({ data, drawer, children }: Props) => {
+  ({ data, children }: Props) => {
+    const { dispatch } = useContext(StoreContext);
     const LOG_LEVELS = [
       { dataKey: "info", variant: "secondary" },
       { dataKey: "warn", variant: "warning" },
@@ -85,12 +74,14 @@ export const InstanceTable = memo(
                       variant="outline"
                       size="icon"
                       onClick={() =>
-                        drawer({
-                          isOpen: true,
-                          modelId: log.uuid ?? "",
-                          requestId: log.request_id ?? "",
-                          jobId: log.job_id ?? "",
-                          scheduleId: log.schedule_id ?? "",
+                        dispatch({
+                          type: "openDrawer",
+                          payload: {
+                            modelId: log.uuid ?? "",
+                            requestId: log.request_id ?? "",
+                            jobId: log.job_id ?? "",
+                            scheduleId: log.schedule_id ?? "",
+                          },
                         })
                       }
                     >

@@ -13,29 +13,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/utils.js";
-import { memo, ReactNode } from "react";
+import { memo, ReactNode, useContext } from "react";
 import { CacheInstanceResponse } from "@/hooks/useApiTyped";
+import { StoreContext } from "@/store";
 
 type Props = {
   data: CacheInstanceResponse[];
-  setDrawer: ({
-    isOpen,
-    modelId,
-    requestId,
-    jobId,
-    scheduleId,
-  }: {
-    isOpen: boolean;
-    modelId: string;
-    requestId: string;
-    jobId: string;
-    scheduleId: string;
-  }) => void;
   children: ReactNode;
 };
 
 export const InstanceTable = memo((props: Props) => {
-  const { data, setDrawer, children } = props;
+  const { data, children } = props;
+  const { dispatch } = useContext(StoreContext);
 
   const getStatusVariant = (hits?: number, writes?: number, misses?: number) => {
     if (hits && hits > 0) {
@@ -117,12 +106,14 @@ export const InstanceTable = memo((props: Props) => {
                     variant="outline"
                     size="icon"
                     onClick={() =>
-                      setDrawer({
-                        isOpen: true,
-                        modelId: cache.uuid ?? "",
-                        requestId: cache.request_id ?? "",
-                        jobId: cache.job_id ?? "",
-                        scheduleId: cache.schedule_id ?? "",
+                      dispatch({
+                        type: "openDrawer",
+                        payload: {
+                          modelId: cache.uuid ?? "",
+                          requestId: cache.request_id ?? "",
+                          jobId: cache.job_id ?? "",
+                          scheduleId: cache.schedule_id ?? "",
+                        },
                       })
                     }
                   >

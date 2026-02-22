@@ -19,10 +19,8 @@ export default function RequestIndexTable() {
     index,
     instanceStatusType,
     inputValue,
-    drawer,
     modelKey,
     message,
-    setDrawer,
     setInstanceStatusType,
     setInputValue,
     loadMore,
@@ -53,11 +51,7 @@ export default function RequestIndexTable() {
   );
 
   return (
-    <TablePageLayout
-      drawer={drawer}
-      setDrawer={setDrawer}
-      type="requests"
-    >
+    <TablePageLayout type="requests">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <ArrowUpDown className="h-5 w-5 text-muted-foreground" />
@@ -88,7 +82,7 @@ export default function RequestIndexTable() {
         />
       </div>
       {index === "instance" ? (
-        <InstanceTable data={instanceData as RequestInstanceResponse[]} setDrawer={setDrawer}>
+        <InstanceTable data={instanceData as RequestInstanceResponse[]}>
           {loadMoreButton}
         </InstanceTable>
       ) : (

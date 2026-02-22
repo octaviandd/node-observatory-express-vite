@@ -8,8 +8,6 @@ import {
   StatsGrid,
 } from "@/components/ui/index-page";
 import { useExceptions } from "@/hooks/useApiTyped";
-import { StoreContext } from "@/store";
-import { useContext } from "react";
 
 const EXCEPTION_BAR_DATA = [
   { dataKey: "unhandledRejection", stackId: "a", fill: "#f1f5f9" },
@@ -17,7 +15,6 @@ const EXCEPTION_BAR_DATA = [
 ];
 
 export default function ExceptionsIndex() {
-  const { state } = useContext(StoreContext);
   const { data } = useExceptions.useGraph({});
 
   return (

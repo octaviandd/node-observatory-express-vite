@@ -24,10 +24,8 @@ export default function MailsIndexTable() {
     index,
     instanceStatusType,
     inputValue,
-    setDrawer,
     modelKey,
     message,
-    drawer,
     setInstanceStatusType,
     setInputValue,
     loadMore,
@@ -40,11 +38,7 @@ export default function MailsIndexTable() {
   const label = index === "instance" ? "Mail" : "Receiver";
 
   return (
-    <TablePageLayout
-      setDrawer={setDrawer}
-      drawer={drawer}
-      type="mails"
-    >
+    <TablePageLayout type="mails">
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
           <TableHeader icon={Mail} count={count} label={label} />
@@ -69,7 +63,7 @@ export default function MailsIndexTable() {
         )}
       </div>
       {index === "instance" ? (
-        <InstanceTable data={instanceData as MailInstanceResponse[]} drawer={setDrawer}>
+        <InstanceTable data={instanceData as MailInstanceResponse[]}>
           <LoadMoreButton message={message} onLoadMore={loadMore} />
         </InstanceTable>
       ) : (

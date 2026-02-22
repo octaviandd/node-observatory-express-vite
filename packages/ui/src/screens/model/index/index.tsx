@@ -9,8 +9,6 @@ import {
   StatsGrid,
 } from "@/components/ui/index-page";
 import { useModels } from "@/hooks/useApiTyped";
-import { StoreContext } from "@/store";
-import { useContext } from "react";
 
 const MODEL_BAR_DATA = [
   { dataKey: "completed", stackId: "a", fill: "#f1f5f9" },
@@ -18,7 +16,6 @@ const MODEL_BAR_DATA = [
 ];
 
 export default function ModelIndex() {
-  const { state } = useContext(StoreContext);
   const { data } = useModels.useGraph();
 
   return (
@@ -45,8 +42,6 @@ export default function ModelIndex() {
             average={data.average}
             p95={data.p95}
             durationFormattedData={data.durationFormattedData}
-            period={state.period}
-            currentDate={""}
           />
         </StatsGrid>
       )}

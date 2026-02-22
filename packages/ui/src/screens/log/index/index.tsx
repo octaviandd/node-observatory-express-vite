@@ -8,8 +8,6 @@ import {
   StatsGrid,
 } from "@/components/ui/index-page";
 import { useLogs } from "@/hooks/useApiTyped";
-import { StoreContext } from "@/store";
-import { useContext } from "react";
 
 const LOG_LEVELS = [
   { dataKey: "info", variant: "secondary", fill: "#F3F7FA" },
@@ -22,7 +20,6 @@ const LOG_LEVELS = [
 ] as const;
 
 export default function LogsIndex() {
-  const { state } = useContext(StoreContext);
   const { data } = useLogs.useGraph();
 
   return (

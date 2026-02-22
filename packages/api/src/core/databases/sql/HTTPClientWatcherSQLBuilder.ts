@@ -83,16 +83,16 @@ class HTTPClientWatcherSQL extends BaseBuilder {
   public getIndexGraphDataSQL(filters: any) {
     const { period, key } = filters;
     const periodSql = this.getPeriodSQL(period);
-    const keySql = key ? this.getInclusionSQL(key, "origin") : "";
+    const keySql = key ? this.getInclusionSQL(key, "data.origin") : "";
 
     const aggregateColumns = [
       "COUNT(*) as total",
       "MIN(CAST(JSON_EXTRACT(content, '$.duration') AS DECIMAL)) as shortest",
       "MAX(CAST(JSON_EXTRACT(content, '$.duration') AS DECIMAL)) as longest",
       "AVG(CAST(JSON_EXTRACT(content, '$.duration') AS DECIMAL)) as average",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) LIKE '2%' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) LIKE '3%' THEN 1 ELSE 0 END) as count_200",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) LIKE '4%' THEN 1 ELSE 0 END) as count_400",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) LIKE '5%' THEN 1 ELSE 0 END) as count_500",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.statusCode')) LIKE '2%' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.statusCode')) LIKE '3%' THEN 1 ELSE 0 END) as count_200",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.statusCode')) LIKE '4%' THEN 1 ELSE 0 END) as count_400",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.statusCode')) LIKE '5%' THEN 1 ELSE 0 END) as count_500",
       this.getP95SQL("http"),
       "NULL as created_at",
       "NULL as content",
@@ -115,7 +115,7 @@ class HTTPClientWatcherSQL extends BaseBuilder {
 
     const commonFilter = `
       WHERE type = 'http' 
-      AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.statusCode')) != '0'
+      AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.statusCode')) != '0'
       ${periodSql} ${keySql}
     `;
 

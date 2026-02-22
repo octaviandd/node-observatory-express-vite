@@ -24,8 +24,6 @@ export default function ScheduledIndexTable() {
     instanceStatusType,
     modelKey,
     message,
-    drawer,
-    setDrawer,
     setInstanceStatusType,
     loadMore,
   } = useIndexTableData<ScheduleInstanceResponse, ScheduleGroupResponse>({
@@ -37,11 +35,7 @@ export default function ScheduledIndexTable() {
   const label = index === "instance" ? "Attempt" : "Schedule";
 
   return (
-    <TablePageLayout
-      setDrawer={setDrawer}
-      drawer={drawer}
-      type="schedules"
-    >
+    <TablePageLayout type="schedules">
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
           <TableHeader icon={CalendarCheck} count={count} label={label} />
@@ -55,7 +49,7 @@ export default function ScheduledIndexTable() {
         )}
       </div>
       {index === "instance" ? (
-        <InstanceTable data={instanceData as ScheduleInstanceResponse[]} drawer={setDrawer}>
+        <InstanceTable data={instanceData as ScheduleInstanceResponse[]}>
           <LoadMoreButton message={message} onLoadMore={loadMore} />
         </InstanceTable>
       ) : (

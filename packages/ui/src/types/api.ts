@@ -2599,7 +2599,7 @@ export interface components {
         RequestInstanceResponse: {
             content: {
                 /** @enum {string} */
-                status?: "completed" | "failed";
+                status?: "completed" | "failed" | "released";
                 duration?: number;
                 metadata: {
                     /** @enum {string} */
@@ -2664,7 +2664,7 @@ export interface components {
         CacheInstanceResponse: {
             content: {
                 /** @enum {string} */
-                status?: "completed" | "failed";
+                status?: "completed" | "failed" | "released";
                 duration?: number;
                 metadata: {
                     /** @enum {string} */
@@ -2676,7 +2676,7 @@ export interface components {
                     package: string;
                 };
                 data: {
-                    key?: unknown;
+                    key?: string;
                     hits?: number;
                     misses?: number;
                     writes?: number;
@@ -2705,7 +2705,7 @@ export interface components {
         JobInstanceResponse: {
             content: {
                 /** @enum {string} */
-                status?: "completed" | "failed";
+                status?: "completed" | "failed" | "released";
                 duration?: number;
                 metadata: {
                     /** @enum {string} */
@@ -2747,7 +2747,7 @@ export interface components {
         QueryInstanceResponse: {
             content: {
                 /** @enum {string} */
-                status?: "completed" | "failed";
+                status?: "completed" | "failed" | "released";
                 duration?: number;
                 metadata: {
                     /** @enum {string} */
@@ -2792,7 +2792,7 @@ export interface components {
         HttpClientInstanceResponse: {
             content: {
                 /** @enum {string} */
-                status?: "completed" | "failed";
+                status?: "completed" | "failed" | "released";
                 duration?: number;
                 metadata: {
                     package: string;
@@ -2843,7 +2843,7 @@ export interface components {
         ScheduleInstanceResponse: {
             content: {
                 /** @enum {string} */
-                status?: "completed" | "failed";
+                status?: "completed" | "failed" | "released";
                 duration?: number;
                 metadata: {
                     /** @enum {string} */
@@ -2885,7 +2885,7 @@ export interface components {
         MailInstanceResponse: {
             content: {
                 /** @enum {string} */
-                status?: "completed" | "failed";
+                status?: "completed" | "failed" | "released";
                 duration?: number;
                 metadata: {
                     /** @enum {string} */
@@ -2928,7 +2928,7 @@ export interface components {
         LogInstanceResponse: {
             content: {
                 /** @enum {string} */
-                status?: "completed" | "failed";
+                status?: "completed" | "failed" | "released";
                 duration?: number;
                 metadata: {
                     /** @enum {string} */
@@ -2990,7 +2990,7 @@ export interface components {
         ModelInstanceResponse: {
             content: {
                 /** @enum {string} */
-                status?: "completed" | "failed";
+                status?: "completed" | "failed" | "released";
                 duration?: number;
                 metadata: {
                     /** @enum {string} */
@@ -3025,7 +3025,7 @@ export interface components {
         ViewInstanceResponse: {
             content: {
                 /** @enum {string} */
-                status?: "completed" | "failed";
+                status?: "completed" | "failed" | "released";
                 duration?: number;
                 metadata: {
                     package: string;
@@ -3066,7 +3066,7 @@ export interface components {
         NotificationInstanceResponse: {
             content: {
                 /** @enum {string} */
-                status?: "completed" | "failed";
+                status?: "completed" | "failed" | "released";
                 duration?: number;
                 metadata: ({
                     /** @constant */
@@ -3262,7 +3262,7 @@ export interface components {
             view?: {
                 content: {
                     /** @enum {string} */
-                    status?: "completed" | "failed";
+                    status?: "completed" | "failed" | "released";
                     duration?: number;
                     metadata: {
                         package: string;
@@ -3303,7 +3303,7 @@ export interface components {
             log?: {
                 content: {
                     /** @enum {string} */
-                    status?: "completed" | "failed";
+                    status?: "completed" | "failed" | "released";
                     duration?: number;
                     metadata: {
                         /** @enum {string} */
@@ -3340,7 +3340,7 @@ export interface components {
             request?: {
                 content: {
                     /** @enum {string} */
-                    status?: "completed" | "failed";
+                    status?: "completed" | "failed" | "released";
                     duration?: number;
                     metadata: {
                         /** @enum {string} */
@@ -3405,7 +3405,7 @@ export interface components {
             cache?: {
                 content: {
                     /** @enum {string} */
-                    status?: "completed" | "failed";
+                    status?: "completed" | "failed" | "released";
                     duration?: number;
                     metadata: {
                         /** @enum {string} */
@@ -3417,7 +3417,7 @@ export interface components {
                         package: string;
                     };
                     data: {
-                        key?: unknown;
+                        key?: string;
                         hits?: number;
                         misses?: number;
                         writes?: number;
@@ -3446,7 +3446,7 @@ export interface components {
             mail?: {
                 content: {
                     /** @enum {string} */
-                    status?: "completed" | "failed";
+                    status?: "completed" | "failed" | "released";
                     duration?: number;
                     metadata: {
                         /** @enum {string} */
@@ -3489,7 +3489,7 @@ export interface components {
             http?: {
                 content: {
                     /** @enum {string} */
-                    status?: "completed" | "failed";
+                    status?: "completed" | "failed" | "released";
                     duration?: number;
                     metadata: {
                         package: string;
@@ -3540,7 +3540,7 @@ export interface components {
             notification?: {
                 content: {
                     /** @enum {string} */
-                    status?: "completed" | "failed";
+                    status?: "completed" | "failed" | "released";
                     duration?: number;
                     metadata: ({
                         /** @constant */
@@ -3589,7 +3589,7 @@ export interface components {
             schedule?: {
                 content: {
                     /** @enum {string} */
-                    status?: "completed" | "failed";
+                    status?: "completed" | "failed" | "released";
                     duration?: number;
                     metadata: {
                         /** @enum {string} */
@@ -3631,7 +3631,7 @@ export interface components {
             model?: {
                 content: {
                     /** @enum {string} */
-                    status?: "completed" | "failed";
+                    status?: "completed" | "failed" | "released";
                     duration?: number;
                     metadata: {
                         /** @enum {string} */
@@ -3691,7 +3691,7 @@ export interface components {
             job?: {
                 content: {
                     /** @enum {string} */
-                    status?: "completed" | "failed";
+                    status?: "completed" | "failed" | "released";
                     duration?: number;
                     metadata: {
                         /** @enum {string} */
@@ -3733,7 +3733,7 @@ export interface components {
             query?: {
                 content: {
                     /** @enum {string} */
-                    status?: "completed" | "failed";
+                    status?: "completed" | "failed" | "released";
                     duration?: number;
                     metadata: {
                         /** @enum {string} */

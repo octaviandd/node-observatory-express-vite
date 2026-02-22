@@ -21,6 +21,7 @@ function generateRoutesForResource(
   path: string,
   watcherKey: string,
 ): AppControllerRoute[] {
+  console.log(`Registering routes for ${path} -> ${watcherKey}`);
   return [
     {
       method: "get",
@@ -51,8 +52,10 @@ function generateRoutesForResource(
       route: `/api/${path}/:id/related`,
       handler: (
         request: ObservatoryBoardRequest,
-      ): Promisify<ControllerHandlerReturnType> =>
-        watchers[watcherKey].metadata(request),
+      ): Promisify<ControllerHandlerReturnType> => {
+        console.log('hit')
+        return watchers[watcherKey].metadata(request)
+      }
     },
     {
       method: "get",

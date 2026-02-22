@@ -1,7 +1,7 @@
 /** @format */
 
 import { ExternalLink, Link2, Cuboid } from "lucide-react";
-import { memo, ReactNode } from "react";
+import { memo, ReactNode, useContext } from "react";
 import { Link } from "react-router";
 import {
   Table,
@@ -15,27 +15,16 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatDate, formatDuration } from "@/utils.js";
 import { ModelInstanceResponse } from "@/hooks/useApiTyped";
+import { StoreContext } from "@/store";
 
 type Props = {
   data: ModelInstanceResponse[];
   children: ReactNode;
-  drawer: ({
-    isOpen,
-    modelId,
-    requestId,
-    jobId,
-    scheduleId,
-  }: {
-    isOpen: boolean;
-    modelId: string;
-    requestId: string;
-    jobId: string;
-    scheduleId: string;
-  }) => void;
 };
 
 export const InstanceTable = memo(
-  ({ data, children, drawer }: Props) => {
+  ({ data, children }: Props) => {
+    const { dispatch } = useContext(StoreContext);
     return (
       <div className="rounded-md border">
         <Table>
@@ -92,16 +81,17 @@ export const InstanceTable = memo(
                     <Button
                       variant="outline"
                       size="icon"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        drawer({
-                          isOpen: true,
-                          modelId: model.uuid ?? "",
-                          requestId: model.request_id ?? "",
-                          jobId: model.job_id ?? "",
-                          scheduleId: model.schedule_id ?? "",
-                        });
-                      }}
+                      onClick={() =>
+                        dispatch({
+                          type: "openDrawer",
+                          payload: {
+                            modelId: model.uuid ?? "",
+                            requestId: model.request_id ?? "",
+                            jobId: model.job_id ?? "",
+                            scheduleId: model.schedule_id ?? "",
+                          },
+                        })
+                      }
                     >
                       <Link2 className="h-4 w-4 text-muted-foreground" />
                     </Button>

@@ -36,16 +36,16 @@ export const CachePreviewInfo = React.memo(
               <div className="col-span-9">
                 <Badge
                   variant={
-                    cache.content.misses
+                    cache.content.data.misses
                       ? "destructive"
-                      : cache.content.writes
+                      : cache.content.data.writes
                         ? "warning"
                         : "secondary"
                   }
                 >
-                  {cache.content.misses
+                  {cache.content.data.misses
                     ? "MISS"
-                    : cache.content.writes
+                    : cache.content.data.writes
                       ? "WRITE"
                       : "HIT"}
                 </Badge>
@@ -57,7 +57,7 @@ export const CachePreviewInfo = React.memo(
               <div className="col-span-9">{formatDuration(Number(cache.content.duration))}</div>
             </div>
 
-            <div className="grid items-center grid-cols-12">
+            {/* <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-muted-foreground">
                 Check Period
               </div>
@@ -73,13 +73,13 @@ export const CachePreviewInfo = React.memo(
                 </div>
                 <div className="col-span-9">{cache.content.stdTTL}</div>
               </div>
-            )}
+            )} */}
 
-            {cache.content.key && (
+            {cache.content.data.key && (
               <div className="grid items-center grid-cols-12">
                 <div className="col-span-3 text-muted-foreground">Key</div>
                 <div className="col-span-9 font-mono text-sm break-all">
-                  {cache.content.key}
+                  {cache.content.data.key}
                 </div>
               </div>
             )}

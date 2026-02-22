@@ -13,9 +13,19 @@ import { createStressRoutes } from "./routes/stress";
 const myCache = new NodeCache();
 
 export const app = express();
-app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
+
+app.use((req, res, next) => {
+  if (!req.path.startsWith('/ui')) {
+    return express.json()(req, res, next);
+  }
+  next();
+});
+
+const expressAdapter = new ExpressAdapter();
+expressAdapter.setBasePath('/ui');
+app.use('/ui', expressAdapter.getRouter());
 
 const logger = winston.createLogger({
   level: 'debug',
@@ -72,9 +82,6 @@ async function startServer() {
     cache: myCache,
   }));
 
-  const expressAdapter = new ExpressAdapter();
-  expressAdapter.setBasePath('/ui');
-  app.use('/ui', expressAdapter.getRouter());
 
   await createObserver(expressAdapter, {}, "mysql2", mysql2Connection, redisConnection as RedisClientType);
 

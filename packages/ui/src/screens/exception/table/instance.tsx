@@ -10,31 +10,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { memo, ReactNode } from "react";
+import { memo, ReactNode, useContext } from "react";
 import { Link } from "react-router";
 import { formatDate } from "@/utils.js";
 import { ExceptionInstanceResponse } from "@/hooks/useApiTyped";
+import { StoreContext } from "@/store";
 
 type Props = {
   data: ExceptionInstanceResponse[];
-  setDrawer: ({
-    isOpen,
-    modelId,
-    requestId,
-    jobId,
-    scheduleId,
-  }: {
-    isOpen: boolean;
-    modelId: string;
-    requestId: string;
-    jobId: string;
-    scheduleId: string;
-  }) => void;
   children: ReactNode;
 };
 
-export const InstanceTable = memo(
-  ({ data, setDrawer, children }: Props) => {
+export const InstanceTable = memo(({ data, children }: Props) => {
+  const { dispatch } = useContext(StoreContext);
     return (
       <div className="rounded-md border">
         <Table>
@@ -63,12 +51,14 @@ export const InstanceTable = memo(
                       variant="outline"
                       size="icon"
                       onClick={() =>
-                        setDrawer({
-                          isOpen: true,
-                          modelId: exception.uuid ?? "",
-                          requestId: exception.request_id ?? "",
-                          jobId: exception.job_id ?? "",
-                          scheduleId: exception.schedule_id ?? "",
+                        dispatch({
+                          type: "openDrawer",
+                          payload: {
+                            modelId: exception.uuid ?? "",
+                            requestId: exception.request_id ?? "",
+                            jobId: exception.job_id ?? "",
+                            scheduleId: exception.schedule_id ?? "",
+                          },
                         })
                       }
                     >
