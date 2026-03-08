@@ -6,7 +6,7 @@ import { GroupTable } from "./group";
 import { Input } from "@/components/ui/base/input";
 import { Button } from "@/components/ui/base/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/base/toggle-group";
-import { useTableData } from "@/hooks/useTableData";
+import { useTableDataContext } from "@/hooks/useTableData";
 import { TableLayout } from "@/components/ui/layout/table-layout";
 import { RequestGroupResponse, RequestInstanceResponse } from "@/hooks/useApiTyped";
 import { SearchInput } from "@/components/ui/search-input";
@@ -25,10 +25,7 @@ export default function RequestIndexTable() {
     setInstanceStatusType,
     setInputValue,
     loadMore,
-  } = useTableData({
-    key: "requests",
-    defaultInstanceStatusType: "all",
-  });
+  } = useTableDataContext();
 
   const loadMoreButton = (
     <div className="flex justify-center my-2">

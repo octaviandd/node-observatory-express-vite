@@ -4,7 +4,7 @@ import { MessageSquareDot } from "lucide-react";
 import { InstanceTable } from "./instance";
 import { GroupTable } from "./group";
 import { Input } from "@/components/ui/base/input";
-import { useTableData } from "@/hooks/useTableData";
+import { useTableDataContext } from "@/hooks/useTableData";
 import { NotificationInstanceResponse, NotificationGroupResponse } from "@/hooks/useApiTyped";
 import { TableLayout } from "@/components/ui/layout/table-layout";
 import { LoadMoreButton } from "@/components/ui/load-more-button";
@@ -28,10 +28,7 @@ export default function NotificationsIndexTable() {
     setInstanceStatusType,
     setInputValue,
     loadMore,
-  } = useTableData<NotificationInstanceResponse, NotificationGroupResponse>({
-    key: "notifications",
-    defaultInstanceStatusType: "all",
-  });
+  } = useTableDataContext();
 
   const count = index === "group" ? groupDataCount : instanceDataCount;
   const label = index === "group" ? "Channel" : "Notification";

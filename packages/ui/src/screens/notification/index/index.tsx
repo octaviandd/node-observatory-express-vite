@@ -6,9 +6,7 @@ import { IndexLayout } from "@/components/ui/layout/index-layout";
 import { StatsGrid } from "@/components/ui/stats-grid";
 import NotificationsIndexTable from "../table";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
-import { useNotifications } from "@/hooks/useApiTyped";
-import { StoreContext } from "@/store";
-import { useContext } from "react";
+import { useTableData, TableDataContext } from "@/hooks/useTableData";
 
 const NOTIFICATION_BAR_DATA = [
   { dataKey: "completed", stackId: "a", fill: "#f1f5f9" },
@@ -16,37 +14,39 @@ const NOTIFICATION_BAR_DATA = [
 ];
 
 export default function NotificationsIndex() {
-  const { state } = useContext(StoreContext);
-  const { data } = useNotifications.useGraph();
+  const tableData = useTableData({ key: "notifications", defaultInstanceStatusType: "all" });
+  const { graphData } = tableData;
 
   return (
-    <IndexLayout>
-      {data && (
-        <StatsGrid columns={2}>
-          <StatsCard
-            title="NOTIFICATIONS"
-            count={data.count}
-            badges={[
-              { label: "Completed", value: data.indexCountOne, variant: "secondary" },
-              { label: "Failed", value: data.indexCountTwo, variant: "error" },
-            ]}
-            graph={
+    <TableDataContext.Provider value={tableData}>
+      <IndexLayout>
+        {graphData && (
+          <StatsGrid columns={2}>
+            <StatsCard
+              title="NOTIFICATIONS"
+              count={graphData.count}
+              badges={[
+                { label: "Completed", value: graphData.indexCountOne, variant: "secondary" },
+                { label: "Failed", value: graphData.indexCountTwo, variant: "error" },
+              ]}
+              graph={
                 <CountGraph
-                  data={data.countFormattedData}
+                  data={graphData.countFormattedData}
                   barData={NOTIFICATION_BAR_DATA}
                 />
-            }
-          />
-          <DurationCard
-            shortest={data.shortest}
-            longest={data.longest}
-            average={data.average}
-            p95={data.p95}
-            durationFormattedData={data.durationFormattedData}
-           />
-        </StatsGrid>
-      )}
-      <NotificationsIndexTable />
-    </IndexLayout>
+              }
+            />
+            <DurationCard
+              shortest={graphData.shortest}
+              longest={graphData.longest}
+              average={graphData.average}
+              p95={graphData.p95}
+              durationFormattedData={graphData.durationFormattedData}
+            />
+          </StatsGrid>
+        )}
+        <NotificationsIndexTable />
+      </IndexLayout>
+    </TableDataContext.Provider>
   );
 }

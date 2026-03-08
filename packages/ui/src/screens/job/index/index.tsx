@@ -6,7 +6,7 @@ import JobsIndexTable from "../table";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
 import { IndexLayout } from "@/components/ui/layout/index-layout";
 import { StatsGrid } from "@/components/ui/stats-grid";
-import { useJobs } from "@/hooks/useApiTyped";
+import { useTableData, TableDataContext } from "@/hooks/useTableData";
 
 const JOB_BAR_DATA = [
   { dataKey: "completed", stackId: "a", fill: "#f1f5f9" },
@@ -15,37 +15,40 @@ const JOB_BAR_DATA = [
 ];
 
 export default function JobsIndex() {
-  const { data } = useJobs.useGraph();
+  const tableData = useTableData({ key: "jobs", defaultInstanceStatusType: "all" });
+  const { graphData } = tableData;
 
   return (
-    <IndexLayout>
-      {data && (
-        <StatsGrid columns={2}>
-          <StatsCard
-            title="JOB ATTEMPTS"
-            count={data.count}
-            badges={[
-              { label: "COMPLETED", value: data.indexCountOne, variant: "secondary" },
-              { label: "RELEASED", value: data.indexCountTwo, variant: "warning" },
-              { label: "FAILED", value: data.indexCountThree, variant: "error" },
-            ]}
-            graph={
+    <TableDataContext.Provider value={tableData}>
+      <IndexLayout>
+        {graphData && (
+          <StatsGrid columns={2}>
+            <StatsCard
+              title="JOB ATTEMPTS"
+              count={graphData.count}
+              badges={[
+                { label: "COMPLETED", value: graphData.indexCountOne, variant: "secondary" },
+                { label: "RELEASED", value: graphData.indexCountTwo, variant: "warning" },
+                { label: "FAILED", value: graphData.indexCountThree, variant: "error" },
+              ]}
+              graph={
                 <CountGraph
-                  data={data.countFormattedData}
+                  data={graphData.countFormattedData}
                   barData={JOB_BAR_DATA}
                 />
-            }
-          />
-          <DurationCard
-            shortest={data.shortest}
-            longest={data.longest}
-            average={data.average}
-            p95={data.p95}
-            durationFormattedData={data.durationFormattedData}
-          />
-        </StatsGrid>
-      )}
-      <JobsIndexTable />
-    </IndexLayout>
+              }
+            />
+            <DurationCard
+              shortest={graphData.shortest}
+              longest={graphData.longest}
+              average={graphData.average}
+              p95={graphData.p95}
+              durationFormattedData={graphData.durationFormattedData}
+            />
+          </StatsGrid>
+        )}
+        <JobsIndexTable />
+      </IndexLayout>
+    </TableDataContext.Provider>
   );
 }

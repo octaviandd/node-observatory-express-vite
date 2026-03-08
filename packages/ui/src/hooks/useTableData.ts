@@ -1,19 +1,49 @@
 /** @format */
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, createContext, useContext } from "react";
 import { useParams, useSearchParams } from "react-router";
 import { AllGroupResponses, AllInstanceResponses, useResourceHooks, type ResourceKey } from "./useApiTyped";
 import { components } from "@/types/api";
 import { queryClient } from "./useApi";
 
 type IndexType = components["schemas"]["IndexType"];
+type GraphDataResponse = components["schemas"]["GraphDataResponse"];
 
 type Props = {
   key: ResourceKey;
   defaultInstanceStatusType: string;
 };
 
-export const useTableData =<TInstance extends AllInstanceResponses, TGroup extends AllGroupResponses> ({ key, defaultInstanceStatusType }: Props) => {
+export type TableDataResult = {
+  instanceData: AllInstanceResponses[];
+  groupData: AllGroupResponses[];
+  instanceDataCount: string;
+  groupDataCount: string;
+  index: IndexType;
+  instanceStatusType: string;
+  inputValue: string;
+  message: string;
+  modelKey: string;
+  loading: boolean;
+  isFetchingMore: boolean;
+  hasNextPage: boolean;
+  graphData: GraphDataResponse | undefined;
+  graphLoading: boolean;
+  loadMore: () => void;
+  setInputValue: (val: string) => void;
+  setInstanceStatusType: (val: string) => void;
+  setIndex: (val: IndexType) => void;
+};
+
+export const TableDataContext = createContext<TableDataResult | null>(null);
+
+export const useTableDataContext = (): TableDataResult => {
+  const ctx = useContext(TableDataContext);
+  if (!ctx) throw new Error("useTableDataContext must be used within a TableDataProvider");
+  return ctx;
+};
+
+export const useTableData = <TInstance extends AllInstanceResponses, TGroup extends AllGroupResponses>({ key, defaultInstanceStatusType }: Props): TableDataResult => {
   const modelKey = useParams<{ key: string }>().key || "";
   const resourceHooks = useResourceHooks(key);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -80,6 +110,12 @@ export const useTableData =<TInstance extends AllInstanceResponses, TGroup exten
     { enabled: index === "group" },
   );
 
+  const graphQuery = resourceHooks.useGraph({
+    q: inputValue || undefined,
+    key: modelKey || undefined,
+    status: instanceStatusType?.toLowerCase(),
+  });
+
   const instanceData = useMemo(() =>
       //@ts-ignore
       (instanceQuery.data?.pages ?? []).flatMap((page) => page.results),
@@ -117,6 +153,8 @@ export const useTableData =<TInstance extends AllInstanceResponses, TGroup exten
     loading: activeQuery.isLoading,
     isFetchingMore: activeQuery.isFetchingNextPage,
     hasNextPage: activeQuery.hasNextPage,
+    graphData: graphQuery.data,
+    graphLoading: graphQuery.isLoading,
     loadMore: activeQuery.fetchNextPage,
     setInputValue,
     setInstanceStatusType,

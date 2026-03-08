@@ -5,7 +5,7 @@ import LogsIndexTable from "../table";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
 import { IndexLayout } from "@/components/ui/layout/index-layout";
 import { StatsGrid } from "@/components/ui/stats-grid";
-import { useLogs } from "@/hooks/useApiTyped";
+import { useTableData, TableDataContext } from "@/hooks/useTableData";
 
 const LOG_LEVELS = [
   { dataKey: "info", variant: "secondary", fill: "#F3F7FA" },
@@ -18,38 +18,41 @@ const LOG_LEVELS = [
 ] as const;
 
 export default function LogsIndex() {
-  const { data } = useLogs.useGraph();
+  const tableData = useTableData({ key: "logs", defaultInstanceStatusType: "all" });
+  const { graphData } = tableData;
 
   return (
-    <IndexLayout>
-      {data && (
-        <StatsGrid columns={1}>
-          <StatsCard
-            title="LOGS"
-            count={data.count}
-            badges={[
-              { label: "INFO", value: data.indexCountOne, variant: "secondary" },
-              { label: "WARN", value: data.indexCountTwo, variant: "warning" },
-              { label: "ERROR", value: data.indexCountThree, variant: "destructive" },
-              { label: "DEBUG", value: data.indexCountFive ?? 0, variant: "debug" },
-              { label: "TRACE", value: data.indexCountSix ?? 0, variant: "trace" },
-              { label: "FATAL", value: data.indexCountSeven ?? 0, variant: "error" },
-              { label: "LOG", value: data.indexCountEight ?? 0, variant: "log" },
-            ]}
-            graph={
-              <CountGraph
-                data={data.countFormattedData}
-                barData={LOG_LEVELS.map((level) => ({
-                  dataKey: level.dataKey,
-                  stackId: level.dataKey,
-                  fill: level.fill,
-                }))}
-              />
-            }
-          />
-        </StatsGrid>
-      )}
-      <LogsIndexTable />
-    </IndexLayout>
+    <TableDataContext.Provider value={tableData}>
+      <IndexLayout>
+        {graphData && (
+          <StatsGrid columns={1}>
+            <StatsCard
+              title="LOGS"
+              count={graphData.count}
+              badges={[
+                { label: "INFO", value: graphData.indexCountOne, variant: "secondary" },
+                { label: "WARN", value: graphData.indexCountTwo, variant: "warning" },
+                { label: "ERROR", value: graphData.indexCountThree, variant: "destructive" },
+                { label: "DEBUG", value: graphData.indexCountFive ?? 0, variant: "debug" },
+                { label: "TRACE", value: graphData.indexCountSix ?? 0, variant: "trace" },
+                { label: "FATAL", value: graphData.indexCountSeven ?? 0, variant: "error" },
+                { label: "LOG", value: graphData.indexCountEight ?? 0, variant: "log" },
+              ]}
+              graph={
+                <CountGraph
+                  data={graphData.countFormattedData}
+                  barData={LOG_LEVELS.map((level) => ({
+                    dataKey: level.dataKey,
+                    stackId: level.dataKey,
+                    fill: level.fill,
+                  }))}
+                />
+              }
+            />
+          </StatsGrid>
+        )}
+        <LogsIndexTable />
+      </IndexLayout>
+    </TableDataContext.Provider>
   );
 }
