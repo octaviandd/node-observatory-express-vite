@@ -90,7 +90,7 @@ function createBaseFilterExtractor(
     query: req.query.q as string,
     isTable: req.query.table === "true",
     index: req.query.index as IndexType,
-    key: req.query.key as string | undefined,
+    key: req.query.key ? decodeURIComponent(req.query.key as string) : undefined,
   };
 }
 

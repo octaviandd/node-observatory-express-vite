@@ -1,7 +1,7 @@
 /** @format */
 // hooks/useFilterContext.tsx
 
-import { createContext, useContext, useState, ReactNode, useMemo, useCallback, useEffect } from "react";
+import { createContext, useContext, useState, ReactNode, useMemo, useEffect } from "react";
 import { useParams } from "react-router";
 import { components } from "@/types/api";
 
@@ -54,11 +54,6 @@ export const FilterProvider = ({
     setInputValue("");
   }, [modelKey, defaultInstanceStatusType]);
 
-  // Stable setter functions
-  const handleSetIndex = useCallback((val: IndexType) => setIndex(val), []);
-  const handleSetInstanceStatusType = useCallback((val: string) => setInstanceStatusType(val), []);
-  const handleSetInputValue = useCallback((val: string) => setInputValue(val), []);
-
   // Memoize the entire context value
   const value = useMemo(
     () => ({
@@ -66,11 +61,11 @@ export const FilterProvider = ({
       instanceStatusType,
       inputValue,
       modelKey,
-      setIndex: handleSetIndex,
-      setInstanceStatusType: handleSetInstanceStatusType,
-      setInputValue: handleSetInputValue,
+      setIndex,
+      setInstanceStatusType,
+      setInputValue,
     }),
-    [index, instanceStatusType, inputValue, modelKey, handleSetIndex, handleSetInstanceStatusType, handleSetInputValue]
+    [index, instanceStatusType, inputValue, modelKey]
   );
 
   return (

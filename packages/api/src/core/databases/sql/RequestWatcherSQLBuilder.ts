@@ -8,7 +8,14 @@ class RequestWatcherSQL extends BaseBuilder {
    */
   private getStatusSQL(type: string | undefined): string {
     if (!type || type === "all") return "";
-    // Takes the first character (e.g., '2' from '2xx') and uses LIKE '2%'
+
+    if (type === "2xx") {
+      return `AND (
+        JSON_EXTRACT(content, '$.data.statusCode') LIKE '2%' OR
+        JSON_EXTRACT(content, '$.data.statusCode') LIKE '3%'
+      )`;
+    }
+
     return `AND JSON_EXTRACT(content, '$.data.statusCode') LIKE '${type[0]}%'`;
   }
 
