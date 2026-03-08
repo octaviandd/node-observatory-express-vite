@@ -4,7 +4,7 @@ import { Cuboid } from "lucide-react";
 import { InstanceTable } from "./instance";
 import { GroupTable } from "./group";
 import { Input } from "@/components/ui/base/input";
-import { useTableData } from "@/hooks/useTableData";
+import { useTableDataContext } from "@/hooks/useTableData";
 import { ModelInstanceResponse, ModelGroupResponse } from "@/hooks/useApiTyped";
 import { TableLayout } from "@/components/ui/layout/table-layout";
 import { LoadMoreButton } from "@/components/ui/load-more-button";
@@ -28,10 +28,7 @@ export default function ModelsIndexTable() {
     setInstanceStatusType,
     setInputValue,
     loadMore,
-  } = useTableData<ModelInstanceResponse, ModelGroupResponse>({
-    key: "models",
-    defaultInstanceStatusType: "all",
-  });
+  } = useTableDataContext();
 
   const count = index === "instance" ? instanceDataCount : groupDataCount;
   const label = index === "instance" ? "Instance" : "Model";

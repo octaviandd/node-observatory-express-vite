@@ -3,7 +3,7 @@
 import { CalendarCheck } from "lucide-react";
 import { InstanceTable } from "./instance";
 import { GroupTable } from "./group";
-import { useTableData } from "@/hooks/useTableData";
+import { useTableDataContext } from "@/hooks/useTableData";
 import { ScheduleInstanceResponse, ScheduleGroupResponse } from "@/hooks/useApiTyped";
 import { TableLayout } from "@/components/ui/layout/table-layout";
 import { LoadMoreButton } from "@/components/ui/load-more-button";
@@ -24,10 +24,7 @@ export default function ScheduledIndexTable() {
     message,
     setInstanceStatusType,
     loadMore,
-  } = useTableData<ScheduleInstanceResponse, ScheduleGroupResponse>({
-    key: "schedules",
-    defaultInstanceStatusType: "all",
-  });
+  } = useTableDataContext();
 
   const count = index === "instance" ? instanceDataCount : groupDataCount;
   const label = index === "instance" ? "Attempt" : "Schedule";

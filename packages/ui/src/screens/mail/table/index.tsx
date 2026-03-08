@@ -3,7 +3,7 @@
 import { Mail } from "lucide-react";
 import { GroupTable } from "./group";
 import { InstanceTable } from "./instance";
-import { useTableData } from "@/hooks/useTableData";
+import { useTableDataContext } from "@/hooks/useTableData";
 import { Input } from "@/components/ui/base/input";
 import { MailInstanceResponse, MailGroupResponse } from "@/hooks/useApiTyped";
 import { TableLayout } from "@/components/ui/layout/table-layout";
@@ -28,10 +28,7 @@ export default function MailsIndexTable() {
     setInstanceStatusType,
     setInputValue,
     loadMore,
-  } = useTableData<MailInstanceResponse, MailGroupResponse>({
-    key: "mails",
-    defaultInstanceStatusType: "all",
-  });
+  } = useTableDataContext();
 
   const count = index === "instance" ? instanceDataCount : groupDataCount;
   const label = index === "instance" ? "Mail" : "Receiver";

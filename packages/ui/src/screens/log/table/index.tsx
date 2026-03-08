@@ -3,7 +3,7 @@
 import { Logs } from "lucide-react";
 import { InstanceTable } from "./instance";
 import { GroupTable } from "./group";
-import { useTableData } from "@/hooks/useTableData";
+import { useTableDataContext } from "@/hooks/useTableData";
 import { Input } from "@/components/ui/base/input";
 import { LogInstanceResponse, LogGroupResponse } from "@/hooks/useApiTyped";
 import { TableLayout } from "@/components/ui/layout/table-layout";
@@ -23,10 +23,7 @@ export default function LogsIndexTable() {
     message,
     setInputValue,
     loadMore,
-  } = useTableData<LogInstanceResponse, LogGroupResponse>({
-    key: "logs",
-    defaultInstanceStatusType: "all",
-  });
+  } = useTableDataContext();
 
   const count = index === "instance" ? instanceDataCount : groupDataCount;
   const label = index === "instance" ? "Log" : "Source";

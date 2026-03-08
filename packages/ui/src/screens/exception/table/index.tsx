@@ -4,7 +4,7 @@ import { Bug } from "lucide-react";
 import { InstanceTable } from "./instance";
 import { GroupTable } from "./group";
 import { Input } from "@/components/ui/base/input";
-import { useTableData } from "@/hooks/useTableData";
+import { useTableDataContext } from "@/hooks/useTableData";
 import { ExceptionGroupResponse, ExceptionInstanceResponse } from "@/hooks/useApiTyped";
 import { TableLayout } from "@/components/ui/layout/table-layout";
 import { LoadMoreButton } from "@/components/ui/load-more-button";
@@ -28,10 +28,7 @@ export default function ExceptionsIndexTable() {
     setInstanceStatusType,
     setInputValue,
     loadMore,
-  } = useTableData({
-    key: "exceptions",
-    defaultInstanceStatusType: "all",
-  });
+  } = useTableDataContext();
 
   const Table = index === "instance" ? InstanceTable : GroupTable;
   const count = index === "instance" ? instanceDataCount : groupDataCount;
