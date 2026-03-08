@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import MailCrumbs from "./crumbs";
-import MailPreviewInfo from "./info";
+import { Details } from "./details";
 import ContentTabs from "./tabs";
 import { MailInstanceResponse } from "@/hooks/useApiTyped";
 import { ViewLayout } from "@/components/ui/layout/view-layout";
@@ -23,7 +23,7 @@ export default function MailPreview() {
         <>
           <MailCrumbs mail={mail} />
           {source && <Source source={source} />}
-          <MailPreviewInfo mail={mail} />
+          <Details mail={mail} />
           <ContentTabs
             activeTab={activeTab}
             setActiveTab={setActiveTab}

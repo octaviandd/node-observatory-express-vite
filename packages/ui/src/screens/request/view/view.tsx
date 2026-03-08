@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { RequestCrumbs } from "./crumbs";
 import { RequestPreviewInfo } from "./info";
-import { RequestPreviewDetails } from "./details";
+import { Details } from "./details";
 import { RequestPreviewUser } from "./user";
 import { RequestPreviewNotifications } from "./notifications";
 import { useParams } from "react-router";
@@ -127,7 +127,7 @@ export default function RequestPreview() {
       <Card>
         <CardContent className="grid grid-cols-2 gap-x-10 p-1">
           {data.request && <RequestPreviewInfo request={data.request} />}
-          <RequestPreviewDetails
+          <Details
             queries={data.queries}
             caches={data.caches}
             https={data.https}

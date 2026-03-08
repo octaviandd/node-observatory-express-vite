@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { ViewCrumbs } from "./crumbs";
 import Source from "./source";
-import Details from "./details";
+import {Details} from "./details";
 import ContentTabs from "./tabs";
 import { Skeleton } from "@/components/ui/base/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/base/alert";

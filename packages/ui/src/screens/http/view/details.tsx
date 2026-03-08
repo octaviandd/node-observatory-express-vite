@@ -6,8 +6,7 @@ import { getSize, timeAgo, formatDuration } from "@/utils.js";
 import { Badge } from "@/components/ui/base/badge";
 import { HttpClientInstanceResponse } from "@/hooks/useApiTyped";
 
-export const HTTPInfo = React.memo(
-  ({ http }: { http: HttpClientInstanceResponse }) => {
+export const Details = ({ http }: { http: HttpClientInstanceResponse }) => {
     return (
       <Card className="rounded-none">
         <CardHeader>
@@ -85,5 +84,4 @@ export const HTTPInfo = React.memo(
         </CardContent>
       </Card>
     );
-  },
-);
+  }

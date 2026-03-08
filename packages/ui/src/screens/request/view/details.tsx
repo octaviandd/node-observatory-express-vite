@@ -4,8 +4,7 @@ import { Card, CardHeader, CardContent } from "@/components/ui/base/card";
 import { Separator } from "@/components/ui/base/separator";
 import { QueryInstanceResponse, JobInstanceResponse, CacheInstanceResponse, HttpClientInstanceResponse, ExceptionInstanceResponse, ViewInstanceResponse, ModelInstanceResponse } from "@/hooks/useApiTyped";
 
-export const RequestPreviewDetails = React.memo(
-  ({
+export const Details = ({
     queries,
     jobs,
     caches,
@@ -139,5 +138,4 @@ export const RequestPreviewDetails = React.memo(
         </CardContent>
       </Card>
     );
-  },
-);
+  }

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ModelCrumbs } from "./crumbs";
 import ContentTabs from "./tabs";
-import Details from "./details";
+import { Details } from "./details";
 import { ModelInstanceResponse } from "@/hooks/useApiTyped";
 import { ViewLayout } from "@/components/ui/layout/view-layout";
 import { useViewData } from "@/hooks/useViewData";

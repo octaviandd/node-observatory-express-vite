@@ -3,7 +3,7 @@ import { formatDuration, timeAgo } from "@/utils.js";
 import { Badge } from "@/components/ui/base/badge";
 import { ModelInstanceResponse } from "@/hooks/useApiTyped";
 
-export default function Details({ model }: { model: ModelInstanceResponse }) {
+export const Details = ({ model }: { model: ModelInstanceResponse }) => {
   return (
     <Card className="rounded-none">
       <CardHeader>

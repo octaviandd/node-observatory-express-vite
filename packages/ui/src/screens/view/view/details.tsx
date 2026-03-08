@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/base/badge";
 import { formatDuration, getSize, timeAgo } from "@/utils.js";
 import { ViewInstanceResponse } from "@/hooks/useApiTyped";
 
-export default function Details({ view }: { view: ViewInstanceResponse }) {
+export const Details = ({ view }: { view: ViewInstanceResponse }) => {
   return (
     <Card className="rounded-none">
       <CardHeader>

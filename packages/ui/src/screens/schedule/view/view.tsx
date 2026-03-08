@@ -1,52 +1,56 @@
 /** @format */
 
+import { timeAgo } from "@/utils";
+import { useState, useEffect } from "react";
+import { useParams } from "react-router";
+
 export default function SchedulePreview() {
-  // const params = useParams();
-  // const [job, setJob] = useState<ScheduleResponse | null>(null);
-  // const [notifications, setNotifications] = useState<any[]>([]);
-  // const [mails, setMails] = useState<any[]>([]);
-  // const [logs, setLogs] = useState<any[]>([]);
-  // const [queries, setQuery] = useState<any[]>([]);
-  // const [https, setHttp] = useState<any[]>([]);
-  // const [caches, setCache] = useState<any[]>([]);
+  const params = useParams();
+  const [schedule, setSchedule] = useState<any | null>(null);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [mails, setMails] = useState<any[]>([]);
+  const [logs, setLogs] = useState<any[]>([]);
+  const [queries, setQuery] = useState<any[]>([]);
+  const [https, setHttp] = useState<any[]>([]);
+  const [caches, setCache] = useState<any[]>([]);
 
-  // const [tabs, setTabs] = useState([
-  //   {
-  //     id: 0,
-  //     title: "Payload",
-  //     active: true,
-  //   },
-  //   {
-  //     id: 1,
-  //     title: "Headers",
-  //     active: false,
-  //   },
-  //   {
-  //     id: 2,
-  //     title: "Session",
-  //     active: false,
-  //   },
-  // ]);
+  const [tabs, setTabs] = useState([
+    {
+      id: 0,
+      title: "Payload",
+      active: true,
+    },
+    {
+      id: 1,
+      title: "Headers",
+      active: false,
+    },
+    {
+      id: 2,
+      title: "Session",
+      active: false,
+    },
+  ]);
 
-  // useEffect(() => {
-  //   getItem();
-  // }, []);
+  useEffect(() => {
+    getItem();
+  }, []);
 
-  // const getItem = async () => {
-  //   const response = await fetch(`/api/data/jobs/${params.requestId}`);
-  //   const data = await response.json();
+  const getItem = async () => {
+    const response = await fetch(`/api/data/jobs/${params.requestId}`);
+    const data = await response.json();
 
-  //   const { query, http, job, cache, notification, mail, logs } = data;
-  //   query && setQuery(query);
-  //   http && setHttp(http);
-  //   job && setJob(job);
-  //   cache && setCache(cache);
-  //   notification && setNotifications(notification);
-  //   mail && setMails(mail);
-  //   logs && setLogs(logs);
-  // };
+    const { query, http, job, cache, notification, mail, logs } = data;
+    query && setQuery(query);
+    http && setHttp(http);
+    schedule && setSchedule(job);
+    cache && setCache(cache);
+    notification && setNotifications(notification);
+    mail && setMails(mail);
+    logs && setLogs(logs);
+  };
 
-  // if (!job) return <div>Loading</div>;
+  if (!schedule) return <div>Loading</div>;
 
   return (
     <div>
@@ -56,7 +60,7 @@ export default function SchedulePreview() {
             <span>Schedule Details</span>
           </div>
         </div>
-        {/* <div className="px-3">
+        <div className="px-3">
           <div className="flex flex-col gap-y-4 py-4">
             <div className="grid items-center grid-cols-12">
               <div className="col-span-4 text-[#5c5f65]">Time</div>
@@ -100,7 +104,7 @@ export default function SchedulePreview() {
               </div>
             </div>
           </div>
-        </div> */}
+        </div>
       </div>
     </div>
   );

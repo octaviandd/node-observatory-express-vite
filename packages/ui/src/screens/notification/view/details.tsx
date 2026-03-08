@@ -2,11 +2,7 @@ import { Card, CardContent } from "@/components/ui/base/card";
 import { NotificationInstanceResponse } from "@/hooks/useApiTyped";
 import { timeAgo } from "@/utils.js";
 
-export default function Details({
-  notification,
-}: {
-  notification: NotificationInstanceResponse;
-}) {
+export const Details = ({ notification }: { notification: NotificationInstanceResponse }) => {
   return (
     <Card className="rounded-sm">
       <CardContent className="p-6">

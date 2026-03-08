@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { QueryCrumbs } from "./crumbs";
-import Details from "./details";
+import {Details} from "./details";
 import ContentTabs from "./tabs";
 import { QueryInstanceResponse } from "@/hooks/useApiTyped";
 import { ViewLayout } from "@/components/ui/layout/view-layout";

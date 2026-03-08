@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { NotificationCrumbs } from "./crumbs";
-import Details from "./details";
+import { Details } from "./details";
 import ContentTabs from "./tabs";
 import { NotificationInstanceResponse } from "@/hooks/useApiTyped";
 import { ViewLayout } from "@/components/ui/layout/view-layout";

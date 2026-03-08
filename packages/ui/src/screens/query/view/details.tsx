@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/base/badge";
 import { formatDuration, timeAgo } from "@/utils.js";
 import { QueryInstanceResponse } from "@/hooks/useApiTyped";
 
-export default function Details({ query }: { query: QueryInstanceResponse }) {
+export const Details = ({ query }: { query: QueryInstanceResponse }) => {
   return (
     <Card className="rounded-none shadow-xs">
       <CardHeader>

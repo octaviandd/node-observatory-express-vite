@@ -6,11 +6,7 @@ import { formatDuration } from "@/utils.js";
 import { Badge } from "@/components/ui/base/badge";
 import { MailInstanceResponse } from "@/hooks/useApiTyped";
 
-export default function MailPreviewInfo({
-  mail,
-}: {
-  mail: MailInstanceResponse;
-}) {
+export const Details = ({ mail } : {mail: MailInstanceResponse}) => {
   return (
     <Card className="rounded-none shadow-xs">
       <CardHeader>

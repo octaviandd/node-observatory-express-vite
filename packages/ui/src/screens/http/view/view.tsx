@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { HTTPCrumbs } from "./crumbs";
-import { HTTPInfo } from "./info";
+import { Details } from "./details";
 import ContentTabs from "./tabs";
 import { HttpClientInstanceResponse } from "@/hooks/useApiTyped";
 import { ViewLayout } from "@/components/ui/layout/view-layout";
@@ -23,7 +23,7 @@ export default function HTTPView() {
         <>
           <HTTPCrumbs http={data} />
           {source && <Source source={source} />}
-          <HTTPInfo http={data} />
+          <Details http={data} />
           <ContentTabs
             activeTab={activeTab}
             setActiveTab={setActiveTab}

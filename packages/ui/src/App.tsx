@@ -3,7 +3,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/base/sidebar";
 import { Outlet, useLocation } from "react-router";
 import { useContext, useEffect, useState } from "react";
 import { StoreContext } from "@/store";
-import { Moon, Sun, CalendarDays, CalendarIcon } from "lucide-react";
+import { Moon, Sun, CalendarDays, CalendarIcon, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/base/button";
 import { Label } from "@/components/ui/base/label";
 import { Switch } from "@/components/ui/base/switch";
@@ -27,13 +27,13 @@ export default function MainLayout() {
       location.pathname,
     );
 
-  // const handleRefresh = () => {
-  //   fetch(`/api/data/${location.pathname}/refresh`)
-  //     .then(res => res.json())
-  //     .then(data => {
-  //       console.log(data);
-  //     });
-  // };
+  const handleRefresh = () => {
+    fetch(`/api/data/${location.pathname}/refresh`)
+      .then(res => res.json())
+      .then(data => {
+        console.log(data);
+      });
+  };
 
   return (
     <SidebarProvider>
@@ -43,14 +43,14 @@ export default function MainLayout() {
         {!isPreviewRoute && (
           <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 pr-10">
             <div className="flex items-center gap-2 ml-auto">
-              {/* <Button
+              <Button
                 variant="ghost"
                 size="icon"
                 onClick={handleRefresh}
                 className="h-9 w-9"
               >
                 <RefreshCcw className="h-4 w-4 text-muted-foreground" />
-              </Button> */}
+              </Button>
               <PeriodSelector />
             </div>
           </header>
