@@ -3,8 +3,7 @@
 import { Layers } from "lucide-react";
 import { InstanceTable } from "./instance";
 import { GroupTable } from "./group";
-import { Input } from "@/components/ui/base/input";
-import { useTableDataContext } from "@/hooks/useTableData";
+import { useTableData } from "@/hooks/useTableData";
 import { JobInstanceResponse, JobGroupResponse } from "@/hooks/useApiTyped";
 import { TableLayout } from "@/components/ui/layout/table-layout";
 import { LoadMoreButton } from "@/components/ui/load-more-button";
@@ -27,7 +26,7 @@ export default function JobsIndexTable() {
     setInstanceStatusType,
     setInputValue,
     loadMore,
-  } = useTableDataContext();
+  } = useTableData({ key: "jobs", defaultInstanceStatusType: "all" });
 
   const count = index === "instance" ? instanceDataCount : groupDataCount;
   const label = index === "group" ? "Queue" : "ATTEMPT";

@@ -3,8 +3,7 @@
 import { FileCode } from "lucide-react";
 import { InstanceTable } from "./instance";
 import { GroupTable } from "./group";
-import { Input } from "@/components/ui/base/input";
-import { useTableDataContext } from "@/hooks/useTableData";
+import { useTableData } from "@/hooks/useTableData";
 import { ViewInstanceResponse, ViewGroupResponse } from "@/hooks/useApiTyped";
 import { TableLayout } from "@/components/ui/layout/table-layout";
 import { LoadMoreButton } from "@/components/ui/load-more-button";
@@ -28,7 +27,7 @@ export default function ViewsIndexTable() {
     setInstanceStatusType,
     setInputValue,
     loadMore,
-  } = useTableDataContext();
+  } = useTableData({ key: "views", defaultInstanceStatusType: "all" });
 
   const count = index === "instance" ? instanceDataCount : groupDataCount;
   const label = index === "instance" ? "View" : "Path";

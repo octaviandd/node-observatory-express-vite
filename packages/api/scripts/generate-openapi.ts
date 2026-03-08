@@ -205,10 +205,10 @@ function generateOpenAPIPath(
       },
     },
 
-    // ── /graph ──────────────────────────────────────────────────────────
-    [`/api/${resourcePath}/graph`]: {
+    // ── /graph/count ──────────────────────────────────────────────────────────
+    [`/api/${resourcePath}/graph/count`]: {
       get: {
-        summary: `Get ${resourcePath} graph data`,
+        summary: `Get ${resourcePath} count graph data`,
         tags: [tag],
         parameters: baseParams,
         responses: {
@@ -216,7 +216,26 @@ function generateOpenAPIPath(
             description: "Success",
             content: {
               "application/json": {
-                schema: { $ref: "#/components/schemas/GraphDataResponse" },
+                schema: { $ref: "#/components/schemas/CountGraphDataResponse" },
+              },
+            },
+          },
+        },
+      },
+    },
+
+    // ── /graph/duration ──────────────────────────────────────────────────────────
+    [`/api/${resourcePath}/graph/duration`]: {
+      get: {
+        summary: `Get ${resourcePath} duration graph data`,
+        tags: [tag],
+        parameters: baseParams,
+        responses: {
+          200: {
+            description: "Success",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/DurationGraphDataResponse" },
               },
             },
           },
@@ -419,7 +438,8 @@ function generateSchemasFromTypes() {
     "NotificationGroupResponse",
 
     // Shared response types
-    "GraphDataResponse",
+    "CountGraphDataResponse",
+    "DurationGraphDataResponse",
     "ViewDataResponse",
     // "DashboardResponse",
   ];

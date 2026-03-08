@@ -1,25 +1,19 @@
 /** @format */
 
-import { useState, useMemo, useEffect, createContext, useContext } from "react";
-import { useParams, useSearchParams } from "react-router";
-import { AllGroupResponses, AllInstanceResponses, useResourceHooks, type ResourceKey } from "./useApiTyped";
-import { components } from "@/types/api";
-import { queryClient } from "./useApi";
-
-type IndexType = components["schemas"]["IndexType"];
-type GraphDataResponse = components["schemas"]["GraphDataResponse"];
+import { useMemo } from "react";
+import { useResourceHooks, type ResourceKey } from "./useApiTyped";
+import { useFilters } from "./useFilterContext";
 
 type Props = {
   key: ResourceKey;
-  defaultInstanceStatusType: string;
 };
 
 export type TableDataResult = {
-  instanceData: AllInstanceResponses[];
-  groupData: AllGroupResponses[];
+  instanceData: unknown;
+  groupData: unknown;
   instanceDataCount: string;
   groupDataCount: string;
-  index: IndexType;
+  index: string;
   instanceStatusType: string;
   inputValue: string;
   message: string;
@@ -27,69 +21,24 @@ export type TableDataResult = {
   loading: boolean;
   isFetchingMore: boolean;
   hasNextPage: boolean;
-  graphData: GraphDataResponse | undefined;
-  graphLoading: boolean;
   loadMore: () => void;
   setInputValue: (val: string) => void;
   setInstanceStatusType: (val: string) => void;
-  setIndex: (val: IndexType) => void;
+  setIndex: (val: any) => void;
 };
 
-export const TableDataContext = createContext<TableDataResult | null>(null);
+export const useTableData = ({ key }: Props): TableDataResult => {
+  const { 
+    index, 
+    instanceStatusType, 
+    inputValue, 
+    modelKey,
+    setIndex,
+    setInstanceStatusType,
+    setInputValue 
+  } = useFilters();
 
-export const useTableDataContext = (): TableDataResult => {
-  const ctx = useContext(TableDataContext);
-  if (!ctx) throw new Error("useTableDataContext must be used within a TableDataProvider");
-  return ctx;
-};
-
-export const useTableData = <TInstance extends AllInstanceResponses, TGroup extends AllGroupResponses>({ key, defaultInstanceStatusType }: Props): TableDataResult => {
-  const modelKey = useParams<{ key: string }>().key || "";
   const resourceHooks = useResourceHooks(key);
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  const urlIndex = searchParams.get("index") as IndexType | null;
-  const urlStatus = searchParams.get("status");
-  const urlQuery = searchParams.get("q");
-
-  // UI state
-  const [index, setIndex] = useState<IndexType>(
-    urlIndex || (modelKey ? "instance" : "group")
-  );
-  const [instanceStatusType, setInstanceStatusType] = useState(
-    urlStatus || defaultInstanceStatusType
-  );
-  const [inputValue, setInputValue] = useState(urlQuery || "");
-  
-
-   // Sync state to URL whenever filters change
-  useEffect(() => {
-    const params = new URLSearchParams();
-    
-    if (index !== "group") params.set("index", index);
-    if (modelKey) params.set("key", modelKey);
-    if (instanceStatusType !== defaultInstanceStatusType) {
-      params.set("status", instanceStatusType);
-    }
-
-    console.log(instanceStatusType)
-    if (inputValue) params.set("q", inputValue);
-
-    // Only update URL if params actually changed
-    if (params.toString() !== searchParams.toString()) {
-      setSearchParams(params, { replace: true });
-    }
-  }, [index, modelKey, instanceStatusType, inputValue, defaultInstanceStatusType]);
-
-  // Reset state when modelKey changes
-  useEffect(() => {
-    setIndex(modelKey ? "instance" : "group");
-    setInstanceStatusType(defaultInstanceStatusType);
-    setInputValue("");
-    
-    // Invalidate queries to trigger refetch
-    queryClient.invalidateQueries({ queryKey: [key, "table"] });
-  }, [modelKey, key, defaultInstanceStatusType]);
 
   const instanceQuery = resourceHooks.useTable<"instance">(
     {
@@ -110,21 +59,11 @@ export const useTableData = <TInstance extends AllInstanceResponses, TGroup exte
     { enabled: index === "group" },
   );
 
-  const graphQuery = resourceHooks.useGraph({
-    q: inputValue || undefined,
-    key: modelKey || undefined,
-    status: instanceStatusType?.toLowerCase(),
-  });
-
   const instanceData = useMemo(() =>
       //@ts-ignore
       (instanceQuery.data?.pages ?? []).flatMap((page) => page.results),
     [instanceQuery.data],
   );
-
-  useEffect(() => {
-    setIndex(modelKey ? "instance" : "group");
-  }, [modelKey]);
 
   const groupData = useMemo(() =>
       //@ts-ignore
@@ -138,7 +77,11 @@ export const useTableData = <TInstance extends AllInstanceResponses, TGroup exte
   const activeQuery = index === "instance" ? instanceQuery : groupQuery;
   const activeCount = index === "instance" ? instanceDataCount : groupDataCount;
 
-  const message = activeCount === "0" ? "No entries available" : !activeQuery.hasNextPage ? "No more entries" : "";
+  const message = useMemo(() => {
+    if (activeCount === "0") return "No entries available";
+    if (!activeQuery.hasNextPage) return "No more entries";
+    return "";
+  }, [activeCount, activeQuery.hasNextPage]);
 
   return {
     instanceData,
@@ -153,8 +96,6 @@ export const useTableData = <TInstance extends AllInstanceResponses, TGroup exte
     loading: activeQuery.isLoading,
     isFetchingMore: activeQuery.isFetchingNextPage,
     hasNextPage: activeQuery.hasNextPage,
-    graphData: graphQuery.data,
-    graphLoading: graphQuery.isLoading,
     loadMore: activeQuery.fetchNextPage,
     setInputValue,
     setInstanceStatusType,

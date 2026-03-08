@@ -123,13 +123,27 @@ class GenericWatcher<
    * Delegates to DBInstance.getGraphData and passes watcher-specific metric keys.
    * graphMetrics comes from config and determines which series are computed.
    */
-  protected async getGraphData(
+  protected async getCountGraphData(
     filters: FiltersByWatcherType[T],
-  ): Promise<GraphDataResponse> {
-    return await this.DBInstance.getGraphData(
+  ): Promise<CountGraphDataResponse> {
+    return await this.DBInstance.getCountGraphData(
       filters,
       this.type,
       this.config.graphMetrics as string[],
+    );
+  }
+
+  /**
+   * Graph query:
+   * Delegates to DBInstance.getGraphData and passes watcher-specific metric keys.
+   * graphMetrics comes from config and determines which series are computed.
+   */
+  protected async getDurationGraphData(
+    filters: FiltersByWatcherType[T],
+  ): Promise<DurationGraphDataResponse> {
+    return await this.DBInstance.getDurationGraphData(
+      filters,
+      this.type,
     );
   }
 

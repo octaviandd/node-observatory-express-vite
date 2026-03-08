@@ -286,7 +286,6 @@ export abstract class BaseWatcher<
       );
 
       if (!pending || pending.length === 0) {
-        console.log(`No pending messages for ${this.type}`);
         return;
       }
 
@@ -465,13 +464,25 @@ export abstract class BaseWatcher<
 
   /**
    * Graph endpoint handler:
-   * Parses filters from request, delegates to watcher-specific getGraphData().
+   * Parses filters from request, delegates to watcher-specific countGraph().
    */
-  async indexGraph(
+  async countGraph(
     req: ObservatoryBoardRequest,
-  ): Promise<ApiResponse<GraphDataResponse>> {
+  ): Promise<ApiResponse<CountGraphDataResponse>> {
     const filters = this.extractFiltersFromRequest(req);
-    const body = await this.getGraphData(filters);
+    const body = await this.getCountGraphData(filters);
+    return { body, statusCode: 200 };
+  }
+
+   /**
+   * Graph endpoint handler:
+   * Parses filters from request, delegates to watcher-specific durationGraph().
+   */
+  async durationGraph(
+    req: ObservatoryBoardRequest,
+  ): Promise<ApiResponse<DurationGraphDataResponse>> {
+    const filters = this.extractFiltersFromRequest(req);
+    const body = await this.getDurationGraphData(filters);
     return { body, statusCode: 200 };
   }
 
@@ -556,9 +567,14 @@ export abstract class BaseWatcher<
   }): Promise<any>;
 
   /** Fetch chartable time-series data for the resource */
-  protected abstract getGraphData(
+  protected abstract getCountGraphData(
     filters: WatcherFilters,
-  ): Promise<GraphDataResponse>;
+  ): Promise<CountGraphDataResponse>;
+
+  /** Fetch chartable time-series data for the resource */
+  protected abstract getDurationGraphData(
+    filters: WatcherFilters,
+  ): Promise<DurationGraphDataResponse>;
 
   /** Fetch table data (instance rows or group aggregates) */
   protected abstract getTableData(

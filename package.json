@@ -14,7 +14,6 @@
     
     "dev": "npm run dev --workspaces --if-present",
     "dev:api": "npm run dev -w @node-observatory/api",
-    "dev:ui": "npm run dev -w @node-observatory/ui",
     "dev:example": "npm run dev -w with-express",
     "dev:all:cjs": "concurrently \"npm run dev -w @node-observatory/ui\" \"npm run dev-cjs -w @node-observatory/api\" \"npm run dev -w @node-observatory/express\" \"npm run dev-all -w with-express\"",
     "dev:all:esm": "concurrently \"npm run dev -w @node-observatory/ui\" \"npm run dev-esm -w @node-observatory/api\" \"npm run dev -w @node-observatory/express\" \"npm run dev-all -w with-express\"",

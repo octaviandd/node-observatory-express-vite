@@ -21,7 +21,6 @@ function generateRoutesForResource(
   path: string,
   watcherKey: string,
 ): AppControllerRoute[] {
-  console.log(`Registering routes for ${path} -> ${watcherKey}`);
   return [
     {
       method: "get",
@@ -33,11 +32,19 @@ function generateRoutesForResource(
     },
     {
       method: "get",
-      route: `/api/${path}/graph`,
+      route: `/api/${path}/count-graph`,
       handler: (
         request: ObservatoryBoardRequest,
       ): Promisify<ControllerHandlerReturnType> =>
-        watchers[watcherKey].indexGraph(request),
+        watchers[watcherKey].countGraph(request),
+    },
+    {
+      method: "get",
+      route: `/api/${path}/duration-graph`,
+      handler: (
+        request: ObservatoryBoardRequest,
+      ): Promisify<ControllerHandlerReturnType> =>
+        watchers[watcherKey].durationGraph(request),
     },
     {
       method: "get",
@@ -53,7 +60,6 @@ function generateRoutesForResource(
       handler: (
         request: ObservatoryBoardRequest,
       ): Promisify<ControllerHandlerReturnType> => {
-        console.log('hit')
         return watchers[watcherKey].metadata(request)
       }
     },

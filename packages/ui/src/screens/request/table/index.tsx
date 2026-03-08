@@ -3,13 +3,12 @@
 import { ArrowUpDown } from "lucide-react";
 import { InstanceTable } from "./instance";
 import { GroupTable } from "./group";
-import { Input } from "@/components/ui/base/input";
-import { Button } from "@/components/ui/base/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/base/toggle-group";
-import { useTableDataContext } from "@/hooks/useTableData";
+import { useTableData } from "@/hooks/useTableData";
 import { TableLayout } from "@/components/ui/layout/table-layout";
 import { RequestGroupResponse, RequestInstanceResponse } from "@/hooks/useApiTyped";
 import { SearchInput } from "@/components/ui/search-input";
+import { LoadMoreButton } from "@/components/ui/load-more-button";
 
 export default function RequestIndexTable() {
   const {
@@ -25,28 +24,12 @@ export default function RequestIndexTable() {
     setInstanceStatusType,
     setInputValue,
     loadMore,
-  } = useTableDataContext();
+    loading,
+  } = useTableData({ key: "requests" });
 
-  const loadMoreButton = (
-    <div className="flex justify-center my-2">
-      {message ? (
-        <Button variant="outline" className="text-muted-foreground" disabled>
-          {message}
-        </Button>
-      ) : (
-        <Button
-          variant="outline"
-          className="text-muted-foreground"
-          onClick={(e) => {
-            e.preventDefault();
-            loadMore();
-          }}
-        >
-          Load older entries
-        </Button>
-      )}
-    </div>
-  );
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <TableLayout type="requests">
@@ -80,11 +63,11 @@ export default function RequestIndexTable() {
       </div>
       {index === "instance" ? (
         <InstanceTable data={instanceData as RequestInstanceResponse[]}>
-          {loadMoreButton}
+          <LoadMoreButton message={message} onLoadMore={loadMore} />
         </InstanceTable>
       ) : (
         <GroupTable data={groupData as RequestGroupResponse[]}>
-          {loadMoreButton}
+          <LoadMoreButton message={message} onLoadMore={loadMore} />
         </GroupTable>
       )}
     </TableLayout>

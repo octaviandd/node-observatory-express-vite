@@ -79,9 +79,10 @@ class RequestWatcherSQL extends BaseBuilder {
    * Logic for the Request Graph (Aggregates + Chronological Rows)
    */
   public getIndexGraphDataSQL(filters: any) {
-    const { period, key } = filters;
+    const { period, key, status } = filters;
     const timeSql = period ? this.getPeriodSQL(period) : "";
     const routeSql = key ? this.getEqualitySQL(key, "data.route") : "";
+    const statusSql = this.getStatusSQL(status);
 
     const aggregateColumns = [
       "COUNT(*) as total",
@@ -114,7 +115,7 @@ class RequestWatcherSQL extends BaseBuilder {
     const whereClause = `
       WHERE type = 'request' 
       AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.statusCode')) != '0'
-      ${routeSql} ${timeSql}
+      ${routeSql} ${timeSql} ${statusSql}
     `;
 
     return `

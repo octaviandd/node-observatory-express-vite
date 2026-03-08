@@ -3,8 +3,7 @@
 import { Bug } from "lucide-react";
 import { InstanceTable } from "./instance";
 import { GroupTable } from "./group";
-import { Input } from "@/components/ui/base/input";
-import { useTableDataContext } from "@/hooks/useTableData";
+import { useTableData } from "@/hooks/useTableData";
 import { ExceptionGroupResponse, ExceptionInstanceResponse } from "@/hooks/useApiTyped";
 import { TableLayout } from "@/components/ui/layout/table-layout";
 import { LoadMoreButton } from "@/components/ui/load-more-button";
@@ -19,7 +18,6 @@ export default function ExceptionsIndexTable() {
     instanceData,
     groupData,
     instanceDataCount,
-    groupDataCount,
     index,
     instanceStatusType,
     inputValue,
@@ -28,17 +26,15 @@ export default function ExceptionsIndexTable() {
     setInstanceStatusType,
     setInputValue,
     loadMore,
-  } = useTableDataContext();
+  } = useTableData({ key: "exceptions", defaultInstanceStatusType: "all" });
 
-  const Table = index === "instance" ? InstanceTable : GroupTable;
-  const count = index === "instance" ? instanceDataCount : groupDataCount;
   const label = index === "instance" ? "Exception" : "Type";
 
   return (
     <TableLayout type="exceptions">
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
-          <TableHeader icon={Bug} count={count} label={label} />
+          <TableHeader icon={Bug} count={instanceDataCount} label={label} />
         </div>
         <div className="flex px-4 grow">
           {!modelKey && (

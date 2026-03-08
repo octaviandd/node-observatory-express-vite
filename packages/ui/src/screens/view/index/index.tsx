@@ -10,16 +10,12 @@ import { Badge } from "@/components/ui/base/badge";
 import ViewsIndexTable from "../table/index";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
 import { DurationGraph } from "@/components/ui/graphs/duration-graph";
-import { useTableData, TableDataContext } from "@/hooks/useTableData";
 
 export default function ViewsIndex() {
-  const tableData = useTableData({ key: "views", defaultInstanceStatusType: "all" });
-  const { graphData } = tableData;
 
   return (
-    <TableDataContext.Provider value={tableData}>
       <div className="flex flex-col gap-6">
-        {graphData && (
+        {/* {graphData && (
           <div className="grid grid-cols-2 gap-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -91,8 +87,7 @@ export default function ViewsIndex() {
           </div>
         )}
 
-        <ViewsIndexTable />
+        <ViewsIndexTable /> */}
       </div>
-    </TableDataContext.Provider>
   );
 }

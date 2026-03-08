@@ -54,7 +54,7 @@ import "./patch-exceptions";
 // import "./patch-fastify";
 // import "./patch-hapi";
 // import "./patch-apollo";
-// import "./patch-express";
+import "./patch-express";
 
 // OUTGOING REQUESTS
 import "./patch-http";

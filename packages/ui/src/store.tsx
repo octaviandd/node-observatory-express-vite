@@ -1,6 +1,6 @@
 /** @format */
 
-import React, { createContext, useReducer, ReactNode, Dispatch } from "react";
+import React, { createContext, useReducer, ReactNode, Dispatch, useMemo } from "react";
 
 // Define the shape of your custom date range
 export type CustomDateRange = {
@@ -134,9 +134,10 @@ const StoreContext = createContext<{
 
 const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const value = useMemo(() => ({ state, dispatch }), [state]);
 
   return (
-    <StoreContext.Provider value={{ state, dispatch }}>
+    <StoreContext.Provider value={value}>
       {children}
     </StoreContext.Provider>
   );

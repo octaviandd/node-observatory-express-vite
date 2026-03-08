@@ -76,12 +76,6 @@ async function fetcher<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const baseUrl = getBaseUrl();
   const url = endpoint.startsWith("http") ? endpoint : `${baseUrl}${endpoint}`;
 
-  console.log('Endpoint:', endpoint);
-  console.log('Base URL:', baseUrl);
-  console.log('Full URL:', url);
-  console.log('Method:', options?.method);
-  console.log('Body:', options?.body);
-
   const response = await fetch(url, {
     headers: {
       "Content-Type": "application/json",

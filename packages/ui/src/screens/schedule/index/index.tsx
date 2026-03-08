@@ -11,16 +11,12 @@ import { Badge } from "@/components/ui/base/badge";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
 import SchedulesIndexTable from "../table";
 import { DurationGraph } from "@/components/ui/graphs/duration-graph";
-import { useTableData, TableDataContext } from "@/hooks/useTableData";
 
 export default function SchedulesIndex() {
-  const tableData = useTableData({ key: "schedules", defaultInstanceStatusType: "all" });
-  const { graphData } = tableData;
 
   return (
-    <TableDataContext.Provider value={tableData}>
       <div className="flex flex-col gap-6">
-        {graphData && (
+        {/* {graphData && (
           <div className="grid grid-cols-2 gap-4">
             <Card>
               <CardHeader className="pb-2">
@@ -92,8 +88,7 @@ export default function SchedulesIndex() {
           </div>
         )}
 
-        <SchedulesIndexTable />
+        <SchedulesIndexTable /> */}
       </div>
-    </TableDataContext.Provider>
   );
 }

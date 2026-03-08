@@ -15,7 +15,8 @@ import { components } from "@/types/api";
 
 type Period = components["schemas"]["Period"];
 type IndexType = components["schemas"]["IndexType"];
-type GraphDataResponse = components["schemas"]["GraphDataResponse"];
+type CountGraphDataResponse = components["schemas"]["CountGraphDataResponse"];
+type DurationGraphDataResponse = components["schemas"]["DurationGraphDataResponse"];
 type ViewDataResponse = components["schemas"]["ViewDataResponse"];
 
 // ============================================================================
@@ -144,14 +145,14 @@ function createResourceHooks<K extends ResourceKey>(resource: K) {
         {
           pageSize: params.limit ?? 20,
           ...options,
+          placeholderData: (previousData) => previousData
         },
       );
     },
 
-    // Graph data - single fetch, returns GraphDataResponse
-    useGraph: (
+    useCountGraph: (
       params: GraphQueryParams = {},
-      options?: UseApiQueryOptions<GraphDataResponse>,
+      options?: UseApiQueryOptions<CountGraphDataResponse>,
     ) => {
       const searchParams = new URLSearchParams({
         ...(params.period && { period: params.period }),
@@ -161,12 +162,39 @@ function createResourceHooks<K extends ResourceKey>(resource: K) {
       });
 
       const query = searchParams.toString();
-      const endpoint = `/api/${resource}/graph${query ? `?${query}` : ""}`;
+      const endpoint = `/api/${resource}/count-graph/${query ? `?${query}` : ""}`;
 
-      return useApiQuery<GraphDataResponse>(
+      return useApiQuery<CountGraphDataResponse>(
         endpoint,
-        [resource, "graph", params],
-        options,
+        [resource, "count-graph", params],
+        {
+          ...options,
+          placeholderData: (previousData) => previousData
+        },
+      );
+    },
+
+    useDurationGraph: (
+      params: GraphQueryParams = {},
+      options?: UseApiQueryOptions<DurationGraphDataResponse>,
+    ) => {
+      const searchParams = new URLSearchParams({
+        ...(params.period && { period: params.period }),
+        ...(params.q && { q: params.q }),
+        ...(params.status && { status: params.status }),
+        ...(params.key && { key: params.key }),
+      });
+
+      const query = searchParams.toString();
+      const endpoint = `/api/${resource}/duration-graph/${query ? `?${query}` : ""}`;
+
+      return useApiQuery<DurationGraphDataResponse>(
+        endpoint,
+        [resource, "duration-graph", params],
+        {
+          ...options,
+          placeholderData: (previousData) => previousData
+        },
       );
     },
 

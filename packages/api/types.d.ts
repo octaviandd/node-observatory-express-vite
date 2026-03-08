@@ -616,18 +616,9 @@ interface TableDataResponse<
   results: WatcherResults<T, I>;
   count: string;
 }
-interface GraphDataResponse {
+
+interface CountGraphDataResponse {
   countFormattedData: Record<string, string | number>[];
-  durationFormattedData: Record<
-    string,
-    {
-      durations: number[];
-      avgDuration: number;
-      p95: number;
-      count: number;
-      label: string;
-    }
-  >;
   count: string;
   indexCountOne: string;
   indexCountTwo: string;
@@ -637,6 +628,22 @@ interface GraphDataResponse {
   indexCountSix?: string;
   indexCountSeven?: string;
   indexCountEight?: string;
+}
+
+interface DurationGraphDataResponse {
+  durationFormattedData: Array<{
+    durations: number[];
+    avgDuration: number;
+    p95: number;
+    count: number;
+    label: string;
+  }> | Record<string, {
+    durations: number[];
+    avgDuration: number;
+    p95: number;
+    count: number;
+    label: string;
+  }>;
   shortest: string;
   longest: string;
   average: string;

@@ -3,7 +3,7 @@
 import { Globe } from "lucide-react";
 import { GroupTable } from "./group";
 import { InstanceTable } from "./instance";
-import { useTableDataContext } from "@/hooks/useTableData";
+import { useTableData } from "@/hooks/useTableData";
 import { HttpClientGroupResponse, HttpClientInstanceResponse } from "@/hooks/useApiTyped";
 import { TableLayout } from "@/components/ui/layout/table-layout";
 import { LoadMoreButton } from "@/components/ui/load-more-button";
@@ -27,7 +27,7 @@ export default function HttpIndexTable() {
     setInstanceStatusType,
     setInputValue,
     loadMore,
-  } = useTableDataContext();
+  } = useTableData({ key: "https", defaultInstanceStatusType: "all" });
 
   const count = index === "instance" ? instanceDataCount : groupDataCount;
   const label = index === "instance" ? "Request" : "Route";

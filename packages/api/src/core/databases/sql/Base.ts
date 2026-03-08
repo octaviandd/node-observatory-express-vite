@@ -473,14 +473,10 @@ class Base {
   // ---------------------------------------------------------------------------
   
   /**
-   * Graph data query:
-   * Delegates SQL generation to the watcher-specific builder, then:
-   * - separates the aggregate row from raw data rows
-   * - builds time-bucketed count series (processedCountGraphData)
-   * - builds duration series when applicable (processedDurationGraphData)
-   * - maps watcher-specific aggregate metrics to indexed UI fields
-   */
-  async getGraphData<T extends WatcherType>(
+ * Count graph data query:
+ * Fetches count-related metrics and time-bucketed count series
+ */
+  async getCountGraphData<T extends WatcherType>(
     filters: FiltersByWatcherType[T],
     watcherType: T,
     keys: string[],
@@ -506,34 +502,12 @@ class Base {
         keys,
       );
 
-      const hasDuration = watcherType !== 'exception' && watcherType !== 'log';
-
-      // Optionally build duration series (some watchers may not have duration)
-      const durationFormattedData = hasDuration
-        ? processedDurationGraphData(results as any[], period)
-        : {};
-
       // Dynamically map keys to indexCountOne/Two/Three/etc.
-      const indexCountNames = [
-        "indexCountOne", "indexCountTwo", "indexCountThree",
-        "indexCountFour", "indexCountFive", "indexCountSix",
-        "indexCountSeven", "indexCountEight",
-      ] as const;
-
-      const indexCounts: Record<string, string> = {};
-      keys.forEach((key, i) => {
-        if (i < indexCountNames.length) {
-          indexCounts[indexCountNames[i]] = formatValue(aggregateRow?.[key], true);
-        }
-      });
-
-       // Dynamically map keys to indexCountOne/Two/Three/etc.
       const kv = (i: number) => formatValue(aggregateRow?.[keys[i]], true);
 
-      // Return UI-friendly formatted values
+      // Return UI-friendly formatted count values
       return {
         countFormattedData,
-        durationFormattedData,
         count: formatValue(aggregateRow?.total, true),
         // Required fields — always populated (defaults to "0" if key doesn't exist)
         indexCountOne: kv(0),
@@ -546,6 +520,58 @@ class Base {
         ...(keys[5] !== undefined && { indexCountSix: kv(5) }),
         ...(keys[6] !== undefined && { indexCountSeven: kv(6) }),
         ...(keys[7] !== undefined && { indexCountEight: kv(7) }),
+      };
+    } catch (error) {
+      throw new DatabaseRetrieveError(
+        "Failed to get count graph data from database",
+        { cause: error as Error },
+      );
+    }
+  }
+
+  /**
+   * Duration graph data query:
+   * Fetches duration-related metrics and time-bucketed duration series
+   */
+  async getDurationGraphData<T extends WatcherType>(
+    filters: FiltersByWatcherType[T],
+    watcherType: T,
+  ) {
+    const { period } = filters;
+
+    try {
+      const hasDuration = watcherType !== 'exception' && watcherType !== 'log';
+
+      if (!hasDuration) {
+        return {
+          durationFormattedData: {},
+          shortest: "0ms",
+          longest: "0ms",
+          average: "0ms",
+          p95: "0ms",
+        };
+      }
+
+      // Delegate SQL generation to the watcher-specific builder
+      const sql = this.builders[watcherType].getIndexGraphDataSQL(filters as any);
+
+      const [results] = (await this.storeConnection.query(
+        sql,
+      )) as [QueryResult, FieldPacket[]];
+
+      // First row is the aggregate; remaining rows are raw event data
+      //@ts-ignore
+      const aggregateRow = (results as any[]).shift();
+
+      // Build duration series
+      const durationFormattedData = processedDurationGraphData(
+        results as any[],
+        period,
+      );
+
+      // Return UI-friendly formatted duration values
+      return {
+        durationFormattedData,
         shortest: formatValue(aggregateRow?.shortest),
         longest: formatValue(aggregateRow?.longest),
         average: formatValue(aggregateRow?.average),
@@ -553,7 +579,7 @@ class Base {
       };
     } catch (error) {
       throw new DatabaseRetrieveError(
-        "Failed to get graph data from database",
+        "Failed to get duration graph data from database",
         { cause: error as Error },
       );
     }

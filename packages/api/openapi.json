@@ -2559,7 +2559,7 @@
           "failed"
         ]
       },
-      "GraphDataResponse": {
+      "CountGraphDataResponse": {
         "type": "object",
         "properties": {
           "countFormattedData": {
@@ -2567,9 +2567,6 @@
             "items": {
               "type": "object"
             }
-          },
-          "durationFormattedData": {
-            "type": "object"
           },
           "count": {
             "type": "string"
@@ -2597,6 +2594,58 @@
           },
           "indexCountEight": {
             "type": "string"
+          }
+        },
+        "required": [
+          "count",
+          "countFormattedData",
+          "indexCountOne",
+          "indexCountThree",
+          "indexCountTwo"
+        ]
+      },
+      "DurationGraphDataResponse": {
+        "type": "object",
+        "properties": {
+          "durationFormattedData": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "durations": {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      }
+                    },
+                    "avgDuration": {
+                      "type": "number"
+                    },
+                    "p95": {
+                      "type": "number"
+                    },
+                    "count": {
+                      "type": "number"
+                    },
+                    "label": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "avgDuration",
+                    "count",
+                    "durations",
+                    "label",
+                    "p95"
+                  ]
+                }
+              },
+              {
+                "type": "object"
+              }
+            ]
           },
           "shortest": {
             "type": "string"
@@ -2613,12 +2662,7 @@
         },
         "required": [
           "average",
-          "count",
-          "countFormattedData",
           "durationFormattedData",
-          "indexCountOne",
-          "indexCountThree",
-          "indexCountTwo",
           "longest",
           "p95",
           "shortest"
@@ -4857,9 +4901,9 @@
         }
       }
     },
-    "/api/requests/graph": {
+    "/api/requests/graph/count": {
       "get": {
-        "summary": "Get requests graph data",
+        "summary": "Get requests count graph data",
         "tags": [
           "Requests"
         ],
@@ -4922,7 +4966,80 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GraphDataResponse"
+                  "$ref": "#/components/schemas/CountGraphDataResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/requests/graph/duration": {
+      "get": {
+        "summary": "Get requests duration graph data",
+        "tags": [
+          "Requests"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "$ref": "#/components/schemas/Period"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "2xx",
+                "3xx",
+                "4xx",
+                "5xx",
+                "all"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DurationGraphDataResponse"
                 }
               }
             }
@@ -5157,9 +5274,9 @@
         }
       }
     },
-    "/api/queries/graph": {
+    "/api/queries/graph/count": {
       "get": {
-        "summary": "Get queries graph data",
+        "summary": "Get queries count graph data",
         "tags": [
           "Queries"
         ],
@@ -5220,7 +5337,78 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GraphDataResponse"
+                  "$ref": "#/components/schemas/CountGraphDataResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/queries/graph/duration": {
+      "get": {
+        "summary": "Get queries duration graph data",
+        "tags": [
+          "Queries"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "$ref": "#/components/schemas/Period"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "completed",
+                "failed",
+                "all"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DurationGraphDataResponse"
                 }
               }
             }
@@ -5455,9 +5643,9 @@
         }
       }
     },
-    "/api/notifications/graph": {
+    "/api/notifications/graph/count": {
       "get": {
-        "summary": "Get notifications graph data",
+        "summary": "Get notifications count graph data",
         "tags": [
           "Notifications"
         ],
@@ -5518,7 +5706,78 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GraphDataResponse"
+                  "$ref": "#/components/schemas/CountGraphDataResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notifications/graph/duration": {
+      "get": {
+        "summary": "Get notifications duration graph data",
+        "tags": [
+          "Notifications"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "$ref": "#/components/schemas/Period"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "completed",
+                "failed",
+                "all"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DurationGraphDataResponse"
                 }
               }
             }
@@ -5753,9 +6012,9 @@
         }
       }
     },
-    "/api/mails/graph": {
+    "/api/mails/graph/count": {
       "get": {
-        "summary": "Get mails graph data",
+        "summary": "Get mails count graph data",
         "tags": [
           "Mails"
         ],
@@ -5816,7 +6075,78 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GraphDataResponse"
+                  "$ref": "#/components/schemas/CountGraphDataResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/mails/graph/duration": {
+      "get": {
+        "summary": "Get mails duration graph data",
+        "tags": [
+          "Mails"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "$ref": "#/components/schemas/Period"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "completed",
+                "failed",
+                "all"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DurationGraphDataResponse"
                 }
               }
             }
@@ -6051,9 +6381,9 @@
         }
       }
     },
-    "/api/exceptions/graph": {
+    "/api/exceptions/graph/count": {
       "get": {
-        "summary": "Get exceptions graph data",
+        "summary": "Get exceptions count graph data",
         "tags": [
           "Exceptions"
         ],
@@ -6114,7 +6444,78 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GraphDataResponse"
+                  "$ref": "#/components/schemas/CountGraphDataResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exceptions/graph/duration": {
+      "get": {
+        "summary": "Get exceptions duration graph data",
+        "tags": [
+          "Exceptions"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "$ref": "#/components/schemas/Period"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all",
+                "unhandledRejection",
+                "uncaughtException"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DurationGraphDataResponse"
                 }
               }
             }
@@ -6351,9 +6752,9 @@
         }
       }
     },
-    "/api/jobs/graph": {
+    "/api/jobs/graph/count": {
       "get": {
-        "summary": "Get jobs graph data",
+        "summary": "Get jobs count graph data",
         "tags": [
           "Jobs"
         ],
@@ -6416,7 +6817,80 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GraphDataResponse"
+                  "$ref": "#/components/schemas/CountGraphDataResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/jobs/graph/duration": {
+      "get": {
+        "summary": "Get jobs duration graph data",
+        "tags": [
+          "Jobs"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "$ref": "#/components/schemas/Period"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "queue",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DurationGraphDataResponse"
                 }
               }
             }
@@ -6653,9 +7127,9 @@
         }
       }
     },
-    "/api/schedules/graph": {
+    "/api/schedules/graph/count": {
       "get": {
-        "summary": "Get schedules graph data",
+        "summary": "Get schedules count graph data",
         "tags": [
           "Schedules"
         ],
@@ -6718,7 +7192,80 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GraphDataResponse"
+                  "$ref": "#/components/schemas/CountGraphDataResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/schedules/graph/duration": {
+      "get": {
+        "summary": "Get schedules duration graph data",
+        "tags": [
+          "Schedules"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "$ref": "#/components/schemas/Period"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "groupFilter",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DurationGraphDataResponse"
                 }
               }
             }
@@ -6955,9 +7502,9 @@
         }
       }
     },
-    "/api/https/graph": {
+    "/api/https/graph/count": {
       "get": {
-        "summary": "Get https graph data",
+        "summary": "Get https count graph data",
         "tags": [
           "Https"
         ],
@@ -7020,7 +7567,80 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GraphDataResponse"
+                  "$ref": "#/components/schemas/CountGraphDataResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/https/graph/duration": {
+      "get": {
+        "summary": "Get https duration graph data",
+        "tags": [
+          "Https"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "$ref": "#/components/schemas/Period"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "2xx",
+                "3xx",
+                "4xx",
+                "5xx",
+                "all"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DurationGraphDataResponse"
                 }
               }
             }
@@ -7256,9 +7876,9 @@
         }
       }
     },
-    "/api/cache/graph": {
+    "/api/cache/graph/count": {
       "get": {
-        "summary": "Get cache graph data",
+        "summary": "Get cache count graph data",
         "tags": [
           "Cache"
         ],
@@ -7320,7 +7940,79 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GraphDataResponse"
+                  "$ref": "#/components/schemas/CountGraphDataResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cache/graph/duration": {
+      "get": {
+        "summary": "Get cache duration graph data",
+        "tags": [
+          "Cache"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "$ref": "#/components/schemas/Period"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "hits",
+                "misses",
+                "writes",
+                "all"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DurationGraphDataResponse"
                 }
               }
             }
@@ -7556,9 +8248,9 @@
         }
       }
     },
-    "/api/logs/graph": {
+    "/api/logs/graph/count": {
       "get": {
-        "summary": "Get logs graph data",
+        "summary": "Get logs count graph data",
         "tags": [
           "Logs"
         ],
@@ -7620,7 +8312,79 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GraphDataResponse"
+                  "$ref": "#/components/schemas/CountGraphDataResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/logs/graph/duration": {
+      "get": {
+        "summary": "Get logs duration graph data",
+        "tags": [
+          "Logs"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "$ref": "#/components/schemas/Period"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "error",
+                "warning",
+                "info",
+                "all"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DurationGraphDataResponse"
                 }
               }
             }
@@ -7855,9 +8619,9 @@
         }
       }
     },
-    "/api/views/graph": {
+    "/api/views/graph/count": {
       "get": {
-        "summary": "Get views graph data",
+        "summary": "Get views count graph data",
         "tags": [
           "Views"
         ],
@@ -7918,7 +8682,78 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GraphDataResponse"
+                  "$ref": "#/components/schemas/CountGraphDataResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/views/graph/duration": {
+      "get": {
+        "summary": "Get views duration graph data",
+        "tags": [
+          "Views"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "$ref": "#/components/schemas/Period"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "completed",
+                "failed",
+                "all"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DurationGraphDataResponse"
                 }
               }
             }
@@ -8153,9 +8988,9 @@
         }
       }
     },
-    "/api/models/graph": {
+    "/api/models/graph/count": {
       "get": {
-        "summary": "Get models graph data",
+        "summary": "Get models count graph data",
         "tags": [
           "Models"
         ],
@@ -8216,7 +9051,78 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GraphDataResponse"
+                  "$ref": "#/components/schemas/CountGraphDataResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/models/graph/duration": {
+      "get": {
+        "summary": "Get models duration graph data",
+        "tags": [
+          "Models"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "$ref": "#/components/schemas/Period"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "completed",
+                "failed",
+                "all"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DurationGraphDataResponse"
                 }
               }
             }

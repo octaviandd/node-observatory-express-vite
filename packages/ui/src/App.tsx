@@ -35,6 +35,8 @@ export default function MainLayout() {
       });
   };
 
+  console.log('hit')
+
   return (
     <SidebarProvider>
       <AppSidebar />

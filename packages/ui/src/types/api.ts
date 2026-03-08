@@ -54,14 +54,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/requests/graph": {
+    "/api/requests/graph/count": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get requests graph data */
+        /** Get requests count graph data */
         get: {
             parameters: {
                 query?: {
@@ -84,7 +84,50 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["GraphDataResponse"];
+                        "application/json": components["schemas"]["CountGraphDataResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/requests/graph/duration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get requests duration graph data */
+        get: {
+            parameters: {
+                query?: {
+                    offset?: number;
+                    limit?: number;
+                    period?: components["schemas"]["Period"];
+                    q?: string;
+                    key?: string;
+                    status?: "2xx" | "3xx" | "4xx" | "5xx" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DurationGraphDataResponse"];
                     };
                 };
             };
@@ -269,14 +312,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/queries/graph": {
+    "/api/queries/graph/count": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get queries graph data */
+        /** Get queries count graph data */
         get: {
             parameters: {
                 query?: {
@@ -299,7 +342,50 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["GraphDataResponse"];
+                        "application/json": components["schemas"]["CountGraphDataResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/queries/graph/duration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get queries duration graph data */
+        get: {
+            parameters: {
+                query?: {
+                    offset?: number;
+                    limit?: number;
+                    period?: components["schemas"]["Period"];
+                    q?: string;
+                    key?: string;
+                    status?: "completed" | "failed" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DurationGraphDataResponse"];
                     };
                 };
             };
@@ -484,14 +570,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/notifications/graph": {
+    "/api/notifications/graph/count": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get notifications graph data */
+        /** Get notifications count graph data */
         get: {
             parameters: {
                 query?: {
@@ -514,7 +600,50 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["GraphDataResponse"];
+                        "application/json": components["schemas"]["CountGraphDataResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notifications/graph/duration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get notifications duration graph data */
+        get: {
+            parameters: {
+                query?: {
+                    offset?: number;
+                    limit?: number;
+                    period?: components["schemas"]["Period"];
+                    q?: string;
+                    key?: string;
+                    status?: "completed" | "failed" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DurationGraphDataResponse"];
                     };
                 };
             };
@@ -699,14 +828,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/mails/graph": {
+    "/api/mails/graph/count": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get mails graph data */
+        /** Get mails count graph data */
         get: {
             parameters: {
                 query?: {
@@ -729,7 +858,50 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["GraphDataResponse"];
+                        "application/json": components["schemas"]["CountGraphDataResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/mails/graph/duration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get mails duration graph data */
+        get: {
+            parameters: {
+                query?: {
+                    offset?: number;
+                    limit?: number;
+                    period?: components["schemas"]["Period"];
+                    q?: string;
+                    key?: string;
+                    status?: "completed" | "failed" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DurationGraphDataResponse"];
                     };
                 };
             };
@@ -914,14 +1086,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/exceptions/graph": {
+    "/api/exceptions/graph/count": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get exceptions graph data */
+        /** Get exceptions count graph data */
         get: {
             parameters: {
                 query?: {
@@ -944,7 +1116,50 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["GraphDataResponse"];
+                        "application/json": components["schemas"]["CountGraphDataResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/exceptions/graph/duration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get exceptions duration graph data */
+        get: {
+            parameters: {
+                query?: {
+                    offset?: number;
+                    limit?: number;
+                    period?: components["schemas"]["Period"];
+                    q?: string;
+                    key?: string;
+                    status?: "all" | "unhandledRejection" | "uncaughtException";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DurationGraphDataResponse"];
                     };
                 };
             };
@@ -1130,14 +1345,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/jobs/graph": {
+    "/api/jobs/graph/count": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get jobs graph data */
+        /** Get jobs count graph data */
         get: {
             parameters: {
                 query?: {
@@ -1161,7 +1376,51 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["GraphDataResponse"];
+                        "application/json": components["schemas"]["CountGraphDataResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/jobs/graph/duration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get jobs duration graph data */
+        get: {
+            parameters: {
+                query?: {
+                    offset?: number;
+                    limit?: number;
+                    period?: components["schemas"]["Period"];
+                    q?: string;
+                    key?: string;
+                    status?: string;
+                    queue?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DurationGraphDataResponse"];
                     };
                 };
             };
@@ -1347,14 +1606,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/schedules/graph": {
+    "/api/schedules/graph/count": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get schedules graph data */
+        /** Get schedules count graph data */
         get: {
             parameters: {
                 query?: {
@@ -1378,7 +1637,51 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["GraphDataResponse"];
+                        "application/json": components["schemas"]["CountGraphDataResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/schedules/graph/duration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get schedules duration graph data */
+        get: {
+            parameters: {
+                query?: {
+                    offset?: number;
+                    limit?: number;
+                    period?: components["schemas"]["Period"];
+                    q?: string;
+                    key?: string;
+                    status?: string;
+                    groupFilter?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DurationGraphDataResponse"];
                     };
                 };
             };
@@ -1563,14 +1866,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/https/graph": {
+    "/api/https/graph/count": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get https graph data */
+        /** Get https count graph data */
         get: {
             parameters: {
                 query?: {
@@ -1593,7 +1896,50 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["GraphDataResponse"];
+                        "application/json": components["schemas"]["CountGraphDataResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/https/graph/duration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get https duration graph data */
+        get: {
+            parameters: {
+                query?: {
+                    offset?: number;
+                    limit?: number;
+                    period?: components["schemas"]["Period"];
+                    q?: string;
+                    key?: string;
+                    status?: "2xx" | "3xx" | "4xx" | "5xx" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DurationGraphDataResponse"];
                     };
                 };
             };
@@ -1778,14 +2124,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/cache/graph": {
+    "/api/cache/graph/count": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get cache graph data */
+        /** Get cache count graph data */
         get: {
             parameters: {
                 query?: {
@@ -1808,7 +2154,50 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["GraphDataResponse"];
+                        "application/json": components["schemas"]["CountGraphDataResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/cache/graph/duration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get cache duration graph data */
+        get: {
+            parameters: {
+                query?: {
+                    offset?: number;
+                    limit?: number;
+                    period?: components["schemas"]["Period"];
+                    q?: string;
+                    key?: string;
+                    status?: "hits" | "misses" | "writes" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DurationGraphDataResponse"];
                     };
                 };
             };
@@ -1993,14 +2382,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/logs/graph": {
+    "/api/logs/graph/count": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get logs graph data */
+        /** Get logs count graph data */
         get: {
             parameters: {
                 query?: {
@@ -2023,7 +2412,50 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["GraphDataResponse"];
+                        "application/json": components["schemas"]["CountGraphDataResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/logs/graph/duration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get logs duration graph data */
+        get: {
+            parameters: {
+                query?: {
+                    offset?: number;
+                    limit?: number;
+                    period?: components["schemas"]["Period"];
+                    q?: string;
+                    key?: string;
+                    status?: "error" | "warning" | "info" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DurationGraphDataResponse"];
                     };
                 };
             };
@@ -2208,14 +2640,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/views/graph": {
+    "/api/views/graph/count": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get views graph data */
+        /** Get views count graph data */
         get: {
             parameters: {
                 query?: {
@@ -2238,7 +2670,50 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["GraphDataResponse"];
+                        "application/json": components["schemas"]["CountGraphDataResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/views/graph/duration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get views duration graph data */
+        get: {
+            parameters: {
+                query?: {
+                    offset?: number;
+                    limit?: number;
+                    period?: components["schemas"]["Period"];
+                    q?: string;
+                    key?: string;
+                    status?: "completed" | "failed" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DurationGraphDataResponse"];
                     };
                 };
             };
@@ -2423,14 +2898,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/models/graph": {
+    "/api/models/graph/count": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get models graph data */
+        /** Get models count graph data */
         get: {
             parameters: {
                 query?: {
@@ -2453,7 +2928,50 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["GraphDataResponse"];
+                        "application/json": components["schemas"]["CountGraphDataResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/models/graph/duration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get models duration graph data */
+        get: {
+            parameters: {
+                query?: {
+                    offset?: number;
+                    limit?: number;
+                    period?: components["schemas"]["Period"];
+                    q?: string;
+                    key?: string;
+                    status?: "completed" | "failed" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DurationGraphDataResponse"];
                     };
                 };
             };
@@ -3241,9 +3759,8 @@ export interface components {
             average?: number;
             p95?: number;
         };
-        GraphDataResponse: {
+        CountGraphDataResponse: {
             countFormattedData: Record<string, never>[];
-            durationFormattedData: Record<string, never>;
             count: string;
             indexCountOne: string;
             indexCountTwo: string;
@@ -3253,6 +3770,15 @@ export interface components {
             indexCountSix?: string;
             indexCountSeven?: string;
             indexCountEight?: string;
+        };
+        DurationGraphDataResponse: {
+            durationFormattedData: {
+                durations: number[];
+                avgDuration: number;
+                p95: number;
+                count: number;
+                label: string;
+            }[] | Record<string, never>;
             shortest: string;
             longest: string;
             average: string;

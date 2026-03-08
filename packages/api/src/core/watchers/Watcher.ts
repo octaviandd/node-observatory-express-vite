@@ -5,9 +5,12 @@ interface Watcher<T extends WatcherType = WatcherType> {
   indexTable(
     req: ObservatoryBoardRequest,
   ): Promise<ApiResponse<TableDataResponse<T, "instance" | "group">>>;
-  indexGraph(
+  countGraph(
     req: ObservatoryBoardRequest,
-  ): Promise<ApiResponse<GraphDataResponse>>;
+  ): Promise<ApiResponse<CountGraphDataResponse>>;
+  durationGraph(
+    req: ObservatoryBoardRequest,
+  ): Promise<ApiResponse<DurationGraphDataResponse>>;
   view(req: ObservatoryBoardRequest): Promise<ApiResponse<ViewDataResponse>>;
   insertRedisStream(entry: BaseLogEntry): Promise<void>;
   stop(): void;

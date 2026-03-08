@@ -83,7 +83,6 @@ export function patchExpressExports(exports: any): any {
         (req.originalUrl.includes("/ui") ||
           /\/api\/(requests|queries|notifications|mails|exceptions|jobs|schedules|https?|cache|logs|views|models)/.test(req.originalUrl))
       ) {
-        console.log("HIT")
         return originalAppHandle.call(this, req, res, next);
       }
 
@@ -105,6 +104,7 @@ export function patchExpressExports(exports: any): any {
         const store = requestLocalStorage.getStore()!;
 
         store.set("requestId", uuidv4());
+        store.set("startTime", performance.now());
 
         // Capture request payload
         const originalReqOn = req.on;
@@ -147,7 +147,7 @@ export function patchExpressExports(exports: any): any {
             finalStore.set("logged", true);
 
             const endTime = performance.now();
-            const storedStartTime = finalStore.get("startTime") || endTime;
+            const storedStartTime = finalStore.get("startTime");
             let responseSize = finalStore.get("totalWrittenBytes") || 0;
             const wasSendUsed = finalStore.get("responseSizeMeasuredBySend") || false;
             const endChunkSize = chunk ? getByteLength(chunk, typeof encoding === "string" ? encoding : "utf8") : 0;

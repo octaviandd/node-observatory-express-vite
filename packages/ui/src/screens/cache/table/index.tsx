@@ -3,7 +3,7 @@
 import { DatabaseZap } from "lucide-react";
 import { InstanceTable } from "./instance";
 import { GroupTable } from "./group";
-import { useTableDataContext } from "@/hooks/useTableData";
+import { useTableData } from "@/hooks/useTableData";
 import { CacheInstanceResponse, CacheGroupResponse } from "@/hooks/useApiTyped";
 import { SearchInput } from "@/components/ui/search-input";
 import { TableLayout } from "@/components/ui/layout/table-layout";
@@ -27,7 +27,7 @@ export default function CacheIndexTable() {
     setInputValue,
     setInstanceStatusType,
     loadMore,
-  } = useTableDataContext();
+  } = useTableData({ key: "cache", defaultInstanceStatusType: "all" });
 
   const count = index === "instance" ? instanceDataCount : groupDataCount;
   const label = index === "instance" ? "Transaction" : "Key";
