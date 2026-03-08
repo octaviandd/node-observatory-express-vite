@@ -78,6 +78,7 @@ function validatePeriod(period: string | undefined): Period {
 
   return period as Period;
 }
+
 function createBaseFilterExtractor(
   req: ObservatoryBoardRequest,
 ): WatcherFilters {
@@ -91,6 +92,7 @@ function createBaseFilterExtractor(
     isTable: req.query.table === "true",
     index: req.query.index as IndexType,
     key: req.query.key ? decodeURIComponent(req.query.key as string) : undefined,
+    status: req.query.status as string,
   };
 }
 
@@ -110,56 +112,43 @@ export const WATCHER_CONFIGS = {
   exception: {
     type: "exception" as const,
     graphMetrics: ["unhandledRejection", "uncaughtException"] as const,
-    filterExtractor: createFilterExtractor<ExceptionFilters>((req) => ({
-      type: req.query.status as ExceptionFilters["type"],
-    })),
+    filterExtractor: createFilterExtractor<ExceptionFilters>((req) => ({})),
   } satisfies WatcherConfig<"exception", ExceptionFilters>,
 
   cache: {
     type: "cache" as const,
     graphMetrics: ["hits", "writes", "misses"] as const,
-    filterExtractor: createFilterExtractor<CacheFilters>((req) => ({
-      type: req.query.status as CacheFilters["type"],
-    })),
+    filterExtractor: createFilterExtractor<CacheFilters>((req) => ({})),
   } satisfies WatcherConfig<"cache", CacheFilters>,
 
   request: {
     type: "request" as const,
     graphMetrics: ["count_200", "count_400", "count_500"] as const,
-    filterExtractor: createFilterExtractor<RequestFilters>((req) => ({
-      status: req.query.status as RequestFilters["status"],
-    })),
+    filterExtractor: createFilterExtractor<RequestFilters>((req) => ({})),
   } satisfies WatcherConfig<"request", RequestFilters>,
 
   query: {
     type: "query" as const,
     graphMetrics: ["completed", "failed"] as const,
-    filterExtractor: createFilterExtractor<QueryFilters>((req) => ({
-      status: req.query.status as string,
-    })),
+    filterExtractor: createFilterExtractor<QueryFilters>((req) => ({})),
   } satisfies WatcherConfig<"query", QueryFilters>,
 
   notification: {
     type: "notification" as const,
     graphMetrics: ["completed", "failed"] as const,
-    filterExtractor: createFilterExtractor<NotificationFilters>((req) => ({
-      status: req.query.status as NotificationFilters["status"],
-    })),
+    filterExtractor: createFilterExtractor<NotificationFilters>((req) => ({})),
   } satisfies WatcherConfig<"notification", NotificationFilters>,
 
   mail: {
     type: "mail" as const,
     graphMetrics: ["completed", "failed"] as const,
-    filterExtractor: createFilterExtractor<MailFilters>((req) => ({
-      status: req.query.status as MailFilters["status"],
-    })),
+    filterExtractor: createFilterExtractor<MailFilters>((req) => ({})),
   } satisfies WatcherConfig<"mail", MailFilters>,
 
   job: {
     type: "job" as const,
     graphMetrics: ["completed", "released", "failed"] as const,
     filterExtractor: createFilterExtractor<JobFilters>((req) => ({
-      status: req.query.status as JobFilters["status"],
       queue: req.query.queue as JobFilters["queue"],
     })),
   } satisfies WatcherConfig<"job", JobFilters>,
@@ -168,7 +157,6 @@ export const WATCHER_CONFIGS = {
     type: "schedule" as const,
     graphMetrics: ["completed", "failed"] as const,
     filterExtractor: createFilterExtractor<ScheduleFilters>((req) => ({
-      status: req.query.status as ScheduleFilters["status"],
       groupFilter: req.query.groupFilter as ScheduleFilters["groupFilter"],
     })),
   } satisfies WatcherConfig<"schedule", ScheduleFilters>,
@@ -176,9 +164,7 @@ export const WATCHER_CONFIGS = {
   http: {
     type: "http" as const,
     graphMetrics: ["count_200", "count_400", "count_500"] as const,
-    filterExtractor: createFilterExtractor<RequestFilters>((req) => ({
-      status: req.query.status as RequestFilters["status"],
-    })),
+    filterExtractor: createFilterExtractor<RequestFilters>((req) => ({})),
   } satisfies WatcherConfig<"http", RequestFilters>,
 
   log: {
@@ -192,17 +178,13 @@ export const WATCHER_CONFIGS = {
   view: {
     type: "view" as const,
     graphMetrics: ["completed", "failed"] as const,
-    filterExtractor: createFilterExtractor<ViewFilters>((req) => ({
-      status: req.query.status as ViewFilters["status"],
-    })),
+    filterExtractor: createFilterExtractor<ViewFilters>((req) => ({})),
   } satisfies WatcherConfig<"view", ViewFilters>,
 
   model: {
     type: "model" as const,
     graphMetrics: ["completed", "failed"] as const,
-    filterExtractor: createFilterExtractor<ModelFilters>((req) => ({
-      status: req.query.status as ModelFilters["status"],
-    })),
+    filterExtractor: createFilterExtractor<ModelFilters>((req) => ({})),
   } satisfies WatcherConfig<"model", ModelFilters>,
 } as const;
 

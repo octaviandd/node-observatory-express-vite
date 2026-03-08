@@ -27,7 +27,7 @@ export default function ModelsIndexTable() {
     setInstanceStatusType,
     setInputValue,
     loadMore,
-  } = useTableData({ key: "models", defaultInstanceStatusType: "all" });
+  } = useTableData({ key: "models" });
 
   const count = index === "instance" ? instanceDataCount : groupDataCount;
   const label = index === "instance" ? "Instance" : "Model";

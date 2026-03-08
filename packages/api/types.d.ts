@@ -61,6 +61,7 @@ interface WatcherFilters {
   isTable: boolean;
   index: IndexType;
   key?: string;
+  status?: string;
 }
 
 interface IndexedFilters extends WatcherFilters {

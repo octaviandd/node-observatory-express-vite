@@ -91,7 +91,6 @@ async function fetcher<T>(endpoint: string, options?: RequestInit): Promise<T> {
     } catch {
       errorData = await response.text();
     }
-    console.log(response);
 
     throw new ApiError(
       `API Error: ${response.status} ${response.statusText}`,

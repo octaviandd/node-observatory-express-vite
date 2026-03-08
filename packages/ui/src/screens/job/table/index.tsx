@@ -26,10 +26,10 @@ export default function JobsIndexTable() {
     setInstanceStatusType,
     setInputValue,
     loadMore,
-  } = useTableData({ key: "jobs", defaultInstanceStatusType: "all" });
+  } = useTableData({ key: "jobs" });
 
   const count = index === "instance" ? instanceDataCount : groupDataCount;
-  const label = index === "group" ? "Queue" : "ATTEMPT";
+  const label = index === "group" ? "Queue" : "Attempts";
 
   return (
     <TableLayout type="jobs">

@@ -27,7 +27,7 @@ export default function ViewsIndexTable() {
     setInstanceStatusType,
     setInputValue,
     loadMore,
-  } = useTableData({ key: "views", defaultInstanceStatusType: "all" });
+  } = useTableData({ key: "views" });
 
   const count = index === "instance" ? instanceDataCount : groupDataCount;
   const label = index === "instance" ? "View" : "Path";

@@ -1,10 +1,11 @@
+import { memo } from "react";
 import { StatsCard } from "@/components/ui/cards/stats-card"
 import { CountGraph } from "@/components/ui/graphs/count-graph"
 import { DurationGraph } from "@/components/ui/graphs/duration-graph";
 import { StatsGrid } from "@/components/ui/stats-grid"
-import { useHttps } from "@/hooks/useApiTyped";
+import { useCountGraphData, useDurationGraphData } from "@/hooks/useGraphData";
 
-const REQUEST_BAR_DATA = [
+const HTTP_BAR_DATA = [
   {
     dataKey: "count_200",
     name: "1/2/3XX",
@@ -17,49 +18,65 @@ const REQUEST_BAR_DATA = [
   { dataKey: "count_500", name: "5XX", stackId: "c", fill: "#ef4444" },
 ];
 
-export const Graphs = () => {
-  const { data, isLoading, isError } = useHttps.useGraph();
+// Memoized HTTP count card - fetches its own data
+const CountCard = memo(() => {
+  const { data } = useCountGraphData({ 
+    key: "https", 
+  });
 
-  if (isLoading) {
-    return "Loading...";
-  }
-
-  if (!data) {
-    return "Error";
-  }
+  if (!data) return null;
 
   return (
-    <StatsGrid columns={2}>
-      <StatsCard
-        title="REQUESTS"
-        count={data.count}
-        badges={[
-          { label: "1/2/3XX", value: data.indexCountOne, variant: "secondary" },
-          { label: "4XX", value: data.indexCountTwo, variant: "warning" },
-          { label: "5XX", value: data.indexCountThree, variant: "error" },
-        ]}
-        graph={
-          <CountGraph
-            data={data.countFormattedData}
-            barData={REQUEST_BAR_DATA}
-          />
-        }
-      />
+    <StatsCard
+      title="HTTP REQUESTS"
+      count={data.count}
+      badges={[
+        { label: "1/2/3XX", value: data.indexCountOne, variant: "secondary" },
+        { label: "4XX", value: data.indexCountTwo, variant: "warning" },
+        { label: "5XX", value: data.indexCountThree, variant: "error" },
+      ]}
+      graph={
+        <CountGraph
+          data={data.countFormattedData}
+          barData={HTTP_BAR_DATA}
+        />
+      }
+    />
+  );
+});
 
-      <StatsCard
-        title="DURATION"
-        count={data.count}
-        badges={[
-          { label: "1/2/3XX", value: data.indexCountOne, variant: "secondary" },
-          { label: "4XX", value: data.indexCountTwo, variant: "warning" },
-          { label: "5XX", value: data.indexCountThree, variant: "error" },
-        ]}
-        graph={
-          <DurationGraph
-            data={data.durationFormattedData}
-          />
-        }
-      />
+CountCard.displayName = 'CountCard';
+
+// Memoized duration card - fetches its own data
+const DurationCard = memo(() => {
+  const { data } = useDurationGraphData({ 
+    key: "https", 
+  });
+
+  if (!data) return null;
+
+  return (
+    <StatsCard
+      title="DURATION"
+      count={`${data.shortest} – ${data.longest}`}
+      badges={[
+        { label: "AVG", value: data.average, variant: "secondary" },
+        { label: "P95", value: data.p95, variant: "warning" },
+      ]}
+      graph={
+        <DurationGraph data={data.durationFormattedData} />
+      }
+    />
+  );
+});
+
+DurationCard.displayName = 'DurationCard';
+
+export const Graphs = () => {
+  return (
+    <StatsGrid columns={2}>
+      <CountCard />
+      <DurationCard />
     </StatsGrid>
-  )
-}
+  );
+};

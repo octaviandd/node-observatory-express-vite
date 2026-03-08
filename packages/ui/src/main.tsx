@@ -60,8 +60,6 @@ const router = createBrowserRouter(
 
 const scrollAreaClassName = "h-[calc(100vh-0.1px)]";
 
-console.log('hit here');
-
 createRoot(document.getElementById("node-observatory") as HTMLDivElement).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>

@@ -70,7 +70,6 @@ const DurationCard = memo(() => {
 
 
 export const Graphs = () => {
-  console.log('hit')
   return (
     <StatsGrid columns={2}>
       <CountCard />

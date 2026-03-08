@@ -1,6 +1,5 @@
 /** @format */
 
-import { useState, useEffect } from "react";
 import { RequestCrumbs } from "./crumbs";
 import { RequestPreviewInfo } from "./info";
 import { Details } from "./details";
@@ -11,94 +10,14 @@ import { Card, CardContent } from "@/components/ui/base/card";
 import { Skeleton } from "@/components/ui/base/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/base/alert";
 import { RequestPreviewTabs } from "./tabs";
-import { RequestInstanceResponse, NotificationInstanceResponse, MailInstanceResponse, LogInstanceResponse, QueryInstanceResponse, HttpClientInstanceResponse, JobInstanceResponse, CacheInstanceResponse, ExceptionInstanceResponse, ViewInstanceResponse, ModelInstanceResponse } from "@/hooks/useApiTyped";
+import { useRequests } from "@/hooks/useApiTyped";
 
 export default function RequestPreview() {
-  const params = useParams();
-  const [data, setData] = useState<{
-    request: RequestInstanceResponse | null;
-    notifications: NotificationInstanceResponse[] | [];
-    mails: MailInstanceResponse[] | [];
-    logs: LogInstanceResponse[] | [];
-    queries: QueryInstanceResponse[] | [];
-    https: HttpClientInstanceResponse[] | [];
-    jobs: JobInstanceResponse[] | [];
-    caches: CacheInstanceResponse[] | [];
-    exceptions: ExceptionInstanceResponse[] | [];
-    views: ViewInstanceResponse[] | [];
-    models: ModelInstanceResponse[] | [];
-  }>({
-    request: null,
-    notifications: [],
-    mails: [],
-    logs: [],
-    queries: [],
-    https: [],
-    jobs: [],
-    caches: [],
-    exceptions: [],
-    views: [],
-    models: [],
-  });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { id } = useParams<{ id: string }>();
+  
+  const { data, isLoading, isError } = useRequests.useGet(id!);
 
-  useEffect(() => {
-    getItem();
-  }, [params.id]);
-
-  const getItem = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(
-        //@ts-ignore
-        `${window.SERVER_CONFIG.base}/api/requests/${params.id}`,
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch request data");
-      }
-      const result = await response.json();
-      const {
-        request,
-        query,
-        http,
-        job,
-        cache,
-        notification,
-        mail,
-        log,
-        exception,
-        view,
-        model,
-      } = result;
-
-      if (!request?.[0]) {
-        throw new Error("Request data not found");
-      }
-
-      setData({
-        request: request[0],
-        queries: query ?? [],
-        https: http ?? [],
-        jobs: job ?? [],
-        caches: cache ?? [],
-        notifications: notification ?? [],
-        mails: mail ?? [],
-        logs: log ?? [],
-        exceptions: exception ?? [],
-        views: view ?? [],
-        models: model ?? [],
-      });
-    } catch (error) {
-      console.error("Error fetching request data:", error);
-      setError(error instanceof Error ? error.message : "An error occurred");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-[200px] w-full" />
@@ -112,42 +31,74 @@ export default function RequestPreview() {
     );
   }
 
-  if (error) {
+  if (isError || !data) {
     return (
       <Alert variant="destructive">
-        <AlertDescription>{error}</AlertDescription>
+        <AlertDescription>Failed to fetch request data</AlertDescription>
+      </Alert>
+    );
+  }
+
+  const request = data.request?.[0];
+  const queries = data.query ?? [];
+  const https = data.http ?? [];
+  const jobs = data.job ?? [];
+  const caches = data.cache ?? [];
+  const notifications = data.notification ?? [];
+  const mails = data.mail ?? [];
+  const logs = data.log ?? [];
+  const exceptions = data.exception ?? [];
+  const views = data.view ?? [];
+  const models = data.model ?? [];
+
+  if (!request) {
+    return (
+      <Alert variant="destructive">
+        <AlertDescription>Request data not found</AlertDescription>
       </Alert>
     );
   }
 
   return (
     <div className="flex flex-col gap-y-6">
-      {data.request && <RequestCrumbs request={data.request} />}
+      <RequestCrumbs request={request} />
 
       <Card>
         <CardContent className="grid grid-cols-2 gap-x-10 p-1">
-          {data.request && <RequestPreviewInfo request={data.request} />}
+          <RequestPreviewInfo request={request} />
           <Details
-            queries={data.queries}
-            caches={data.caches}
-            https={data.https}
-            jobs={data.jobs}
-            exceptions={data.exceptions}
-            views={data.views}
-            models={data.models}
+            queries={queries}
+            caches={caches}
+            https={https}
+            jobs={jobs}
+            exceptions={exceptions}
+            views={views}
+            models={models}
           />
-          {data.request && <RequestPreviewUser request={data.request} />}
+          <RequestPreviewUser request={request} />
           <RequestPreviewNotifications
-            mails={data.mails}
-            notifications={data.notifications}
-            logs={data.logs}
+            mails={mails}
+            notifications={notifications}
+            logs={logs}
           />
         </CardContent>
       </Card>
 
-      {data.request && (
-        <RequestPreviewTabs data={{ ...data, request: data.request }} />
-      )}
+      <RequestPreviewTabs 
+        data={{ 
+          request, 
+          notifications, 
+          mails, 
+          logs, 
+          queries, 
+          https, 
+          jobs, 
+          caches, 
+          exceptions, 
+          views, 
+          models 
+        }} 
+      />
     </div>
   );
 }

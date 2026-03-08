@@ -2,19 +2,19 @@
 import { RequestInstanceResponse } from "@/hooks/useApiTyped";
 import { BaseCard } from "./base-card";
 
-export default function RequestCard({
+export const RequestCard = ({
   item,
 }: {
   item: RequestInstanceResponse;
-}) {
+}) => {
   const duration = Number(item.content.duration);
   const formattedDuration =
     duration > 999 ? `${(duration / 1000).toFixed(2)}s` : `${duration}ms`;
 
   const content = {
-    method: item.content.method,
-    route: item.content.route,
-    statusCode: item.content.statusCode,
+    method: item.content.metadata.method,
+    route: item.content.data.route,
+    statusCode: item.content.data.statusCode,
     duration: formattedDuration,
   };
 
@@ -25,9 +25,9 @@ export default function RequestCard({
       content={content}
       linkPath={`/request/${item.uuid}`}
       language="json"
-      file={item.content.file || "unknown"}
-      line={item.content.line || "unknown"}
-      package={item.content.package || "unknown"}
+      file={item.content.location?.file || "unknown"}
+      line={item.content.location?.line || "unknown"}
+      package={item.content.metadata.package || "unknown"}
     />
   );
 }

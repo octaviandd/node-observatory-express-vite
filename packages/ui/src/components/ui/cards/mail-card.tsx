@@ -2,17 +2,17 @@
 import { MailInstanceResponse } from "@/hooks/useApiTyped";
 import { BaseCard } from "./base-card";
 
-export default function MailCard({ item }: { item: MailInstanceResponse }) {
+export const MailCard = ({ item }: { item: MailInstanceResponse }) => {
   return (
     <BaseCard
       date={item.created_at}
-      metadata={item.content.package}
+      metadata={item.content.metadata.package}
       content={{
-        from: item.content.from,
-        to: item.content.to,
+        from: item.content.data.from,
+        to: item.content.data.to,
       }}
-      file={item.content.file}
-      line={item.content.line}
+      file={item.content.location?.file as string}
+      line={item.content.location?.line as string}
       linkPath={`/mail/${item.uuid}`}
     />
   );

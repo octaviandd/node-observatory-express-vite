@@ -27,7 +27,7 @@ export default function MailsIndexTable() {
     setInstanceStatusType,
     setInputValue,
     loadMore,
-  } = useTableData({ key: "mails", defaultInstanceStatusType: "all" });
+  } = useTableData({ key: "mails" });
 
   const count = index === "instance" ? instanceDataCount : groupDataCount;
   const label = index === "instance" ? "Mail" : "Receiver";

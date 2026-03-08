@@ -3,13 +3,13 @@
 import { X } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import { StoreContext } from "@/store";
-import QueryCard from "@/components/ui/cards/query-card";
-import JobCard from "@/components/ui/cards/job-card";
-import LogCard from "@/components/ui/cards/log-card";
-import HttpCard from "@/components/ui/cards/http-card";
-import CacheCard from "@/components/ui/cards/cache-card";
-import NotificationCard from "@/components/ui/cards/notification-card";
-import MailCard from "@/components/ui/cards/mail-card";
+import {QueryCard} from "@/components/ui/cards/query-card";
+import {JobCard} from "@/components/ui/cards/job-card";
+import {LogCard} from "@/components/ui/cards/log-card";
+import {HttpCard} from "@/components/ui/cards/http-card";
+import {CacheCard} from "@/components/ui/cards/cache-card";
+import {NotificationCard} from "@/components/ui/cards/notification-card";
+import {MailCard} from "@/components/ui/cards/mail-card";
 import { Button } from "@/components/ui/base/button";
 import { ScrollArea } from "@/components/ui/base/scroll-area";
 import {
@@ -20,9 +20,9 @@ import {
 } from "@/components/ui/base/sheet";
 import { Separator } from "@/components/ui/base/separator";
 import { Badge } from "@/components/ui/base/badge";
-import RequestCard from "@/components/ui/cards/request-card";
-import ModelCard from "@/components/ui/cards/model-card";
-import ExceptionCard from "@/components/ui/cards/exception-card";
+import {RequestCard} from "@/components/ui/cards/request-card";
+import {ModelCard} from "@/components/ui/cards/model-card";
+import {ExceptionCard} from "@/components/ui/cards/exception-card";
 import { useResourceHooks, type ResourceKey } from "@/hooks/useApiTyped";
 
 type Props = {
@@ -84,7 +84,7 @@ export default function Drawer({ type }: Props) {
   ) => {
     if (items.length === 0) return null;
     return (
-      <>
+      <div className="my-5">
         <div className="flex items-center gap-2 px-6 mb-3">
           <span className="text-sm font-medium text-muted-foreground">
             {title}
@@ -93,13 +93,13 @@ export default function Drawer({ type }: Props) {
             {items.length}
           </Badge>
         </div>
-        <div className="flex flex-col gap-4 px-6">
+        <div className="flex flex-col gap-4 px-6 my-4">
           {items.map((item, index) => (
             <CardComponent key={index} item={item} />
           ))}
         </div>
         <Separator className="my-4" />
-      </>
+      </div>
     );
   };
 
@@ -131,7 +131,7 @@ export default function Drawer({ type }: Props) {
         {isLoading ? (
           <div className="p-6 text-muted-foreground">Loading...</div>
         ) : (
-          <ScrollArea className="h-[calc(100vh-5rem)]">
+          <ScrollArea className="h-[calc(100vh-5rem)] my-4">
             {hasNoData && (
               <div className="p-6 text-muted-foreground">No related data found</div>
             )}

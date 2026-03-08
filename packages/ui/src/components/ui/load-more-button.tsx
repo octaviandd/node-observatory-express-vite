@@ -19,7 +19,7 @@ export function LoadMoreButton({ message, onLoadMore }: LoadMoreButtonProps) {
           <Button
             variant="outline"
             onClick={onLoadMore}
-            className="text-black"
+            className="text-black dark:text-white"
           >
             Load older entries
           </Button>

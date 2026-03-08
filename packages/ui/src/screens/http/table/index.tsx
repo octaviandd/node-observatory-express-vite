@@ -27,7 +27,7 @@ export default function HttpIndexTable() {
     setInstanceStatusType,
     setInputValue,
     loadMore,
-  } = useTableData({ key: "https", defaultInstanceStatusType: "all" });
+  } = useTableData({ key: "https" });
 
   const count = index === "instance" ? instanceDataCount : groupDataCount;
   const label = index === "instance" ? "Request" : "Route";

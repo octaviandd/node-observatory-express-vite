@@ -7,14 +7,9 @@ class QueryWatcherSQL extends BaseBuilder {
   private getQueryStatusSQL(status: string | undefined): string {
     if (!status || status === "all") return "";
 
-    const mapping: Record<string, string> = {
-      select: "AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.sql')) LIKE '%SELECT%'",
-      insert: "AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.sql')) LIKE '%INSERT%'",
-      update: "AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.sql')) LIKE '%UPDATE%'",
-      delete: "AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.sql')) LIKE '%DELETE%'",
-    };
-
-    return mapping[status] || "";
+    // Use metadata.sqlType instead of parsing the SQL string
+    const sqlType = status.toUpperCase();
+    return `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.sqlType')) = '${sqlType}'`;
   }
 
   /**

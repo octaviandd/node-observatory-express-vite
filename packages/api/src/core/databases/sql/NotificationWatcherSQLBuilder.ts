@@ -16,13 +16,14 @@ class NotificationWatcherSQL extends BaseBuilder {
    * Data for the "Instance" (flat list) view
    */
   public getIndexTableDataByInstanceSQL(filters: any) {
-    const { limit, offset, channel, query, status } = filters;
+    const { limit, offset, key, query, status, period } = filters;
 
-    const channelSql = channel ? this.getEqualitySQL(channel, "channel") : "";
-    const querySql = query ? this.getInclusionSQL(query, "channel") : "";
+    const periodSql = period ? this.getPeriodSQL(period) : "";
+    const channelSql = key ? this.getEqualitySQL(key, "data.channel") : "";
+    const querySql = query ? this.getInclusionSQL(query, "data.channel") : "";
     const statusSql = this.getStatusSQL(status);
 
-    const whereClause = `WHERE type = 'notification' ${channelSql} ${querySql} ${statusSql}`;
+    const whereClause = `WHERE type = 'notification' ${periodSql} ${channelSql} ${querySql} ${statusSql}`;
 
     return {
       items: `SELECT * FROM observatory_entries ${whereClause} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset};`,
@@ -34,15 +35,15 @@ class NotificationWatcherSQL extends BaseBuilder {
    * Data for the "Grouped" (aggregated by channel) view
    */
   public getIndexTableDataByGroupSQL(filters: any) {
-    const { period, channel, query, limit, offset } = filters;
+    const { period, key, query, limit, offset } = filters;
 
     const timeSql = period ? this.getPeriodSQL(period) : "";
-    const channelSql = channel ? this.getEqualitySQL(channel, "channel") : "";
-    const querySql = query ? this.getInclusionSQL(query, "channel") : "";
+    const channelSql = key ? this.getEqualitySQL(key, "data.channel") : "";
+    const querySql = query ? this.getInclusionSQL(query, "data.channel") : "";
     const statusSql = this.getStatusSQL("all"); // Excludes pending
 
     const columns = [
-      "JSON_UNQUOTE(JSON_EXTRACT(content, '$.channel')) AS channel",
+      "JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.channel')) AS channel",
       "COUNT(*) as total",
       "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed",
       "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed",
@@ -62,7 +63,7 @@ class NotificationWatcherSQL extends BaseBuilder {
         GROUP BY channel
         ORDER BY MAX(created_at) DESC
         LIMIT ${limit} OFFSET ${offset};`,
-      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.channel'))) as total FROM observatory_entries ${whereClause};`,
+      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.channel'))) as total FROM observatory_entries ${whereClause};`,
     };
   }
 
@@ -70,18 +71,18 @@ class NotificationWatcherSQL extends BaseBuilder {
    * Logic for the Notification Graph (Aggregates + Rows)
    */
   public getIndexGraphDataSQL(filters: any) {
-    const { period, channel } = filters;
+    const { period, key, status } = filters;
     const periodSql = period ? this.getPeriodSQL(period) : "";
-    const channelSql = channel ? this.getEqualitySQL(channel, "channel") : "";
-    const statusSql = this.getStatusSQL("all"); // Excludes pending
+    const channelSql = key ? this.getEqualitySQL(key, "data.channel") : "";
+    const statusSql = this.getStatusSQL(status || "all"); // Excludes pending
 
     const aggregateColumns = [
       "COUNT(*) as total",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed",
       "CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest",
       "CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest",
       "CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average",
-      "SUM(CASE WHEN JSON_EXTRACT(content, '$.status') = 'completed' THEN 1 ELSE 0 END) as completed",
-      "SUM(CASE WHEN JSON_EXTRACT(content, '$.status') = 'failed' THEN 1 ELSE 0 END) as failed",
       this.getP95SQL("notification"),
       "NULL as created_at",
       "NULL as content",
@@ -89,9 +90,16 @@ class NotificationWatcherSQL extends BaseBuilder {
     ];
 
     const rowColumns = [
-      "NULL as total", "NULL as shortest", "NULL as longest", "NULL as average",
-      "NULL as completed", "NULL as failed", "NULL as p95",
-      "created_at", "content", "'row' as type"
+      "NULL as total",
+      "NULL as completed",
+      "NULL as failed",
+      "NULL as shortest",
+      "NULL as longest",
+      "NULL as average",
+      "NULL as p95",
+      "created_at",
+      "content",
+      "'row' as type"
     ];
 
     const whereClause = `WHERE type = 'notification' ${periodSql} ${channelSql} ${statusSql}`;

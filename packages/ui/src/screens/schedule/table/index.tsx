@@ -24,7 +24,7 @@ export default function ScheduledIndexTable() {
     message,
     setInstanceStatusType,
     loadMore,
-  } = useTableData({ key: "schedules", defaultInstanceStatusType: "all" });
+  } = useTableData({ key: "schedules" });
 
   const count = index === "instance" ? instanceDataCount : groupDataCount;
   const label = index === "instance" ? "Attempt" : "Schedule";

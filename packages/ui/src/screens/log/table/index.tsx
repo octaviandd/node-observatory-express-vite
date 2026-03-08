@@ -23,7 +23,7 @@ export default function LogsIndexTable() {
     message,
     setInputValue,
     loadMore,
-  } = useTableData({ key: "logs", defaultInstanceStatusType: "all" });
+  } = useTableData({ key: "logs" });
 
   const count = index === "instance" ? instanceDataCount : groupDataCount;
   const label = index === "instance" ? "Log" : "Source";

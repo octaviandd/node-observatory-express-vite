@@ -27,7 +27,7 @@ export default function QueryIndexTable() {
     setInstanceStatusType,
     setInputValue,
     loadMore,
-  } = useTableData({ key: "queries", defaultInstanceStatusType: "all" });
+  } = useTableData({ key: "queries" });
 
   const count = index === "instance" ? instanceDataCount : groupDataCount;
   const label = index === "instance" ? "Query" : "Endpoint";

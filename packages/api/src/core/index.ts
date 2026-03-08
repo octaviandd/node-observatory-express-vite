@@ -106,7 +106,6 @@ export async function createObserver(
       }),
     })
     .setErrorHandler((error: Error & { statusCode: HTTPStatus }) => {
-      console.log(error, 'hit please')
       return {
         status: error.statusCode || 500,
         body: {

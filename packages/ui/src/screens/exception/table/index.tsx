@@ -26,7 +26,7 @@ export default function ExceptionsIndexTable() {
     setInstanceStatusType,
     setInputValue,
     loadMore,
-  } = useTableData({ key: "exceptions", defaultInstanceStatusType: "all" });
+  } = useTableData({ key: "exceptions" });
 
   const label = index === "instance" ? "Exception" : "Type";
 

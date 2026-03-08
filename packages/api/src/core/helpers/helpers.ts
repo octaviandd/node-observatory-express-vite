@@ -164,7 +164,6 @@ export const processedDurationGraphData = (data: any[], period: string) => {
   }));
 
   data.forEach((entry: any) => {
-    console.log(entry)
     const createdAt = new Date(entry.created_at).getTime();
     // duration lives at the top level of the BaseLogEntry stored in content
     const duration = parseFloat(entry.content?.duration);

@@ -506,7 +506,6 @@ export abstract class BaseWatcher<
     req: ObservatoryBoardRequest,
   ): Promise<ApiResponse<Record<string, any>>> {
 
-    console.log(req.body)
     const { requestId, jobId, scheduleId } = req.body;
     const body = await this.getMetadata({ requestId, jobId, scheduleId });
 

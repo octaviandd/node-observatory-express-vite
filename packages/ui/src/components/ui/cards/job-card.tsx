@@ -3,12 +3,12 @@
 import { JobInstanceResponse } from "@/hooks/useApiTyped";
 import { BaseCard } from "./base-card";
 
-export default function JobCard({ item }: { item: JobInstanceResponse }) {
+export const JobCard = ({ item }: { item: JobInstanceResponse }) => {
   const content = {
     id: item.job_id,
-    queue: item.content.queue,
+    queue: item.content.data.queue,
     status: item.content.status,
-    method: item.content.method,
+    method: item.content.metadata.method,
   };
 
   return (
@@ -16,9 +16,9 @@ export default function JobCard({ item }: { item: JobInstanceResponse }) {
       date={item.created_at}
       metadata={item.content.duration || undefined}
       content={content}
-      file={item.content.file}
-      line={item.content.line}
-      package={item.content.package ?? "bull"}
+      file={item.content.location?.file as string}
+      line={item.content.location?.line as string}
+      package={item.content.metadata.package ?? "bull"}
       linkPath={`/job/${item.uuid}`}
     />
   );

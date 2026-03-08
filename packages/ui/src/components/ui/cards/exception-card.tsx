@@ -2,11 +2,11 @@
 import { ExceptionInstanceResponse } from "@/hooks/useApiTyped";
 import { BaseCard } from "./base-card";
 
-export default function ExceptionCard({
+export const ExceptionCard = ({
   item,
 }: {
   item: ExceptionInstanceResponse;
-}) {
+}) => {
   return (
     <BaseCard
       date={item.created_at}

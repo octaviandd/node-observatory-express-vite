@@ -7,22 +7,23 @@ class MailWatcherSQL extends BaseBuilder {
   private getStatusSQL(status: string | undefined): string {
     if (!status || status === "all") return "";
     
-    // Explicitly mapping to ensure only valid statuses are queried
     const value = status === "completed" ? "completed" : "failed";
-    return `AND JSON_EXTRACT(content, '$.status') = '${value}'`;
+    return `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = '${value}'`;
   }
 
   /**
    * Data for the "Instance" (flat list) view
    */
   public getIndexTableDataByInstanceSQL(filters: any) {
-    const { limit, offset, status, key, query } = filters;
+    const { limit, offset, status, key, query, period } = filters;
 
+    const periodSql = period ? this.getPeriodSQL(period) : "";
     const statusSql = this.getStatusSQL(status);
-    const mailToSql = key ? this.getInclusionSQL(key, "to") : "";
-    const querySql = query ? this.getInclusionSQL(query, "subject") : "";
+    // Use JSON_CONTAINS to search in the array
+    const mailToSql = key ? `AND JSON_CONTAINS(JSON_EXTRACT(content, '$.data.to'), '"${key}"')` : "";
+    const querySql = query ? this.getInclusionSQL(query, "data.subject") : "";
 
-    const whereClause = `WHERE type = 'mail' ${statusSql} ${mailToSql} ${querySql}`;
+    const whereClause = `WHERE type = 'mail' ${periodSql} ${statusSql} ${mailToSql} ${querySql}`;
 
     return {
       items: `SELECT * FROM observatory_entries ${whereClause} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset};`,
@@ -36,10 +37,11 @@ class MailWatcherSQL extends BaseBuilder {
   public getIndexTableDataByGroupSQL(filters: any) {
     const { offset, limit, period, query } = filters;
     const periodSql = period ? this.getPeriodSQL(period) : "";
-    const querySql = query ? this.getInclusionSQL(query, "subject") : "";
+    const querySql = query ? this.getInclusionSQL(query, "data.subject") : "";
 
     const columns = [
-      "JSON_UNQUOTE(JSON_EXTRACT(content, '$.to')) as mail_to",
+      // Extract first email from the to array
+      "JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.to[0]')) as mail_to",
       "COUNT(*) as total",
       "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed_count",
       "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as success_count",
@@ -59,7 +61,7 @@ class MailWatcherSQL extends BaseBuilder {
         GROUP BY mail_to
         ORDER BY total DESC
         LIMIT ${limit} OFFSET ${offset};`,
-      count: `SELECT COUNT(DISTINCT JSON_EXTRACT(content, '$.to')) as total FROM observatory_entries ${whereClause};`,
+      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.to[0]'))) as total FROM observatory_entries ${whereClause};`,
     };
   }
 
@@ -67,17 +69,18 @@ class MailWatcherSQL extends BaseBuilder {
    * Logic for the Mail Graph (Aggregate counts + Rows)
    */
   public getIndexGraphDataSQL(filters: any) {
-    const { period, key } = filters;
+    const { period, key, status } = filters;
     const periodSql = period ? this.getPeriodSQL(period) : "";
-    const keySql = key ? this.getEqualitySQL(key, "to") : "";
+    const statusSql = this.getStatusSQL(status);
+    const keySql = key ? `AND JSON_CONTAINS(JSON_EXTRACT(content, '$.data.to'), '"${key}"')` : "";
 
     const aggregateColumns = [
       "COUNT(*) as total",
-      "MIN(CAST(JSON_EXTRACT(content, '$.duration') AS DECIMAL)) as shortest",
-      "MAX(CAST(JSON_EXTRACT(content, '$.duration') AS DECIMAL)) as longest",
-      "AVG(CAST(JSON_EXTRACT(content, '$.duration') AS DECIMAL)) as average",
-      "SUM(CASE WHEN JSON_EXTRACT(content, '$.status') = 'completed' THEN 1 ELSE 0 END) as completed",
-      "SUM(CASE WHEN JSON_EXTRACT(content, '$.status') = 'failed' THEN 1 ELSE 0 END) as failed",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed",
+      "CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest",
+      "CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest",
+      "CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average",
       this.getP95SQL("mail"),
       "NULL as created_at",
       "NULL as content",
@@ -85,12 +88,19 @@ class MailWatcherSQL extends BaseBuilder {
     ];
 
     const rowColumns = [
-      "NULL as total", "NULL as shortest", "NULL as longest", "NULL as average",
-      "NULL as completed", "NULL as failed", "NULL as p95",
-      "created_at", "content", "'row' as type"
+      "NULL as total",
+      "NULL as completed",
+      "NULL as failed",
+      "NULL as shortest",
+      "NULL as longest",
+      "NULL as average",
+      "NULL as p95",
+      "created_at",
+      "content",
+      "'row' as type"
     ];
 
-    const whereClause = `WHERE type = 'mail' ${periodSql} ${keySql}`;
+    const whereClause = `WHERE type = 'mail' ${periodSql} ${statusSql} ${keySql}`;
 
     return `
       (SELECT ${aggregateColumns.join(", ")} FROM observatory_entries ${whereClause})

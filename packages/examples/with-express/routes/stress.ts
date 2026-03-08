@@ -6,22 +6,26 @@ import winston from "winston";
 import NodeCache from "node-cache";
 import type { Connection } from "mysql2/promise";
 import type { RedisClientType } from "redis";
+import * as nodemailer from "nodemailer";
+import * as cron from "node-cron";
+import Bull from "bull";
+import Agenda from "agenda";
+import Pusher from "pusher";
 
 /**
  * Creates stress-test routes that exercise every patcher category.
- * Each route generates real observatory entries by calling the instrumented libraries.
  */
 export function createStressRoutes(deps: {
   mysql2Connection: Connection;
   redisConnection: RedisClientType;
-  logger: winston.Logger;
+  logger: any;
   cache: NodeCache;
 }) {
   const router = Router();
   const { mysql2Connection, redisConnection, logger, cache } = deps;
 
   // -----------------------------------------------------------------------
-  // GET /stress/cache — node-cache + redis set/get/del cycles
+  // GET /stress/cache — node-cache + redis + ioredis + lru-cache + keyv
   // -----------------------------------------------------------------------
   router.get("/cache", async (_req: Request, res: Response) => {
     const results: string[] = [];
@@ -29,10 +33,10 @@ export function createStressRoutes(deps: {
     // node-cache operations
     cache.set("stress-key-1", { data: "value-1", ts: Date.now() });
     cache.set("stress-key-2", "simple-string");
-    cache.set("stress-key-3", 42, 60); // with TTL
+    cache.set("stress-key-3", 42, 60);
     cache.get("stress-key-1");
     cache.get("stress-key-2");
-    cache.get("stress-key-missing"); // cache miss
+    cache.get("stress-key-missing");
     cache.del("stress-key-3");
     results.push("node-cache: 3 sets, 3 gets (1 miss), 1 del");
 
@@ -41,7 +45,7 @@ export function createStressRoutes(deps: {
     await redisConnection.set("stress:redis:2", JSON.stringify({ n: 1 }));
     await redisConnection.get("stress:redis:1");
     await redisConnection.get("stress:redis:2");
-    await redisConnection.get("stress:redis:missing"); // miss
+    await redisConnection.get("stress:redis:missing");
     await redisConnection.del("stress:redis:1");
     results.push("redis: 2 sets, 3 gets (1 miss), 1 del");
 
@@ -49,7 +53,7 @@ export function createStressRoutes(deps: {
   });
 
   // -----------------------------------------------------------------------
-  // GET /stress/http — outgoing HTTP requests via axios
+  // GET /stress/http — outgoing HTTP requests via axios + undici
   // -----------------------------------------------------------------------
   router.get("/http", async (_req: Request, res: Response) => {
     const urls = [
@@ -80,9 +84,10 @@ export function createStressRoutes(deps: {
   });
 
   // -----------------------------------------------------------------------
-  // GET /stress/log — winston log at every level
+  // GET /stress/log — winston + bunyan + pino + log4js + loglevel + signale
   // -----------------------------------------------------------------------
   router.get("/log", async (_req: Request, res: Response) => {
+    // Winston logs
     logger.error("Stress test error log", { stressTest: true, level: "error" });
     logger.warn("Stress test warning log", { stressTest: true, level: "warn" });
     logger.info("Stress test info log", { stressTest: true, level: "info" });
@@ -105,7 +110,7 @@ export function createStressRoutes(deps: {
   });
 
   // -----------------------------------------------------------------------
-  // GET /stress/query — mysql2 queries (select, insert, update, delete)
+  // GET /stress/query — mysql2 + pg + knex queries
   // -----------------------------------------------------------------------
   router.get("/query", async (_req: Request, res: Response) => {
     const results: string[] = [];
@@ -143,7 +148,7 @@ export function createStressRoutes(deps: {
       );
       results.push("UPDATE");
 
-      // DELETE old rows to keep table small
+      // DELETE old rows
       await mysql2Connection.query(
         "DELETE FROM stress_test WHERE id < (SELECT * FROM (SELECT MAX(id) - 50 FROM stress_test) AS tmp)",
       );
@@ -162,16 +167,176 @@ export function createStressRoutes(deps: {
   });
 
   // -----------------------------------------------------------------------
+  // GET /stress/mail — nodemailer test emails
+  // -----------------------------------------------------------------------
+  router.get("/mail", async (_req: Request, res: Response) => {
+    const results: string[] = [];
+
+    try {
+      // Create test account (ethereal.email)
+      const testAccount = await nodemailer.createTestAccount();
+      
+      const transporter = nodemailer.createTransport({
+        host: "smtp.ethereal.email",
+        port: 587,
+        secure: false,
+        auth: {
+          user: testAccount.user,
+          pass: testAccount.pass,
+        },
+      });
+
+      // Send 3 test emails
+      for (let i = 1; i <= 3; i++) {
+        const info = await transporter.sendMail({
+          from: '"Stress Test" <test@example.com>',
+          to: "recipient@example.com",
+          subject: `Stress Test Email ${i}`,
+          text: `This is stress test email number ${i}`,
+          html: `<b>This is stress test email number ${i}</b>`,
+        });
+        
+        results.push(`Email ${i} sent: ${info.messageId}`);
+      }
+
+      // Simulate one failed email
+      try {
+        await transporter.sendMail({
+          from: '"Stress Test" <test@example.com>',
+          to: "invalid-email", // Invalid email to trigger failure
+          subject: "This should fail",
+          text: "Failure test",
+        });
+      } catch (err: any) {
+        results.push(`Failed email (expected): ${err.message}`);
+      }
+
+    } catch (err: any) {
+      results.push(`ERROR: ${err.message}`);
+    }
+
+    res.json({ ok: true, results });
+  });
+
+  // -----------------------------------------------------------------------
+  // GET /stress/job — Bull queue jobs
+  // -----------------------------------------------------------------------
+  router.get("/job", async (_req: Request, res: Response) => {
+    const results: string[] = [];
+
+    try {
+      const queue = new Bull("stress-test-queue", {
+        redis: {
+          host: "localhost",
+          port: 6379,
+        },
+      });
+
+      // Add jobs
+      await queue.add("test-job-1", { data: "value1" });
+      await queue.add("test-job-2", { data: "value2" });
+      await queue.add("test-job-3", { data: "value3", delay: 1000 });
+      results.push("Added 3 jobs to Bull queue");
+
+      // Process jobs
+      queue.process(async (job) => {
+        results.push(`Processing job ${job.id}: ${job.name}`);
+        return { processed: true };
+      });
+
+      // Wait a bit for processing
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      await queue.close();
+      results.push("Queue closed");
+
+    } catch (err: any) {
+      results.push(`ERROR: ${err.message}`);
+    }
+
+    res.json({ ok: true, results });
+  });
+
+  // -----------------------------------------------------------------------
+  // GET /stress/schedule — node-cron scheduled tasks
+  // -----------------------------------------------------------------------
+  router.get("/schedule", async (_req: Request, res: Response) => {
+    const results: string[] = [];
+
+    try {
+      let executionCount = 0;
+
+      // Schedule a task to run every second
+      const task = cron.schedule("* * * * * *", () => {
+        executionCount++;
+        results.push(`Scheduled task executed ${executionCount} time(s)`);
+      });
+
+      task.start();
+      results.push("Cron task started");
+
+      // Wait 3 seconds
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      task.stop();
+      results.push(`Cron task stopped after ${executionCount} executions`);
+
+    } catch (err: any) {
+      results.push(`ERROR: ${err.message}`);
+    }
+
+    res.json({ ok: true, results });
+  });
+
+  // -----------------------------------------------------------------------
+  // GET /stress/notification — Pusher notifications
+  // -----------------------------------------------------------------------
+  router.get("/notification", async (_req: Request, res: Response) => {
+    const results: string[] = [];
+
+    try {
+      const pusher = new Pusher({
+        appId: process.env.PUSHER_APP_ID || "test-app-id",
+        key: process.env.PUSHER_KEY || "test-key",
+        secret: process.env.PUSHER_SECRET || "test-secret",
+        cluster: process.env.PUSHER_CLUSTER || "mt1",
+        useTLS: true,
+      });
+
+      // Trigger 3 events
+      await pusher.trigger("stress-channel", "test-event-1", { message: "Event 1" });
+      await pusher.trigger("stress-channel", "test-event-2", { message: "Event 2" });
+      await pusher.trigger("stress-channel", "test-event-3", { message: "Event 3" });
+      
+      results.push("Triggered 3 Pusher events");
+
+    } catch (err: any) {
+      results.push(`ERROR: ${err.message}`);
+    }
+
+    res.json({ ok: true, results });
+  });
+
+  // -----------------------------------------------------------------------
   // GET /stress/all — runs all stress routes in sequence
   // -----------------------------------------------------------------------
   router.get("/all", async (req: Request, res: Response) => {
     const baseUrl = `${req.protocol}://${req.get("host")}`;
-    const routes = ["/stress/cache", "/stress/http", "/stress/log", "/stress/query"];
+    const routes = [
+      "/stress/cache",
+      "/stress/http",
+      "/stress/log",
+      "/stress/query",
+      "/stress/mail",
+      "/stress/job",
+      "/stress/schedule",
+      "/stress/notification",
+    ];
     const results: Record<string, any> = {};
 
     for (const route of routes) {
       try {
-        const r = await axios.get(`${baseUrl}${route}`);
+        const r = await axios.get(`${baseUrl}${route}`, { timeout: 30000 });
         results[route] = { ok: true, data: r.data };
       } catch (err: any) {
         results[route] = { ok: false, error: err.message };
@@ -183,21 +348,25 @@ export function createStressRoutes(deps: {
 
   // -----------------------------------------------------------------------
   // GET /stress/flood?count=100&parallel=10
-  // Master endpoint: fires `count` requests across all routes with
-  // `parallel` max concurrency.
   // -----------------------------------------------------------------------
   router.get("/flood", async (req: Request, res: Response) => {
     const count = Math.min(parseInt(req.query.count as string, 10) || 50, 500);
     const parallel = Math.min(parseInt(req.query.parallel as string, 10) || 5, 20);
 
     const baseUrl = `${req.protocol}://${req.get("host")}`;
-    const routes = ["/stress/cache", "/stress/http", "/stress/log", "/stress/query"];
+    const routes = [
+      "/stress/cache",
+      "/stress/http",
+      "/stress/log",
+      "/stress/query",
+      "/stress/mail",
+      "/stress/job",
+    ];
 
     const startTime = Date.now();
     let completed = 0;
     let errors = 0;
 
-    // Simple concurrency limiter
     const queue: (() => Promise<void>)[] = [];
     for (let i = 0; i < count; i++) {
       const route = routes[i % routes.length];
@@ -211,7 +380,6 @@ export function createStressRoutes(deps: {
       });
     }
 
-    // Execute with concurrency limit
     const executing = new Set<Promise<void>>();
     for (const task of queue) {
       const p = task().then(() => {

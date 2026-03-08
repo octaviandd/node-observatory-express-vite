@@ -58,10 +58,10 @@ export const InstanceTable = memo(
                 </TableCell>
                 <TableCell className="text-black dark:text-white flex flex-col gap-1">
                   <span className="font-medium">
-                    {job.content.data.connectionName}
+                    {job.content.metadata.connectionName}
                   </span>
                   <span className="text-muted-foreground">
-                    ({job.content.data.queue})
+                    ({job.content.metadata.method})
                   </span>
                 </TableCell>
                 <TableCell className="text-black dark:text-white">

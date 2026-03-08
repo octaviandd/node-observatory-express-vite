@@ -2,16 +2,16 @@
 import { LogInstanceResponse } from "@/hooks/useApiTyped";
 import { BaseCard } from "./base-card";
 
-export default function LogCard({ item }: { item: LogInstanceResponse }) {
+export const LogCard = ({ item }: { item: LogInstanceResponse }) => {
   return (
     <BaseCard
       date={item.created_at}
-      metadata={item.content.level.toUpperCase()}
-      content={item.content.message}
-      file={item.content.file}
-      line={item.content.line}
+      metadata={item.content.metadata.level.toUpperCase()}
+      content={item.content.data.message as string}
+      file={item.content.location?.file as string}
+      line={item.content.location?.line as string}
       linkPath={`/log/${item.uuid}`}
-      package={item.content.package}
+      package={item.content.metadata.package}
     />
   );
 }

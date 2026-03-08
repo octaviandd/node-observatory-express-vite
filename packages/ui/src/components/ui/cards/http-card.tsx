@@ -2,11 +2,7 @@
 import { HttpClientInstanceResponse } from "@/hooks/useApiTyped";
 import { BaseCard } from "./base-card";
 
-export default function HttpCard({
-  item,
-}: {
-  item: HttpClientInstanceResponse;
-}) {
+export const HttpCard = ({ item }: { item: HttpClientInstanceResponse }) => {
   const duration = Number(item.content.duration);
   const formattedDuration =
     duration > 999 ? `${(duration / 1000).toFixed(2)}s` : `${duration}ms`;
@@ -16,13 +12,13 @@ export default function HttpCard({
       date={item.created_at}
       metadata={formattedDuration}
       content={{
-        href: item.content.href,
-        pathname: item.content.pathname,
-        route: item.content.route,
+        href: item.content.data.path,
+        pathname: item.content.data.pathname,
+        route: item.content.data.origin,
       }}
-      file={item.content.file}
-      line={item.content.line}
-      package={item.content.package}
+      file={item.content.location?.file as string}
+      line={item.content.location?.line as string}
+      package={item.content.metadata.package}
     />
   );
 }

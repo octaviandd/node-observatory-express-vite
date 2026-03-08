@@ -27,7 +27,7 @@ export default function CacheIndexTable() {
     setInputValue,
     setInstanceStatusType,
     loadMore,
-  } = useTableData({ key: "cache", defaultInstanceStatusType: "all" });
+  } = useTableData({ key: "cache" });
 
   const count = index === "instance" ? instanceDataCount : groupDataCount;
   const label = index === "instance" ? "Transaction" : "Key";
