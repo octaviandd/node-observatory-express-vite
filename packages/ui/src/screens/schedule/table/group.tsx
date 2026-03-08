@@ -14,9 +14,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+} from "@/components/ui/base/table";
+import { Badge } from "@/components/ui/base/badge";
+import { Button } from "@/components/ui/base/button";
 import React from "react";
 import { formatCount, formatDuration } from "@/utils.js";
 import { ScheduleGroupResponse } from "@/hooks/useApiTyped";

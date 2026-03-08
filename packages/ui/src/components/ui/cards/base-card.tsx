@@ -3,8 +3,8 @@ import {
   CardContent,
   CardFooter,
   CardHeader,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from "@/components/ui/base/card";
+import { Button } from "@/components/ui/base/button";
 import { Folder, ExternalLink, ChevronUp, ChevronDown } from "lucide-react";
 import { Link } from "react-router";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";

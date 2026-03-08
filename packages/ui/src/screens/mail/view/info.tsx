@@ -1,9 +1,9 @@
 /** @format */
 
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/base/card";
 import { timeAgo } from "@/utils.js";
 import { formatDuration } from "@/utils.js";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/base/badge";
 import { MailInstanceResponse } from "@/hooks/useApiTyped";
 
 export default function MailPreviewInfo({

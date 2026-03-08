@@ -1,13 +1,11 @@
 /** @format */
 
+import { DurationCard } from "@/components/ui/cards/duration-card";
+import { StatsCard } from "@/components/ui/cards/stats-card";
+import { IndexLayout } from "@/components/ui/layout/index-layout";
+import { StatsGrid } from "@/components/ui/stats-grid";
 import NotificationsIndexTable from "../table";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
-import {
-  IndexPageLayout,
-  StatsCard,
-  DurationCard,
-  StatsGrid,
-} from "@/components/ui/index-page";
 import { useNotifications } from "@/hooks/useApiTyped";
 import { StoreContext } from "@/store";
 import { useContext } from "react";
@@ -22,7 +20,7 @@ export default function NotificationsIndex() {
   const { data } = useNotifications.useGraph();
 
   return (
-    <IndexPageLayout>
+    <IndexLayout>
       {data && (
         <StatsGrid columns={2}>
           <StatsCard
@@ -45,12 +43,10 @@ export default function NotificationsIndex() {
             average={data.average}
             p95={data.p95}
             durationFormattedData={data.durationFormattedData}
-            period={state.period}
-            currentDate={""}
            />
         </StatsGrid>
       )}
       <NotificationsIndexTable />
-    </IndexPageLayout>
+    </IndexLayout>
   );
 }

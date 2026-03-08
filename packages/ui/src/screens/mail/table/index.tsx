@@ -3,15 +3,14 @@
 import { Mail } from "lucide-react";
 import { GroupTable } from "./group";
 import { InstanceTable } from "./instance";
-import { useIndexTableData } from "@/hooks/useIndexTableData";
-import { Input } from "@/components/ui/input";
-import {
-  TablePageLayout,
-  TableHeader,
-  StatusFilter,
-  LoadMoreButton,
-} from "@/components/ui/table-page";
+import { useTableData } from "@/hooks/useTableData";
+import { Input } from "@/components/ui/base/input";
 import { MailInstanceResponse, MailGroupResponse } from "@/hooks/useApiTyped";
+import { TableLayout } from "@/components/ui/layout/table-layout";
+import { LoadMoreButton } from "@/components/ui/load-more-button";
+import { StatusFilter } from "@/components/ui/status-filter";
+import { TableHeader } from "@/components/ui/table-header";
+import { SearchInput } from "@/components/ui/search-input";
 
 const STATUS_OPTIONS = ["all", "completed", "failed"];
 
@@ -29,7 +28,7 @@ export default function MailsIndexTable() {
     setInstanceStatusType,
     setInputValue,
     loadMore,
-  } = useIndexTableData<MailInstanceResponse, MailGroupResponse>({
+  } = useTableData<MailInstanceResponse, MailGroupResponse>({
     key: "mails",
     defaultInstanceStatusType: "all",
   });
@@ -38,18 +37,16 @@ export default function MailsIndexTable() {
   const label = index === "instance" ? "Mail" : "Receiver";
 
   return (
-    <TablePageLayout type="mails">
+    <TableLayout type="mails">
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
           <TableHeader icon={Mail} count={count} label={label} />
           <div className="flex px-4 grow">
             {!modelKey && (
-              <Input
-                type="text"
-                placeholder={`Search ${index === "instance" ? "mails" : "receivers"}`}
+              <SearchInput
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                className="w-[300px] text-muted-foreground"
+                onChange={setInputValue}
+                placeholder={`Search ${index === "instance" ? "mails" : "receivers"}`}
               />
             )}
           </div>
@@ -71,6 +68,6 @@ export default function MailsIndexTable() {
           <LoadMoreButton message={message} onLoadMore={loadMore} />
         </GroupTable>
       )}
-    </TablePageLayout>
+    </TableLayout>
   );
 }

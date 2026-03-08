@@ -5,12 +5,10 @@ import { JobPreviewCrumbs } from "./crumbs";
 import { JobMetadata } from "./metadata";
 import JobDetails from "./details";
 import ContentTabs from "./tabs";
-import {
-  ViewPageLayout,
-  useViewData,
-  Source,
-} from "@/components/ui/view-page";
 import { CacheInstanceResponse, ExceptionInstanceResponse, HttpClientInstanceResponse, JobInstanceResponse, LogInstanceResponse, MailInstanceResponse, ModelInstanceResponse, NotificationInstanceResponse, QueryInstanceResponse, RequestInstanceResponse } from "@/hooks/useApiTyped";
+import { ViewLayout } from "@/components/ui/layout/view-layout";
+import { useViewData } from "@/hooks/useViewData";
+import Source from "./source";
 
 export default function JobPreview() {
   const [activeTab, setActiveTab] = useState("raw");
@@ -32,7 +30,7 @@ export default function JobPreview() {
   const requests = (rawResponse?.request as RequestInstanceResponse[]) ?? [];
 
   return (
-    <ViewPageLayout loading={loading} error={error}>
+    <ViewLayout loading={loading} error={error}>
       {job && (
         <>
           <JobPreviewCrumbs job={job} />
@@ -68,6 +66,6 @@ export default function JobPreview() {
           />
         </>
       )}
-    </ViewPageLayout>
+    </ViewLayout>
   );
 }

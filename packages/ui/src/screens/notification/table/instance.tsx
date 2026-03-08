@@ -9,33 +9,22 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { memo } from "react";
+} from "@/components/ui/base/table";
+import { Button } from "@/components/ui/base/button";
+import { Badge } from "@/components/ui/base/badge";
+import { memo, useContext } from "react";
 import { formatDate, formatDuration } from "@/utils.js";
 import { NotificationInstanceResponse } from "@/hooks/useApiTyped";
+import { StoreContext } from "@/store";
 
 type Props = {
   data: NotificationInstanceResponse[];
-  drawer: ({
-    isOpen,
-    modelId,
-    requestId,
-    jobId,
-    scheduleId,
-  }: {
-    isOpen: boolean;
-    modelId: string;
-    requestId: string;
-    jobId: string;
-    scheduleId: string;
-  }) => void;
   children: React.ReactNode;
 };
 
 export const InstanceTable = memo(
-  ({ data, drawer, children }: Props) => {
+  ({ data, children }: Props) => {
+    const { dispatch } = useContext(StoreContext);
     return (
       <div className="rounded-md border">
         <Table>
@@ -97,12 +86,14 @@ export const InstanceTable = memo(
                       variant="outline"
                       size="icon"
                       onClick={() =>
-                        drawer({
-                          isOpen: true,
-                          modelId: notification.uuid ?? "",
-                          requestId: notification.request_id ?? "",
-                          jobId: notification.job_id ?? "",
-                          scheduleId: notification.schedule_id ?? "",
+                        dispatch({
+                          type: "openDrawer",
+                          payload: {
+                            modelId: notification.uuid ?? "",
+                            requestId: notification.request_id ?? "",
+                            jobId: notification.job_id ?? "",
+                            scheduleId: notification.schedule_id ?? "",
+                          },
                         })
                       }
                     >

@@ -1,6 +1,6 @@
 /** @format */
 
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/base/toggle-group";
 
 interface StatusFilterProps {
   options: readonly string[];

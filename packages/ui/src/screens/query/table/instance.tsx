@@ -9,9 +9,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/base/table";
+import { Button } from "@/components/ui/base/button";
+import { Badge } from "@/components/ui/base/badge";
 import { formatDate, formatDuration } from "@/utils.js";
 import { memo, ReactNode, useContext } from "react";
 import { QueryInstanceResponse } from "@/hooks/useApiTyped";

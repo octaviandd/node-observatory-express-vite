@@ -1,18 +1,17 @@
 /** @format */
 
 import { ReactNode } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/base/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/base/alert";
 
 interface ViewPageLayoutProps {
   loading: boolean;
   error: string | null;
   children: ReactNode;
-  /** Optional custom loading skeleton heights. Defaults to [200, 300] */
   skeletonHeights?: number[];
 }
 
-export function ViewPageLayout({
+export function ViewLayout({
   loading,
   error,
   children,

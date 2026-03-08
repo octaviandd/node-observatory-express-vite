@@ -3,15 +3,14 @@
 import { Database } from "lucide-react";
 import { InstanceTable } from "./instance";
 import { GroupTable } from "./group";
-import { Input } from "@/components/ui/input";
-import { useIndexTableData } from "@/hooks/useIndexTableData";
-import {
-  TablePageLayout,
-  TableHeader,
-  StatusFilter,
-  LoadMoreButton,
-} from "@/components/ui/table-page";
+import { Input } from "@/components/ui/base/input";
+import { useTableData } from "@/hooks/useTableData";
 import { QueryGroupResponse, QueryInstanceResponse } from "@/hooks/useApiTyped";
+import { TableLayout } from "@/components/ui/layout/table-layout";
+import { LoadMoreButton } from "@/components/ui/load-more-button";
+import { StatusFilter } from "@/components/ui/status-filter";
+import { TableHeader } from "@/components/ui/table-header";
+import { SearchInput } from "@/components/ui/search-input";
 
 const STATUS_OPTIONS = ["all", "select", "insert", "update", "delete"];
 
@@ -29,7 +28,7 @@ export default function QueryIndexTable() {
     setInstanceStatusType,
     setInputValue,
     loadMore,
-  } = useIndexTableData<QueryInstanceResponse, QueryGroupResponse>({
+  } = useTableData<QueryInstanceResponse, QueryGroupResponse>({
     key: "queries",
     defaultInstanceStatusType: "all",
   });
@@ -40,7 +39,7 @@ export default function QueryIndexTable() {
   const pluralize = index !== "instance";
 
   return (
-    <TablePageLayout type="queries">
+    <TableLayout type="queries">
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
           <TableHeader
@@ -51,12 +50,10 @@ export default function QueryIndexTable() {
           />
           <div className="flex px-4 grow">
             {!modelKey && (
-              <Input
-                type="text"
-                placeholder={`Search ${index === "instance" ? "queries" : "endpoints"}`}
+              <SearchInput
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                className="w-[300px] text-muted-foreground"
+                onChange={setInputValue}
+                placeholder={`Search ${index === "instance" ? "queries" : "endpoints"}`}
               />
             )}
           </div>
@@ -80,6 +77,6 @@ export default function QueryIndexTable() {
           <LoadMoreButton message={message} onLoadMore={loadMore} />
         </GroupTable>
       )}
-    </TablePageLayout>
+    </TableLayout>
   );
 }

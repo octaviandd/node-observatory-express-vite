@@ -9,10 +9,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+} from "@/components/ui/base/table";
+import { Button } from "@/components/ui/base/button";
 import { ReactNode, memo, useContext } from "react";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/base/badge";
 import { formatDate, formatDuration } from "@/utils.js";
 import { HttpClientInstanceResponse } from "@/hooks/useApiTyped";
 import { StoreContext } from "@/store";
@@ -52,7 +52,7 @@ export const InstanceTable = memo(
                   {formatDate(request.created_at)}
                 </TableCell>
                 <TableCell className="flex items-center gap-2 h-[53px]">
-                  <span className="text-black">
+                  <span className="text-black dark:text-white">
                     {(request.content.data.method ?? "").toUpperCase()}
                   </span>
                   <Globe className="h-4 w-4 text-muted-foreground" />

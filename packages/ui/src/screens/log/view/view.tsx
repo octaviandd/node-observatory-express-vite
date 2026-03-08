@@ -4,12 +4,10 @@ import { useState } from "react";
 import { LogCrumbs } from "./crumbs";
 import ContentTabs from "./tabs";
 import Details from "./details";
-import {
-  ViewPageLayout,
-  useViewData,
-  Source,
-} from "@/components/ui/view-page";
 import { LogInstanceResponse } from "@/hooks/useApiTyped";
+import { ViewLayout } from "@/components/ui/layout/view-layout";
+import { useViewData } from "@/hooks/useViewData";
+import Source from "./source";
 
 export default function LogView() {
   const [activeTab, setActiveTab] = useState("raw");
@@ -20,7 +18,7 @@ export default function LogView() {
   });
 
   return (
-    <ViewPageLayout loading={loading} error={error}>
+    <ViewLayout loading={loading} error={error}>
       {log && (
         <>
           <LogCrumbs log={log} />
@@ -33,6 +31,6 @@ export default function LogView() {
           />
         </>
       )}
-    </ViewPageLayout>
+    </ViewLayout>
   );
 }

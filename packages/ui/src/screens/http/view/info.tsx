@@ -1,9 +1,9 @@
 /** @format */
 
 import React from "react";
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/base/card";
 import { getSize, timeAgo, formatDuration } from "@/utils.js";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/base/badge";
 import { HttpClientInstanceResponse } from "@/hooks/useApiTyped";
 
 export const HTTPInfo = React.memo(

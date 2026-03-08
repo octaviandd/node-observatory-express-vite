@@ -19,8 +19,8 @@ import {
   SquareTerminal,
 } from "lucide-react";
 
-import { NavMain } from "@/components/NavMain";
-import { AppSettings } from "@/components/AppSettings";
+import { Navigation } from "@/components/ui/navigation/navigation";
+import { AppSettings } from "@/components/ui/navigation/app-settings";
 import {
   Sidebar,
   SidebarContent,
@@ -29,16 +29,11 @@ import {
   SidebarRail,
   SidebarMenu,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
+} from "@/components/ui/base/sidebar";
 import { Link } from "react-router";
 
 // This is sample data.
 const data = {
-  user: {
-    name: "octavian",
-    email: "octavian@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   dashboard: {
     title: "Dashboard",
     url: "/",
@@ -160,7 +155,7 @@ export const AppSidebar = memo(
           </Link>
         </SidebarHeader>
         <SidebarContent>
-          <NavMain items={data.navMain} />
+          <Navigation items={data.navMain} />
         </SidebarContent>
         <SidebarFooter>
           <SidebarMenu>

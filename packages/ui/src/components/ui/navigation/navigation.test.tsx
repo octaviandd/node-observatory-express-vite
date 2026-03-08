@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
-import { NavMain } from "./NavMain";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { Navigation } from "./navigation";
+import { SidebarProvider } from "@/components/ui/base/sidebar";
 import { Home, Settings, Users } from "lucide-react";
 
 const renderWithProviders = (ui: React.ReactElement) => {
@@ -13,7 +13,7 @@ const renderWithProviders = (ui: React.ReactElement) => {
   );
 };
 
-describe("NavMain", () => {
+describe("Navigation", () => {
   const mockItems = [
     {
       title: "Activity",
@@ -38,14 +38,14 @@ describe("NavMain", () => {
   ];
 
   it("renders all top-level navigation items", () => {
-    renderWithProviders(<NavMain items={mockItems} />);
+    renderWithProviders(<Navigation items={mockItems} />);
 
     expect(screen.getByText("Activity")).toBeInTheDocument();
     expect(screen.getByText("Settings")).toBeInTheDocument();
   });
 
   it("renders sub-items for expanded sections", () => {
-    renderWithProviders(<NavMain items={mockItems} />);
+    renderWithProviders(<Navigation items={mockItems} />);
 
     // Activity section is isActive: true, so should be expanded
     expect(screen.getByText("Dashboard")).toBeInTheDocument();
@@ -53,7 +53,7 @@ describe("NavMain", () => {
   });
 
   it("renders navigation links with correct hrefs", () => {
-    renderWithProviders(<NavMain items={mockItems} />);
+    renderWithProviders(<Navigation items={mockItems} />);
 
     const dashboardLink = screen.getByRole("link", { name: /dashboard/i });
     expect(dashboardLink).toHaveAttribute("href", "/dashboard");
@@ -63,7 +63,7 @@ describe("NavMain", () => {
   });
 
   it("renders empty when no items provided", () => {
-    const { container } = renderWithProviders(<NavMain items={[]} />);
+    const { container } = renderWithProviders(<Navigation items={[]} />);
     
     // Should still render the structure but with no menu items
     expect(container.querySelector("[data-sidebar='menu']")).toBeInTheDocument();
@@ -79,14 +79,14 @@ describe("NavMain", () => {
       },
     ];
 
-    renderWithProviders(<NavMain items={itemsWithoutIcons} />);
+    renderWithProviders(<Navigation items={itemsWithoutIcons} />);
 
     expect(screen.getByText("No Icon Section")).toBeInTheDocument();
     expect(screen.getByText("Sub Item")).toBeInTheDocument();
   });
 
   it("renders chevron icon for collapsible sections", () => {
-    renderWithProviders(<NavMain items={mockItems} />);
+    renderWithProviders(<Navigation items={mockItems} />);
 
     // There should be chevron icons (one per collapsible section)
     const chevrons = document.querySelectorAll(".lucide-chevron-right");

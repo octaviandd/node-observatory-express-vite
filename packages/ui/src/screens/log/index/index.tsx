@@ -1,12 +1,10 @@
 /** @format */
 
+import { StatsCard } from "@/components/ui/cards/stats-card";
 import LogsIndexTable from "../table";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
-import {
-  IndexPageLayout,
-  StatsCard,
-  StatsGrid,
-} from "@/components/ui/index-page";
+import { IndexLayout } from "@/components/ui/layout/index-layout";
+import { StatsGrid } from "@/components/ui/stats-grid";
 import { useLogs } from "@/hooks/useApiTyped";
 
 const LOG_LEVELS = [
@@ -23,7 +21,7 @@ export default function LogsIndex() {
   const { data } = useLogs.useGraph();
 
   return (
-    <IndexPageLayout>
+    <IndexLayout>
       {data && (
         <StatsGrid columns={1}>
           <StatsCard
@@ -52,6 +50,6 @@ export default function LogsIndex() {
         </StatsGrid>
       )}
       <LogsIndexTable />
-    </IndexPageLayout>
+    </IndexLayout>
   );
 }

@@ -1,10 +1,10 @@
 /** @format */
 
 import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Breadcrumb, BreadcrumbLink } from "@/components/ui/breadcrumb";
-import { BreadcrumbItem } from "@/components/ui/breadcrumb";
+import { Card, CardContent } from "@/components/ui/base/card";
+import { Badge } from "@/components/ui/base/badge";
+import { Breadcrumb, BreadcrumbLink } from "@/components/ui/base/breadcrumb";
+import { BreadcrumbItem } from "@/components/ui/base/breadcrumb";
 import { ChevronRight } from "lucide-react";
 import { JobInstanceResponse } from "@/hooks/useApiTyped";
 

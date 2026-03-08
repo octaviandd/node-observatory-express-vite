@@ -3,14 +3,13 @@
 import { Logs } from "lucide-react";
 import { InstanceTable } from "./instance";
 import { GroupTable } from "./group";
-import { useIndexTableData } from "@/hooks/useIndexTableData";
-import { Input } from "@/components/ui/input";
-import {
-  TablePageLayout,
-  TableHeader,
-  LoadMoreButton,
-} from "@/components/ui/table-page";
+import { useTableData } from "@/hooks/useTableData";
+import { Input } from "@/components/ui/base/input";
 import { LogInstanceResponse, LogGroupResponse } from "@/hooks/useApiTyped";
+import { TableLayout } from "@/components/ui/layout/table-layout";
+import { LoadMoreButton } from "@/components/ui/load-more-button";
+import { TableHeader } from "@/components/ui/table-header";
+import { SearchInput } from "@/components/ui/search-input";
 
 export default function LogsIndexTable() {
   const {
@@ -24,7 +23,7 @@ export default function LogsIndexTable() {
     message,
     setInputValue,
     loadMore,
-  } = useIndexTableData<LogInstanceResponse, LogGroupResponse>({
+  } = useTableData<LogInstanceResponse, LogGroupResponse>({
     key: "logs",
     defaultInstanceStatusType: "all",
   });
@@ -33,18 +32,16 @@ export default function LogsIndexTable() {
   const label = index === "instance" ? "Log" : "Source";
 
   return (
-    <TablePageLayout type="logs">
+    <TableLayout type="logs">
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
           <TableHeader icon={Logs} count={count} label={label} />
           <div className="flex px-4 grow">
             {!modelKey && (
-              <Input
-                type="text"
-                placeholder={`Search ${index === "instance" ? "logs" : "log sources"}`}
+              <SearchInput
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                className="w-[300px] text-muted-foreground"
+                onChange={setInputValue}
+                placeholder={`Search ${index === "instance" ? "logs" : "log sources"}`}
               />
             )}
           </div>
@@ -59,6 +56,6 @@ export default function LogsIndexTable() {
           <LoadMoreButton message={message} onLoadMore={loadMore} />
         </GroupTable>
       )}
-    </TablePageLayout>
+    </TableLayout>
   );
 }

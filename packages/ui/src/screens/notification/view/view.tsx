@@ -4,12 +4,10 @@ import { useState } from "react";
 import { NotificationCrumbs } from "./crumbs";
 import Details from "./details";
 import ContentTabs from "./tabs";
-import {
-  ViewPageLayout,
-  useViewData,
-  Source,
-} from "@/components/ui/view-page";
 import { NotificationInstanceResponse } from "@/hooks/useApiTyped";
+import { ViewLayout } from "@/components/ui/layout/view-layout";
+import { useViewData } from "@/hooks/useViewData";
+import Source from "./source";
 
 export default function NotificationView() {
   const [activeTab, setActiveTab] = useState("raw");
@@ -20,7 +18,7 @@ export default function NotificationView() {
   });
 
   return (
-    <ViewPageLayout loading={loading} error={error}>
+    <ViewLayout loading={loading} error={error}>
       {notification && (
         <>
           <NotificationCrumbs notification={notification} />
@@ -33,6 +31,6 @@ export default function NotificationView() {
           />
         </>
       )}
-    </ViewPageLayout>
+    </ViewLayout>
   );
 }

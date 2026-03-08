@@ -6,8 +6,8 @@ import {
   CardHeader,
   CardTitle,
   CardSubtitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/base/card";
+import { Badge } from "@/components/ui/base/badge";
 import { DurationGraph } from "@/components/ui/graphs/duration-graph";
 
 interface DurationCardProps {

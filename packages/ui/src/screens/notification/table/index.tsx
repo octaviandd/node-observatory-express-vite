@@ -3,15 +3,14 @@
 import { MessageSquareDot } from "lucide-react";
 import { InstanceTable } from "./instance";
 import { GroupTable } from "./group";
-import { Input } from "@/components/ui/input";
-import { useIndexTableData } from "@/hooks/useIndexTableData";
-import {
-  TablePageLayout,
-  TableHeader,
-  StatusFilter,
-  LoadMoreButton,
-} from "@/components/ui/table-page";
+import { Input } from "@/components/ui/base/input";
+import { useTableData } from "@/hooks/useTableData";
 import { NotificationInstanceResponse, NotificationGroupResponse } from "@/hooks/useApiTyped";
+import { TableLayout } from "@/components/ui/layout/table-layout";
+import { LoadMoreButton } from "@/components/ui/load-more-button";
+import { StatusFilter } from "@/components/ui/status-filter";
+import { TableHeader } from "@/components/ui/table-header";
+import { SearchInput } from "@/components/ui/search-input";
 
 const STATUS_OPTIONS = ["all", "completed", "failed"];
 
@@ -24,14 +23,12 @@ export default function NotificationsIndexTable() {
     index,
     instanceStatusType,
     inputValue,
-    setDrawer,
     modelKey,
     message,
-    drawer,
     setInstanceStatusType,
     setInputValue,
     loadMore,
-  } = useIndexTableData<NotificationInstanceResponse, NotificationGroupResponse>({
+  } = useTableData<NotificationInstanceResponse, NotificationGroupResponse>({
     key: "notifications",
     defaultInstanceStatusType: "all",
   });
@@ -40,22 +37,16 @@ export default function NotificationsIndexTable() {
   const label = index === "group" ? "Channel" : "Notification";
 
   return (
-    <TablePageLayout
-      setDrawer={setDrawer}
-      drawer={drawer}
-      type="notifications"
-    >
+    <TableLayout type="notifications">
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
           <TableHeader icon={MessageSquareDot} count={count} label={label} />
           {!modelKey && (
             <div className="flex px-4 grow">
-              <Input
-                type="text"
-                placeholder={`Search ${index === "group" ? "channels" : "notifications"}`}
+              <SearchInput
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                className="w-[300px] text-muted-foreground"
+                onChange={setInputValue}
+                placeholder={`Search ${index === "group" ? "channels" : "notifications"}`}
               />
             </div>
           )}
@@ -69,7 +60,7 @@ export default function NotificationsIndexTable() {
         )}
       </div>
       {index === "instance" ? (
-        <InstanceTable data={instanceData as NotificationInstanceResponse[]} drawer={setDrawer}>
+        <InstanceTable data={instanceData as NotificationInstanceResponse[]}>
           <LoadMoreButton message={message} onLoadMore={loadMore} />
         </InstanceTable>
       ) : (
@@ -77,6 +68,6 @@ export default function NotificationsIndexTable() {
           <LoadMoreButton message={message} onLoadMore={loadMore} />
         </GroupTable>
       )}
-    </TablePageLayout>
+    </TableLayout>
   );
 }

@@ -4,8 +4,8 @@ import { ViewCrumbs } from "./crumbs";
 import Source from "./source";
 import Details from "./details";
 import ContentTabs from "./tabs";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/base/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/base/alert";
 import { ViewInstanceResponse, RequestInstanceResponse } from "@/hooks/useApiTyped";
 
 export default function ViewPreview() {

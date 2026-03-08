@@ -3,15 +3,14 @@
 import { FileCode } from "lucide-react";
 import { InstanceTable } from "./instance";
 import { GroupTable } from "./group";
-import { Input } from "@/components/ui/input";
-import { useIndexTableData } from "@/hooks/useIndexTableData";
-import {
-  TablePageLayout,
-  TableHeader,
-  StatusFilter,
-  LoadMoreButton,
-} from "@/components/ui/table-page";
+import { Input } from "@/components/ui/base/input";
+import { useTableData } from "@/hooks/useTableData";
 import { ViewInstanceResponse, ViewGroupResponse } from "@/hooks/useApiTyped";
+import { TableLayout } from "@/components/ui/layout/table-layout";
+import { LoadMoreButton } from "@/components/ui/load-more-button";
+import { StatusFilter } from "@/components/ui/status-filter";
+import { TableHeader } from "@/components/ui/table-header";
+import { SearchInput } from "@/components/ui/search-input";
 
 const STATUS_OPTIONS = ["all", "completed", "failed"];
 
@@ -29,7 +28,7 @@ export default function ViewsIndexTable() {
     setInstanceStatusType,
     setInputValue,
     loadMore,
-  } = useIndexTableData<ViewInstanceResponse, ViewGroupResponse>({
+  } = useTableData<ViewInstanceResponse, ViewGroupResponse>({
     key: "views",
     defaultInstanceStatusType: "all",
   });
@@ -38,18 +37,16 @@ export default function ViewsIndexTable() {
   const label = index === "instance" ? "View" : "Path";
 
   return (
-    <TablePageLayout type="views">
+    <TableLayout type="views">
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
           <TableHeader icon={FileCode} count={count} label={label} />
           {!modelKey && (
             <div className="flex px-4 grow">
-              <Input
-                type="text"
-                placeholder={`Search ${index === "instance" ? "views" : "paths"}`}
+              <SearchInput
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                className="w-[300px] text-muted-foreground"
+                onChange={setInputValue}
+                placeholder={`Search ${index === "instance" ? "views" : "paths"}`}
               />
             </div>
           )}
@@ -71,6 +68,6 @@ export default function ViewsIndexTable() {
           <LoadMoreButton message={message} onLoadMore={loadMore} />
         </GroupTable>
       )}
-    </TablePageLayout>
+    </TableLayout>
   );
 }

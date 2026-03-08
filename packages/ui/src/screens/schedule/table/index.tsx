@@ -3,7 +3,7 @@
 import { CalendarCheck } from "lucide-react";
 import { InstanceTable } from "./instance";
 import { GroupTable } from "./group";
-import { useIndexTableData } from "@/hooks/useIndexTableData";
+import { useTableData } from "@/hooks/useTableData";
 import {
   TablePageLayout,
   TableHeader,
@@ -26,7 +26,7 @@ export default function ScheduledIndexTable() {
     message,
     setInstanceStatusType,
     loadMore,
-  } = useIndexTableData<ScheduleInstanceResponse, ScheduleGroupResponse>({
+  } = useTableData<ScheduleInstanceResponse, ScheduleGroupResponse>({
     key: "schedules",
     defaultInstanceStatusType: "all",
   });
@@ -35,7 +35,7 @@ export default function ScheduledIndexTable() {
   const label = index === "instance" ? "Attempt" : "Schedule";
 
   return (
-    <TablePageLayout type="schedules">
+    <TableLayout type="schedules">
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
           <TableHeader icon={CalendarCheck} count={count} label={label} />
@@ -57,6 +57,6 @@ export default function ScheduledIndexTable() {
           <LoadMoreButton message={message} onLoadMore={loadMore} />
         </GroupTable>
       )}
-    </TablePageLayout>
+    </TableLayout>
   );
 }

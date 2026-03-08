@@ -1,13 +1,11 @@
 /** @format */
 
+import { DurationCard } from "@/components/ui/cards/duration-card";
+import { StatsCard } from "@/components/ui/cards/stats-card";
 import MailsIndexTable from "../table";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
-import {
-  IndexPageLayout,
-  StatsCard,
-  DurationCard,
-  StatsGrid,
-} from "@/components/ui/index-page";
+import { IndexLayout } from "@/components/ui/layout/index-layout";
+import { StatsGrid } from "@/components/ui/stats-grid";
 import { useMails } from "@/hooks/useApiTyped";
 
 const MAIL_BAR_DATA = [
@@ -19,7 +17,7 @@ export default function MailsIndex() {
   const { data } = useMails.useGraph();
 
     return(
-    <IndexPageLayout>
+    <IndexLayout>
       {data && (
         <StatsGrid columns={2}>
           <StatsCard
@@ -46,6 +44,6 @@ export default function MailsIndex() {
         </StatsGrid>
       )}
       <MailsIndexTable />
-    </IndexPageLayout>
+    </IndexLayout>
   );
 }

@@ -4,12 +4,10 @@ import { useState } from "react";
 import { ModelCrumbs } from "./crumbs";
 import ContentTabs from "./tabs";
 import Details from "./details";
-import {
-  ViewPageLayout,
-  useViewData,
-  Source,
-} from "@/components/ui/view-page";
 import { ModelInstanceResponse } from "@/hooks/useApiTyped";
+import { ViewLayout } from "@/components/ui/layout/view-layout";
+import { useViewData } from "@/hooks/useViewData";
+import Source from "./source";
 
 export default function ModelPreview() {
   const [activeTab, setActiveTab] = useState("raw");
@@ -20,7 +18,7 @@ export default function ModelPreview() {
   });
 
   return (
-    <ViewPageLayout loading={loading} error={error}>
+    <ViewLayout loading={loading} error={error}>
       {model && (
         <>
           <ModelCrumbs model={model} />
@@ -33,6 +31,6 @@ export default function ModelPreview() {
           />
         </>
       )}
-    </ViewPageLayout>
+    </ViewLayout>
   );
 }

@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/base/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/base/tabs";
+import { Input } from "@/components/ui/base/input";
+import { Button } from "@/components/ui/base/button";
 
 export function AppSettings() {
   const [refreshRate, setRefreshRate] = useState("60");

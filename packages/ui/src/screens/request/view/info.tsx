@@ -1,8 +1,8 @@
 /** @format */
 
 import React from "react";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardHeader, CardContent } from "@/components/ui/base/card";
+import { Separator } from "@/components/ui/base/separator";
 import { timeAgo } from "@/utils.js";
 import { RequestInstanceResponse } from "@/hooks/useApiTyped";
 

@@ -9,9 +9,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+} from "@/components/ui/base/table";
+import { Badge } from "@/components/ui/base/badge";
+import { Button } from "@/components/ui/base/button";
 import { memo, ReactNode, useContext } from "react";
 import { formatDate, formatDuration } from "@/utils.js";
 import { RequestInstanceResponse } from "@/hooks/useApiTyped";
@@ -38,7 +38,7 @@ export const InstanceTable = memo(
           <TableHeader>
             <TableRow>
               <TableHead className="w-[12.5%]">Date</TableHead>
-              <TableHead>Details</TableHead>
+              <TableHead className="w-auto">Details</TableHead>
               <TableHead className="w-[100px]">Status</TableHead>
               <TableHead className="w-[100px]">Duration</TableHead>
               <TableHead className="w-[100px]"></TableHead>
@@ -57,7 +57,7 @@ export const InstanceTable = memo(
                 <TableCell className="font-medium text-muted-foreground">
                   {formatDate(request.created_at)}
                 </TableCell>
-                <TableCell className="flex font-medium items-center gap-2 text-muted-foreground h-[53px]">
+                <TableCell className="flex font-medium items-center gap-2 text-muted-foreground h-[53px] dark:text-white">
                   <span>{request?.content?.metadata?.type?.toUpperCase()}</span>
                   <ArrowUpDown className="h-4 w-4" />
                   <span className="truncate max-w-[400px] text-black dark:text-white">

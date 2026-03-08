@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/base/card";
+import { Badge } from "@/components/ui/base/badge";
 import { formatDuration, getSize, timeAgo } from "@/utils.js";
 import { ViewInstanceResponse } from "@/hooks/useApiTyped";
 

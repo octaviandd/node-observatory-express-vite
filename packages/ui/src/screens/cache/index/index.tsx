@@ -2,12 +2,10 @@
 
 import CacheIndexTable from "../table";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
-import {
-  IndexPageLayout,
-  StatsCard,
-  DurationCard,
-  StatsGrid,
-} from "@/components/ui/index-page";
+import { IndexLayout } from "@/components/ui/layout/index-layout";
+import { StatsCard } from "@/components/ui/cards/stats-card";
+import { DurationCard } from "@/components/ui/cards/duration-card";
+import { StatsGrid } from "@/components/ui/stats-grid";
 import { useCaches } from "@/hooks/useApiTyped";
 
 const CACHE_BAR_DATA = [
@@ -22,7 +20,7 @@ export default function CacheIndex() {
    if (isLoading || !data) return null;
 
   return (
-    <IndexPageLayout>
+    <IndexLayout>
       <StatsGrid columns={2}>
         <StatsCard
           title="TRANSACTIONS"
@@ -48,6 +46,6 @@ export default function CacheIndex() {
         />
       </StatsGrid>
       <CacheIndexTable />
-    </IndexPageLayout>
+    </IndexLayout>
   );
 }

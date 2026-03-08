@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/base/card";
+import { Badge } from "@/components/ui/base/badge";
 import { formatDuration, timeAgo } from "@/utils.js";
 import { JobInstanceResponse } from "@/hooks/useApiTyped";
 

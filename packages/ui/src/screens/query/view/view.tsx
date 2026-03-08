@@ -4,12 +4,10 @@ import { useState } from "react";
 import { QueryCrumbs } from "./crumbs";
 import Details from "./details";
 import ContentTabs from "./tabs";
-import {
-  ViewPageLayout,
-  useViewData,
-  Source,
-} from "@/components/ui/view-page";
 import { QueryInstanceResponse } from "@/hooks/useApiTyped";
+import { ViewLayout } from "@/components/ui/layout/view-layout";
+import { useViewData } from "@/hooks/useViewData";
+import Source from "./source";
 
 export default function QueryPreview() {
   const [activeTab, setActiveTab] = useState("raw");
@@ -20,7 +18,7 @@ export default function QueryPreview() {
   });
 
   return (
-    <ViewPageLayout
+    <ViewLayout
       loading={loading}
       error={error}
       skeletonHeights={[50, 150, 250, 300]}
@@ -37,6 +35,6 @@ export default function QueryPreview() {
           />
         </>
       )}
-    </ViewPageLayout>
+    </ViewLayout>
   );
 }

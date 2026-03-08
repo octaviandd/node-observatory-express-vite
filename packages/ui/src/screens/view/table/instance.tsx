@@ -10,9 +10,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/base/table";
+import { Button } from "@/components/ui/base/button";
+import { Badge } from "@/components/ui/base/badge";
 import { formatDate, formatDuration, getSize } from "@/utils.js";
 import { ViewInstanceResponse } from "@/hooks/useApiTyped";
 import { StoreContext } from "@/store";

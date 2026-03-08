@@ -10,26 +10,20 @@ import HttpCard from "@/components/ui/cards/http-card";
 import CacheCard from "@/components/ui/cards/cache-card";
 import NotificationCard from "@/components/ui/cards/notification-card";
 import MailCard from "@/components/ui/cards/mail-card";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/base/button";
+import { ScrollArea } from "@/components/ui/base/scroll-area";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/base/sheet";
+import { Separator } from "@/components/ui/base/separator";
+import { Badge } from "@/components/ui/base/badge";
 import RequestCard from "@/components/ui/cards/request-card";
 import ModelCard from "@/components/ui/cards/model-card";
 import ExceptionCard from "@/components/ui/cards/exception-card";
 import { useResourceHooks, type ResourceKey } from "@/hooks/useApiTyped";
-
-type RelatedRequestBody = {
-  requestId?: string;
-  jobId?: string;
-  scheduleId?: string;
-};
 
 type Props = {
   type: ResourceKey;

@@ -6,7 +6,7 @@ interface IndexPageLayoutProps {
   children: ReactNode;
 }
 
-export function IndexPageLayout({ children }: IndexPageLayoutProps) {
+export function IndexLayout({ children }: IndexPageLayoutProps) {
   return <div className="flex flex-col gap-6">{children}</div>;
 }
 

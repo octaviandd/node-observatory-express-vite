@@ -1,8 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/base/card";
+import { Button } from "@/components/ui/base/button";
 import { Link } from "react-router";
 import { ExternalLinkIcon } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/base/badge";
 import { RequestInstanceResponse, JobInstanceResponse, ScheduleInstanceResponse } from "@/hooks/useApiTyped";
 
 export default function Source({

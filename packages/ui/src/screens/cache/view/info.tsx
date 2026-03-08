@@ -1,8 +1,8 @@
 /** @format */
 
 import React from "react";
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/base/card";
+import { Badge } from "@/components/ui/base/badge";
 import { formatDuration, timeAgo } from "@/utils.js";
 import { CacheInstanceResponse } from "@/hooks/useApiTyped";
 

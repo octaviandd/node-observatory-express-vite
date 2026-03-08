@@ -3,12 +3,13 @@
 import { ArrowUpDown } from "lucide-react";
 import { InstanceTable } from "./instance";
 import { GroupTable } from "./group";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { useIndexTableData } from "@/hooks/useIndexTableData";
-import { TablePageLayout } from "@/components/ui/table-page/TablePageLayout";
+import { Input } from "@/components/ui/base/input";
+import { Button } from "@/components/ui/base/button";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/base/toggle-group";
+import { useTableData } from "@/hooks/useTableData";
+import { TableLayout } from "@/components/ui/layout/table-layout";
 import { RequestGroupResponse, RequestInstanceResponse } from "@/hooks/useApiTyped";
+import { SearchInput } from "@/components/ui/search-input";
 
 export default function RequestIndexTable() {
   const {
@@ -24,7 +25,7 @@ export default function RequestIndexTable() {
     setInstanceStatusType,
     setInputValue,
     loadMore,
-  } = useIndexTableData({
+  } = useTableData({
     key: "requests",
     defaultInstanceStatusType: "all",
   });
@@ -51,7 +52,7 @@ export default function RequestIndexTable() {
   );
 
   return (
-    <TablePageLayout type="requests">
+    <TableLayout type="requests">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <ArrowUpDown className="h-5 w-5 text-muted-foreground" />
@@ -66,11 +67,10 @@ export default function RequestIndexTable() {
           </span>
           {!modelKey && (
             <div className="flex px-4 grow">
-              <Input
-                placeholder={`Search ${index === "instance" ? "requests" : "routes"}`}
+              <SearchInput
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                className="w-[300px] text-muted-foreground"
+                onChange={setInputValue}
+                placeholder={`Search ${index === "instance" ? "requests" : "routes"}`}
               />
             </div>
           )}
@@ -90,7 +90,7 @@ export default function RequestIndexTable() {
           {loadMoreButton}
         </GroupTable>
       )}
-    </TablePageLayout>
+    </TableLayout>
   );
 }
 

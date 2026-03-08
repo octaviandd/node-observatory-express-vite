@@ -1,5 +1,5 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/base/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/base/tabs";
 import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { ViewInstanceResponse } from "@/hooks/useApiTyped";

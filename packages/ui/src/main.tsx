@@ -6,7 +6,7 @@ import { createBrowserRouter, RouterProvider } from "react-router";
 import Dashboard from "./components/ui/dashboard";
 import { StoreProvider } from "./store";
 import MainLayout from "./App";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/base/scroll-area";
 import { queryClient, QueryClientProvider } from "@/hooks/useApi";
 
 const screens = {

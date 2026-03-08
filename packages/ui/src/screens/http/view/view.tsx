@@ -4,12 +4,10 @@ import { useState } from "react";
 import { HTTPCrumbs } from "./crumbs";
 import { HTTPInfo } from "./info";
 import ContentTabs from "./tabs";
-import {
-  ViewPageLayout,
-  useViewData,
-  Source,
-} from "@/components/ui/view-page";
 import { HttpClientInstanceResponse } from "@/hooks/useApiTyped";
+import { ViewLayout } from "@/components/ui/layout/view-layout";
+import { useViewData } from "@/hooks/useViewData";
+import Source from "./source";
 
 export default function HTTPView() {
   const [activeTab, setActiveTab] = useState("raw");
@@ -20,7 +18,7 @@ export default function HTTPView() {
   });
 
   return (
-    <ViewPageLayout loading={loading} error={error}>
+    <ViewLayout loading={loading} error={error}>
       {data && (
         <>
           <HTTPCrumbs http={data} />
@@ -33,6 +31,6 @@ export default function HTTPView() {
           />
         </>
       )}
-    </ViewPageLayout>
+    </ViewLayout>
   );
 }

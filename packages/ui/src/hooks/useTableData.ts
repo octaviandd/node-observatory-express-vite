@@ -13,7 +13,7 @@ type Props = {
   defaultInstanceStatusType: string;
 };
 
-export const useIndexTableData =<TInstance extends AllInstanceResponses, TGroup extends AllGroupResponses> ({ key, defaultInstanceStatusType }: Props) => {
+export const useTableData =<TInstance extends AllInstanceResponses, TGroup extends AllGroupResponses> ({ key, defaultInstanceStatusType }: Props) => {
   const modelKey = useParams<{ key: string }>().key || "";
   const resourceHooks = useResourceHooks(key);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -102,11 +102,7 @@ export const useIndexTableData =<TInstance extends AllInstanceResponses, TGroup 
   const activeQuery = index === "instance" ? instanceQuery : groupQuery;
   const activeCount = index === "instance" ? instanceDataCount : groupDataCount;
 
-  const message = useMemo(() => {
-    if (activeCount === "0") return "No entries available";
-    if (!activeQuery.hasNextPage) return "No more entries";
-    return null;
-  }, [activeCount, activeQuery.hasNextPage]);
+  const message = activeCount === "0" ? "No entries available" : !activeQuery.hasNextPage ? "No more entries" : "";
 
   return {
     instanceData,

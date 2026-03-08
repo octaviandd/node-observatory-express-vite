@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/base/card";
 import { formatDuration, timeAgo } from "@/utils.js";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/base/badge";
 import { ModelInstanceResponse } from "@/hooks/useApiTyped";
 
 export default function Details({ model }: { model: ModelInstanceResponse }) {

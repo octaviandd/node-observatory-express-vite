@@ -1,4 +1,4 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/base/card";
 import { NotificationInstanceResponse } from "@/hooks/useApiTyped";
 import { timeAgo } from "@/utils.js";
 

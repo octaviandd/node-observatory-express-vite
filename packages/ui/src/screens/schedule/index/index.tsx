@@ -6,8 +6,8 @@ import {
   CardHeader,
   CardTitle,
   CardSubtitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/base/card";
+import { Badge } from "@/components/ui/base/badge";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
 import SchedulesIndexTable from "../table";
 import { DurationGraph } from "@/components/ui/graphs/duration-graph";

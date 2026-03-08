@@ -1,9 +1,9 @@
 /** @format */
 
 import React from "react";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardHeader, CardContent } from "@/components/ui/base/card";
+import { ScrollArea } from "@/components/ui/base/scroll-area";
+import { Badge } from "@/components/ui/base/badge";
 
 type TimelineEvent = {
   type: string;

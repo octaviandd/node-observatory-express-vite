@@ -3,15 +3,13 @@
 import { DatabaseZap } from "lucide-react";
 import { InstanceTable } from "./instance";
 import { GroupTable } from "./group";
-import { useIndexTableData } from "@/hooks/useIndexTableData";
-import { Input } from "@/components/ui/input";
-import {
-  TablePageLayout,
-  TableHeader,
-  StatusFilter,
-  LoadMoreButton,
-} from "@/components/ui/table-page";
+import { useTableData } from "@/hooks/useTableData";
 import { CacheInstanceResponse, CacheGroupResponse } from "@/hooks/useApiTyped";
+import { SearchInput } from "@/components/ui/search-input";
+import { TableLayout } from "@/components/ui/layout/table-layout";
+import { LoadMoreButton } from "@/components/ui/load-more-button";
+import { StatusFilter } from "@/components/ui/status-filter";
+import { TableHeader } from "@/components/ui/table-header";
 
 const STATUS_OPTIONS = ["all", "hits", "misses", "writes"] as const;
 
@@ -29,7 +27,7 @@ export default function CacheIndexTable() {
     setInputValue,
     setInstanceStatusType,
     loadMore,
-  } = useIndexTableData({
+  } = useTableData({
     key: "cache",
     defaultInstanceStatusType: "all",
   });
@@ -38,18 +36,16 @@ export default function CacheIndexTable() {
   const label = index === "instance" ? "Transaction" : "Key";
 
   return (
-    <TablePageLayout type="cache">
+    <TableLayout type="cache">
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
           <TableHeader icon={DatabaseZap} count={count} label={label} />
           <div className="flex px-4 grow">
             {!modelKey && (
-              <Input
-                type="text"
-                placeholder={`Search ${index === "instance" ? "transactions" : "keys"}`}
+              <SearchInput
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                className="w-[300px] text-muted-foreground"
+                onChange={setInputValue}
+                placeholder={`Search ${index === "instance" ? "transactions" : "keys"}`}
               />
             )}
           </div>
@@ -72,6 +68,6 @@ export default function CacheIndexTable() {
           <LoadMoreButton message={message} onLoadMore={loadMore} />
         </GroupTable>
       )}
-    </TablePageLayout>
+    </TableLayout>
   );
 }

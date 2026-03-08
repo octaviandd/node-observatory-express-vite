@@ -8,8 +8,8 @@ import {
   CardHeader,
   CardTitle,
   CardSubtitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/base/card";
+import { Badge } from "@/components/ui/base/badge";
 import { useRequests } from "@/hooks/useApiTyped";
 import { useSearchParams } from "react-router";
 

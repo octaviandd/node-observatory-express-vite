@@ -4,12 +4,10 @@ import { useState } from "react";
 import MailCrumbs from "./crumbs";
 import MailPreviewInfo from "./info";
 import ContentTabs from "./tabs";
-import {
-  ViewPageLayout,
-  useViewData,
-  Source,
-} from "@/components/ui/view-page";
 import { MailInstanceResponse } from "@/hooks/useApiTyped";
+import { ViewLayout } from "@/components/ui/layout/view-layout";
+import { useViewData } from "@/hooks/useViewData";
+import Source from "./source";
 
 export default function MailPreview() {
   const [activeTab, setActiveTab] = useState("raw");
@@ -20,7 +18,7 @@ export default function MailPreview() {
   });
 
   return (
-    <ViewPageLayout loading={loading} error={error}>
+    <ViewLayout loading={loading} error={error}>
       {mail && (
         <>
           <MailCrumbs mail={mail} />
@@ -33,6 +31,6 @@ export default function MailPreview() {
           />
         </>
       )}
-    </ViewPageLayout>
+    </ViewLayout>
   );
 }

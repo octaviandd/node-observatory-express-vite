@@ -5,9 +5,9 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
-} from "@/components/ui/breadcrumb";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+} from "@/components/ui/base/breadcrumb";
+import { Badge } from "@/components/ui/base/badge";
+import { Card, CardContent } from "@/components/ui/base/card";
 import { ChevronRight } from "lucide-react";
 import { LogInstanceResponse } from "@/hooks/useApiTyped";
 

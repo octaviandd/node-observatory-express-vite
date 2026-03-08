@@ -1,8 +1,8 @@
-import { CardContent } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { CardContent } from "@/components/ui/base/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/base/tabs";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { Card } from "@/components/ui/card";
+import { Card } from "@/components/ui/base/card";
 import { JobInstanceResponse, NotificationInstanceResponse, MailInstanceResponse, LogInstanceResponse, QueryInstanceResponse, CacheInstanceResponse, HttpClientInstanceResponse, ExceptionInstanceResponse, ModelInstanceResponse } from "@/hooks/useApiTyped";
 
 type Props = {

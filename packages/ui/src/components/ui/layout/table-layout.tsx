@@ -9,7 +9,7 @@ interface TablePageLayoutProps {
   type: ResourceKey;
 }
 
-export function TablePageLayout({
+export function TableLayout({
   children,
   type,
 }: TablePageLayoutProps) {

@@ -1,9 +1,9 @@
-import { BreadcrumbItem, BreadcrumbLink } from "@/components/ui/breadcrumb";
-import { Breadcrumb } from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
+import { BreadcrumbItem, BreadcrumbLink } from "@/components/ui/base/breadcrumb";
+import { Breadcrumb } from "@/components/ui/base/breadcrumb";
+import { Button } from "@/components/ui/base/button";
 import { ExternalLinkIcon } from "lucide-react";
-import { Card, CardHeader } from "@/components/ui/card";
-import { CardContent } from "@/components/ui/card";
+import { Card, CardHeader } from "@/components/ui/base/card";
+import { CardContent } from "@/components/ui/base/card";
 import { ChevronRight } from "lucide-react";
 import { Link } from "react-router";
 import { JobInstanceResponse, ScheduleInstanceResponse, RequestInstanceResponse } from "@/hooks/useApiTyped";

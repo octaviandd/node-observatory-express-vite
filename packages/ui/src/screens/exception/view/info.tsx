@@ -1,7 +1,7 @@
 /** @format */
 
 import React from "react";
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/base/card";
 import { timeAgo } from "@/utils.js";
 import { ExceptionInstanceResponse } from "@/hooks/useApiTyped";
 

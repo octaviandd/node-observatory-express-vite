@@ -1,12 +1,12 @@
 import { Calendar as CalendarIcon } from "lucide-react";
 
 import { cn } from "@/utils.js";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/base/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@/components/ui/base/popover";
 
 export function DatePickerWithRange({
   className,

@@ -15,8 +15,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/base/table";
+import { Badge } from "@/components/ui/base/badge";
 import { memo, ReactNode } from "react";
 import { formatCount, formatDuration } from "@/utils.js";
 import { RequestGroupResponse } from "@/hooks/useApiTyped";

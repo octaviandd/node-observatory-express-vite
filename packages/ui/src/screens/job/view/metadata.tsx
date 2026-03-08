@@ -1,7 +1,7 @@
 /** @format */
 import React from "react";
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/base/card";
+import { Separator } from "@/components/ui/base/separator";
 import { QueryInstanceResponse, CacheInstanceResponse, HttpClientInstanceResponse, NotificationInstanceResponse, MailInstanceResponse, LogInstanceResponse, ExceptionInstanceResponse } from "@/hooks/useApiTyped";
 
 export const JobMetadata = React.memo(

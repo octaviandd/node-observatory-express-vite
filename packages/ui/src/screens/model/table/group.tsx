@@ -10,8 +10,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+} from "@/components/ui/base/table";
+import { Button } from "@/components/ui/base/button";
 import { formatDuration } from "@/utils.js";
 import { ModelGroupResponse } from "@/hooks/useApiTyped";
 

@@ -20,7 +20,7 @@ export default function ExceptionView() {
   });
 
   return (
-    <ViewPageLayout loading={loading} error={error}>
+    <ViewLayout loading={loading} error={error}>
       {exception && (
         <>
           <ExceptionCrumbs exception={exception} />
@@ -33,6 +33,6 @@ export default function ExceptionView() {
           />
         </>
       )}
-    </ViewPageLayout>
+    </ViewLayout>
   );
 }

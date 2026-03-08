@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
-import { AppSidebar } from "./AppSidebar";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "./app-sidebar";
+import { SidebarProvider } from "@/components/ui/base/sidebar";
 
 // Mock the AppSettings component since it has complex dialog behavior
 vi.mock("./app-settings", () => ({

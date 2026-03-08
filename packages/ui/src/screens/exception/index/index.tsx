@@ -1,12 +1,10 @@
 /** @format */
 
+import { StatsCard } from "@/components/ui/cards/stats-card";
 import ExceptionsIndexTable from "../table";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
-import {
-  IndexPageLayout,
-  StatsCard,
-  StatsGrid,
-} from "@/components/ui/index-page";
+import { IndexLayout } from "@/components/ui/layout/index-layout";
+import { StatsGrid } from "@/components/ui/stats-grid";
 import { useExceptions } from "@/hooks/useApiTyped";
 
 const EXCEPTION_BAR_DATA = [
@@ -18,7 +16,7 @@ export default function ExceptionsIndex() {
   const { data } = useExceptions.useGraph({});
 
   return (
-    <IndexPageLayout>
+    <IndexLayout>
       {data && (
         <StatsGrid columns={1}>
           <StatsCard
@@ -38,6 +36,6 @@ export default function ExceptionsIndex() {
         </StatsGrid>
       )}
       <ExceptionsIndexTable />
-    </IndexPageLayout>
+    </IndexLayout>
   );
 }

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { AppSettings } from "./AppSettings";
+import { AppSettings } from "./app-settings";
 
 describe("AppSettings", () => {
   it("renders without crashing", () => {

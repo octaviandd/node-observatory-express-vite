@@ -1,5 +1,5 @@
 /** @format */
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/base/card";
 import { StoreContext } from "@/store";
 import { getDateFromPeriod, formatGraphDate } from "@/utils";
 import { useContext } from "react";

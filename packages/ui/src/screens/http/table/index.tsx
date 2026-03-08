@@ -3,15 +3,13 @@
 import { Globe } from "lucide-react";
 import { GroupTable } from "./group";
 import { InstanceTable } from "./instance";
-import { useIndexTableData } from "@/hooks/useIndexTableData";
-import {
-  TablePageLayout,
-  TableHeader,
-  StatusFilter,
-  SearchInput,
-  LoadMoreButton,
-} from "@/components/ui/table-page";
+import { useTableData } from "@/hooks/useTableData";
 import { HttpClientGroupResponse, HttpClientInstanceResponse } from "@/hooks/useApiTyped";
+import { TableLayout } from "@/components/ui/layout/table-layout";
+import { LoadMoreButton } from "@/components/ui/load-more-button";
+import { SearchInput } from "@/components/ui/search-input";
+import { StatusFilter } from "@/components/ui/status-filter";
+import { TableHeader } from "@/components/ui/table-header";
 
 const STATUS_OPTIONS = ["all", "2xx", "4xx", "5xx"] as const;
 
@@ -29,7 +27,7 @@ export default function HttpIndexTable() {
     setInstanceStatusType,
     setInputValue,
     loadMore,
-  } = useIndexTableData<HttpClientInstanceResponse, HttpClientGroupResponse>({
+  } = useTableData<HttpClientInstanceResponse, HttpClientGroupResponse>({
     key: "https",
     defaultInstanceStatusType: "all",
   });
@@ -38,7 +36,7 @@ export default function HttpIndexTable() {
   const label = index === "instance" ? "Request" : "Route";
 
   return (
-    <TablePageLayout type="https">
+    <TableLayout type="https">
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
           <TableHeader icon={Globe} count={count} label={label} />
@@ -68,6 +66,6 @@ export default function HttpIndexTable() {
           <LoadMoreButton message={message} onLoadMore={loadMore} />
         </GroupTable>
       )}
-    </TablePageLayout>
+    </TableLayout>
   );
 }

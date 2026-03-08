@@ -1,13 +1,13 @@
-import { AppSidebar } from "@/components/AppSidebar";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/ui/navigation/app-sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/base/sidebar";
 import { Outlet, useLocation } from "react-router";
 import { useContext, useEffect, useState } from "react";
 import { StoreContext } from "@/store";
 import { Moon, Sun, CalendarDays, CalendarIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Button } from "@/components/ui/base/button";
+import { Label } from "@/components/ui/base/label";
+import { Switch } from "@/components/ui/base/switch";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/base/popover";
 import { cn } from "@/utils";
 import {
   Dialog,
@@ -16,7 +16,7 @@ import {
   DialogTitle,
   DialogFooter,
   DialogClose,
-} from "@/components/ui/dialog";
+} from "@/components/ui/base/dialog";
 
 type TimePeriod = "1h" | "24h" | "7d" | "14d" | "30d";
 
@@ -109,7 +109,8 @@ const PeriodSelector = () => {
           onClick={() => setIsCustomRangeModalOpen(true)}
           className="px-3 rounded-none rounded-r-md border-l border-muted-foreground/20"
         >
-          <CalendarDays className="h-4 w-4 mr-1" /> Custom
+          <CalendarDays className="h-4 w-4 mr-1" />
+          <span>Custom</span>
         </Button>
       </div>
       <div className="flex items-center space-x-2">

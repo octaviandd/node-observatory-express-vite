@@ -3,15 +3,14 @@
 import { Layers } from "lucide-react";
 import { InstanceTable } from "./instance";
 import { GroupTable } from "./group";
-import { Input } from "@/components/ui/input";
-import { useIndexTableData } from "@/hooks/useIndexTableData";
-import {
-  TablePageLayout,
-  TableHeader,
-  StatusFilter,
-  LoadMoreButton,
-} from "@/components/ui/table-page";
+import { Input } from "@/components/ui/base/input";
+import { useTableData } from "@/hooks/useTableData";
 import { JobInstanceResponse, JobGroupResponse } from "@/hooks/useApiTyped";
+import { TableLayout } from "@/components/ui/layout/table-layout";
+import { LoadMoreButton } from "@/components/ui/load-more-button";
+import { StatusFilter } from "@/components/ui/status-filter";
+import { TableHeader } from "@/components/ui/table-header";
+import { SearchInput } from "@/components/ui/search-input";
 
 const STATUS_OPTIONS = ["all", "completed", "released", "failed"];
 
@@ -28,7 +27,7 @@ export default function JobsIndexTable() {
     setInstanceStatusType,
     setInputValue,
     loadMore,
-  } = useIndexTableData({
+  } = useTableData({
     key: "jobs",
     defaultInstanceStatusType: "all",
   });
@@ -37,18 +36,16 @@ export default function JobsIndexTable() {
   const label = index === "group" ? "Queue" : "ATTEMPT";
 
   return (
-    <TablePageLayout type="jobs">
+    <TableLayout type="jobs">
       <div className="py-3 flex justify-between">
         <div className="flex items-center gap-2">
           <TableHeader icon={Layers} count={count} label={label} />
           {index === "group" && (
             <div className="flex px-4 grow">
-              <Input
-                type="text"
-                placeholder="Search queues"
+              <SearchInput
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                className="w-[300px] text-muted-foreground"
+                onChange={setInputValue}
+                placeholder={`Search queues`}
               />
             </div>
           )}
@@ -72,6 +69,6 @@ export default function JobsIndexTable() {
           <LoadMoreButton message={message} onLoadMore={loadMore} />
         </GroupTable>
       )}
-    </TablePageLayout>
+    </TableLayout>
   );
 }

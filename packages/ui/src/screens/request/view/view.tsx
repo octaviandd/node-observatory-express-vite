@@ -7,9 +7,9 @@ import { RequestPreviewDetails } from "./details";
 import { RequestPreviewUser } from "./user";
 import { RequestPreviewNotifications } from "./notifications";
 import { useParams } from "react-router";
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Card, CardContent } from "@/components/ui/base/card";
+import { Skeleton } from "@/components/ui/base/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/base/alert";
 import { RequestPreviewTabs } from "./tabs";
 import { RequestInstanceResponse, NotificationInstanceResponse, MailInstanceResponse, LogInstanceResponse, QueryInstanceResponse, HttpClientInstanceResponse, JobInstanceResponse, CacheInstanceResponse, ExceptionInstanceResponse, ViewInstanceResponse, ModelInstanceResponse } from "@/hooks/useApiTyped";
 

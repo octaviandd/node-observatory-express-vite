@@ -6,7 +6,7 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+} from "@/components/ui/base/collapsible";
 import {
   SidebarGroup,
   SidebarMenu,
@@ -15,10 +15,10 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-} from "@/components/ui/sidebar";
+} from "@/components/ui/base/sidebar";
 import { Link } from "react-router";
 
-export function NavMain({
+export function Navigation({
   items,
 }: {
   items: {

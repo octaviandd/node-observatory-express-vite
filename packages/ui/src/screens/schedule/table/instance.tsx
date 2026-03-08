@@ -7,8 +7,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/base/table";
+import { Badge } from "@/components/ui/base/badge";
 import { memo, ReactNode } from "react";
 import { formatDate, formatDuration } from "@/utils.js";
 import { ScheduleInstanceResponse } from "@/hooks/useApiTyped";

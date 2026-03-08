@@ -20,7 +20,7 @@ export default function CachePreview() {
   });
 
   return (
-    <ViewPageLayout loading={loading} error={error}>
+    <ViewLayout loading={loading} error={error}>
       {cache && (
         <>
           <CacheCrumbs cache={cache} />
@@ -33,6 +33,6 @@ export default function CachePreview() {
           />
         </>
       )}
-    </ViewPageLayout>
+    </ViewLayout>
   );
 }

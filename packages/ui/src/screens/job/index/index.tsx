@@ -1,13 +1,11 @@
 /** @format */
 
+import { DurationCard } from "@/components/ui/cards/duration-card";
+import { StatsCard } from "@/components/ui/cards/stats-card";
 import JobsIndexTable from "../table";
 import { CountGraph } from "@/components/ui/graphs/count-graph";
-import {
-  IndexPageLayout,
-  StatsCard,
-  DurationCard,
-  StatsGrid,
-} from "@/components/ui/index-page";
+import { IndexLayout } from "@/components/ui/layout/index-layout";
+import { StatsGrid } from "@/components/ui/stats-grid";
 import { useJobs } from "@/hooks/useApiTyped";
 
 const JOB_BAR_DATA = [
@@ -20,7 +18,7 @@ export default function JobsIndex() {
   const { data } = useJobs.useGraph();
 
   return (
-    <IndexPageLayout>
+    <IndexLayout>
       {data && (
         <StatsGrid columns={2}>
           <StatsCard
@@ -48,6 +46,6 @@ export default function JobsIndex() {
         </StatsGrid>
       )}
       <JobsIndexTable />
-    </IndexPageLayout>
+    </IndexLayout>
   );
 }
