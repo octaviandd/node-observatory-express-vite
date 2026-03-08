@@ -5,11 +5,15 @@ import { PERIODS } from "../../helpers/constants.js";
 const VALID_PERIODS = ["1h", "24h", "7d", "14d", "30d"] as const;
 
 export abstract class BaseBuilder {
-  /**
-   * Validate and sanitize period
-   */
-  private validatePeriod(period: string | undefined): Period | null {
+  private validatePeriod(period: PeriodValue | undefined): Period | CustomPeriod | null {
     if (!period) return null;
+    
+    // Handle custom period
+    if (typeof period === 'object' && period.label === 'custom') {
+      return period;
+    }
+    
+    // Handle preset period
     if (!VALID_PERIODS.includes(period as Period)) {
       throw new Error(
         `Invalid period: "${period}". Valid periods: ${VALID_PERIODS.join(", ")}`,
@@ -36,10 +40,17 @@ export abstract class BaseBuilder {
     return path;
   }
 
-  getPeriodSQL = (period: string | undefined): string => {
-    const validPeriod = this.validatePeriod(period);
-    return validPeriod
-      ? `AND created_at >= UTC_TIMESTAMP() - ${PERIODS[validPeriod].interval}`
+  getPeriodSQL = (period: PeriodValue): string => {
+    if (!period) return "";
+    
+    // Handle custom period with explicit date range
+    if (typeof period === 'object' && period.label === 'custom') {
+      return `AND created_at >= '${period.startDate}' AND created_at <= '${period.endDate}'`;
+    }
+    
+    // Handle preset periods
+    return period
+      ? `AND created_at >= UTC_TIMESTAMP() - ${PERIODS[period].interval}`
       : "";
   };
 

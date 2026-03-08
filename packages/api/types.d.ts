@@ -13,6 +13,13 @@ declare global {
 // Common Types
 // ============================================================================
 type Period = "1h" | "24h" | "7d" | "14d" | "30d";
+type CustomPeriod = {
+  startDate: string; // ISO string
+  endDate: string;   // ISO string
+  label: "custom";
+};
+
+type PeriodValue = Period | CustomPeriod;
 type IndexType = "instance" | "group";
 type StatusType = "all" | "completed" | "failed";
 type HttpStatusType = "all" | "2xx" | "4xx" | "5xx";
@@ -56,7 +63,7 @@ interface WatcherEntry {
 interface WatcherFilters {
   offset: number;
   limit: number;
-  period: Period;
+  period: PeriodValue;
   query: string;
   isTable: boolean;
   index: IndexType;

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/base/button";
 import { Label } from "@/components/ui/base/label";
 import { Switch } from "@/components/ui/base/switch";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/base/popover";
+import { Calendar } from "@/components/ui/base/calendar"
 import { cn } from "@/utils";
 import {
   Dialog,
@@ -166,6 +167,16 @@ const CustomDateRangeModal: React.FC<CustomDateRangeModalProps> = ({
   const [isStartDatePickerOpen, setIsStartDatePickerOpen] = useState(false);
   const [isEndDatePickerOpen, setIsEndDatePickerOpen] = useState(false);
 
+  const [timeZone, setTimeZone] = useState<string | undefined>(undefined)
+ 
+  useEffect(() => {
+    setTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone)
+  }, [])
+
+  // Get today at start of day for consistent comparison
+  const today = new Date();
+  today.setHours(23, 59, 59, 999); // End of today
+
   useEffect(() => {
     const knownPresets = ["1h", "24h", "7d", "14d", "30d"];
     if (typeof appState.period === 'string' && knownPresets.includes(appState.period)) {
@@ -186,6 +197,18 @@ const CustomDateRangeModal: React.FC<CustomDateRangeModalProps> = ({
     window.localStorage.setItem("period", period);
     appDispatch({ type: "setPeriod", payload: period });
     onClose();
+  };
+
+  const handleStartDateSelect = (date: Date | undefined) => {
+    setStartDate(date);
+    setDateError(null);
+    setIsStartDatePickerOpen(false);
+  };
+
+  const handleEndDateSelect = (date: Date | undefined) => {
+    setEndDate(date);
+    setDateError(null);
+    setIsEndDatePickerOpen(false);
   };
 
   const handleApplyCustomRange = () => {
@@ -212,12 +235,10 @@ const CustomDateRangeModal: React.FC<CustomDateRangeModalProps> = ({
     return "No range selected";
   };
 
-  // Handler for Dialog's onOpenChange to sync with parent control
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       onClose();
     }
-    // We don't control opening from here, only closing via onOpenChange
   };
 
   return (
@@ -254,11 +275,12 @@ const CustomDateRangeModal: React.FC<CustomDateRangeModalProps> = ({
           <div>
             <Label className="mb-2 block text-sm font-medium">Custom Range</Label>
             <div className="flex space-x-4">
+              {/* Start Date */}
               <div className="flex-1">
                 <Popover open={isStartDatePickerOpen} onOpenChange={setIsStartDatePickerOpen}>
-                  <PopoverTrigger asChild id="startDatePopover">
+                  <PopoverTrigger asChild>
                     <Button
-                      variant={"outline"}
+                      variant="outline"
                       className={cn(
                         "w-full justify-start text-left font-normal",
                         !startDate && "text-muted-foreground"
@@ -268,16 +290,25 @@ const CustomDateRangeModal: React.FC<CustomDateRangeModalProps> = ({
                       {startDate ? startDate.toLocaleDateString() : <span>Start date</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                   
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      timeZone={timeZone}
+                      selected={startDate}
+                      onSelect={handleStartDateSelect}
+                      disabled={(date: Date) => date > today}
+                      defaultMonth={startDate || new Date()}
+                    />
                   </PopoverContent>
                 </Popover>
               </div>
+
+              {/* End Date */}
               <div className="flex-1">
                 <Popover open={isEndDatePickerOpen} onOpenChange={setIsEndDatePickerOpen}>
-                  <PopoverTrigger asChild id="endDatePopover">
+                  <PopoverTrigger asChild>
                     <Button
-                      variant={"outline"}
+                      variant="outline"
                       className={cn(
                         "w-full justify-start text-left font-normal",
                         !endDate && "text-muted-foreground"
@@ -287,8 +318,18 @@ const CustomDateRangeModal: React.FC<CustomDateRangeModalProps> = ({
                       {endDate ? endDate.toLocaleDateString() : <span>End date</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      timeZone={timeZone}
+                      selected={endDate}
+                      onSelect={handleEndDateSelect}
+                      disabled={(date: Date) => 
+                        date > today || 
+                        (startDate ? date < startDate : false)
+                      }
+                      defaultMonth={endDate || startDate || new Date()}
+                    />
                   </PopoverContent>
                 </Popover>
               </div>
