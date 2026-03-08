@@ -1,5 +1,6 @@
 /** @format */
 
+import { dashboardController } from "../dashboard.js";
 import { watchers } from "../index.js";
 
 const ROUTE_CONFIG = [
@@ -77,16 +78,10 @@ function generateRoutesForResource(
 const apiRoutes: AppControllerRoute[] = [
   {
     method: "get",
-    route: "/api/",
+    route: "/api/dashboard",
     handler: (
       request: ObservatoryBoardRequest,
-    ): Promisify<ControllerHandlerReturnType> =>
-      watchers.dashboard?.indexTable(request) ||
-      Promise.resolve({
-        body: { error: "Dashboard not initialized" },
-        statusCode: 503,
-      }),
-  },
+    ): Promisify<ControllerHandlerReturnType> => dashboardController.getDashboardData(request)},
   ...ROUTE_CONFIG.flatMap(({ path, watcher }) =>
     generateRoutesForResource(path, watcher),
   ),

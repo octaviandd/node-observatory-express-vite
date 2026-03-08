@@ -12,7 +12,7 @@ import apiRoutes from "./routes/routes.js";
 import { BaseWatcher } from "./watchers/BaseWatcher.js";
 import GenericWatcher from "./watchers/GenericWatcher.js";
 import { WATCHER_CONFIGS } from "./watcherConfig.js";
-
+import { dashboardController } from "./dashboard.js";
 
 // I need to actually import the patchers.
 
@@ -48,6 +48,8 @@ function initializeWatchers(redis: RedisClientType, db: Database) {
       );
     },
   );
+
+  (dashboardController as any).db = db;
 }
 
 const UI_RESOURCES = [

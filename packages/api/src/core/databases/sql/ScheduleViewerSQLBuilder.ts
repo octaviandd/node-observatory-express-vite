@@ -4,14 +4,14 @@ import { BaseBuilder } from "./BaseBuilder";
 
 class ScheduleWatcherSQL extends BaseBuilder {
   /**
-   * Helper for schedule-specific status and type filtering
+   * Helper for schedule-specific status filtering
    */
-  private getStatusSQL(type: string | undefined): string {
-    const base =
-      "AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data,type')) = 'processJob'";
-    if (!type || type === "all") return base;
-
-    return `${base} AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.status')) = '${type}'`;
+  private getStatusSQL(status: string | undefined): string {
+    if (!status || status === "all") {
+      return "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) IN ('completed', 'failed'))";
+    }
+    
+    return `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = '${status}'`;
   }
 
   /**
@@ -21,10 +21,8 @@ class ScheduleWatcherSQL extends BaseBuilder {
     const { offset, limit, query, period, key, status } = filters;
 
     const periodSql = this.getPeriodSQL(period);
-    const querySql = query
-      ? this.getInclusionSQL(query, "data.scheduleId")
-      : "";
-    const scheduleSql = key ? this.getEqualitySQL(key, "data.scheduleId") : "";
+    const querySql = query ? this.getInclusionSQL(query, "metadata.scheduleId") : "";
+    const scheduleSql = key ? this.getEqualitySQL(key, "metadata.scheduleId") : "";
     const statusSql = this.getStatusSQL(status);
 
     const whereClause = `WHERE type = 'schedule' ${statusSql} ${querySql} ${periodSql} ${scheduleSql}`;
@@ -42,7 +40,7 @@ class ScheduleWatcherSQL extends BaseBuilder {
     const { offset, limit, period, groupFilter, query } = filters;
 
     const timeSql = this.getPeriodSQL(period);
-    const querySql = query ? this.getInclusionSQL(query, "jobId") : "";
+    const querySql = query ? this.getInclusionSQL(query, "metadata.scheduleId") : "";
 
     // Dynamic sorting based on UI selection
     let orderBySql = "ORDER BY total DESC";
@@ -50,7 +48,7 @@ class ScheduleWatcherSQL extends BaseBuilder {
     if (groupFilter === "slow") orderBySql = "ORDER BY longest DESC";
 
     const columns = [
-      "JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.scheduleId')) AS scheduleId",
+      "JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.scheduleId')) AS scheduleId",
       "COUNT(*) as total",
       "GROUP_CONCAT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.cronExpression'))) AS cronExpression",
       "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed",
@@ -74,7 +72,7 @@ class ScheduleWatcherSQL extends BaseBuilder {
         GROUP BY scheduleId
         ${orderBySql}
         LIMIT ${limit} OFFSET ${offset};`,
-      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.scheduleId'))) as total FROM observatory_entries ${whereClause};`,
+      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.scheduleId'))) as total FROM observatory_entries ${whereClause};`,
     };
   }
 
@@ -82,17 +80,18 @@ class ScheduleWatcherSQL extends BaseBuilder {
    * Logic for the Schedule Graph (Aggregates + Chronological Rows)
    */
   public getIndexGraphDataSQL(filters: any) {
-    const { period, key } = filters;
-    const timeSql = this.getPeriodSQL(period);
-    const scheduleKeySql = key ? this.getEqualitySQL(key, "scheduleId") : "";
+    const { period, key, status } = filters;
+    const timeSql = period ? this.getPeriodSQL(period) : "";
+    const scheduleKeySql = key ? this.getEqualitySQL(key, "metadata.scheduleId") : "";
+    const statusSql = this.getStatusSQL(status);
 
     const aggregateColumns = [
       "COUNT(*) as total",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed",
       "CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest",
       "CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest",
       "CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed",
       this.getP95SQL("schedule"),
       "NULL as created_at",
       "NULL as content",
@@ -101,21 +100,18 @@ class ScheduleWatcherSQL extends BaseBuilder {
 
     const rowColumns = [
       "NULL as total",
+      "NULL as completed",
+      "NULL as failed",
       "NULL as shortest",
       "NULL as longest",
       "NULL as average",
-      "NULL as completed",
-      "NULL as failed",
       "NULL as p95",
       "created_at",
       "content",
       "'row' as type",
     ];
 
-    const whereClause = `
-      WHERE type = 'schedule' ${timeSql} ${scheduleKeySql} 
-      AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) IN ('completed', 'failed'))
-    `;
+    const whereClause = `WHERE type = 'schedule' ${timeSql} ${scheduleKeySql} ${statusSql}`;
 
     return `
       (SELECT ${aggregateColumns.join(", ")} FROM observatory_entries ${whereClause})

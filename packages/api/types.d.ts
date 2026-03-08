@@ -650,3 +650,19 @@ interface DurationGraphDataResponse {
   average: string;
   p95: string;
 }
+
+interface DashboardData {
+  requests: {
+    count: any;
+    duration: any;
+  };
+  exceptions: {
+    count: any;
+  };
+  jobs: {
+    count: any;
+    duration: any;
+  };
+  slowRequests: any[];
+  slowQueries: any[];
+}
