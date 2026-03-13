@@ -11,8 +11,8 @@ const VIEW_BAR_DATA = [
     name: "Completed",
     stackId: "a",
     fill: document.documentElement.classList.contains("dark")
-      ? "#22c55e"
-      : "#86efac",
+      ? "#242427"
+      : "#f1f5f9",
   },
   { dataKey: "failed", name: "Failed", stackId: "b", fill: "#ef4444" },
 ];
@@ -30,7 +30,7 @@ const CountCard = memo(() => {
       title="VIEWS"
       count={data.count}
       badges={[
-        { label: "Completed", value: data.indexCountOne, variant: "success" },
+        { label: "Completed", value: data.indexCountOne, variant: "secondary" },
         { label: "Failed", value: data.indexCountTwo, variant: "error" },
       ]}
       graph={

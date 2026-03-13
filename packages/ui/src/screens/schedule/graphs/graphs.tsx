@@ -1,8 +1,10 @@
+/** @format */
+
 import { memo } from "react";
-import { StatsCard } from "@/components/ui/cards/stats-card"
-import { CountGraph } from "@/components/ui/graphs/count-graph"
+import { StatsCard } from "@/components/ui/cards/stats-card";
+import { CountGraph } from "@/components/ui/graphs/count-graph";
 import { DurationGraph } from "@/components/ui/graphs/duration-graph";
-import { StatsGrid } from "@/components/ui/stats-grid"
+import { StatsGrid } from "@/components/ui/stats-grid";
 import { useCountGraphData, useDurationGraphData } from "@/hooks/useGraphData";
 
 const SCHEDULE_BAR_DATA = [
@@ -11,16 +13,16 @@ const SCHEDULE_BAR_DATA = [
     name: "Completed",
     stackId: "a",
     fill: document.documentElement.classList.contains("dark")
-      ? "#22c55e"
-      : "#86efac",
+      ? "#242427"
+      : "#f1f5f9",
   },
   { dataKey: "failed", name: "Failed", stackId: "b", fill: "#ef4444" },
 ];
 
 // Memoized schedule count card - fetches its own data
 const CountCard = memo(() => {
-  const { data } = useCountGraphData({ 
-    key: "schedules", 
+  const { data } = useCountGraphData({
+    key: "schedules",
   });
 
   if (!data) return null;
@@ -30,7 +32,7 @@ const CountCard = memo(() => {
       title="SCHEDULES"
       count={data.count}
       badges={[
-        { label: "Completed", value: data.indexCountOne, variant: "success" },
+        { label: "Completed", value: data.indexCountOne, variant: "secondary" },
         { label: "Failed", value: data.indexCountTwo, variant: "error" },
       ]}
       graph={
@@ -45,7 +47,7 @@ const CountCard = memo(() => {
 
 // Memoized duration card - fetches its own data
 const DurationCard = memo(() => {
-  const { data } = useDurationGraphData({ 
+  const { data } = useDurationGraphData({
     key: "schedules", // ← Fixed from "requests"
   });
 
@@ -59,9 +61,7 @@ const DurationCard = memo(() => {
         { label: "AVG", value: data.average, variant: "secondary" },
         { label: "P95", value: data.p95, variant: "warning" },
       ]}
-      graph={
-        <DurationGraph data={data.durationFormattedData} />
-      }
+      graph={<DurationGraph data={data.durationFormattedData} />}
     />
   );
 });

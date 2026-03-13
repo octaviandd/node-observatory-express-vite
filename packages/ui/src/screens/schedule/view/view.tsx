@@ -93,11 +93,10 @@ export default function SchedulePreview() {
               <div className="col-span-4 text-[#5c5f65]">Mode</div>
               <div className="col-span-8">
                 <span
-                  className={`px-2 py-1 rounded-md ${
-                    schedule.content.mode === "cancel"
-                      ? "bg-red-300"
-                      : "bg-[#D1FAE4]"
-                  }`}
+                  className={`px-2 py-1 rounded-md ${schedule.content.mode === "cancel"
+                    ? "bg-red-300"
+                    : "bg-[#D1FAE4]"
+                    }`}
                 >
                   {schedule.content.mode}
                 </span>

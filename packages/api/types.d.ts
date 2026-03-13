@@ -96,7 +96,7 @@ interface NotificationFilters extends IndexedFilters {
   status: string;
 }
 interface CacheFilters extends IndexedFilters {
-  type: "all" | "misses" | "hits" | "writes";
+  status: "all" | "misses" | "hits" | "writes";
 }
 interface HTTPClientFilters extends IndexedFilters {
   status: HttpStatusType;
@@ -125,7 +125,7 @@ interface LogFilters extends IndexedFilters {
     | "Log";
 }
 interface ExceptionFilters extends IndexedFilters {
-  type: "all" | "unhandled" | "uncaught";
+  status: "all" | "unhandled" | "uncaught";
 }
 
 type FiltersByWatcherType = {
