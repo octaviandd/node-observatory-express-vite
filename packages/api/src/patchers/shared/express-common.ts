@@ -182,6 +182,7 @@ export function patchExpressExports(exports: any): any {
               // Retrieve caller info captured at request entry
               const callerInfo = finalStore.get("callerInfo");
 
+              const route = (req.originalUrl || req.url || "").split("?")[0];
               const logContent: RequestContent = {
                 metadata: {
                   package: "express",
@@ -191,7 +192,8 @@ export function patchExpressExports(exports: any): any {
                 },
                 data: {
                   method: req.method?.toLowerCase() || "unknown",
-                  route: req.originalUrl || req.url,
+                  route,
+                  originalUrl: req.originalUrl,
                   statusCode,
                   requestSize: parseFloat(req.headers["content-length"] || "0"),
                   responseSize,
@@ -229,6 +231,7 @@ export function patchExpressExports(exports: any): any {
 
               const callerInfo = errorStore.get("callerInfo");
 
+              const route = (req.originalUrl || req.url || "").split("?")[0];
               log({
                 metadata: {
                   package: "express",
@@ -242,10 +245,11 @@ export function patchExpressExports(exports: any): any {
                   created_at: timestamp(),
                 },
                 data: {
-                  route: req.originalUrl || req.url,
+                  route,
                   statusCode: res.statusCode >= 400 ? res.statusCode : 500,
                   requestSize: parseFloat(req.headers["content-length"] || "0"),
                   method: req.method?.toLowerCase() || "unknown",
+                  originalUrl: req.originalUrl,
                   responseSize: 0,
                   payload: errorStore.get("payload") || "",
                   headers: req.headers,

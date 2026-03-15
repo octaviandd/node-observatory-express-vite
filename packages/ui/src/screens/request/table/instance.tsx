@@ -60,7 +60,7 @@ export const InstanceTable = memo(({ data, children }: Props) => {
                 <span>{request.content.data.method?.toUpperCase()}</span>
                 <ArrowUpDown className="h-4 w-4" />
                 <span className="truncate max-w-100 text-black dark:text-white">
-                  {request.content.data.route}
+                  {request.content.data.originalUrl}
                 </span>
               </TableCell>
               <TableCell>

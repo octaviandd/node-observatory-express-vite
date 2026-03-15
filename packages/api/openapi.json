@@ -93,6 +93,9 @@
                   "statusCode": {
                     "type": "number"
                   },
+                  "originalUrl": {
+                    "type": "string"
+                  },
                   "requestSize": {
                     "type": "number"
                   },
@@ -154,6 +157,7 @@
                 },
                 "required": [
                   "method",
+                  "originalUrl",
                   "statusCode"
                 ]
               },
@@ -2780,6 +2784,9 @@
                         "statusCode": {
                           "type": "number"
                         },
+                        "originalUrl": {
+                          "type": "string"
+                        },
                         "requestSize": {
                           "type": "number"
                         },
@@ -2841,6 +2848,7 @@
                       },
                       "required": [
                         "method",
+                        "originalUrl",
                         "statusCode"
                       ]
                     },

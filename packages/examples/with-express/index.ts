@@ -1,5 +1,5 @@
 /** @format */
-import { createObserver } from "@node-observatory/api"
+import { createObserver } from "@node-observatory/api";
 import { ExpressAdapter } from "@node-observatory/express";
 import express from "express";
 import cors from "cors";
@@ -16,10 +16,10 @@ import nodemailer from "nodemailer";
 const myCache = new NodeCache();
 
 // Create a Bull queue
-const emailQueue = new Bull('email-queue', {
+const emailQueue = new Bull("email-queue", {
   redis: {
-    host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT || '6379', 10),
+    host: process.env.REDIS_HOST || "localhost",
+    port: parseInt(process.env.REDIS_PORT || "6379", 10),
   },
 });
 
@@ -34,7 +34,7 @@ const pusher = new Pusher({
 
 // Create Pino logger
 const logger = pino({
-  level: process.env.LOG_LEVEL || 'info',
+  level: process.env.LOG_LEVEL || "info",
 });
 
 // Create nodemailer transporter (ethereal test account)
@@ -42,7 +42,7 @@ let mailTransporter: nodemailer.Transporter;
 
 async function createMailTransporter() {
   const testAccount = await nodemailer.createTestAccount();
-  
+
   mailTransporter = nodemailer.createTransport({
     host: "smtp.ethereal.email",
     port: 587,
@@ -52,14 +52,14 @@ async function createMailTransporter() {
       pass: testAccount.pass,
     },
   });
-  
+
   console.log(`  Mail:       Test account created - ${testAccount.user}`);
 }
 
 // Process jobs from the queue
 emailQueue.process(async (job) => {
-  logger.info({ jobId: job.id, email: job.data.email }, 'Processing job');
-  
+  logger.info({ jobId: job.id, email: job.data.email }, "Processing job");
+
   // Actually send the email via nodemailer
   const info = await mailTransporter.sendMail({
     from: '"Observatory System" <system@observatory.dev>',
@@ -68,20 +68,23 @@ emailQueue.process(async (job) => {
     text: job.data.body,
     html: `<b>${job.data.body}</b>`,
   });
-  
-  logger.info({ messageId: info.messageId }, 'Email sent');
-  logger.info({ previewUrl: nodemailer.getTestMessageUrl(info) }, 'Preview URL');
-  
+
+  logger.info({ messageId: info.messageId }, "Email sent");
+  logger.info(
+    { previewUrl: nodemailer.getTestMessageUrl(info) },
+    "Preview URL",
+  );
+
   // Send Pusher notification when job completes
-  await pusher.trigger('jobs-channel', 'job-completed', {
+  await pusher.trigger("jobs-channel", "job-completed", {
     jobId: job.id,
     email: job.data.email,
     messageId: info.messageId,
     timestamp: new Date().toISOString(),
   });
-  
-  return { 
-    status: 'sent', 
+
+  return {
+    status: "sent",
     email: job.data.email,
     subject: job.data.subject,
     messageId: info.messageId,
@@ -89,17 +92,17 @@ emailQueue.process(async (job) => {
 });
 
 // Handle job completion
-emailQueue.on('completed', (job, result) => {
-  logger.info({ jobId: job.id, result }, 'Job completed');
+emailQueue.on("completed", (job, result) => {
+  logger.info({ jobId: job.id, result }, "Job completed");
 });
 
 // Handle job failure
-emailQueue.on('failed', async (job, err) => {
-  logger.error({ jobId: job?.id, error: err.message }, 'Job failed');
-  
+emailQueue.on("failed", async (job, err) => {
+  logger.error({ jobId: job?.id, error: err.message }, "Job failed");
+
   // Send Pusher notification for failed job
   if (job) {
-    await pusher.trigger('jobs-channel', 'job-failed', {
+    await pusher.trigger("jobs-channel", "job-failed", {
       jobId: job.id,
       error: err.message,
       timestamp: new Date().toISOString(),
@@ -112,82 +115,93 @@ app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
-  if (!req.path.startsWith('/ui')) {
+  if (!req.path.startsWith("/ui")) {
     return express.json()(req, res, next);
   }
   next();
 });
 
 const expressAdapter = new ExpressAdapter();
-expressAdapter.setBasePath('/ui');
-app.use('/ui', expressAdapter.getRouter());
+expressAdapter.setBasePath("/ui");
+app.use("/ui", expressAdapter.getRouter());
 
 // ---------------------------------------------------------------------------
 // Demo route with Bull jobs, Pusher notifications, and direct emails
 // ---------------------------------------------------------------------------
-app.get('/home', async (req, res) => {
+app.get("/home", async (req, res) => {
   try {
     // HTTP request
-    const response = await axios.get('https://jsonplaceholder.typicode.com/todos/1');
-    
+    const response = await axios.get(
+      "https://jsonplaceholder.typicode.com/todos/1",
+    );
+
     // Cache operations
-    myCache.set('index', 'test');
-    myCache.get('index');
-    console.log(myCache.get('index'));
-    
+    myCache.set("index", "test");
+    myCache.get("index");
+    console.log(myCache.get("index"));
+
     // Logging - Pino style
-    logger.info('This is an info log message from Pino in user app');
-    logger.debug({ context: 'home-route', user: 'test' }, 'Debug message with context');
-    logger.warn({ warning: 'test-warning' }, 'This is a warning');
-    logger.error({ error: 'test-error' }, 'This is an error log');
-    
+    logger.info("This is an info log message from Pino in user app");
+    logger.debug(
+      { context: "home-route", user: "test" },
+      "Debug message with context",
+    );
+    logger.warn({ warning: "test-warning" }, "This is a warning");
+    logger.error({ error: "test-error" }, "This is an error log");
+
     // Send a direct email (not through Bull queue)
     const directEmail = await mailTransporter.sendMail({
       from: '"Direct Sender" <direct@observatory.dev>',
-      to: 'user@example.com',
-      subject: 'Direct Email - Not Queued',
-      text: 'This email was sent directly, not through the job queue',
-      html: '<b>This email was sent directly, not through the job queue</b>',
+      to: "user@example.com",
+      subject: "Direct Email - Not Queued",
+      text: "This email was sent directly, not through the job queue",
+      html: "<b>This email was sent directly, not through the job queue</b>",
     });
-    
-    logger.info({ messageId: directEmail.messageId }, 'Direct email sent');
-    
+
+    logger.info({ messageId: directEmail.messageId }, "Direct email sent");
+
     // Send Pusher notification for page visit
-    await pusher.trigger('activity-channel', 'page-visit', {
-      path: '/home',
+    await pusher.trigger("activity-channel", "page-visit", {
+      path: "/home",
       timestamp: new Date().toISOString(),
-      userAgent: req.headers['user-agent'],
+      userAgent: req.headers["user-agent"],
     });
-    
+
     // Add jobs to Bull queue (these will send emails when processed)
     const job1 = await emailQueue.add({
-      email: 'user1@example.com',
-      subject: 'Welcome Email',
-      body: 'Welcome to our service!',
+      email: "user1@example.com",
+      subject: "Welcome Email",
+      body: "Welcome to our service!",
     });
-    
-    const job2 = await emailQueue.add({
-      email: 'user2@example.com',
-      subject: 'Newsletter',
-      body: 'Check out our latest updates!',
-    }, {
-      delay: 2000, // Delay by 2 seconds
-    });
-    
-    const job3 = await emailQueue.add({
-      email: 'user3@example.com',
-      subject: 'Reminder',
-      body: 'Don\'t forget your appointment!',
-    }, {
-      attempts: 3, // Retry up to 3 times on failure
-      backoff: {
-        type: 'exponential',
-        delay: 1000,
+
+    const job2 = await emailQueue.add(
+      {
+        email: "user2@example.com",
+        subject: "Newsletter",
+        body: "Check out our latest updates!",
       },
-    });
-    
+      {
+        delay: 2000, // Delay by 2 seconds
+      },
+    );
+
+    const job3 = await emailQueue.add(
+      {
+        email: "user3@example.com",
+        subject: "Reminder",
+        body: "Don't forget your appointment!",
+      },
+      {
+        attempts: 3, // Retry up to 3 times on failure
+        backoff: {
+          type: "exponential",
+          delay: 1000,
+        },
+      },
+    );
+
     // Send Pusher notification for jobs created
-    await pusher.trigger('jobs-channel', 'jobs-created', {
+    await pusher.trigger("jobs-channel", "jobs-created", {
       count: 3,
       jobs: [
         { id: job1.id, email: job1.data.email },
@@ -196,7 +210,7 @@ app.get('/home', async (req, res) => {
       ],
       timestamp: new Date().toISOString(),
     });
-    
+
     res.json({
       todo: response.data,
       directEmail: {
@@ -210,7 +224,7 @@ app.get('/home', async (req, res) => {
       ],
     });
   } catch (error) {
-    logger.error({ error }, 'Error in /home route');
+    logger.error({ error }, "Error in /home route");
     res.status(500).json({ error: String(error) });
   }
 });
@@ -218,25 +232,25 @@ app.get('/home', async (req, res) => {
 // ---------------------------------------------------------------------------
 // Route to send a test email directly
 // ---------------------------------------------------------------------------
-app.post('/send-email', async (req, res) => {
+app.post("/send-email", async (req, res) => {
   try {
     const { to, subject, body } = req.body;
-    
+
     const info = await mailTransporter.sendMail({
       from: '"Observatory Test" <test@observatory.dev>',
-      to: to || 'test@example.com',
-      subject: subject || 'Test Email',
-      text: body || 'This is a test email',
-      html: `<b>${body || 'This is a test email'}</b>`,
+      to: to || "test@example.com",
+      subject: subject || "Test Email",
+      text: body || "This is a test email",
+      html: `<b>${body || "This is a test email"}</b>`,
     });
-    
+
     res.json({
       success: true,
       messageId: info.messageId,
       previewUrl: nodemailer.getTestMessageUrl(info),
     });
   } catch (error) {
-    logger.error({ error }, 'Error sending email');
+    logger.error({ error }, "Error sending email");
     res.status(500).json({ error: String(error) });
   }
 });
@@ -244,16 +258,16 @@ app.post('/send-email', async (req, res) => {
 // ---------------------------------------------------------------------------
 // Route to check job status
 // ---------------------------------------------------------------------------
-app.get('/job/:id', async (req, res) => {
+app.get("/job/:id", async (req, res) => {
   try {
     const job = await emailQueue.getJob(req.params.id);
-    
+
     if (!job) {
-      return res.status(404).json({ error: 'Job not found' });
+      return res.status(404).json({ error: "Job not found" });
     }
-    
+
     const state = await job.getState();
-    
+
     res.json({
       id: job.id,
       state,
@@ -263,7 +277,7 @@ app.get('/job/:id', async (req, res) => {
       returnvalue: job.returnvalue,
     });
   } catch (error) {
-    logger.error({ error }, 'Error getting job status');
+    logger.error({ error }, "Error getting job status");
     res.status(500).json({ error: String(error) });
   }
 });
@@ -271,38 +285,128 @@ app.get('/job/:id', async (req, res) => {
 // ---------------------------------------------------------------------------
 // Route to send custom Pusher notification
 // ---------------------------------------------------------------------------
-app.post('/notify', async (req, res) => {
+app.post("/notify", async (req, res) => {
   try {
     const { channel, event, message } = req.body;
-    
-    await pusher.trigger(channel || 'test-channel', event || 'test-event', {
-      message: message || 'Test notification',
+
+    await pusher.trigger(channel || "test-channel", event || "test-event", {
+      message: message || "Test notification",
       timestamp: new Date().toISOString(),
     });
-    
+
     // Send multiple notifications to different channels
     await pusher.triggerBatch([
       {
-        channel: 'alerts-channel',
-        name: 'new-alert',
-        data: { severity: 'info', message: 'System notification' },
+        channel: "alerts-channel",
+        name: "new-alert",
+        data: { severity: "info", message: "System notification" },
       },
       {
-        channel: 'updates-channel',
-        name: 'new-update',
-        data: { type: 'feature', message: 'New feature available' },
+        channel: "updates-channel",
+        name: "new-update",
+        data: { type: "feature", message: "New feature available" },
       },
     ]);
-    
-    res.json({ 
-      success: true, 
-      message: 'Notifications sent',
-      channels: [channel || 'test-channel', 'alerts-channel', 'updates-channel'],
+
+    res.json({
+      success: true,
+      message: "Notifications sent",
+      channels: [
+        channel || "test-channel",
+        "alerts-channel",
+        "updates-channel",
+      ],
     });
   } catch (error) {
-    logger.error({ error }, 'Error sending notification');
+    logger.error({ error }, "Error sending notification");
     res.status(500).json({ error: String(error) });
   }
+});
+
+// ---------------------------------------------------------------------------
+// Express patcher test variations routes
+// ---------------------------------------------------------------------------
+app.get("/patcher/variants", (req, res) => {
+  const host = req.get("host") || "localhost:9999";
+  const urls = [
+    "GET /patcher/basic",
+    "GET /patcher/with-query?foo=1&bar=hello",
+    "GET /patcher/with-params/12345",
+    "POST /patcher/json-body",
+    "GET /patcher/stream",
+    "GET /patcher/error",
+    "GET /patcher/middleware-chain",
+    "GET /patcher/redirect",
+    "GET /ui", // should be skipped by request patcher filter
+  ];
+  res.json({ ok: true, routes: urls, base: `http://${host}` });
+});
+
+app.get("/patcher/basic", (_req, res) => {
+  res.json({
+    ok: true,
+    route: "basic",
+    message: "express patcher basic route",
+  });
+});
+
+app.get("/patcher/with-query", (req, res) => {
+  res.json({
+    ok: true,
+    route: "/patcher/with-query",
+    query: req.query,
+    message: "Query route for patcher coverage",
+  });
+});
+
+app.get("/patcher/with-params/:id", (req, res) => {
+  res.json({
+    ok: true,
+    route: "/patcher/with-params/:id",
+    id: req.params.id,
+    message: "Route with path params for patcher coverage",
+  });
+});
+
+app.post("/patcher/json-body", (req, res) => {
+  res.json({
+    ok: true,
+    route: "/patcher/json-body",
+    body: req.body,
+    message: "POST JSON body route for patcher payload capture",
+  });
+});
+
+app.get("/patcher/error", (_req, res) => {
+  throw new Error("Intentional patcher error route");
+});
+
+app.get(
+  "/patcher/middleware-chain",
+  (req, _res, next) => {
+    (req as any).middlewareData = "first";
+    next();
+  },
+  (req, res) => {
+    res.json({
+      ok: true,
+      route: "/patcher/middleware-chain",
+      middlewareData: (req as any).middlewareData,
+    });
+  },
+);
+
+app.get("/patcher/redirect", (_req, res) => {
+  res.redirect("/patcher/basic");
+});
+
+// Error handler for patcher error route and async errors
+app.use((err: any, _req: any, res: any, _next: any) => {
+  logger.error({ error: err }, "Unhandled route error");
+  if (res.headersSent) {
+    return;
+  }
+  res.status(500).json({ ok: false, error: err?.message || "Unknown error" });
 });
 
 // ---------------------------------------------------------------------------
@@ -327,38 +431,40 @@ async function startServer() {
   await createMailTransporter();
 
   // Mount stress/sample-data routes (exercises all patcher categories)
-  app.use('/stress', createStressRoutes({
+  app.use(
+    "/stress",
+    createStressRoutes({
+      mysql2Connection,
+      redisConnection: redisConnection as RedisClientType,
+      logger,
+      cache: myCache,
+    }),
+  );
+
+  await createObserver(
+    expressAdapter,
+    {},
+    "mysql2",
     mysql2Connection,
-    redisConnection: redisConnection as RedisClientType,
-    logger,
-    cache: myCache,
-  }));
+    redisConnection as RedisClientType,
+  );
 
-  await createObserver(expressAdapter, {}, "mysql2", mysql2Connection, redisConnection as RedisClientType);
-
-  logger.info('Server started');
+  logger.info("Server started");
 
   const PORT = 9999;
   app.listen(PORT, () => {
-    logger.info({ port: PORT }, 'Server is running');
-    console.log(`  Home:       http://localhost:${PORT}/home`);
-    console.log(`  UI:         http://localhost:${PORT}/ui`);
-    console.log(`  Stress:     http://localhost:${PORT}/stress/all`);
-    console.log(`  Flood:      http://localhost:${PORT}/stress/flood?count=50&parallel=5`);
-    console.log(`  Job Status: http://localhost:${PORT}/job/:id`);
-    console.log(`  Notify:     POST http://localhost:${PORT}/notify`);
-    console.log(`  Send Email: POST http://localhost:${PORT}/send-email`);
+    logger.info({ port: PORT }, "Server is running");
   });
 }
 
 // Graceful shutdown
-process.on('SIGTERM', async () => {
-  logger.info('Received SIGTERM, closing queue...');
+process.on("SIGTERM", async () => {
+  logger.info("Received SIGTERM, closing queue...");
   await emailQueue.close();
   process.exit(0);
 });
 
 startServer().catch((error) => {
-  logger.fatal({ error }, 'Error starting the server');
+  logger.fatal({ error }, "Error starting the server");
   process.exit(1);
 });

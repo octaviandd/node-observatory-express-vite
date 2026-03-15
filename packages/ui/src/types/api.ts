@@ -3130,6 +3130,7 @@ export interface components {
                     route?: string;
                     method: string;
                     statusCode: number;
+                    originalUrl: string;
                     requestSize?: number;
                     responseSize?: number;
                     payload?: string;
@@ -3808,6 +3809,7 @@ export interface components {
                         route?: string;
                         method: string;
                         statusCode: number;
+                        originalUrl: string;
                         requestSize?: number;
                         responseSize?: number;
                         payload?: string;

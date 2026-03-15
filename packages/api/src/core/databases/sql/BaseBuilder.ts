@@ -38,7 +38,7 @@ export abstract class BaseBuilder {
 
   getP95SQL(watcherType: WatcherType): string {
     if (["exception", "log"].includes(watcherType)) return "NULL as p95";
-    return `CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(GROUP_CONCAT(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2)) ORDER BY CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.duration')) AS DECIMAL(10,2)) SEPARATOR ','), ',', CEILING(COUNT(*) * 0.95)), ',', -1) AS DECIMAL(10,2)) AS p95`;
+    return `CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(GROUP_CONCAT(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2)) ORDER BY CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2)) SEPARATOR ','), ',', CEILING(COUNT(*) * 0.95)), ',', -1) AS DECIMAL(10,2)) AS p95`;
   }
 
   getInclusionSQL = (value: string, type: string): string => {

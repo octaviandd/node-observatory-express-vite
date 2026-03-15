@@ -1,14 +1,26 @@
+/** @format */
+
 import { AppSidebar } from "@/components/ui/navigation/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/base/sidebar";
 import { Outlet, useLocation } from "react-router";
 import { useContext, useEffect, useState } from "react";
 import { StoreContext } from "@/store";
-import { Moon, Sun, CalendarDays, CalendarIcon, RefreshCcw } from "lucide-react";
+import {
+  Moon,
+  Sun,
+  CalendarDays,
+  CalendarIcon,
+  RefreshCcw,
+} from "lucide-react";
 import { Button } from "@/components/ui/base/button";
 import { Label } from "@/components/ui/base/label";
 import { Switch } from "@/components/ui/base/switch";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/base/popover";
-import { Calendar } from "@/components/ui/base/calendar"
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/base/popover";
+import { Calendar } from "@/components/ui/base/calendar";
 import { cn } from "@/utils";
 import {
   Dialog,
@@ -30,8 +42,8 @@ export default function MainLayout() {
 
   const handleRefresh = () => {
     fetch(`/api/data/${location.pathname}/refresh`)
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         console.log(data);
       });
   };
@@ -76,18 +88,23 @@ const PeriodSelector = () => {
 
   useEffect(() => {
     if (window.localStorage.getItem("theme")) {
-      window.localStorage.setItem("theme", window.localStorage.getItem("theme") as string);
-      document.documentElement.classList.add(window.localStorage.getItem("theme") as string);
-      setIsDarkMode(window.localStorage.getItem("theme") === 'dark')
+      window.localStorage.setItem(
+        "theme",
+        window.localStorage.getItem("theme") as string,
+      );
+      document.documentElement.classList.add(
+        window.localStorage.getItem("theme") as string,
+      );
+      setIsDarkMode(window.localStorage.getItem("theme") === "dark");
     }
   }, []);
 
   const updateDarkMode = (checked: boolean) => {
     setIsDarkMode(checked);
-    window.localStorage.setItem("theme", checked ? 'dark' : 'light');
-    document.documentElement.classList.remove(checked ? 'light' : 'dark');
-    document.documentElement.classList.add(checked ? 'dark' : 'light');
-  }
+    window.localStorage.setItem("theme", checked ? "dark" : "light");
+    document.documentElement.classList.remove(checked ? "light" : "dark");
+    document.documentElement.classList.add(checked ? "dark" : "light");
+  };
 
   const timePeriods: TimePeriod[] = ["1h", "24h", "7d", "14d", "30d"];
   return (
@@ -104,7 +121,7 @@ const PeriodSelector = () => {
             {period.toUpperCase()}
           </Button>
         ))}
-        <Button
+        {/* <Button
           variant={typeof state.period === 'object' && state.period.label === 'custom' ? "default" : "ghost"}
           size="sm"
           onClick={() => setIsCustomRangeModalOpen(true)}
@@ -112,7 +129,7 @@ const PeriodSelector = () => {
         >
           <CalendarDays className="h-4 w-4 mr-1" />
           <span>Custom</span>
-        </Button>
+        </Button> */}
       </div>
       <div className="flex items-center space-x-2">
         <Sun className="h-4 w-4" />
@@ -167,11 +184,11 @@ const CustomDateRangeModal: React.FC<CustomDateRangeModalProps> = ({
   const [isStartDatePickerOpen, setIsStartDatePickerOpen] = useState(false);
   const [isEndDatePickerOpen, setIsEndDatePickerOpen] = useState(false);
 
-  const [timeZone, setTimeZone] = useState<string | undefined>(undefined)
- 
+  const [timeZone, setTimeZone] = useState<string | undefined>(undefined);
+
   useEffect(() => {
-    setTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone)
-  }, [])
+    setTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  }, []);
 
   // Get today at start of day for consistent comparison
   const today = new Date();
@@ -179,15 +196,22 @@ const CustomDateRangeModal: React.FC<CustomDateRangeModalProps> = ({
 
   useEffect(() => {
     const knownPresets = ["1h", "24h", "7d", "14d", "30d"];
-    if (typeof appState.period === 'string' && knownPresets.includes(appState.period)) {
-        setStartDate(undefined);
-        setEndDate(undefined);
-    } else if (appState.period && typeof appState.period === 'object' && appState.period.label === 'custom') {
-        setStartDate(new Date(appState.period.startDate));
-        setEndDate(new Date(appState.period.endDate));
+    if (
+      typeof appState.period === "string" &&
+      knownPresets.includes(appState.period)
+    ) {
+      setStartDate(undefined);
+      setEndDate(undefined);
+    } else if (
+      appState.period &&
+      typeof appState.period === "object" &&
+      appState.period.label === "custom"
+    ) {
+      setStartDate(new Date(appState.period.startDate));
+      setEndDate(new Date(appState.period.endDate));
     } else {
-        setStartDate(undefined);
-        setEndDate(undefined);
+      setStartDate(undefined);
+      setEndDate(undefined);
     }
   }, [appState.period]);
 
@@ -226,11 +250,17 @@ const CustomDateRangeModal: React.FC<CustomDateRangeModalProps> = ({
 
   const getCurrentlyShowingText = () => {
     if (startDate && endDate) {
-        return `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
-    } else if (typeof appState.period === 'object' && appState.period.label === 'custom') {
-        return `${new Date(appState.period.startDate).toLocaleDateString()} - ${new Date(appState.period.endDate).toLocaleDateString()}`;
-    } else if (typeof appState.period === 'string' && timePeriods.includes(appState.period as TimePeriod)) {
-        return `Preset: ${appState.period.toUpperCase()}`;
+      return `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
+    } else if (
+      typeof appState.period === "object" &&
+      appState.period.label === "custom"
+    ) {
+      return `${new Date(appState.period.startDate).toLocaleDateString()} - ${new Date(appState.period.endDate).toLocaleDateString()}`;
+    } else if (
+      typeof appState.period === "string" &&
+      timePeriods.includes(appState.period as TimePeriod)
+    ) {
+      return `Preset: ${appState.period.toUpperCase()}`;
     }
     return "No range selected";
   };
@@ -243,19 +273,23 @@ const CustomDateRangeModal: React.FC<CustomDateRangeModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent 
+      <DialogContent
         className="max-w-lg"
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={onClose}
       >
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">Date Range</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">
+            Date Range
+          </DialogTitle>
         </DialogHeader>
 
         <div className="py-4 space-y-6">
           {/* Quick Select */}
           <div>
-            <Label className="mb-2 block text-sm font-medium">Quick Select</Label>
+            <Label className="mb-2 block text-sm font-medium">
+              Quick Select
+            </Label>
             <div className="inline-flex h-9 items-center justify-center rounded-md bg-muted text-muted-foreground w-full">
               {timePeriods.map((period, index) => (
                 <Button
@@ -273,21 +307,30 @@ const CustomDateRangeModal: React.FC<CustomDateRangeModalProps> = ({
 
           {/* Custom Range */}
           <div>
-            <Label className="mb-2 block text-sm font-medium">Custom Range</Label>
+            <Label className="mb-2 block text-sm font-medium">
+              Custom Range
+            </Label>
             <div className="flex space-x-4">
               {/* Start Date */}
               <div className="flex-1">
-                <Popover open={isStartDatePickerOpen} onOpenChange={setIsStartDatePickerOpen}>
+                <Popover
+                  open={isStartDatePickerOpen}
+                  onOpenChange={setIsStartDatePickerOpen}
+                >
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       className={cn(
                         "w-full justify-start text-left font-normal",
-                        !startDate && "text-muted-foreground"
+                        !startDate && "text-muted-foreground",
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {startDate ? startDate.toLocaleDateString() : <span>Start date</span>}
+                      {startDate ? (
+                        startDate.toLocaleDateString()
+                      ) : (
+                        <span>Start date</span>
+                      )}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -305,17 +348,24 @@ const CustomDateRangeModal: React.FC<CustomDateRangeModalProps> = ({
 
               {/* End Date */}
               <div className="flex-1">
-                <Popover open={isEndDatePickerOpen} onOpenChange={setIsEndDatePickerOpen}>
+                <Popover
+                  open={isEndDatePickerOpen}
+                  onOpenChange={setIsEndDatePickerOpen}
+                >
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       className={cn(
                         "w-full justify-start text-left font-normal",
-                        !endDate && "text-muted-foreground"
+                        !endDate && "text-muted-foreground",
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {endDate ? endDate.toLocaleDateString() : <span>End date</span>}
+                      {endDate ? (
+                        endDate.toLocaleDateString()
+                      ) : (
+                        <span>End date</span>
+                      )}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -324,9 +374,8 @@ const CustomDateRangeModal: React.FC<CustomDateRangeModalProps> = ({
                       timeZone={timeZone}
                       selected={endDate}
                       onSelect={handleEndDateSelect}
-                      disabled={(date: Date) => 
-                        date > today || 
-                        (startDate ? date < startDate : false)
+                      disabled={(date: Date) =>
+                        date > today || (startDate ? date < startDate : false)
                       }
                       defaultMonth={endDate || startDate || new Date()}
                     />
@@ -342,23 +391,23 @@ const CustomDateRangeModal: React.FC<CustomDateRangeModalProps> = ({
           {/* Currently Showing */}
           <div className="p-3 bg-muted rounded-md">
             <p className="text-sm text-center text-muted-foreground">
-              Currently showing: <span className="font-semibold text-foreground">{getCurrentlyShowingText()}</span>
+              Currently showing:{" "}
+              <span className="font-semibold text-foreground">
+                {getCurrentlyShowingText()}
+              </span>
             </p>
           </div>
         </div>
 
         <DialogFooter className="sm:justify-end">
           <DialogClose asChild>
-            <Button 
-              type="button" 
-              variant="outline" 
-            >
+            <Button type="button" variant="outline">
               Cancel
             </Button>
           </DialogClose>
-          <Button 
-            type="button" 
-            onClick={handleApplyCustomRange} 
+          <Button
+            type="button"
+            onClick={handleApplyCustomRange}
             disabled={!startDate || !endDate}
           >
             Apply Custom Range

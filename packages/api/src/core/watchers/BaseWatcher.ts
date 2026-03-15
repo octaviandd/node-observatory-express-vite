@@ -91,7 +91,6 @@ export abstract class BaseWatcher<
         "0",
         { MKSTREAM: true },
       );
-      console.log(`Created consumer group for ${this.type}`);
     } catch (error: unknown) {
       // BUSYGROUP means the consumer group already exists
       if (error instanceof Error && error.message?.includes("BUSYGROUP"))
@@ -117,7 +116,6 @@ export abstract class BaseWatcher<
         this.consumerGroup,
         messageIds,
       );
-      console.log("after xAck, result:", result);
     } catch (error) {
       // Avoid noisy logs during shutdown
       if (!this.isStopped) {
@@ -151,10 +149,6 @@ export abstract class BaseWatcher<
   private async insertIntoDB(parsedValues: WatcherEntry[]): Promise<void> {
     try {
       await this.DBInstance.insert(parsedValues);
-      console.log(
-        "inserted into db: ",
-        parsedValues.map((value) => value.uuid),
-      );
     } catch (dbError) {
       console.error(`Error inserting batch data for ${this.type}:`, dbError);
       // Don't ACK if DB insert failed - messages will be retried
@@ -304,9 +298,6 @@ export abstract class BaseWatcher<
           this.streamKey,
           this.consumerGroup,
           existingUuids,
-        );
-        console.log(
-          `Cleaned up ${existingUuids.length} already-inserted pending messages for ${this.type}`,
         );
       }
     } catch (error) {

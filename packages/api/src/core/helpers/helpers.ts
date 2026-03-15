@@ -1,10 +1,15 @@
+/** @format */
+
 import { PERIODS } from "./constants.js";
 import type { RequestOptions } from "node:http";
 import * as url from "url";
-import {createRequire} from "module";
+import { createRequire } from "module";
 
-export function resolvePackagePath(packageName: string, metaUrl?: string): string {
-  if (typeof require === 'undefined') {
+export function resolvePackagePath(
+  packageName: string,
+  metaUrl?: string,
+): string {
+  if (typeof require === "undefined") {
     const require = createRequire(metaUrl!);
     return require.resolve(packageName);
   }
@@ -13,40 +18,48 @@ export function resolvePackagePath(packageName: string, metaUrl?: string): strin
 
 /**
  * The format for values that indicate entries for each watcher.
- * @param value 
- * @param isCount 
- * @returns 
+ * @param value
+ * @param isCount
+ * @returns
  */
-export const formatValue = (value: string | number | null, isCount = false): string => {
+export const formatValue = (
+  value: string | number | null,
+  isCount = false,
+): string => {
   if (!value || value === null) return "0" + (isCount ? "" : "ms");
-  
+
   const num = parseFloat(value.toString());
-  
+
   if (isNaN(num) || num === 0) return "0" + (isCount ? "" : "ms");
-  
+
   if (num > 999) {
     return `${(num / 1000).toFixed(2)}${isCount ? "K" : "s"}`;
   }
-  
+
   const formatted = num % 1 === 0 ? num.toString() : num.toFixed(2);
   return `${formatted}${isCount ? "" : "ms"}`;
 };
 
 /**
  * Turns [] into {} with each [index] as {[index]}
- * @param items 
- * @returns 
+ * @param items
+ * @returns
  */
 
-export const groupItemsByType = <T extends { type: string }>(items: T[]): Partial<Record<string, T[]>> => {
-  return items.reduce((acc, item) => {
-    const key = item.type;
-    if (!acc[key]) {
-      acc[key] = [];
-    }
-    acc[key]!.push(item);
-    return acc;
-  }, {} as Record<string, T[]>);
+export const groupItemsByType = <T extends { type: string }>(
+  items: T[],
+): Partial<Record<string, T[]>> => {
+  return items.reduce(
+    (acc, item) => {
+      const key = item.type;
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key]!.push(item);
+      return acc;
+    },
+    {} as Record<string, T[]>,
+  );
 };
 
 export function httpRequestToRequestData(request: {
@@ -97,8 +110,8 @@ export function httpRequestToRequestData(request: {
 
 /**
  * Cleans the request from values that can't be added to redis because of circularity or size.
- * @param content 
- * @returns 
+ * @param content
+ * @returns
  */
 export const sanitizeContent = <T>(content: T): T => {
   const seen = new WeakSet();
@@ -145,7 +158,7 @@ export const sanitizeContent = <T>(content: T): T => {
 
   // Start sanitization from the root object
   return sanitize(content);
-}
+};
 
 export const processedDurationGraphData = (data: any[], period: string) => {
   const totalDuration = PERIODS[period].duration; // in minutes
@@ -166,7 +179,7 @@ export const processedDurationGraphData = (data: any[], period: string) => {
   data.forEach((entry: any) => {
     const createdAt = new Date(entry.created_at).getTime();
     // duration lives at the top level of the BaseLogEntry stored in content
-    const duration = parseFloat(entry.content?.duration);
+    const duration = parseFloat(entry.content.metadata.duration);
 
     // Figure out which interval slot this request belongs to
     const intervalIndex = Math.floor(
@@ -193,7 +206,7 @@ export const processedDurationGraphData = (data: any[], period: string) => {
   });
 
   return groupedData;
-}
+};
 
 /**
  * Extracts a 0/1 metric value from a BaseLogEntry-shaped content object
@@ -234,7 +247,20 @@ function getMetricValue(content: any, key: string): number {
   }
 
   // Log-level keys (log)
-  if (["error", "warning", "warn", "info", "debug", "trace", "fatal", "log", "verbose", "silly"].includes(key)) {
+  if (
+    [
+      "error",
+      "warning",
+      "warn",
+      "info",
+      "debug",
+      "trace",
+      "fatal",
+      "log",
+      "verbose",
+      "silly",
+    ].includes(key)
+  ) {
     const level = content.metadata?.level;
     // The config uses "warning" but patchers store "warn"
     if (key === "warning") return level === "warn" ? 1 : 0;
@@ -252,8 +278,11 @@ function getMetricValue(content: any, key: string): number {
   return 0;
 }
 
-export const processedCountGraphData = <T extends readonly string[]>
-  (data: any[], period: string, keys: T): Array<Record<T[number], number> & { label: string }> => {
+export const processedCountGraphData = <T extends readonly string[]>(
+  data: any[],
+  period: string,
+  keys: T,
+): Array<Record<T[number], number> & { label: string }> => {
   const totalDuration = PERIODS[period].duration;
   const intervalDuration = totalDuration / 120;
   const now = new Date().getTime();
@@ -261,30 +290,39 @@ export const processedCountGraphData = <T extends readonly string[]>
 
   const initializeKeys = (): Record<string, number> => {
     let obj: Record<string, number> = {};
-    keys.forEach(key => obj[key] = 0);
-    
-    return obj;
-  }
+    keys.forEach((key) => (obj[key] = 0));
 
-  const groupedData = Array.from({ length: 120 }, (_, index) => ({
-    ...initializeKeys(),
-    label: getLabel(index, period),
-  }) as Record<T[number], number> & {label: string});
+    return obj;
+  };
+
+  const groupedData = Array.from(
+    { length: 120 },
+    (_, index) =>
+      ({
+        ...initializeKeys(),
+        label: getLabel(index, period),
+      }) as Record<T[number], number> & { label: string },
+  );
 
   data.forEach((row: any) => {
     const createdAt = new Date(row.created_at).getTime();
-    const intervalIndex = Math.floor((createdAt - startDate) / (intervalDuration * 60 * 1000));
+    const intervalIndex = Math.floor(
+      (createdAt - startDate) / (intervalDuration * 60 * 1000),
+    );
 
     if (intervalIndex >= 0 && intervalIndex < 120) {
       const content = row.content;
       keys.forEach((key: T[number]) => {
-        (groupedData[intervalIndex] as any)[key] += getMetricValue(content, key);
-      })
+        (groupedData[intervalIndex] as any)[key] += getMetricValue(
+          content,
+          key,
+        );
+      });
     }
   });
 
   return groupedData;
-}
+};
 
 export const isPackageInstalled = (npmPackage: string) => {
   try {
@@ -452,9 +490,7 @@ export const getRequestInfo = (
   return { origin, pathname, method, optionsParsed, invalidUrl };
 };
 
-
-
-export const getLabel = (index: number, period: string) =>  {
+export const getLabel = (index: number, period: string) => {
   const totalDuration = PERIODS[period].duration;
   const intervalDuration = totalDuration / 120; // Duration of each bar in minutes
 
@@ -462,35 +498,37 @@ export const getLabel = (index: number, period: string) =>  {
   let config = {};
 
   switch (period) {
-    case '1h':
+    case "1h":
       timeAgo = new Date().getTime() - 60 * 60 * 1000;
-      config = { minute: "2-digit", second: "2-digit" }
+      config = { minute: "2-digit", second: "2-digit" };
       break;
-    case '24h':
+    case "24h":
       timeAgo = new Date().getTime() - 24 * 60 * 60 * 1000;
-      config = { minute: "2-digit", second: "2-digit" }
-      break
-    case '7d':
+      config = { minute: "2-digit", second: "2-digit" };
+      break;
+    case "7d":
       timeAgo = new Date().getTime() - 7 * 24 * 60 * 60 * 1000;
-      config = { minute: "2-digit", second: "2-digit", weekday: 'short' }
-      break
-    case '14d':
+      config = { minute: "2-digit", second: "2-digit", weekday: "short" };
+      break;
+    case "14d":
       timeAgo = new Date().getTime() - 14 * 24 * 60 * 60 * 1000;
-      config = { minute: "2-digit", second: "2-digit", weekday: 'short' }
-      break
-    case '30d':
+      config = { minute: "2-digit", second: "2-digit", weekday: "short" };
+      break;
+    case "30d":
       timeAgo = new Date().getTime() - 30 * 24 * 60 * 60 * 1000;
-      config = { minute: "2-digit", second: "2-digit", weekday: 'short' }
-      break
+      config = { minute: "2-digit", second: "2-digit", weekday: "short" };
+      break;
     default:
-      break
+      break;
   }
 
   const interval = timeAgo + index * intervalDuration * 60 * 1000;
   const startTime = new Date(interval).toLocaleTimeString("en-US", config);
-  const endTime = new Date(interval + intervalDuration * 60 * 1000).toLocaleTimeString("en-US", config);
-  return `${startTime} - ${endTime}`
-}
+  const endTime = new Date(
+    interval + intervalDuration * 60 * 1000,
+  ).toLocaleTimeString("en-US", config);
+  return `${startTime} - ${endTime}`;
+};
 
 export function dropUndefinedKeys<T>(inputValue: T): T {
   // This map keeps track of what already visited nodes map to.
