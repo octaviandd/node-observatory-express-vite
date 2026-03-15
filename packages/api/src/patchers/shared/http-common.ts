@@ -5,47 +5,32 @@ import http from "http";
 import https from "https";
 import zlib from "zlib";
 import { watchers } from "../../core/index";
-import { getCallerInfo, getRequestInfo, httpRequestToRequestData } from "../../core/helpers/helpers";
+import {
+  getCallerInfo,
+  getRequestInfo,
+  httpRequestToRequestData,
+} from "../../core/helpers/helpers";
 
 const MAX_BODY_SIZE = 1024 * 1024;
 
-export interface HttpLogEntry {
-  status?: "completed" | "failed";
-  duration: number;
-  metadata: { package: string };
-  data: {
-    method?: string;
-    origin?: string;
-    pathname?: string;
-    hostname?: string;
-    port?: number | string;
-    path?: string;
-    headers?: Record<string, any>;
-    requestBody?: string;
-    requestBodySize?: number;
-    responseBody?: string;
-    responseBodySize?: number;
-    statusCode?: number;
-    statusMessage?: string;
-    isRedirect?: boolean;
-    redirectFrom?: string;
-    isMedia?: boolean;
-    aborted?: boolean;
-  };
-  location: { file: string; line: string };
-  error?: { name: string; message: string; stack?: string; code?: string };
-}
+const timestamp = () =>
+  new Date().toISOString().replace("T", " ").substring(0, 19);
 
-const timestamp = () => new Date().toISOString().replace("T", " ").substring(0, 19);
-
-function logHttpEntry(content: HttpLogEntry) { 
-    watchers.http.insertRedisStream({ ...content, created_at: timestamp() })
+function logHttpEntry(entry: HttpClientContent) {
+  watchers.http.insertRedisStream({ ...entry });
 }
 
 const skipDomains = [
-  "amazonaws.com", "api.sendgrid.com", "api.mailgun.net", "api.postmarkapp.com",
-  "api.pusher.com", "api-eu.pusher.com", "ethereal.email", "smtp.",
-  "rest.ably.io", "realtime.ably.io",
+  "amazonaws.com",
+  "api.sendgrid.com",
+  "api.mailgun.net",
+  "api.postmarkapp.com",
+  "api.pusher.com",
+  "api-eu.pusher.com",
+  "ethereal.email",
+  "smtp.",
+  "rest.ably.io",
+  "realtime.ably.io",
 ];
 
 export const detectLibrary = (defaultLibrary: string, stackLines: string[]) => {
@@ -71,10 +56,13 @@ export const detectLibrary = (defaultLibrary: string, stackLines: string[]) => {
 export const shouldSkip = (options: any) => {
   const host = options.hostname || options.host || "";
   if (
-    host === "localhost" || host === "127.0.0.1" || host === "::1" ||
+    host === "localhost" ||
+    host === "127.0.0.1" ||
+    host === "::1" ||
     host === "host.docker.internal" ||
     /^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)/.test(host)
-  ) return true;
+  )
+    return true;
   return skipDomains.some((domain) => host.includes(domain));
 };
 
@@ -82,7 +70,7 @@ export function patchHttpMethod(
   module: typeof http | typeof https,
   methodName: "request" | "get",
   scheme: "http" | "https",
-  filename: string
+  filename: string,
 ) {
   shimmer.wrap(module, methodName, function (original) {
     return function patchedMethod(this: any, ...args: any[]) {
@@ -95,11 +83,15 @@ export function patchHttpMethod(
       try {
         const options = argsCopy.shift() as URL | http.RequestOptions | string;
         const extraOptions =
-          typeof argsCopy[0] === "object" && (typeof options === "string" || options instanceof URL)
+          typeof argsCopy[0] === "object" &&
+          (typeof options === "string" || options instanceof URL)
             ? (argsCopy.shift() as http.RequestOptions)
             : undefined;
 
-        const { optionsParsed, method, origin, pathname } = getRequestInfo(options, extraOptions);
+        const { optionsParsed, method, origin, pathname } = getRequestInfo(
+          options,
+          extraOptions,
+        );
 
         if (optionsParsed.agent) delete optionsParsed.agent;
         // @ts-ignore
@@ -107,8 +99,10 @@ export function patchHttpMethod(
 
         if (shouldSkip(optionsParsed)) return original.apply(this, args as any);
 
-        const baseData: HttpLogEntry["data"] = {
-          method, origin, pathname,
+        const baseData: HttpClientData = {
+          method,
+          origin,
+          pathname,
           hostname: optionsParsed.hostname ?? undefined,
           port: optionsParsed.port ?? undefined,
           path: optionsParsed.path ?? undefined,
@@ -120,11 +114,19 @@ export function patchHttpMethod(
           request = original.apply(this, args as any);
         } catch (error: any) {
           logHttpEntry({
-            status: "failed", duration: 0,
-            metadata: { package: scheme },
+            metadata: {
+              package: scheme,
+              duration: 0,
+              location: { file: callerInfo.file, line: callerInfo.line },
+              created_at: timestamp(),
+            },
             data: baseData,
-            location: { file: callerInfo.file, line: callerInfo.line },
-            error: { name: error.name, message: error.message, stack: error.stack, code: error.code },
+            error: {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+              code: error.code,
+            },
           });
           throw error;
         }
@@ -136,21 +138,42 @@ export function patchHttpMethod(
           if (hasLogged) return;
           hasLogged = true;
           logHttpEntry({
-            status: "failed",
-            duration: parseFloat((performance.now() - start).toFixed(2)) || 0,
-            metadata: { package: detectLibrary(request.protocol.split(":")[0], stackLines) },
-            data: { ...baseData, aborted: error.name === "AbortError" || request.aborted || error.code === "ABORT_ERR" },
-            location: { file: callerInfo.file, line: callerInfo.line },
-            error: { name: error.name, message: error.message, stack: error.stack, code: error.code },
+            metadata: {
+              package: detectLibrary(
+                request.protocol.split(":")[0],
+                stackLines,
+              ),
+              duration: parseFloat((performance.now() - start).toFixed(2)) || 0,
+              location: { file: callerInfo.file, line: callerInfo.line },
+              created_at: timestamp(),
+            },
+            data: {
+              ...baseData,
+              aborted:
+                error.name === "AbortError" ||
+                request.aborted ||
+                error.code === "ABORT_ERR",
+            },
+            error: {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+              code: error.code,
+            },
           });
         });
 
         const originalWrite = request.write;
-        request.write = function (chunk: string | Buffer | Uint8Array, ...writeArgs: any[]) {
+        request.write = function (
+          chunk: string | Buffer | Uint8Array,
+          ...writeArgs: any[]
+        ) {
           if (chunk !== undefined) {
             if (Buffer.isBuffer(chunk)) requestBodyChunks.push(chunk);
-            else if (typeof chunk === "string") requestBodyChunks.push(Buffer.from(chunk));
-            else if (chunk instanceof Uint8Array) requestBodyChunks.push(Buffer.from(chunk));
+            else if (typeof chunk === "string")
+              requestBodyChunks.push(Buffer.from(chunk));
+            else if (chunk instanceof Uint8Array)
+              requestBodyChunks.push(Buffer.from(chunk));
           }
           return originalWrite.apply(this, arguments as any);
         };
@@ -160,8 +183,10 @@ export function patchHttpMethod(
           if (endArgs.length > 0 && endArgs[0] != null) {
             const chunk = endArgs[0];
             if (Buffer.isBuffer(chunk)) requestBodyChunks.push(chunk);
-            else if (typeof chunk === "string") requestBodyChunks.push(Buffer.from(chunk));
-            else if (chunk instanceof Uint8Array) requestBodyChunks.push(Buffer.from(chunk));
+            else if (typeof chunk === "string")
+              requestBodyChunks.push(Buffer.from(chunk));
+            else if (chunk instanceof Uint8Array)
+              requestBodyChunks.push(Buffer.from(chunk));
           }
           // @ts-ignore
           baseData.isRedirect = request?._redirectable?._isRedirect;
@@ -191,15 +216,24 @@ export function patchHttpMethod(
                       if (!hasLoggedResponse) {
                         const chunk = a[0];
                         try {
-                          if (Buffer.isBuffer(chunk) && Buffer.concat(chunks).length < MAX_BODY_SIZE) chunks.push(chunk);
-                          else if (typeof chunk === "string") chunks.push(Buffer.from(chunk));
+                          if (
+                            Buffer.isBuffer(chunk) &&
+                            Buffer.concat(chunks).length < MAX_BODY_SIZE
+                          )
+                            chunks.push(chunk);
+                          else if (typeof chunk === "string")
+                            chunks.push(Buffer.from(chunk));
                         } catch {}
                       }
                       return Reflect.apply(t, tArg, a);
                     },
                   });
                   callbackMap.set(listener, wrappedListener);
-                  return Reflect.apply(target, thisArg, [event, wrappedListener, ...restArgs]);
+                  return Reflect.apply(target, thisArg, [
+                    event,
+                    wrappedListener,
+                    ...restArgs,
+                  ]);
                 }
 
                 if (event === "end") {
@@ -207,17 +241,29 @@ export function patchHttpMethod(
                     apply: (t, tArg, a: any[]) => {
                       if (!hasLoggedResponse) {
                         const contentEncoding = res.headers["content-encoding"];
-                        let responseText = "";
                         try {
                           const responseBody = Buffer.concat(chunks);
-                          responseText = contentEncoding === "gzip"
-                            ? zlib.gunzipSync(responseBody).toString("utf-8")
-                            : responseBody.toString("utf-8");
+                          const responseText =
+                            contentEncoding === "gzip"
+                              ? zlib.gunzipSync(responseBody).toString("utf-8")
+                              : responseBody.toString("utf-8");
 
                           logHttpEntry({
-                            status: "completed",
-                            duration: parseFloat((performance.now() - start).toFixed(2)) || 0,
-                            metadata: { package: detectLibrary(request.protocol.split(":")[0], stackLines) },
+                            metadata: {
+                              package: detectLibrary(
+                                request.protocol.split(":")[0],
+                                stackLines,
+                              ),
+                              duration:
+                                parseFloat(
+                                  (performance.now() - start).toFixed(2),
+                                ) || 0,
+                              location: {
+                                file: callerInfo.file,
+                                line: callerInfo.line,
+                              },
+                              created_at: timestamp(),
+                            },
                             data: {
                               ...baseData,
                               responseBodySize: responseBody.length,
@@ -225,11 +271,14 @@ export function patchHttpMethod(
                               statusCode: res.statusCode,
                               statusMessage: res.statusMessage,
                               headers: res.headers,
-                              isMedia: /image|video|audio/.test(res.headers["content-type"] || ""),
-                              redirectFrom: res.headers["x-previous-redirect-url"] as string | undefined,
+                              isMedia: /image|video|audio/.test(
+                                res.headers["content-type"] || "",
+                              ),
+                              redirectFrom: res.headers[
+                                "x-previous-redirect-url"
+                              ] as string | undefined,
                               aborted: false,
                             },
-                            location: { file: callerInfo.file, line: callerInfo.line },
                           });
                           hasLoggedResponse = true;
                         } catch {}
@@ -238,7 +287,11 @@ export function patchHttpMethod(
                     },
                   });
                   callbackMap.set(listener, wrappedListener);
-                  return Reflect.apply(target, thisArg, [event, wrappedListener, ...restArgs]);
+                  return Reflect.apply(target, thisArg, [
+                    event,
+                    wrappedListener,
+                    ...restArgs,
+                  ]);
                 }
 
                 return Reflect.apply(target, thisArg, args);
@@ -258,20 +311,40 @@ export function patchHttpMethod(
                 },
               });
 
-            if (typeof res.removeListener === "function") res.removeListener = patchRemove(res.removeListener) as any;
-            if (typeof res.off === "function" && res.off !== res.removeListener) res.off = patchRemove(res.off) as any;
+            if (typeof res.removeListener === "function")
+              res.removeListener = patchRemove(res.removeListener) as any;
+            if (typeof res.off === "function" && res.off !== res.removeListener)
+              res.off = patchRemove(res.off) as any;
 
             const originalAddListener = res.addListener || res.on;
-            if (typeof res.listenerCount === "function" && res.listenerCount("end") === 0) {
+            if (
+              typeof res.listenerCount === "function" &&
+              res.listenerCount("end") === 0
+            ) {
               originalAddListener.call(res, "end", function () {
                 try {
                   const responseBody = Buffer.concat(chunks);
                   logHttpEntry({
-                    status: "completed",
-                    duration: parseFloat((performance.now() - start).toFixed(2)) || 0,
-                    metadata: { package: detectLibrary(request.protocol.split(":")[0], stackLines) },
-                    data: { ...baseData, responseBodySize: responseBody.length, statusCode: res.statusCode, statusMessage: res.statusMessage, headers: res.headers },
-                    location: { file: callerInfo.file, line: callerInfo.line },
+                    metadata: {
+                      package: detectLibrary(
+                        request.protocol.split(":")[0],
+                        stackLines,
+                      ),
+                      duration:
+                        parseFloat((performance.now() - start).toFixed(2)) || 0,
+                      location: {
+                        file: callerInfo.file,
+                        line: callerInfo.line,
+                      },
+                      created_at: timestamp(),
+                    },
+                    data: {
+                      ...baseData,
+                      responseBodySize: responseBody.length,
+                      statusCode: res.statusCode,
+                      statusMessage: res.statusMessage,
+                      headers: res.headers,
+                    },
                   });
                   hasLoggedResponse = true;
                 } catch {}
@@ -283,11 +356,19 @@ export function patchHttpMethod(
         return request;
       } catch (error: any) {
         logHttpEntry({
-          status: "failed", duration: 0,
-          metadata: { package: scheme },
+          metadata: {
+            package: scheme,
+            duration: 0,
+            location: { file: callerInfo.file, line: callerInfo.line },
+            created_at: timestamp(),
+          },
           data: {},
-          location: { file: callerInfo.file, line: callerInfo.line },
-          error: { name: error.name, message: error.message, stack: error.stack, code: error.code },
+          error: {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+            code: error.code,
+          },
         });
         throw error;
       }
@@ -297,26 +378,38 @@ export function patchHttpMethod(
 
 export function patchServerEmit(module: typeof http | typeof https) {
   shimmer.wrap(module.Server.prototype, "emit", function (original) {
-    return function patchedEmit(this: unknown, event: string, ...args: unknown[]) {
+    return function patchedEmit(
+      this: unknown,
+      event: string,
+      ...args: unknown[]
+    ) {
       if (event === "request") {
         const req = args[0] as http.IncomingMessage;
         const res = args[1] as http.ServerResponse;
 
         if (req && res) {
           const startTime = performance.now();
-          const ipAddress = (req as { ip?: string }).ip || req.socket?.remoteAddress;
+          const ipAddress =
+            (req as { ip?: string }).ip || req.socket?.remoteAddress;
           const normalizedRequest = httpRequestToRequestData(req);
 
           const originalEnd = res.end;
           res.end = function (...endArgs: any[]) {
             try {
               watchers.requests.insertRedisStream({
-                status: res.statusCode >= 400 ? "failed" : "completed",
-                duration: parseFloat((performance.now() - startTime).toFixed(2)),
-                metadata: { package: "http", type: "server" },
-                data: { ...normalizedRequest, statusCode: res.statusCode, ipAddress },
-                location: { file: "http-server", line: "0" },
-                created_at: timestamp(),
+                metadata: {
+                  package: "http",
+                  duration: parseFloat(
+                    (performance.now() - startTime).toFixed(2),
+                  ),
+                  location: { file: "http-server", line: "0" },
+                  created_at: timestamp(),
+                },
+                data: {
+                  ...normalizedRequest,
+                  statusCode: res.statusCode,
+                  ipAddress,
+                },
               });
             } catch {}
             return originalEnd.apply(this, endArgs as any);

@@ -62,7 +62,10 @@ export function createStressRoutes(deps: {
     results.push("redis: OK");
 
     // 3. ioredis
-    const ioredis = new IORedis({ host: "localhost", port: 6379 });
+    const ioredis = new IORedis({
+      host: process.env.REDIS_HOST || "localhost",
+      port: parseInt(process.env.REDIS_PORT || "6379", 10),
+    });
     await ioredis.set("stress:ioredis:1", "value");
     await ioredis.get("stress:ioredis:1");
     await ioredis.get("stress:ioredis:missing");
@@ -237,7 +240,10 @@ export function createStressRoutes(deps: {
     try {
       // 1. Bull
       const bullQueue = new Bull("stress-bull", {
-        redis: { host: "localhost", port: 6379 },
+        redis: {
+          host: process.env.REDIS_HOST || "localhost",
+          port: parseInt(process.env.REDIS_PORT || "6379", 10),
+        },
       });
       bullQueue.process(async (job) => ({ processed: true }));
       await bullQueue.add("test-job", { data: "bull-test" });
@@ -350,9 +356,11 @@ export function createStressRoutes(deps: {
       const knexInstance = knex({
         client: "mysql2",
         connection: {
-          host: "localhost",
-          user: "root",
-          database: "observatory",
+          host: process.env.MYSQL_HOST || "localhost",
+          port: parseInt(process.env.MYSQL_PORT || "3306", 10),
+          user: process.env.MYSQL_USER || "root",
+          password: process.env.MYSQL_PASSWORD || "",
+          database: process.env.MYSQL_DATABASE || "observatory",
         },
       });
       await knexInstance.raw("SELECT 1 as result");

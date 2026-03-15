@@ -1,12 +1,17 @@
+/** @format */
+
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { ViewCrumbs } from "./crumbs";
 import Source from "./source";
-import {Details} from "./details";
+import { Details } from "./details";
 import ContentTabs from "./tabs";
 import { Skeleton } from "@/components/ui/base/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/base/alert";
-import { ViewInstanceResponse, RequestInstanceResponse } from "@/hooks/useApiTyped";
+import {
+  ViewInstanceResponse,
+  RequestInstanceResponse,
+} from "@/hooks/useApiTyped";
 
 export default function ViewPreview() {
   const params = useParams();
@@ -32,7 +37,10 @@ export default function ViewPreview() {
     try {
       setData((prev) => ({ ...prev, loading: true }));
       //@ts-ignore
-      const response = await fetch(`${window.SERVER_CONFIG.base}/api/views/${params.id}`);
+      const response = await fetch(
+        //@ts-ignore
+        `${window.SERVER_CONFIG.base}/api/views/${params.id}`,
+      );
       const { request, view } = await response.json();
 
       setData((prev) => ({
@@ -53,12 +61,12 @@ export default function ViewPreview() {
   if (data.loading) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-[200px] w-full" />
+        <Skeleton className="h-50 w-full" />
         <div className="grid grid-cols-2 gap-4">
-          <Skeleton className="h-[300px]" />
-          <Skeleton className="h-[300px]" />
-          <Skeleton className="h-[200px]" />
-          <Skeleton className="h-[200px]" />
+          <Skeleton className="h-75" />
+          <Skeleton className="h-75" />
+          <Skeleton className="h-50" />
+          <Skeleton className="h-50" />
         </div>
       </div>
     );

@@ -18,8 +18,8 @@ const myCache = new NodeCache();
 // Create a Bull queue
 const emailQueue = new Bull('email-queue', {
   redis: {
-    host: 'localhost',
-    port: 6379,
+    host: process.env.REDIS_HOST || 'localhost',
+    port: parseInt(process.env.REDIS_PORT || '6379', 10),
   },
 });
 
@@ -310,13 +310,15 @@ app.post('/notify', async (req, res) => {
 // ---------------------------------------------------------------------------
 async function startServer() {
   const mysql2Connection = await mysql2.createConnection({
-    host: "localhost",
-    user: "root",
-    database: "observatory",
+    host: process.env.MYSQL_HOST || "localhost",
+    port: parseInt(process.env.MYSQL_PORT || "3306", 10),
+    user: process.env.MYSQL_USER || "root",
+    password: process.env.MYSQL_PASSWORD || "",
+    database: process.env.MYSQL_DATABASE || "observatory",
   });
 
   const redisConnection = createClient({
-    url: "redis://localhost:6379",
+    url: process.env.REDIS_URL || "redis://localhost:6379",
   });
 
   await redisConnection.connect();

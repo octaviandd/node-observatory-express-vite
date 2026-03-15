@@ -41,8 +41,12 @@ export const ModelCrumbs = React.memo(
             <Badge variant="secondary">
               {model.content.metadata.package.toUpperCase()}
             </Badge>
-            <Badge variant={getStatusColor(model.content.status as string)}>
-              {model.content.status?.toUpperCase()}
+            <Badge
+              variant={getStatusColor(
+                model.content.error?.code ? "failed" : "completed",
+              )}
+            >
+              {model.content.error?.code ? "Failed" : "Completed"}
             </Badge>
           </div>
         </CardContent>

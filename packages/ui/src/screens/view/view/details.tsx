@@ -1,4 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/base/card";
+/** @format */
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/base/card";
 import { Badge } from "@/components/ui/base/badge";
 import { formatDuration, getSize, timeAgo } from "@/utils.js";
 import { ViewInstanceResponse } from "@/hooks/useApiTyped";
@@ -32,12 +39,12 @@ export const Details = ({ view }: { view: ViewInstanceResponse }) => {
             <div className="col-span-9">
               <Badge
                 variant={
-                  view.content.status === "completed"
+                  view.content.data.status === "completed"
                     ? "secondary"
                     : "destructive"
                 }
               >
-                {view.content.status?.toUpperCase()}
+                {view.content.data.status?.toUpperCase()}
               </Badge>
             </div>
           </div>
@@ -61,7 +68,7 @@ export const Details = ({ view }: { view: ViewInstanceResponse }) => {
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Duration</div>
             <div className="col-span-9">
-              {formatDuration(view.content.duration as number)}
+              {formatDuration(view.content.metadata.duration as number)}
             </div>
           </div>
 
@@ -82,4 +89,4 @@ export const Details = ({ view }: { view: ViewInstanceResponse }) => {
       </CardContent>
     </Card>
   );
-}
+};

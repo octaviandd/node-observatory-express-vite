@@ -3116,19 +3116,19 @@ export interface components {
         IndexType: "instance" | "group";
         RequestInstanceResponse: {
             content: {
-                /** @enum {string} */
-                status?: "completed" | "failed" | "released";
-                duration?: number;
                 metadata: {
-                    /** @enum {string} */
-                    package: "express" | "http";
-                    method: string;
-                    type?: string;
+                    duration: number;
                 } & {
+                    location?: {
+                        file: string;
+                        line: string;
+                    };
+                    created_at: string;
                     package: string;
                 };
                 data: {
                     route?: string;
+                    method: string;
                     statusCode: number;
                     requestSize?: number;
                     responseSize?: number;
@@ -3158,17 +3158,12 @@ export interface components {
                     };
                     session?: Record<string, never>;
                 };
-                location?: {
-                    file: string;
-                    line: string;
-                };
                 error?: {
                     name: string;
                     message: string;
                     stack?: string;
                     code?: string;
                 };
-                created_at?: string;
             };
             uuid: string;
             request_id?: string;
@@ -3181,27 +3176,26 @@ export interface components {
         };
         CacheInstanceResponse: {
             content: {
-                /** @enum {string} */
-                status?: "completed" | "failed" | "released";
-                duration?: number;
                 metadata: {
-                    /** @enum {string} */
-                    package: "ioredis" | "keyv" | "level" | "lru-cache" | "memjs" | "node-cache" | "redis";
-                    command: string;
-                    host?: string;
-                    port?: number;
+                    duration: number;
                 } & {
+                    location?: {
+                        file: string;
+                        line: string;
+                    };
+                    created_at: string;
                     package: string;
                 };
                 data: {
+                    method: string;
+                    /** @enum {string} */
+                    status?: "completed" | "failed";
+                    host?: string;
+                    port?: number;
                     key?: string;
                     hits?: number;
                     misses?: number;
                     writes?: number;
-                };
-                location?: {
-                    file: string;
-                    line: string;
                 };
                 error?: {
                     name: string;
@@ -3209,7 +3203,6 @@ export interface components {
                     stack?: string;
                     code?: string;
                 };
-                created_at?: string;
             };
             uuid: string;
             request_id?: string;
@@ -3222,28 +3215,24 @@ export interface components {
         };
         JobInstanceResponse: {
             content: {
-                /** @enum {string} */
-                status?: "completed" | "failed" | "released";
-                duration?: number;
                 metadata: {
-                    /** @enum {string} */
-                    package: "agenda" | "bull";
-                    method: string;
-                    queue?: string;
-                    connectionName?: string;
+                    duration: number;
                 } & {
+                    location?: {
+                        file: string;
+                        line: string;
+                    };
+                    created_at: string;
                     package: string;
                 };
                 data: {
+                    method: string;
                     queue?: string;
+                    status: string;
                     connectionName?: string;
                     jobId?: string;
                     attemptsMade?: number;
                     failedReason?: string;
-                };
-                location?: {
-                    file: string;
-                    line: string;
                 };
                 error?: {
                     name: string;
@@ -3251,7 +3240,6 @@ export interface components {
                     stack?: string;
                     code?: string;
                 };
-                created_at?: string;
             };
             uuid: string;
             request_id?: string;
@@ -3264,29 +3252,26 @@ export interface components {
         };
         QueryInstanceResponse: {
             content: {
-                /** @enum {string} */
-                status?: "completed" | "failed" | "released";
-                duration?: number;
                 metadata: {
-                    /** @enum {string} */
-                    package: "knex" | "mongodb" | "mysql" | "mysql2" | "pg" | "prisma" | "sequelize" | "sqlite3" | "typeorm";
-                    context?: string;
-                    sqlType?: string;
-                    method?: string;
+                    duration: number;
                 } & {
+                    location?: {
+                        file: string;
+                        line: string;
+                    };
+                    created_at: string;
                     package: string;
                 };
                 data: {
+                    sqlType?: string;
+                    method?: string;
                     sql?: string;
                     query?: string;
+                    context?: string;
                     hostname?: string;
                     port?: string | number;
                     database?: string;
                     rowCount?: number;
-                };
-                location?: {
-                    file: string;
-                    line: string;
                 };
                 error?: {
                     name: string;
@@ -3294,7 +3279,6 @@ export interface components {
                     stack?: string;
                     code?: string;
                 };
-                created_at?: string;
             };
             average: number;
             p95: number;
@@ -3309,13 +3293,14 @@ export interface components {
         };
         HttpClientInstanceResponse: {
             content: {
-                /** @enum {string} */
-                status?: "completed" | "failed" | "released";
-                duration?: number;
                 metadata: {
-                    package: string;
-                    method?: string;
+                    duration: number;
                 } & {
+                    location?: {
+                        file: string;
+                        line: string;
+                    };
+                    created_at: string;
                     package: string;
                 };
                 data: {
@@ -3337,17 +3322,12 @@ export interface components {
                     isMedia?: boolean;
                     aborted?: boolean;
                 };
-                location?: {
-                    file: string;
-                    line: string;
-                };
                 error?: {
                     name: string;
                     message: string;
                     stack?: string;
                     code?: string;
                 };
-                created_at?: string;
             };
             uuid: string;
             request_id?: string;
@@ -3360,28 +3340,25 @@ export interface components {
         };
         ScheduleInstanceResponse: {
             content: {
-                /** @enum {string} */
-                status?: "completed" | "failed" | "released";
-                duration?: number;
                 metadata: {
-                    /** @enum {string} */
-                    package: "bree" | "node-cron" | "node-schedule";
-                    type: string;
-                    scheduleId: string;
-                    breeId?: string;
-                    jobId?: string;
+                    duration: number;
                 } & {
+                    location?: {
+                        file: string;
+                        line: string;
+                    };
+                    created_at: string;
                     package: string;
                 };
                 data: {
                     cronExpression?: string;
+                    jobId?: string;
+                    scheduleId: string;
+                    breeId?: string;
+                    type: string;
                     name?: null | string;
                     rule?: unknown;
                     jobName?: string;
-                };
-                location?: {
-                    file: string;
-                    line: string;
                 };
                 error?: {
                     name: string;
@@ -3389,7 +3366,6 @@ export interface components {
                     stack?: string;
                     code?: string;
                 };
-                created_at?: string;
             };
             uuid: string;
             request_id?: string;
@@ -3402,17 +3378,18 @@ export interface components {
         };
         MailInstanceResponse: {
             content: {
-                /** @enum {string} */
-                status?: "completed" | "failed" | "released";
-                duration?: number;
                 metadata: {
-                    /** @enum {string} */
-                    package: "@aws-sdk/client-ses" | "@sendgrid/mail" | "mailgun.js" | "nodemailer" | "postmark";
-                    command: string;
+                    duration: number;
                 } & {
+                    location?: {
+                        file: string;
+                        line: string;
+                    };
+                    created_at: string;
                     package: string;
                 };
                 data: {
+                    command: string;
                     to: string[];
                     cc: string[];
                     bcc: string[];
@@ -3422,17 +3399,12 @@ export interface components {
                     templateId?: string;
                     messageId?: string;
                 };
-                location?: {
-                    file: string;
-                    line: string;
-                };
                 error?: {
                     name: string;
                     message: string;
                     stack?: string;
                     code?: string;
                 };
-                created_at?: string;
             };
             uuid: string;
             request_id?: string;
@@ -3445,23 +3417,21 @@ export interface components {
         };
         LogInstanceResponse: {
             content: {
-                /** @enum {string} */
-                status?: "completed" | "failed" | "released";
-                duration?: number;
                 metadata: {
                     /** @enum {string} */
                     package: "bunyan" | "log4js" | "loglevel" | "pino" | "signale" | "winston";
                     level: string;
                     logger?: string;
                 } & {
+                    location?: {
+                        file: string;
+                        line: string;
+                    };
+                    created_at: string;
                     package: string;
                 };
                 data: {
                     message: unknown;
-                };
-                location?: {
-                    file: string;
-                    line: string;
                 };
                 error?: {
                     name: string;
@@ -3469,7 +3439,6 @@ export interface components {
                     stack?: string;
                     code?: string;
                 };
-                created_at?: string;
             };
             uuid: string;
             request_id?: string;
@@ -3482,19 +3451,33 @@ export interface components {
         };
         ExceptionInstanceResponse: {
             content: {
-                /** @constant */
-                type: "exception";
-                message: string;
-                stack: string;
-                file: string;
-                line: string;
-                title: string;
-                fullError: string;
-                codeContext: {
-                    lineNumber: number;
-                    content: string;
-                    isErrorLine: boolean;
-                }[];
+                metadata: {
+                    location?: {
+                        file: string;
+                        line: string;
+                    };
+                    created_at: string;
+                    package: string;
+                };
+                data: {
+                    message: string;
+                    stack: string;
+                    file: string;
+                    line: string;
+                    title: string;
+                    fullError: string;
+                    codeContext: {
+                        lineNumber: number;
+                        content: string;
+                        isErrorLine: boolean;
+                    }[];
+                };
+                error?: {
+                    name: string;
+                    message: string;
+                    stack?: string;
+                    code?: string;
+                };
             };
             uuid: string;
             request_id?: string;
@@ -3507,21 +3490,21 @@ export interface components {
         };
         ModelInstanceResponse: {
             content: {
-                /** @enum {string} */
-                status?: "completed" | "failed" | "released";
-                duration?: number;
                 metadata: {
-                    /** @enum {string} */
-                    package: "knex" | "mongoose" | "prisma" | "sequelize" | "sqlite3" | "typeorm";
-                    method: string;
-                    modelName: string;
+                    duration: number;
                 } & {
+                    location?: {
+                        file: string;
+                        line: string;
+                    };
+                    created_at: string;
                     package: string;
                 };
-                data: Record<string, never>;
-                location?: {
-                    file: string;
-                    line: string;
+                data: {
+                    /** @enum {string} */
+                    status: "completed" | "failed";
+                    method: string;
+                    modelName: string;
                 };
                 error?: {
                     name: string;
@@ -3529,7 +3512,6 @@ export interface components {
                     stack?: string;
                     code?: string;
                 };
-                created_at?: string;
             };
             uuid: string;
             request_id?: string;
@@ -3542,17 +3524,20 @@ export interface components {
         };
         ViewInstanceResponse: {
             content: {
-                /** @enum {string} */
-                status?: "completed" | "failed" | "released";
-                duration?: number;
                 metadata: {
-                    package: string;
-                    /** @constant */
-                    method: "render";
+                    method: string;
+                    duration: number;
                 } & {
+                    location?: {
+                        file: string;
+                        line: string;
+                    };
+                    created_at: string;
                     package: string;
                 };
                 data: {
+                    /** @enum {string} */
+                    status?: "completed" | "failed";
                     view: string;
                     options: Record<string, never>;
                     size: number;
@@ -3560,17 +3545,12 @@ export interface components {
                         cacheEnabled: boolean;
                     };
                 };
-                location?: {
-                    file: string;
-                    line: string;
-                };
                 error?: {
                     name: string;
                     message: string;
                     stack?: string;
                     code?: string;
                 };
-                created_at?: string;
             };
             uuid: string;
             request_id?: string;
@@ -3583,35 +3563,24 @@ export interface components {
         };
         NotificationInstanceResponse: {
             content: {
-                /** @enum {string} */
-                status?: "completed" | "failed" | "released";
-                duration?: number;
-                metadata: ({
-                    /** @constant */
-                    package: "pusher";
-                    /** @enum {string} */
-                    method: "trigger" | "triggerBatch";
+                metadata: {
+                    mode?: string;
+                    duration: number;
                 } & {
+                    location?: {
+                        file: string;
+                        line: string;
+                    };
+                    created_at: string;
                     package: string;
-                }) | ({
-                    /** @constant */
-                    package: "ably";
-                    method: string;
-                    /** @enum {string} */
-                    mode: "realtime" | "rest";
-                } & {
-                    package: string;
-                });
+                };
                 data: {
+                    method: string;
                     channel?: string;
                     event?: string;
                     payload?: unknown;
                     batch?: unknown[];
                     options?: unknown;
-                };
-                location?: {
-                    file: string;
-                    line: string;
                 };
                 error?: {
                     name: string;
@@ -3619,7 +3588,6 @@ export interface components {
                     stack?: string;
                     code?: string;
                 };
-                created_at?: string;
             };
             uuid: string;
             request_id?: string;
@@ -3787,17 +3755,20 @@ export interface components {
         ViewDataResponse: {
             view?: {
                 content: {
-                    /** @enum {string} */
-                    status?: "completed" | "failed" | "released";
-                    duration?: number;
                     metadata: {
-                        package: string;
-                        /** @constant */
-                        method: "render";
+                        method: string;
+                        duration: number;
                     } & {
+                        location?: {
+                            file: string;
+                            line: string;
+                        };
+                        created_at: string;
                         package: string;
                     };
                     data: {
+                        /** @enum {string} */
+                        status?: "completed" | "failed";
                         view: string;
                         options: Record<string, never>;
                         size: number;
@@ -3805,54 +3776,12 @@ export interface components {
                             cacheEnabled: boolean;
                         };
                     };
-                    location?: {
-                        file: string;
-                        line: string;
-                    };
                     error?: {
                         name: string;
                         message: string;
                         stack?: string;
                         code?: string;
                     };
-                    created_at?: string;
-                };
-                uuid: string;
-                request_id?: string;
-                job_id?: string;
-                schedule_id?: string;
-                created_at: string;
-                updated_at: string;
-                /** @enum {string} */
-                type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
-            }[];
-            log?: {
-                content: {
-                    /** @enum {string} */
-                    status?: "completed" | "failed" | "released";
-                    duration?: number;
-                    metadata: {
-                        /** @enum {string} */
-                        package: "bunyan" | "log4js" | "loglevel" | "pino" | "signale" | "winston";
-                        level: string;
-                        logger?: string;
-                    } & {
-                        package: string;
-                    };
-                    data: {
-                        message: unknown;
-                    };
-                    location?: {
-                        file: string;
-                        line: string;
-                    };
-                    error?: {
-                        name: string;
-                        message: string;
-                        stack?: string;
-                        code?: string;
-                    };
-                    created_at?: string;
                 };
                 uuid: string;
                 request_id?: string;
@@ -3865,19 +3794,19 @@ export interface components {
             }[];
             request?: {
                 content: {
-                    /** @enum {string} */
-                    status?: "completed" | "failed" | "released";
-                    duration?: number;
                     metadata: {
-                        /** @enum {string} */
-                        package: "express" | "http";
-                        method: string;
-                        type?: string;
+                        duration: number;
                     } & {
+                        location?: {
+                            file: string;
+                            line: string;
+                        };
+                        created_at: string;
                         package: string;
                     };
                     data: {
                         route?: string;
+                        method: string;
                         statusCode: number;
                         requestSize?: number;
                         responseSize?: number;
@@ -3907,17 +3836,12 @@ export interface components {
                         };
                         session?: Record<string, never>;
                     };
-                    location?: {
-                        file: string;
-                        line: string;
-                    };
                     error?: {
                         name: string;
                         message: string;
                         stack?: string;
                         code?: string;
                     };
-                    created_at?: string;
                 };
                 uuid: string;
                 request_id?: string;
@@ -3930,27 +3854,26 @@ export interface components {
             }[];
             cache?: {
                 content: {
-                    /** @enum {string} */
-                    status?: "completed" | "failed" | "released";
-                    duration?: number;
                     metadata: {
-                        /** @enum {string} */
-                        package: "ioredis" | "keyv" | "level" | "lru-cache" | "memjs" | "node-cache" | "redis";
-                        command: string;
-                        host?: string;
-                        port?: number;
+                        duration: number;
                     } & {
+                        location?: {
+                            file: string;
+                            line: string;
+                        };
+                        created_at: string;
                         package: string;
                     };
                     data: {
+                        method: string;
+                        /** @enum {string} */
+                        status?: "completed" | "failed";
+                        host?: string;
+                        port?: number;
                         key?: string;
                         hits?: number;
                         misses?: number;
                         writes?: number;
-                    };
-                    location?: {
-                        file: string;
-                        line: string;
                     };
                     error?: {
                         name: string;
@@ -3958,7 +3881,40 @@ export interface components {
                         stack?: string;
                         code?: string;
                     };
-                    created_at?: string;
+                };
+                uuid: string;
+                request_id?: string;
+                job_id?: string;
+                schedule_id?: string;
+                created_at: string;
+                updated_at: string;
+                /** @enum {string} */
+                type: "cache" | "exception" | "http" | "job" | "log" | "mail" | "model" | "notification" | "query" | "request" | "schedule" | "view";
+            }[];
+            log?: {
+                content: {
+                    metadata: {
+                        /** @enum {string} */
+                        package: "bunyan" | "log4js" | "loglevel" | "pino" | "signale" | "winston";
+                        level: string;
+                        logger?: string;
+                    } & {
+                        location?: {
+                            file: string;
+                            line: string;
+                        };
+                        created_at: string;
+                        package: string;
+                    };
+                    data: {
+                        message: unknown;
+                    };
+                    error?: {
+                        name: string;
+                        message: string;
+                        stack?: string;
+                        code?: string;
+                    };
                 };
                 uuid: string;
                 request_id?: string;
@@ -3971,17 +3927,18 @@ export interface components {
             }[];
             mail?: {
                 content: {
-                    /** @enum {string} */
-                    status?: "completed" | "failed" | "released";
-                    duration?: number;
                     metadata: {
-                        /** @enum {string} */
-                        package: "@aws-sdk/client-ses" | "@sendgrid/mail" | "mailgun.js" | "nodemailer" | "postmark";
-                        command: string;
+                        duration: number;
                     } & {
+                        location?: {
+                            file: string;
+                            line: string;
+                        };
+                        created_at: string;
                         package: string;
                     };
                     data: {
+                        command: string;
                         to: string[];
                         cc: string[];
                         bcc: string[];
@@ -3991,17 +3948,12 @@ export interface components {
                         templateId?: string;
                         messageId?: string;
                     };
-                    location?: {
-                        file: string;
-                        line: string;
-                    };
                     error?: {
                         name: string;
                         message: string;
                         stack?: string;
                         code?: string;
                     };
-                    created_at?: string;
                 };
                 uuid: string;
                 request_id?: string;
@@ -4014,13 +3966,14 @@ export interface components {
             }[];
             http?: {
                 content: {
-                    /** @enum {string} */
-                    status?: "completed" | "failed" | "released";
-                    duration?: number;
                     metadata: {
-                        package: string;
-                        method?: string;
+                        duration: number;
                     } & {
+                        location?: {
+                            file: string;
+                            line: string;
+                        };
+                        created_at: string;
                         package: string;
                     };
                     data: {
@@ -4042,17 +3995,12 @@ export interface components {
                         isMedia?: boolean;
                         aborted?: boolean;
                     };
-                    location?: {
-                        file: string;
-                        line: string;
-                    };
                     error?: {
                         name: string;
                         message: string;
                         stack?: string;
                         code?: string;
                     };
-                    created_at?: string;
                 };
                 uuid: string;
                 request_id?: string;
@@ -4065,35 +4013,24 @@ export interface components {
             }[];
             notification?: {
                 content: {
-                    /** @enum {string} */
-                    status?: "completed" | "failed" | "released";
-                    duration?: number;
-                    metadata: ({
-                        /** @constant */
-                        package: "pusher";
-                        /** @enum {string} */
-                        method: "trigger" | "triggerBatch";
+                    metadata: {
+                        mode?: string;
+                        duration: number;
                     } & {
+                        location?: {
+                            file: string;
+                            line: string;
+                        };
+                        created_at: string;
                         package: string;
-                    }) | ({
-                        /** @constant */
-                        package: "ably";
-                        method: string;
-                        /** @enum {string} */
-                        mode: "realtime" | "rest";
-                    } & {
-                        package: string;
-                    });
+                    };
                     data: {
+                        method: string;
                         channel?: string;
                         event?: string;
                         payload?: unknown;
                         batch?: unknown[];
                         options?: unknown;
-                    };
-                    location?: {
-                        file: string;
-                        line: string;
                     };
                     error?: {
                         name: string;
@@ -4101,7 +4038,6 @@ export interface components {
                         stack?: string;
                         code?: string;
                     };
-                    created_at?: string;
                 };
                 uuid: string;
                 request_id?: string;
@@ -4114,28 +4050,25 @@ export interface components {
             }[];
             schedule?: {
                 content: {
-                    /** @enum {string} */
-                    status?: "completed" | "failed" | "released";
-                    duration?: number;
                     metadata: {
-                        /** @enum {string} */
-                        package: "bree" | "node-cron" | "node-schedule";
-                        type: string;
-                        scheduleId: string;
-                        breeId?: string;
-                        jobId?: string;
+                        duration: number;
                     } & {
+                        location?: {
+                            file: string;
+                            line: string;
+                        };
+                        created_at: string;
                         package: string;
                     };
                     data: {
                         cronExpression?: string;
+                        jobId?: string;
+                        scheduleId: string;
+                        breeId?: string;
+                        type: string;
                         name?: null | string;
                         rule?: unknown;
                         jobName?: string;
-                    };
-                    location?: {
-                        file: string;
-                        line: string;
                     };
                     error?: {
                         name: string;
@@ -4143,7 +4076,6 @@ export interface components {
                         stack?: string;
                         code?: string;
                     };
-                    created_at?: string;
                 };
                 uuid: string;
                 request_id?: string;
@@ -4156,21 +4088,21 @@ export interface components {
             }[];
             model?: {
                 content: {
-                    /** @enum {string} */
-                    status?: "completed" | "failed" | "released";
-                    duration?: number;
                     metadata: {
-                        /** @enum {string} */
-                        package: "knex" | "mongoose" | "prisma" | "sequelize" | "sqlite3" | "typeorm";
-                        method: string;
-                        modelName: string;
+                        duration: number;
                     } & {
+                        location?: {
+                            file: string;
+                            line: string;
+                        };
+                        created_at: string;
                         package: string;
                     };
-                    data: Record<string, never>;
-                    location?: {
-                        file: string;
-                        line: string;
+                    data: {
+                        /** @enum {string} */
+                        status: "completed" | "failed";
+                        method: string;
+                        modelName: string;
                     };
                     error?: {
                         name: string;
@@ -4178,7 +4110,6 @@ export interface components {
                         stack?: string;
                         code?: string;
                     };
-                    created_at?: string;
                 };
                 uuid: string;
                 request_id?: string;
@@ -4191,19 +4122,33 @@ export interface components {
             }[];
             exception?: {
                 content: {
-                    /** @constant */
-                    type: "exception";
-                    message: string;
-                    stack: string;
-                    file: string;
-                    line: string;
-                    title: string;
-                    fullError: string;
-                    codeContext: {
-                        lineNumber: number;
-                        content: string;
-                        isErrorLine: boolean;
-                    }[];
+                    metadata: {
+                        location?: {
+                            file: string;
+                            line: string;
+                        };
+                        created_at: string;
+                        package: string;
+                    };
+                    data: {
+                        message: string;
+                        stack: string;
+                        file: string;
+                        line: string;
+                        title: string;
+                        fullError: string;
+                        codeContext: {
+                            lineNumber: number;
+                            content: string;
+                            isErrorLine: boolean;
+                        }[];
+                    };
+                    error?: {
+                        name: string;
+                        message: string;
+                        stack?: string;
+                        code?: string;
+                    };
                 };
                 uuid: string;
                 request_id?: string;
@@ -4216,28 +4161,24 @@ export interface components {
             }[];
             job?: {
                 content: {
-                    /** @enum {string} */
-                    status?: "completed" | "failed" | "released";
-                    duration?: number;
                     metadata: {
-                        /** @enum {string} */
-                        package: "agenda" | "bull";
-                        method: string;
-                        queue?: string;
-                        connectionName?: string;
+                        duration: number;
                     } & {
+                        location?: {
+                            file: string;
+                            line: string;
+                        };
+                        created_at: string;
                         package: string;
                     };
                     data: {
+                        method: string;
                         queue?: string;
+                        status: string;
                         connectionName?: string;
                         jobId?: string;
                         attemptsMade?: number;
                         failedReason?: string;
-                    };
-                    location?: {
-                        file: string;
-                        line: string;
                     };
                     error?: {
                         name: string;
@@ -4245,7 +4186,6 @@ export interface components {
                         stack?: string;
                         code?: string;
                     };
-                    created_at?: string;
                 };
                 uuid: string;
                 request_id?: string;
@@ -4258,29 +4198,26 @@ export interface components {
             }[];
             query?: {
                 content: {
-                    /** @enum {string} */
-                    status?: "completed" | "failed" | "released";
-                    duration?: number;
                     metadata: {
-                        /** @enum {string} */
-                        package: "knex" | "mongodb" | "mysql" | "mysql2" | "pg" | "prisma" | "sequelize" | "sqlite3" | "typeorm";
-                        context?: string;
-                        sqlType?: string;
-                        method?: string;
+                        duration: number;
                     } & {
+                        location?: {
+                            file: string;
+                            line: string;
+                        };
+                        created_at: string;
                         package: string;
                     };
                     data: {
+                        sqlType?: string;
+                        method?: string;
                         sql?: string;
                         query?: string;
+                        context?: string;
                         hostname?: string;
                         port?: string | number;
                         database?: string;
                         rowCount?: number;
-                    };
-                    location?: {
-                        file: string;
-                        line: string;
                     };
                     error?: {
                         name: string;
@@ -4288,7 +4225,6 @@ export interface components {
                         stack?: string;
                         code?: string;
                     };
-                    created_at?: string;
                 };
                 average: number;
                 p95: number;

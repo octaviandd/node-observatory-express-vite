@@ -1,0 +1,43 @@
+{
+	"description": "Patcher version compatibility matrix",
+	"entries": [
+		{ "patcher": "redis", "package": "redis", "versions": ["5.11.0"], "category": "cache" },
+		{ "patcher": "ioredis", "package": "ioredis", "versions": ["5.10.0"], "category": "cache" },
+		{ "patcher": "lru-cache", "package": "lru-cache", "versions": ["11.2.7"], "category": "cache" },
+		{ "patcher": "node-cache", "package": "node-cache", "versions": ["5.1.2"], "category": "cache" },
+		{ "patcher": "keyv", "package": "keyv", "versions": ["5.6.0"], "category": "cache" },
+		{ "patcher": "memjs", "package": "memjs", "versions": ["1.3.2"], "category": "cache" },
+		{ "patcher": "level", "package": "level", "versions": ["10.0.0"], "category": "cache" },
+
+		{ "patcher": "bull", "package": "bull", "versions": ["4.16.5"], "category": "job" },
+		{ "patcher": "agenda", "package": "agenda", "versions": ["6.2.3"], "category": "job" },
+		{ "patcher": "bree", "package": "bree", "versions": ["9.2.9"], "category": "job" },
+
+		{ "patcher": "node-cron", "package": "node-cron", "versions": ["4.2.1"], "category": "schedule" },
+		{ "patcher": "node-schedule", "package": "node-schedule", "versions": ["2.1.1"], "category": "schedule" },
+
+		{ "patcher": "mysql2", "package": "mysql2", "versions": ["3.19.1"], "category": "query" },
+		{ "patcher": "pg", "package": "pg", "versions": ["8.20.0"], "category": "query" },
+		{ "patcher": "knex", "package": "knex", "versions": ["3.1.0"], "category": "query" },
+		{ "patcher": "mongoose", "package": "mongoose", "versions": ["9.3.0"], "category": "query" },
+		{ "patcher": "sequelize", "package": "sequelize", "versions": ["6.37.8"], "category": "query" },
+		{ "patcher": "typeorm", "package": "typeorm", "versions": ["0.3.28"], "category": "query" },
+		{ "patcher": "sqlite3", "package": "sqlite3", "versions": ["6.0.1"], "category": "query" },
+
+		{ "patcher": "axios", "package": "axios", "versions": ["1.13.6"], "category": "http" },
+		{ "patcher": "undici", "package": "undici", "versions": ["7.24.1"], "category": "http" },
+		{ "patcher": "superagent", "package": "superagent", "versions": ["10.3.0"], "category": "http" },
+
+		{ "patcher": "winston", "package": "winston", "versions": ["3.19.0"], "category": "logger" },
+		{ "patcher": "pino", "package": "pino", "versions": ["10.3.1"], "category": "logger" },
+		{ "patcher": "bunyan", "package": "bunyan", "versions": ["1.8.15"], "category": "logger" },
+		{ "patcher": "log4js", "package": "log4js", "versions": ["6.9.1"], "category": "logger" },
+		{ "patcher": "loglevel", "package": "loglevel", "versions": ["1.9.2"], "category": "logger" },
+		{ "patcher": "signale", "package": "signale", "versions": ["1.4.0"], "category": "logger" },
+
+		{ "patcher": "nodemailer", "package": "nodemailer", "versions": ["8.0.2"], "category": "mail" },
+		{ "patcher": "aws-ses", "package": "@aws-sdk/client-ses", "versions": ["3.1008.0"], "category": "mail" },
+		{ "patcher": "mailgun", "package": "mailgun.js", "versions": ["12.7.1"], "category": "mail" },
+		{ "patcher": "postmark", "package": "postmark", "versions": ["4.0.7"], "category": "mail" }
+	]
+}

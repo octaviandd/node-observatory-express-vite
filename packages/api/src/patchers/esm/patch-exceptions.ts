@@ -1,116 +1,16 @@
 /** @format */
 
-import fs from "fs";
-import path from "path";
-import { watchers, patchedGlobal } from "../../core/index.js";
-import { inspect } from "util";
-import { getCallerInfo } from "../../core/helpers/helpers.js";
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { fileURLToPath } from "url";
+import { patchedGlobal } from "../../core/index.js";
 import { PATCHERS_GLOBAL_SYMBOLS } from "../../core/helpers/constants.js";
-
+import { applyExceptionPatchers } from "../shared/exception-common.js";
 
 //@ts-ignore
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
-/**
- * Extract detailed error information, including formatted code context
- * @param error - The error object
- * @returns Error details object
- */
-function extractErrorDetails(error: any) {
-  if (!error) {
-    return {
-      message: "Unknown Error",
-      stack: "No stack trace available",
-      file: "Unknown file",
-      title: "Error",
-      codeContext: null,
-    };
-  }
-
-  const stack = error.stack || "No stack trace available";
-  const callerInfo = getCallerInfo(__filename);
-
-  const file = callerInfo.file;
-  const line = Number(callerInfo.line);
-
-  return {
-    message: error.message || "No message provided",
-    stack,
-    file: callerInfo.file || "Unknown file",
-    line: callerInfo.line || "Unknown line",
-    title: error.name || "Error",
-    codeContext:
-      file && line ? formatCodeContext(file, line) : "No context available",
-    fullError: inspect(error, { depth: null }), // Full error object for debugging
-  };
-}
-
-/**
- * Format the code context for React-friendly rendering
- * @param filePath - The file path
- * @param line - The line number
- * @returns Code context as an array of objects
- */
-function formatCodeContext(filePath: string, line: number) {
-  try {
-    const fileContent = fs.readFileSync(path.resolve(filePath), "utf-8");
-    const fileLines = fileContent.split("\n");
-
-    const contextLines = fileLines.slice(Math.max(0, line - 3), line + 2); // Fetch two lines before and after
-    return contextLines.map((content, index) => {
-      const currentLineNumber = line - 2 + index; // Adjust the line numbers
-      return {
-        lineNumber: currentLineNumber,
-        content: content.trim(),
-        isErrorLine: currentLineNumber === line,
-      };
-    });
-  } catch (err) {
-    return [];
-  }
-}
-
-/**
- * Monkey patch for uncaught exceptions to record errors
- */
-// function uncaughtPatcher() {
-//   process.on("uncaughtException", (error) => {
-//     const details = extractErrorDetails(error);
-//     if (watchers?.errors) {
-//       watchers?.errors.insertRedisStream({
-//         type: "uncaughtException",
-//         ...details,
-//       });
-//     }
-//   });
-// }
-
-/**
- * Monkey patch for unhandled rejections to record errors
- */
-// function unhandledRejectionPatcher() {
-//   process.on("unhandledRejection", (reason) => {
-//     const details = extractErrorDetails(reason);
-//     if (watchers?.errors) {
-//       watchers?.errors.insertRedisStream({
-//         type: "unhandledRejection",
-//         ...details,
-//       });
-//     }
-//   });
-// }
-
-if (process.env.NODE_OBSERVATORY_ERRORS) {
-  // Check if exceptions have already been patched
-  if (!patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.EXCEPTIONS_PATCHED_SYMBOL]) {
-    // Mark exceptions as patched
-    patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.EXCEPTIONS_PATCHED_SYMBOL] = true;
-
-    // Apply all patchers
-    // uncaughtPatcher();
-    // unhandledRejectionPatcher();
-  }
+if (
+  process.env.NODE_OBSERVATORY_ERRORS &&
+  !patchedGlobal[PATCHERS_GLOBAL_SYMBOLS.EXCEPTIONS_PATCHED_SYMBOL]
+) {
+  applyExceptionPatchers(__filename);
 }

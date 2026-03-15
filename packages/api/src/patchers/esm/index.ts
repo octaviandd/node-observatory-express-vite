@@ -5,7 +5,6 @@ import "./patch-bunyan.js";
 import "./patch-pino.js";
 import "./patch-log4js.js";
 import "./patch-loglevel.js";
-// import "./patch-roarr.js";
 import "./patch-signale.js";
 
 // JOBS
@@ -22,13 +21,13 @@ import "./patch-nodemailer.js";
 import "./patch-sendgrid.js";
 import "./patch-mailgun.js";
 import "./patch-aws_ses.js";
-// import "./patch-postmark.js";
+import "./patch-postmark.js";
 
 // CACHE
 import "./patch-node-cache.js";
 import "./patch-redis.js";
 import "./patch-ioredis.js";
-// import "./patch-memjs.js";
+import "./patch-memjs.js";
 import "./patch-lru-cache.js";
 import "./patch-keyv.js";
 import "./patch-level.js";

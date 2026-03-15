@@ -1,4 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/base/card";
+/** @format */
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/base/card";
 import { Badge } from "@/components/ui/base/badge";
 import { Button } from "@/components/ui/base/button";
 import { Link } from "react-router";
@@ -43,7 +50,7 @@ export default function Source({
             <div className="col-span-3 text-muted-foreground">Method</div>
             <div className="col-span-9">
               <Badge variant="outline">
-                {source.content.metadata.method.toUpperCase()}
+                {source.content.data.method.toUpperCase()}
               </Badge>
             </div>
           </div>

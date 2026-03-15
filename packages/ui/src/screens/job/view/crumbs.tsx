@@ -44,8 +44,8 @@ export const JobPreviewCrumbs = React.memo(
               <Badge variant="secondary" className="text-sm">
                 {job.content.data.jobId} (ID)
               </Badge>
-              <Badge variant={getStatusColor(job.content.status ?? "")}>
-                {job.content.status}
+              <Badge variant={getStatusColor(job.content.data.status ?? "")}>
+                {job.content.data.status}
               </Badge>
             </div>
           </div>

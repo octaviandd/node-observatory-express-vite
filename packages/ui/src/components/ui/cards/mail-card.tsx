@@ -11,9 +11,9 @@ export const MailCard = ({ item }: { item: MailInstanceResponse }) => {
         from: item.content.data.from,
         to: item.content.data.to,
       }}
-      file={item.content.location?.file as string}
-      line={item.content.location?.line as string}
+      file={item.content.metadata.location?.file as string}
+      line={item.content.metadata.location?.line as string}
       linkPath={`/mail/${item.uuid}`}
     />
   );
-}
+};

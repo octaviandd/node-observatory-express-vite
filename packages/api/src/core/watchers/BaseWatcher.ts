@@ -28,6 +28,7 @@ import type { WatcherType } from "../watcherConfig.js";
  */
 export abstract class BaseWatcher<
   T extends WatcherType = WatcherType,
+  TFilters extends WatcherFilters = WatcherFilters,
 > implements Watcher<T> {
   /** Redis client used for stream consumption + producing entries */
   protected readonly RedisClient: RedisClientType;
@@ -93,7 +94,8 @@ export abstract class BaseWatcher<
       console.log(`Created consumer group for ${this.type}`);
     } catch (error: unknown) {
       // BUSYGROUP means the consumer group already exists
-      if (error instanceof Error && error.message?.includes("BUSYGROUP")) return;
+      if (error instanceof Error && error.message?.includes("BUSYGROUP"))
+        return;
 
       // Anything else is a real Redis error
       throw new RedisError(`Error creating consumer group for ${this.type}:`, {
@@ -149,7 +151,10 @@ export abstract class BaseWatcher<
   private async insertIntoDB(parsedValues: WatcherEntry[]): Promise<void> {
     try {
       await this.DBInstance.insert(parsedValues);
-      console.log("inserted into db: ", parsedValues.map(value => value.uuid));
+      console.log(
+        "inserted into db: ",
+        parsedValues.map((value) => value.uuid),
+      );
     } catch (dbError) {
       console.error(`Error inserting batch data for ${this.type}:`, dbError);
       // Don't ACK if DB insert failed - messages will be retried
@@ -180,7 +185,7 @@ export abstract class BaseWatcher<
           },
         ],
         {
-          COUNT: 500,  // batch size
+          COUNT: 500, // batch size
           BLOCK: 1000, // wait up to 1s for new messages
         },
       );
@@ -414,7 +419,7 @@ export abstract class BaseWatcher<
         type: this.type,
         content: JSON.stringify(cleanContent),
         created_at:
-          entry.created_at ||
+          entry.metadata.created_at ||
           new Date().toISOString().replace("T", " ").substring(0, 19),
       });
     } catch (error) {
@@ -474,7 +479,7 @@ export abstract class BaseWatcher<
     return { body, statusCode: 200 };
   }
 
-   /**
+  /**
    * Graph endpoint handler:
    * Parses filters from request, delegates to watcher-specific durationGraph().
    */
@@ -505,7 +510,6 @@ export abstract class BaseWatcher<
   async metadata(
     req: ObservatoryBoardRequest,
   ): Promise<ApiResponse<Record<string, any>>> {
-
     const { requestId, jobId, scheduleId } = req.body;
     const body = await this.getMetadata({ requestId, jobId, scheduleId });
 
@@ -549,7 +553,7 @@ export abstract class BaseWatcher<
   /** Convert incoming request query params into DB filters */
   protected abstract extractFiltersFromRequest(
     req: ObservatoryBoardRequest,
-  ): WatcherFilters;
+  ): TFilters;
 
   /** Fetch entry by id + its related entries (request/log/query/job/etc) */
   protected abstract getViewdata(id: string): Promise<ViewDataResponse>;
@@ -567,16 +571,16 @@ export abstract class BaseWatcher<
 
   /** Fetch chartable time-series data for the resource */
   protected abstract getCountGraphData(
-    filters: WatcherFilters,
+    filters: TFilters,
   ): Promise<CountGraphDataResponse>;
 
   /** Fetch chartable time-series data for the resource */
   protected abstract getDurationGraphData(
-    filters: WatcherFilters,
+    filters: TFilters,
   ): Promise<DurationGraphDataResponse>;
 
   /** Fetch table data (instance rows or group aggregates) */
   protected abstract getTableData(
-    filters: WatcherFilters & { index: "instance" | "group" },
+    filters: TFilters & { index: "instance" | "group" },
   ): Promise<TableDataResponse<T, "instance" | "group">>;
 }

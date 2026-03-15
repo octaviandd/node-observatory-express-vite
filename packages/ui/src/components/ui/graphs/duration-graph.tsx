@@ -5,35 +5,44 @@ import { formatGraphDate, getDateFromPeriod } from "@/utils";
 import { useContext } from "react";
 import { ResponsiveContainer, LineChart, Line, Tooltip, YAxis } from "recharts";
 
+type DurationGraphRow = {
+  durations: number[];
+  avgDuration: number;
+  p95: number;
+  count: number;
+  label: string;
+};
+
 type Props = {
-  data: Record<string, {durations: number[], avgDuration: number, p95: number, count: number, label: string}>;
+  data: Record<string, DurationGraphRow> | DurationGraphRow[];
 };
 
 export const DurationGraph = ({ data }: Props) => {
   const { state } = useContext(StoreContext);
-  const period = state.period
+  const period = state.period;
 
-  const formattedData = [];
-  for (const [key, value] of Object.entries(data)) {
-    formattedData.push({
-      name: key,
-      "Average Duration": value.avgDuration,
-      "95th Percentile": value.p95,
-      label: value.label,
-    });
-  }
-  
+  const rows: DurationGraphRow[] = Array.isArray(data)
+    ? data
+    : Object.values(data);
+
+  const formattedData = rows.map((value, index) => ({
+    name: value.label ?? String(index),
+    "Average Duration": value.avgDuration,
+    "95th Percentile": value.p95,
+    label: value.label,
+  }));
+
   const startDate = getDateFromPeriod(period);
 
   const currentDate = new Date();
   const formattedEndDate = formatGraphDate(currentDate);
-  const formattedStartDate = formatGraphDate(startDate)
+  const formattedStartDate = formatGraphDate(startDate);
 
-    const maxValue = Math.max(
-      ...formattedData.map((d) =>
-        Math.max(d["Average Duration"], d["95th Percentile"]),
-      ),
-    );
+  const maxValue = Math.max(
+    ...formattedData.map((d) =>
+      Math.max(d["Average Duration"], d["95th Percentile"]),
+    ),
+  );
 
   return (
     <Card className="col-span-4 p-1 border-none shadow-none">

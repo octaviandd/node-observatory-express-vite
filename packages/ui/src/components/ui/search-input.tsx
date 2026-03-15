@@ -19,8 +19,7 @@ export function SearchInput({
       placeholder={placeholder}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-[300px] text-muted-foreground"
+      className="w-75 text-muted-foreground"
     />
   );
 }
-

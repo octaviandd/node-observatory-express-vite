@@ -5,19 +5,22 @@ import { watchers } from "../../core/index";
 import { ioRedisCommandsArgs } from "../../core/helpers/constants";
 import { getCallerInfo } from "../../core/helpers/helpers";
 
-type IoRedisMetadata = { package: "ioredis"; command: string; host?: string; port?: number };
-type IoRedisData = { key?: string; hits?: number; misses?: number; writes?: number };
+const timestamp = () =>
+  new Date().toISOString().replace("T", " ").substring(0, 19);
 
-export type IoRedisLogEntry = BaseLogEntry<IoRedisMetadata, IoRedisData>;
-
-const timestamp = () => new Date().toISOString().replace("T", " ").substring(0, 19);
-
-function log(entry: IoRedisLogEntry) { 
-    watchers.cache.insertRedisStream({ ...entry, created_at: timestamp() })
+function log(entry: CacheContent) {
+  watchers.cache.insertRedisStream({ ...entry });
 }
 
-function getCommandData(command: string, args: any[], result: any): IoRedisData {
-  const data: IoRedisData = { key: args[0] };
+function getCommandData(
+  command: string,
+  args: any[],
+  result: any,
+  status: "completed" | "failed",
+  host: string,
+  port: number,
+): CacheData {
+  const data: CacheData = { key: args[0], method: command, status, host, port };
   const lowerCmd = command.toLowerCase();
 
   if (lowerCmd === "get") {
@@ -40,24 +43,66 @@ export function patchIoRedisExports(exports: any, filename: string): any {
   for (const command of Object.keys(ioRedisCommandsArgs)) {
     if (typeof exports.prototype[command] !== "function") continue;
 
-    shimmer.wrap(exports.prototype, command, (originalFn) =>
-      async function patchedCommand(this: any, ...args: any[]) {
-        const callerInfo = getCallerInfo(filename);
-        const startTime = performance.now();
-        const base = { metadata: { package: "ioredis" as const, command, host: this.options?.host, port: this.options?.port } };
+    shimmer.wrap(
+      exports.prototype,
+      command,
+      (originalFn) =>
+        async function patchedCommand(this: any, ...args: any[]) {
+          const callerInfo = getCallerInfo(filename);
+          const startTime = performance.now();
 
-        try {
-          const result = await originalFn.apply(this, args);
-          log({ status: "completed", duration: parseFloat((performance.now() - startTime).toFixed(2)), location: { file: callerInfo.file, line: callerInfo.line }, data: getCommandData(command, args, result), ...base });
-          return result;
-        } catch (error: any) {
-          log({ status: "failed", duration: parseFloat((performance.now() - startTime).toFixed(2)), data: { key: args[0] }, error: { name: "IoRedisError", message: error?.message ?? String(error), stack: error?.stack }, ...base });
-          throw error;
-        }
-      }
+          try {
+            const result = await originalFn.apply(this, args);
+
+            log({
+              metadata: {
+                package: "ioredis",
+                duration: parseFloat(
+                  (performance.now() - startTime).toFixed(2),
+                ),
+                location: { file: callerInfo.file, line: callerInfo.line },
+                created_at: timestamp(),
+              },
+              data: getCommandData(
+                command,
+                args,
+                result,
+                "completed",
+                this.options?.host,
+                this.options?.port,
+              ),
+            });
+
+            return result;
+          } catch (error: any) {
+            log({
+              metadata: {
+                package: "ioredis",
+                duration: parseFloat(
+                  (performance.now() - startTime).toFixed(2),
+                ),
+                location: { file: callerInfo.file, line: callerInfo.line },
+                created_at: timestamp(),
+              },
+              data: {
+                key: args[0],
+                method: command,
+                status: "failed",
+                host: this.options?.host,
+                port: this.options?.port,
+              },
+              error: {
+                name: "IoRedisError",
+                message: error?.message ?? String(error),
+                stack: error?.stack,
+              },
+            });
+
+            throw error;
+          }
+        },
     );
   }
 
   return exports;
 }
-

@@ -4,20 +4,29 @@ import shimmer from "shimmer";
 import { watchers } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
 
-type MemjsMetadata = { package: "memjs"; command: string };
-type MemjsData = { key?: string; hits?: number; misses?: number; writes?: number };
+const timestamp = () =>
+  new Date().toISOString().replace("T", " ").substring(0, 19);
 
-export type MemjsLogEntry = BaseLogEntry<MemjsMetadata, MemjsData>;
+const METHODS = [
+  "get",
+  "set",
+  "delete",
+  "replace",
+  "increment",
+  "decrement",
+] as const;
 
-const timestamp = () => new Date().toISOString().replace("T", " ").substring(0, 19);
-const METHODS = ["get", "set", "delete", "replace", "increment", "decrement"] as const;
-
-function log(entry: MemjsLogEntry) { 
-    watchers.cache.insertRedisStream({ ...entry, created_at: timestamp() })
+function log(entry: CacheContent) {
+  watchers.cache.insertRedisStream({ ...entry });
 }
 
-function getCommandData(method: string, key: string, result: any): MemjsData {
-  const data: MemjsData = { key };
+function getCommandData(
+  method: string,
+  key: string,
+  result: any,
+  status: "completed" | "failed",
+): CacheData {
+  const data: CacheData = { key, method, status };
 
   if (method === "get") {
     const isHit = result?.value !== undefined && result?.value !== null;
@@ -36,27 +45,54 @@ export function patchMemjsExports(exports: any, filename: string): any {
   for (const method of METHODS) {
     if (typeof exports.Client.prototype[method] !== "function") continue;
 
-    shimmer.wrap(exports.Client.prototype, method, (original) =>
-      async function patched(this: any, key: string, ...args: any[]) {
-        const callerInfo = getCallerInfo(filename);
-        const startTime = performance.now();
+    shimmer.wrap(
+      exports.Client.prototype,
+      method,
+      (original) =>
+        async function patched(this: any, key: string, ...args: any[]) {
+          const callerInfo = getCallerInfo(filename);
+          const startTime = performance.now();
 
-        const base = { metadata: { package: "memjs" as const, command: method } };
+          try {
+            const result = await original.call(this, key, ...args);
+            if (result === undefined) return result;
 
-        try {
-          const result = await original.call(this, key, ...args);
-          if (result === undefined) return result;
+            log({
+              metadata: {
+                package: "memjs",
+                duration: parseFloat(
+                  (performance.now() - startTime).toFixed(2),
+                ),
+                location: { file: callerInfo.file, line: callerInfo.line },
+                created_at: timestamp(),
+              },
+              data: getCommandData(method, key, result, "completed"),
+            });
 
-          log({ status: "completed", duration: parseFloat((performance.now() - startTime).toFixed(2)), location: { file: callerInfo.file, line: callerInfo.line }, data: getCommandData(method, key, result), ...base });
-          return result;
-        } catch (error: any) {
-          log({ status: "failed", duration: parseFloat((performance.now() - startTime).toFixed(2)), data: { key }, error: { name: "MemjsError", message: error?.message ?? String(error), stack: error?.stack }, ...base });
-          throw error;
-        }
-      }
+            return result;
+          } catch (error: any) {
+            log({
+              metadata: {
+                package: "memjs",
+                duration: parseFloat(
+                  (performance.now() - startTime).toFixed(2),
+                ),
+                location: { file: callerInfo.file, line: callerInfo.line },
+                created_at: timestamp(),
+              },
+              data: { key, method, status: "failed" },
+              error: {
+                name: "MemjsError",
+                message: error?.message ?? String(error),
+                stack: error?.stack,
+              },
+            });
+
+            throw error;
+          }
+        },
     );
   }
 
   return exports;
 }
-

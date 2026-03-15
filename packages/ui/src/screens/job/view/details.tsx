@@ -1,4 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/base/card";
+/** @format */
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/base/card";
 import { Badge } from "@/components/ui/base/badge";
 import { formatDuration, timeAgo } from "@/utils.js";
 import { JobInstanceResponse } from "@/hooks/useApiTyped";
@@ -37,23 +44,23 @@ export default function Details({ job }: { job: JobInstanceResponse }) {
             <div className="col-span-9">
               <Badge
                 variant={
-                  job.content.status === "failed"
+                  job.content.data.status === "failed"
                     ? "destructive"
                     : "secondary"
                 }
               >
-                {(job.content.status ?? "").toUpperCase()}
+                {(job.content.data.status ?? "").toUpperCase()}
               </Badge>
             </div>
           </div>
 
-          {job.content.duration !== undefined && (
+          {job.content.metadata.duration !== undefined && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-sm text-muted-foreground">
                 Duration
               </div>
               <div className="col-span-9 text-sm">
-                {formatDuration(job.content.duration)}
+                {formatDuration(job.content.metadata.duration)}
               </div>
             </div>
           )}
@@ -84,7 +91,9 @@ export default function Details({ job }: { job: JobInstanceResponse }) {
             <div className="col-span-3 text-sm text-muted-foreground">
               Attempts Made
             </div>
-            <div className="col-span-9 text-sm">{job.content.data.attemptsMade}</div>
+            <div className="col-span-9 text-sm">
+              {job.content.data.attemptsMade}
+            </div>
           </div>
 
           {job.content.data.failedReason && (
@@ -92,34 +101,42 @@ export default function Details({ job }: { job: JobInstanceResponse }) {
               <div className="col-span-3 text-sm text-muted-foreground">
                 Failed Reason
               </div>
-              <div className="col-span-9 text-sm">{job.content.data.failedReason}</div>
+              <div className="col-span-9 text-sm">
+                {job.content.data.failedReason}
+              </div>
             </div>
           )}
 
-          {job.content.metadata.method && (
+          {job.content.data.method && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-sm text-muted-foreground">
                 Method
               </div>
-              <div className="col-span-9 text-sm">{job.content.metadata.method}</div>
+              <div className="col-span-9 text-sm">
+                {job.content.data.method}
+              </div>
             </div>
           )}
 
-          {job.content.location?.file && (
+          {job.content.metadata.location?.file && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-sm text-muted-foreground">
                 File
               </div>
-              <div className="col-span-9 text-sm">{job.content.location.file}</div>
+              <div className="col-span-9 text-sm">
+                {job.content.metadata.location.file}
+              </div>
             </div>
           )}
 
-          {job.content.location?.line && (
+          {job.content.metadata.location?.line && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-sm text-muted-foreground">
                 Line
               </div>
-              <div className="col-span-9 text-sm">{job.content.location.line}</div>
+              <div className="col-span-9 text-sm">
+                {job.content.metadata.location.line}
+              </div>
             </div>
           )}
         </div>

@@ -90,22 +90,32 @@ function createBaseFilterExtractor(
     period: validatePeriod(rawPeriod),
     query: req.query.q as string,
     isTable: req.query.table === "true",
-    index: req.query.index as IndexType,
-    key: req.query.key ? decodeURIComponent(req.query.key as string) : undefined,
-    status: req.query.status as string,
+    index:
+      req.query.index === "group" || req.query.index === "instance"
+        ? (req.query.index as "instance" | "group")
+        : "instance",
+    key: req.query.key
+      ? decodeURIComponent(req.query.key as string)
+      : undefined,
   };
 }
 
 function createFilterExtractor<TFilters extends WatcherFilters>(
   extensions: (
     req: ObservatoryBoardRequest,
-  ) => Omit<TFilters, keyof WatcherFilters>,
+  ) => Omit<TFilters, keyof WatcherFilters | "status">,
 ): (req: ObservatoryBoardRequest) => TFilters {
-  return (req: ObservatoryBoardRequest) =>
-    ({
-      ...createBaseFilterExtractor(req),
-      ...extensions(req),
-    }) as TFilters;
+  return (req: ObservatoryBoardRequest) => {
+    const baseFilters = createBaseFilterExtractor(req);
+    const extensionFilters = extensions(req);
+    const statusFilter = req.query.status as unknown;
+
+    return {
+      ...baseFilters,
+      ...extensionFilters,
+      status: statusFilter as TFilters extends { status: infer S } ? S : string,
+    } as unknown as TFilters;
+  };
 }
 
 export const WATCHER_CONFIGS = {
@@ -148,17 +158,13 @@ export const WATCHER_CONFIGS = {
   job: {
     type: "job" as const,
     graphMetrics: ["completed", "released", "failed"] as const,
-    filterExtractor: createFilterExtractor<JobFilters>((req) => ({
-      queue: req.query.queue as JobFilters["queue"],
-    })),
+    filterExtractor: createFilterExtractor<JobFilters>((req) => ({})),
   } satisfies WatcherConfig<"job", JobFilters>,
 
   schedule: {
     type: "schedule" as const,
     graphMetrics: ["completed", "failed"] as const,
-    filterExtractor: createFilterExtractor<ScheduleFilters>((req) => ({
-      groupFilter: req.query.groupFilter as ScheduleFilters["groupFilter"],
-    })),
+    filterExtractor: createFilterExtractor<ScheduleFilters>((req) => ({})),
   } satisfies WatcherConfig<"schedule", ScheduleFilters>,
 
   http: {
@@ -169,10 +175,16 @@ export const WATCHER_CONFIGS = {
 
   log: {
     type: "log" as const,
-    graphMetrics: ["info", "warn", "error", "log", "debug", "trace", "fatal"] as const,
-    filterExtractor: createFilterExtractor<LogFilters>((req) => ({
-      logType: req.query.type as LogFilters["logType"],
-    })),
+    graphMetrics: [
+      "info",
+      "warn",
+      "error",
+      "log",
+      "debug",
+      "trace",
+      "fatal",
+    ] as const,
+    filterExtractor: createFilterExtractor<LogFilters>((req) => ({})),
   } satisfies WatcherConfig<"log", LogFilters>,
 
   view: {

@@ -8,10 +8,10 @@ export const LogCard = ({ item }: { item: LogInstanceResponse }) => {
       date={item.created_at}
       metadata={item.content.metadata.level.toUpperCase()}
       content={item.content.data.message as string}
-      file={item.content.location?.file as string}
-      line={item.content.location?.line as string}
+      file={item.content.metadata.location?.file as string}
+      line={item.content.metadata.location?.line as string}
       linkPath={`/log/${item.uuid}`}
       package={item.content.metadata.package}
     />
   );
-}
+};

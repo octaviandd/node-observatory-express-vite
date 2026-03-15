@@ -4,19 +4,20 @@ import shimmer from "shimmer";
 import { watchers } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
 
-type KeyvMetadata = { package: "keyv"; command: string };
-type KeyvData = { key?: any; hits?: number; misses?: number; writes?: number };
+const timestamp = () =>
+  new Date().toISOString().replace("T", " ").substring(0, 19);
 
-export type KeyvLogEntry = BaseLogEntry<KeyvMetadata, KeyvData>;
-
-const timestamp = () => new Date().toISOString().replace("T", " ").substring(0, 19);
-
-function log(entry: KeyvLogEntry) { 
-    watchers.cache.insertRedisStream({ ...entry, created_at: timestamp() })
+function log(entry: CacheContent) {
+  watchers.cache.insertRedisStream({ ...entry });
 }
 
-function getCommandData(method: string, key: any, result: any): KeyvData {
-  const data: KeyvData = { key };
+function getCommandData(
+  method: string,
+  key: any,
+  result: any,
+  status: "completed" | "failed",
+): CacheData {
+  const data: CacheData = { key, method, status };
 
   if (["get", "has"].includes(method)) {
     const isHit = result !== undefined && result !== null && result !== false;
@@ -35,25 +36,53 @@ export function patchKeyvExports(exports: any, filename: string): any {
   if (!exports?.Keyv || typeof exports.Keyv !== "function") return exports;
 
   for (const method of METHODS) {
-    shimmer.wrap(exports.Keyv.prototype, method, (original) =>
-      async function patched(this: any, key: any, ...args: any[]) {
-        const callerInfo = getCallerInfo(filename);
-        const startTime = performance.now();
+    shimmer.wrap(
+      exports.Keyv.prototype,
+      method,
+      (original) =>
+        async function patched(this: any, key: any, ...args: any[]) {
+          const callerInfo = getCallerInfo(filename);
+          const startTime = performance.now();
 
-        const base = { metadata: { package: "keyv" as const, command: method } };
+          try {
+            const result = await original.call(this, key, ...args);
 
-        try {
-          const result = await original.call(this, key, ...args);
-          log({ status: "completed", duration: parseFloat((performance.now() - startTime).toFixed(2)), location: { file: callerInfo.file, line: callerInfo.line }, data: getCommandData(method, key, result), ...base });
-          return result;
-        } catch (error: any) {
-          log({ status: "failed", duration: parseFloat((performance.now() - startTime).toFixed(2)), data: { key }, error: { name: "KeyvError", message: error?.message ?? String(error), stack: error?.stack }, ...base });
-          throw error;
-        }
-      }
+            log({
+              metadata: {
+                package: "keyv",
+                duration: parseFloat(
+                  (performance.now() - startTime).toFixed(2),
+                ),
+                location: { file: callerInfo.file, line: callerInfo.line },
+                created_at: timestamp(),
+              },
+              data: getCommandData(method, key, result, "completed"),
+            });
+
+            return result;
+          } catch (error: any) {
+            log({
+              metadata: {
+                package: "keyv",
+                duration: parseFloat(
+                  (performance.now() - startTime).toFixed(2),
+                ),
+                location: { file: callerInfo.file, line: callerInfo.line },
+                created_at: timestamp(),
+              },
+              data: { key, method, status: "failed" },
+              error: {
+                name: "KeyvError",
+                message: error?.message ?? String(error),
+                stack: error?.stack,
+              },
+            });
+
+            throw error;
+          }
+        },
     );
   }
 
   return exports;
 }
-

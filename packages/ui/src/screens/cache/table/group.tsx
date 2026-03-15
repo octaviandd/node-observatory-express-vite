@@ -27,15 +27,15 @@ export const GroupTable = memo(
               <TableHead>Status</TableHead>
               <TableHead>Duration</TableHead>
               <TableHead>P95</TableHead>
-              <TableHead className="w-[50px]"></TableHead>
+              <TableHead className="w-12.5"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data.map((cache: CacheGroupResponse) => (
               <TableRow key={cache.cache_key}>
-                <TableCell className="flex items-center gap-2 h-[53px]">
+                <TableCell className="flex items-center gap-2 h-13.25">
                   <DatabaseZap className="h-4 w-4 text-muted-foreground" />
-                  <span className="truncate max-w-[400px] text-black dark:text-white">
+                  <span className="truncate max-w-100 text-black dark:text-white">
                     {cache.cache_key}
                   </span>
                 </TableCell>

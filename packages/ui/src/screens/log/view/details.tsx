@@ -1,5 +1,12 @@
+/** @format */
+
 import { Badge } from "@/components/ui/base/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/base/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/base/card";
 import { LogInstanceResponse } from "@/hooks/useApiTyped";
 import { timeAgo } from "@/utils.js";
 
@@ -49,18 +56,18 @@ export default function Details({ log }: { log: LogInstanceResponse }) {
                   LOG_LEVELS.find(
                     (level) => level.dataKey === log.content.metadata.level,
                   )?.variant as
-                  | "secondary"
-                  | "warning"
-                  | "error"
-                  | "debug"
-                  | "trace"
-                  | "log"
-                  | "default"
-                  | "destructive"
-                  | "outline"
-                  | "success"
-                  | null
-                  | undefined
+                    | "secondary"
+                    | "warning"
+                    | "error"
+                    | "debug"
+                    | "trace"
+                    | "log"
+                    | "default"
+                    | "destructive"
+                    | "outline"
+                    | "success"
+                    | null
+                    | undefined
                 }
               >
                 {log.content.metadata.level.toUpperCase()}
@@ -75,7 +82,9 @@ export default function Details({ log }: { log: LogInstanceResponse }) {
               </div>
               <div className="col-span-9">
                 <Badge variant="secondary" className="capitalize">
-                  {typeof log.content.data.message === 'object' ? JSON.stringify(log.content.data.message) : String(log.content.data.message ?? "")}
+                  {typeof log.content.data.message === "object"
+                    ? JSON.stringify(log.content.data.message)
+                    : String(log.content.data.message ?? "")}
                 </Badge>
               </div>
             </div>
@@ -94,27 +103,27 @@ export default function Details({ log }: { log: LogInstanceResponse }) {
             </div>
           )}
 
-          {log.content.location?.file && (
+          {log.content.metadata.location?.file && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-sm text-muted-foreground">
                 File
               </div>
               <div className="col-span-9">
                 <Badge variant="secondary" className="capitalize">
-                  {log.content.location.file}
+                  {log.content.metadata.location.file}
                 </Badge>
               </div>
             </div>
           )}
 
-          {log.content.location?.line && (
+          {log.content.metadata.location?.line && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-sm text-muted-foreground">
                 Line
               </div>
               <div className="col-span-9">
                 <Badge variant="secondary" className="capitalize">
-                  {log.content.location.line}
+                  {log.content.metadata.location.line}
                 </Badge>
               </div>
             </div>

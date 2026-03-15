@@ -5,19 +5,25 @@ import { watchers } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
 import { LRUCacheCommandArgsMapping } from "../../core/helpers/constants";
 
-type LruCacheMetadata = { package: "lru-cache"; command: string };
-type LruCacheData = { key?: any; hits?: number; misses?: number; writes?: number };
+const timestamp = () =>
+  new Date().toISOString().replace("T", " ").substring(0, 19);
 
-export type LruCacheLogEntry = BaseLogEntry<LruCacheMetadata, LruCacheData>;
-
-const timestamp = () => new Date().toISOString().replace("T", " ").substring(0, 19);
-
-function log(entry: LruCacheLogEntry) {
-  watchers?.cache?.insertRedisStream({ ...entry, created_at: timestamp() })
+function log(entry: CacheContent) {
+  watchers?.cache?.insertRedisStream({ ...entry });
 }
 
-function getCommandData(method: string, args: any[], argNames: string[], result: any): LruCacheData {
-  const data: LruCacheData = { key: argNames.includes("key") ? args[argNames.indexOf("key")] : undefined };
+function getCommandData(
+  method: string,
+  args: any[],
+  argNames: string[],
+  result: any,
+  status: "completed" | "failed",
+): CacheData {
+  const data: CacheData = {
+    key: argNames.includes("key") ? args[argNames.indexOf("key")] : undefined,
+    method,
+    status,
+  };
 
   if (method === "get") {
     const isHit = result !== undefined && result !== null;
@@ -40,26 +46,57 @@ export function patchLruCacheExports(exports: any, filename: string): any {
   for (const method of Object.keys(LRUCacheCommandArgsMapping)) {
     if (typeof LRUCacheClass.prototype[method] !== "function") continue;
 
-    shimmer.wrap(LRUCacheClass.prototype, method, (originalFn) =>
-      function patchedMethod(this: any, ...args: any[]) {
-        const callerInfo = getCallerInfo(filename);
-        const startTime = performance.now();
-        const argNames = LRUCacheCommandArgsMapping[method as keyof typeof LRUCacheCommandArgsMapping] || [];
+    shimmer.wrap(
+      LRUCacheClass.prototype,
+      method,
+      (originalFn) =>
+        function patchedMethod(this: any, ...args: any[]) {
+          const callerInfo = getCallerInfo(filename);
+          const startTime = performance.now();
+          const argNames =
+            LRUCacheCommandArgsMapping[
+              method as keyof typeof LRUCacheCommandArgsMapping
+            ] || [];
 
-        const base = { metadata: { package: "lru-cache" as const, command: method } };
+          try {
+            const result = originalFn.apply(this, args);
 
-        try {
-          const result = originalFn.apply(this, args);
-          log({ status: "completed", duration: parseFloat((performance.now() - startTime).toFixed(2)), location: { file: callerInfo.file, line: callerInfo.line }, data: getCommandData(method, args, argNames, result), ...base });
-          return result;
-        } catch (error: any) {
-          log({ status: "failed", duration: parseFloat((performance.now() - startTime).toFixed(2)), data: { key: args[0] }, error: { name: "LruCacheError", message: error?.message ?? String(error), stack: error?.stack }, ...base });
-          throw error;
-        }
-      }
+            log({
+              metadata: {
+                package: "lru-cache",
+                duration: parseFloat(
+                  (performance.now() - startTime).toFixed(2),
+                ),
+                location: { file: callerInfo.file, line: callerInfo.line },
+                created_at: timestamp(),
+              },
+              data: getCommandData(method, args, argNames, result, "completed"),
+            });
+
+            return result;
+          } catch (error: any) {
+            log({
+              metadata: {
+                package: "lru-cache",
+                duration: parseFloat(
+                  (performance.now() - startTime).toFixed(2),
+                ),
+                location: { file: callerInfo.file, line: callerInfo.line },
+                created_at: timestamp(),
+              },
+              data: { key: args[0], method, status: "failed" },
+              error: {
+                name: "LruCacheError",
+                message: error?.message ?? String(error),
+                stack: error?.stack,
+              },
+            });
+
+            throw error;
+          }
+        },
     );
   }
 
   return exports;
 }
-

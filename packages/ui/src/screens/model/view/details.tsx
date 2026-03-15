@@ -1,4 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/base/card";
+/** @format */
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/base/card";
 import { formatDuration, timeAgo } from "@/utils.js";
 import { Badge } from "@/components/ui/base/badge";
 import { ModelInstanceResponse } from "@/hooks/useApiTyped";
@@ -32,12 +39,10 @@ export const Details = ({ model }: { model: ModelInstanceResponse }) => {
             <div className="col-span-9">
               <Badge
                 variant={
-                  model.content.status === "completed"
-                    ? "secondary"
-                    : "destructive"
+                  !model.content.error?.code ? "secondary" : "destructive"
                 }
               >
-                {model.content.status?.toUpperCase()}
+                {model.content.error?.code ? "Failed" : "Completed"}
               </Badge>
             </div>
           </div>
@@ -57,25 +62,29 @@ export const Details = ({ model }: { model: ModelInstanceResponse }) => {
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Method</div>
             <div className="col-span-9">
-              <Badge variant="secondary">{model.content.metadata.method}</Badge>
+              <Badge variant="secondary">{model.content.data.method}</Badge>
             </div>
           </div>
 
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">File</div>
-            <div className="col-span-9">{model.content.location?.file}</div>
+            <div className="col-span-9">
+              {model.content.metadata.location?.file}
+            </div>
           </div>
 
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Line</div>
-            <div className="col-span-9">{model.content.location?.line}</div>
+            <div className="col-span-9">
+              {model.content.metadata.location?.line}
+            </div>
           </div>
 
-          {model.content.duration && (
+          {model.content.metadata.duration && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-muted-foreground">Duration</div>
               <div className="col-span-9">
-                {formatDuration(model.content.duration)}
+                {formatDuration(model.content.metadata.duration)}
               </div>
             </div>
           )}
@@ -83,4 +92,4 @@ export const Details = ({ model }: { model: ModelInstanceResponse }) => {
       </CardContent>
     </Card>
   );
-}
+};

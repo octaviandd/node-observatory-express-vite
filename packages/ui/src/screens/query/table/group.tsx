@@ -32,15 +32,15 @@ export const GroupTable = memo(
               <TableHead>Queries</TableHead>
               <TableHead>Avg</TableHead>
               <TableHead>P95</TableHead>
-              <TableHead className="w-[50px]"></TableHead>
+              <TableHead className="w-12.5"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data.map((queryGroupResponse: QueryGroupResponse) => (
               <TableRow key={queryGroupResponse.endpoint}>
-                <TableCell className="flex gap-2 items-center h-[53px]">
+                <TableCell className="flex gap-2 items-center h-13.25">
                   <Database className="h-4 w-4 text-muted-foreground" />
-                  <span className="truncate max-w-[400px] text-black dark:text-white">
+                  <span className="truncate max-w-100 text-black dark:text-white">
                     {queryGroupResponse.endpoint}
                   </span>
                 </TableCell>
@@ -69,7 +69,8 @@ export const GroupTable = memo(
                 <TableCell>
                   <p
                     className={
-                      queryGroupResponse.average && queryGroupResponse.average > 999
+                      queryGroupResponse.average &&
+                      queryGroupResponse.average > 999
                         ? "text-yellow-600"
                         : "text-black dark:text-white"
                     }
@@ -87,11 +88,15 @@ export const GroupTable = memo(
                         : "text-black dark:text-white"
                     }
                   >
-                    {queryGroupResponse.p95 ? formatDuration(queryGroupResponse.p95) : "N/A"}
+                    {queryGroupResponse.p95
+                      ? formatDuration(queryGroupResponse.p95)
+                      : "N/A"}
                   </p>
                 </TableCell>
                 <TableCell>
-                  <Link to={`${encodeURIComponent(queryGroupResponse.endpoint)}`}>
+                  <Link
+                    to={`${encodeURIComponent(queryGroupResponse.endpoint)}`}
+                  >
                     <Button variant="outline" size="icon">
                       <ExternalLink className="h-4 w-4 text-muted-foreground" />
                     </Button>

@@ -32,11 +32,9 @@ export default function MailCrumbs({ mail }: { mail: MailInstanceResponse }) {
         <div className="flex items-center gap-x-4">
           <Badge variant="secondary">{mail.content.metadata.package}</Badge>
           <Badge
-            variant={
-              mail.content.status === "completed" ? "secondary" : "destructive"
-            }
+            variant={!mail.content.error?.code ? "secondary" : "destructive"}
           >
-            {mail?.content?.status?.toUpperCase()}
+            {!mail.content.error?.code ? "FAILED" : "COMPLETED"}
           </Badge>
         </div>
       </CardContent>

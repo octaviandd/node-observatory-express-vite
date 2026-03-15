@@ -6,7 +6,7 @@ class DashboardController {
   db!: Database; // Will be injected during initialization
 
   async getDashboardData(
-    request: ObservatoryBoardRequest
+    request: ObservatoryBoardRequest,
   ): Promise<ApiResponse<DashboardData>> {
     try {
       const period = (request.query.period as string) || "24h";
@@ -15,19 +15,19 @@ class DashboardController {
       const requestGraphFilters = { period, status: "all" } as any;
       const exceptionGraphFilters = { period, status: "all" } as any;
       const jobGraphFilters = { period, status: "all" } as any;
-      
-      const requestTableFilters = { 
-        offset: 0, 
-        limit: 100, 
-        period, 
-        index: "group" 
+
+      const requestTableFilters = {
+        offset: 0,
+        limit: 100,
+        period,
+        index: "group",
       } as any;
-      
-      const queryTableFilters = { 
-        offset: 0, 
-        limit: 100, 
-        period, 
-        index: "group" 
+
+      const queryTableFilters = {
+        offset: 0,
+        limit: 100,
+        period,
+        index: "group",
       } as any;
 
       // Fetch all data in parallel
@@ -39,17 +39,28 @@ class DashboardController {
         groupedQueries,
       ] = await Promise.all([
         // Get combined count + duration data for requests
-        this.getGraphData(requestGraphFilters, "request", ["count_200", "count_400", "count_500"]),
-        
+        this.getGraphData(requestGraphFilters, "request", [
+          "count_200",
+          "count_400",
+          "count_500",
+        ]),
+
         // Get combined count + duration data for exceptions
-        this.getGraphData(exceptionGraphFilters, "exception", ["unhandledRejection", "uncaughtException"]),
-        
+        this.getGraphData(exceptionGraphFilters, "exception", [
+          "unhandledRejection",
+          "uncaughtException",
+        ]),
+
         // Get combined count + duration data for jobs
-        this.getGraphData(jobGraphFilters, "job", ["completed", "released", "failed"]),
-        
+        this.getGraphData(jobGraphFilters, "job", [
+          "completed",
+          "released",
+          "failed",
+        ]),
+
         // Get grouped requests table
         this.db.getByGroup(requestTableFilters, "request"),
-        
+
         // Get grouped queries table
         this.db.getByGroup(queryTableFilters, "query"),
       ]);
@@ -94,9 +105,9 @@ class DashboardController {
    * Helper to get both count and duration graph data
    */
   private async getGraphData(
-    filters: any,
+    filters: WatcherFilters,
     watcherType: string,
-    countKeys: string[]
+    countKeys: string[],
   ) {
     // Use the existing methods that split the data internally
     const [countData, durationData] = await Promise.all([

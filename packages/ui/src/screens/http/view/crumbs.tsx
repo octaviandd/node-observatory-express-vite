@@ -35,16 +35,24 @@ export const HTTPCrumbs = React.memo(
             <BreadcrumbItem>
               <BreadcrumbLink className="text-muted-foreground">
                 {http.content.data.origin
-                ? (http.content.data.origin + (http.content.data.pathname ?? http.content.data.path ?? ""))
-                : (http.content.data.hostname ?? "") + (http.content.data.pathname ?? "")}
+                  ? http.content.data.origin +
+                    (http.content.data.pathname ?? http.content.data.path ?? "")
+                  : (http.content.data.hostname ?? "") +
+                    (http.content.data.pathname ?? "")}
               </BreadcrumbLink>
             </BreadcrumbItem>
           </Breadcrumb>
           <div className="flex items-center gap-x-4">
             <Badge variant="secondary">
-              {(http.content.data.method ?? http.content.metadata?.method ?? "").toUpperCase()}
+              {(
+                http.content.data.method ??
+                http.content.data?.method ??
+                ""
+              ).toUpperCase()}
             </Badge>
-            <Badge variant={getStatusColor(http.content.data.statusCode as number)}>
+            <Badge
+              variant={getStatusColor(http.content.data.statusCode as number)}
+            >
               {http.content.data.statusCode}
             </Badge>
           </div>

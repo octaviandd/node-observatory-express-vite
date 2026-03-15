@@ -35,15 +35,11 @@ export const ExceptionCrumbs = React.memo(
             </BreadcrumbItem>
             <BreadcrumbItem>
               <BreadcrumbLink className="text-muted-foreground">
-                {exception.content.title}
+                {exception.content.data.title}
               </BreadcrumbLink>
             </BreadcrumbItem>
           </Breadcrumb>
-          <div className="flex items-center gap-x-4">
-            <Badge variant={getStatusColor(exception.content.type)}>
-              {exception.content.type}
-            </Badge>
-          </div>
+          <div className="flex items-center gap-x-4">Exception</div>
         </CardContent>
       </Card>
     );

@@ -5,7 +5,6 @@ import "./patch-bunyan";
 import "./patch-pino";
 import "./patch-log4js";
 import "./patch-loglevel";
-// import "./patch-roarr";
 import "./patch-signale";
 
 // JOBS
@@ -28,7 +27,7 @@ import "./patch-aws_ses";
 import "./patch-node-cache";
 import "./patch-redis";
 import "./patch-ioredis";
-// import "./patch-memjs";
+import "./patch-memjs";
 import "./patch-lru-cache";
 import "./patch-keyv";
 import "./patch-level";

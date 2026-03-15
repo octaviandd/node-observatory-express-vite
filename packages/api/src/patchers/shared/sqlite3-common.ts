@@ -4,18 +4,21 @@ import shimmer from "shimmer";
 import { watchers } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
 
-type Sqlite3Metadata = { package: "sqlite3"; method: string };
-type Sqlite3Data = { sql: string };
+const timestamp = () =>
+  new Date().toISOString().replace("T", " ").substring(0, 19);
 
-export type Sqlite3LogEntry = BaseLogEntry<Sqlite3Metadata, Sqlite3Data>;
-
-const timestamp = () => new Date().toISOString().replace("T", " ").substring(0, 19);
-
-function log(entry: Sqlite3LogEntry) { 
-    watchers.database.insertRedisStream({ ...entry, created_at: timestamp() })
+function log(entry: QueryContent) {
+  watchers.query.insertRedisStream({ ...entry });
 }
 
-const METHODS_TO_PATCH = ["all", "get", "run", "each", "exec", "prepare"] as const;
+const METHODS_TO_PATCH = [
+  "all",
+  "get",
+  "run",
+  "each",
+  "exec",
+  "prepare",
+] as const;
 
 function createPatchedMethod(method: string, filename: string) {
   return function (originalMethod: Function) {
@@ -28,29 +31,60 @@ function createPatchedMethod(method: string, filename: string) {
       const params = hasCallback ? args.slice(0, -1) : args;
       const callback = hasCallback ? lastArg : undefined;
 
-      const base = { metadata: { package: "sqlite3" as const, method } };
+      const data: QueryData = { sql, method };
 
       const handleResult = (err: Error | null) => {
         if (err) {
-          log({ status: "failed", duration: parseFloat((performance.now() - startTime).toFixed(2)), data: { sql }, error: { name: "Sqlite3Error", message: err.message, stack: err.stack }, ...base });
+          log({
+            metadata: {
+              package: "sqlite3",
+              duration: parseFloat((performance.now() - startTime).toFixed(2)),
+              location: { file: callerInfo.file, line: callerInfo.line },
+              created_at: timestamp(),
+            },
+            data,
+            error: {
+              name: "Sqlite3Error",
+              message: err.message,
+              stack: err.stack,
+            },
+          });
         } else {
-          log({ status: "completed", duration: parseFloat((performance.now() - startTime).toFixed(2)), location: { file: callerInfo.file, line: callerInfo.line }, data: { sql }, ...base });
+          log({
+            metadata: {
+              package: "sqlite3",
+              duration: parseFloat((performance.now() - startTime).toFixed(2)),
+              location: { file: callerInfo.file, line: callerInfo.line },
+              created_at: timestamp(),
+            },
+            data,
+          });
         }
       };
 
       if (!callback) {
         return new Promise((resolve, reject) => {
-          originalMethod.call(this, sql, ...params, (err: Error, result: any) => {
-            handleResult(err);
-            err ? reject(err) : resolve(result);
-          });
+          originalMethod.call(
+            this,
+            sql,
+            ...params,
+            (err: Error, result: any) => {
+              handleResult(err);
+              err ? reject(err) : resolve(result);
+            },
+          );
         });
       }
 
-      return originalMethod.call(this, sql, ...params, (err: Error, result: any) => {
-        handleResult(err);
-        callback(err, result);
-      });
+      return originalMethod.call(
+        this,
+        sql,
+        ...params,
+        (err: Error, result: any) => {
+          handleResult(err);
+          callback(err, result);
+        },
+      );
     };
   };
 }
@@ -65,7 +99,7 @@ export function patchSqlite3Exports(exports: any, filename: string): any {
       shimmer.wrap(
         sqlite3Module.Database.prototype,
         method,
-        createPatchedMethod(method, filename)
+        createPatchedMethod(method, filename),
       );
     }
   }

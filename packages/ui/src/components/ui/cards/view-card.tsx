@@ -3,7 +3,7 @@ import { ViewInstanceResponse } from "@/hooks/useApiTyped";
 import { BaseCard } from "./base-card";
 
 export const ViewCard = ({ view }: { view: ViewInstanceResponse }) => {
-  const duration = Number(view.content.duration);
+  const duration = Number(view.content.metadata.duration);
   const formattedDuration =
     duration > 999 ? `${(duration / 1000).toFixed(2)}s` : `${duration}ms`;
 
@@ -12,9 +12,9 @@ export const ViewCard = ({ view }: { view: ViewInstanceResponse }) => {
       date={view.created_at}
       metadata={formattedDuration}
       content={view.content.data}
-      file={view.content.location?.file || "unknown"}
-      line={view.content.location?.line || "unknown"}
+      file={view.content.metadata.location?.file || "unknown"}
+      line={view.content.metadata.location?.line || "unknown"}
       linkPath={`/view/${view.uuid}`}
     />
   );
-}
+};

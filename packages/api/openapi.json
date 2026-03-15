@@ -36,49 +36,46 @@
           "content": {
             "type": "object",
             "properties": {
-              "status": {
-                "enum": [
-                  "completed",
-                  "failed",
-                  "released"
-                ],
-                "type": "string"
-              },
-              "duration": {
-                "type": "number"
-              },
               "metadata": {
                 "allOf": [
                   {
                     "type": "object",
                     "properties": {
-                      "package": {
-                        "enum": [
-                          "express",
-                          "http"
-                        ],
-                        "type": "string"
-                      },
-                      "method": {
-                        "type": "string"
-                      },
-                      "type": {
-                        "type": "string"
+                      "duration": {
+                        "type": "number"
                       }
                     },
                     "required": [
-                      "method",
-                      "package"
+                      "duration"
                     ]
                   },
                   {
                     "type": "object",
                     "properties": {
+                      "location": {
+                        "type": "object",
+                        "properties": {
+                          "file": {
+                            "type": "string"
+                          },
+                          "line": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "file",
+                          "line"
+                        ]
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
                       "package": {
                         "type": "string"
                       }
                     },
                     "required": [
+                      "created_at",
                       "package"
                     ]
                   }
@@ -88,6 +85,9 @@
                 "type": "object",
                 "properties": {
                   "route": {
+                    "type": "string"
+                  },
+                  "method": {
                     "type": "string"
                   },
                   "statusCode": {
@@ -153,22 +153,8 @@
                   }
                 },
                 "required": [
+                  "method",
                   "statusCode"
-                ]
-              },
-              "location": {
-                "type": "object",
-                "properties": {
-                  "file": {
-                    "type": "string"
-                  },
-                  "line": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "file",
-                  "line"
                 ]
               },
               "error": {
@@ -191,9 +177,6 @@
                   "message",
                   "name"
                 ]
-              },
-              "created_at": {
-                "type": "string"
               }
             },
             "required": [
@@ -251,57 +234,46 @@
           "content": {
             "type": "object",
             "properties": {
-              "status": {
-                "enum": [
-                  "completed",
-                  "failed",
-                  "released"
-                ],
-                "type": "string"
-              },
-              "duration": {
-                "type": "number"
-              },
               "metadata": {
                 "allOf": [
                   {
                     "type": "object",
                     "properties": {
-                      "package": {
-                        "enum": [
-                          "ioredis",
-                          "keyv",
-                          "level",
-                          "lru-cache",
-                          "memjs",
-                          "node-cache",
-                          "redis"
-                        ],
-                        "type": "string"
-                      },
-                      "command": {
-                        "type": "string"
-                      },
-                      "host": {
-                        "type": "string"
-                      },
-                      "port": {
+                      "duration": {
                         "type": "number"
                       }
                     },
                     "required": [
-                      "command",
-                      "package"
+                      "duration"
                     ]
                   },
                   {
                     "type": "object",
                     "properties": {
+                      "location": {
+                        "type": "object",
+                        "properties": {
+                          "file": {
+                            "type": "string"
+                          },
+                          "line": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "file",
+                          "line"
+                        ]
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
                       "package": {
                         "type": "string"
                       }
                     },
                     "required": [
+                      "created_at",
                       "package"
                     ]
                   }
@@ -310,6 +282,22 @@
               "data": {
                 "type": "object",
                 "properties": {
+                  "method": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "enum": [
+                      "completed",
+                      "failed"
+                    ],
+                    "type": "string"
+                  },
+                  "host": {
+                    "type": "string"
+                  },
+                  "port": {
+                    "type": "number"
+                  },
                   "key": {
                     "type": "string"
                   },
@@ -322,21 +310,9 @@
                   "writes": {
                     "type": "number"
                   }
-                }
-              },
-              "location": {
-                "type": "object",
-                "properties": {
-                  "file": {
-                    "type": "string"
-                  },
-                  "line": {
-                    "type": "string"
-                  }
                 },
                 "required": [
-                  "file",
-                  "line"
+                  "method"
                 ]
               },
               "error": {
@@ -359,9 +335,6 @@
                   "message",
                   "name"
                 ]
-              },
-              "created_at": {
-                "type": "string"
               }
             },
             "required": [
@@ -419,52 +392,46 @@
           "content": {
             "type": "object",
             "properties": {
-              "status": {
-                "enum": [
-                  "completed",
-                  "failed",
-                  "released"
-                ],
-                "type": "string"
-              },
-              "duration": {
-                "type": "number"
-              },
               "metadata": {
                 "allOf": [
                   {
                     "type": "object",
                     "properties": {
-                      "package": {
-                        "enum": [
-                          "agenda",
-                          "bull"
-                        ],
-                        "type": "string"
-                      },
-                      "method": {
-                        "type": "string"
-                      },
-                      "queue": {
-                        "type": "string"
-                      },
-                      "connectionName": {
-                        "type": "string"
+                      "duration": {
+                        "type": "number"
                       }
                     },
                     "required": [
-                      "method",
-                      "package"
+                      "duration"
                     ]
                   },
                   {
                     "type": "object",
                     "properties": {
+                      "location": {
+                        "type": "object",
+                        "properties": {
+                          "file": {
+                            "type": "string"
+                          },
+                          "line": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "file",
+                          "line"
+                        ]
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
                       "package": {
                         "type": "string"
                       }
                     },
                     "required": [
+                      "created_at",
                       "package"
                     ]
                   }
@@ -473,7 +440,13 @@
               "data": {
                 "type": "object",
                 "properties": {
+                  "method": {
+                    "type": "string"
+                  },
                   "queue": {
+                    "type": "string"
+                  },
+                  "status": {
                     "type": "string"
                   },
                   "connectionName": {
@@ -488,21 +461,10 @@
                   "failedReason": {
                     "type": "string"
                   }
-                }
-              },
-              "location": {
-                "type": "object",
-                "properties": {
-                  "file": {
-                    "type": "string"
-                  },
-                  "line": {
-                    "type": "string"
-                  }
                 },
                 "required": [
-                  "file",
-                  "line"
+                  "method",
+                  "status"
                 ]
               },
               "error": {
@@ -525,9 +487,6 @@
                   "message",
                   "name"
                 ]
-              },
-              "created_at": {
-                "type": "string"
               }
             },
             "required": [
@@ -585,58 +544,46 @@
           "content": {
             "type": "object",
             "properties": {
-              "status": {
-                "enum": [
-                  "completed",
-                  "failed",
-                  "released"
-                ],
-                "type": "string"
-              },
-              "duration": {
-                "type": "number"
-              },
               "metadata": {
                 "allOf": [
                   {
                     "type": "object",
                     "properties": {
-                      "package": {
-                        "enum": [
-                          "knex",
-                          "mongodb",
-                          "mysql",
-                          "mysql2",
-                          "pg",
-                          "prisma",
-                          "sequelize",
-                          "sqlite3",
-                          "typeorm"
-                        ],
-                        "type": "string"
-                      },
-                      "context": {
-                        "type": "string"
-                      },
-                      "sqlType": {
-                        "type": "string"
-                      },
-                      "method": {
-                        "type": "string"
+                      "duration": {
+                        "type": "number"
                       }
                     },
                     "required": [
-                      "package"
+                      "duration"
                     ]
                   },
                   {
                     "type": "object",
                     "properties": {
+                      "location": {
+                        "type": "object",
+                        "properties": {
+                          "file": {
+                            "type": "string"
+                          },
+                          "line": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "file",
+                          "line"
+                        ]
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
                       "package": {
                         "type": "string"
                       }
                     },
                     "required": [
+                      "created_at",
                       "package"
                     ]
                   }
@@ -645,10 +592,19 @@
               "data": {
                 "type": "object",
                 "properties": {
+                  "sqlType": {
+                    "type": "string"
+                  },
+                  "method": {
+                    "type": "string"
+                  },
                   "sql": {
                     "type": "string"
                   },
                   "query": {
+                    "type": "string"
+                  },
+                  "context": {
                     "type": "string"
                   },
                   "hostname": {
@@ -667,21 +623,6 @@
                     "type": "number"
                   }
                 }
-              },
-              "location": {
-                "type": "object",
-                "properties": {
-                  "file": {
-                    "type": "string"
-                  },
-                  "line": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "file",
-                  "line"
-                ]
               },
               "error": {
                 "type": "object",
@@ -703,9 +644,6 @@
                   "message",
                   "name"
                 ]
-              },
-              "created_at": {
-                "type": "string"
               }
             },
             "required": [
@@ -771,41 +709,46 @@
           "content": {
             "type": "object",
             "properties": {
-              "status": {
-                "enum": [
-                  "completed",
-                  "failed",
-                  "released"
-                ],
-                "type": "string"
-              },
-              "duration": {
-                "type": "number"
-              },
               "metadata": {
                 "allOf": [
                   {
                     "type": "object",
                     "properties": {
-                      "package": {
-                        "type": "string"
-                      },
-                      "method": {
-                        "type": "string"
+                      "duration": {
+                        "type": "number"
                       }
                     },
                     "required": [
-                      "package"
+                      "duration"
                     ]
                   },
                   {
                     "type": "object",
                     "properties": {
+                      "location": {
+                        "type": "object",
+                        "properties": {
+                          "file": {
+                            "type": "string"
+                          },
+                          "line": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "file",
+                          "line"
+                        ]
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
                       "package": {
                         "type": "string"
                       }
                     },
                     "required": [
+                      "created_at",
                       "package"
                     ]
                   }
@@ -870,21 +813,6 @@
                   }
                 }
               },
-              "location": {
-                "type": "object",
-                "properties": {
-                  "file": {
-                    "type": "string"
-                  },
-                  "line": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "file",
-                  "line"
-                ]
-              },
               "error": {
                 "type": "object",
                 "properties": {
@@ -905,9 +833,6 @@
                   "message",
                   "name"
                 ]
-              },
-              "created_at": {
-                "type": "string"
               }
             },
             "required": [
@@ -965,57 +890,46 @@
           "content": {
             "type": "object",
             "properties": {
-              "status": {
-                "enum": [
-                  "completed",
-                  "failed",
-                  "released"
-                ],
-                "type": "string"
-              },
-              "duration": {
-                "type": "number"
-              },
               "metadata": {
                 "allOf": [
                   {
                     "type": "object",
                     "properties": {
-                      "package": {
-                        "enum": [
-                          "bree",
-                          "node-cron",
-                          "node-schedule"
-                        ],
-                        "type": "string"
-                      },
-                      "type": {
-                        "type": "string"
-                      },
-                      "scheduleId": {
-                        "type": "string"
-                      },
-                      "breeId": {
-                        "type": "string"
-                      },
-                      "jobId": {
-                        "type": "string"
+                      "duration": {
+                        "type": "number"
                       }
                     },
                     "required": [
-                      "package",
-                      "scheduleId",
-                      "type"
+                      "duration"
                     ]
                   },
                   {
                     "type": "object",
                     "properties": {
+                      "location": {
+                        "type": "object",
+                        "properties": {
+                          "file": {
+                            "type": "string"
+                          },
+                          "line": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "file",
+                          "line"
+                        ]
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
                       "package": {
                         "type": "string"
                       }
                     },
                     "required": [
+                      "created_at",
                       "package"
                     ]
                   }
@@ -1025,6 +939,18 @@
                 "type": "object",
                 "properties": {
                   "cronExpression": {
+                    "type": "string"
+                  },
+                  "jobId": {
+                    "type": "string"
+                  },
+                  "scheduleId": {
+                    "type": "string"
+                  },
+                  "breeId": {
+                    "type": "string"
+                  },
+                  "type": {
                     "type": "string"
                   },
                   "name": {
@@ -1037,21 +963,10 @@
                   "jobName": {
                     "type": "string"
                   }
-                }
-              },
-              "location": {
-                "type": "object",
-                "properties": {
-                  "file": {
-                    "type": "string"
-                  },
-                  "line": {
-                    "type": "string"
-                  }
                 },
                 "required": [
-                  "file",
-                  "line"
+                  "scheduleId",
+                  "type"
                 ]
               },
               "error": {
@@ -1074,9 +989,6 @@
                   "message",
                   "name"
                 ]
-              },
-              "created_at": {
-                "type": "string"
               }
             },
             "required": [
@@ -1134,49 +1046,46 @@
           "content": {
             "type": "object",
             "properties": {
-              "status": {
-                "enum": [
-                  "completed",
-                  "failed",
-                  "released"
-                ],
-                "type": "string"
-              },
-              "duration": {
-                "type": "number"
-              },
               "metadata": {
                 "allOf": [
                   {
                     "type": "object",
                     "properties": {
-                      "package": {
-                        "enum": [
-                          "@aws-sdk/client-ses",
-                          "@sendgrid/mail",
-                          "mailgun.js",
-                          "nodemailer",
-                          "postmark"
-                        ],
-                        "type": "string"
-                      },
-                      "command": {
-                        "type": "string"
+                      "duration": {
+                        "type": "number"
                       }
                     },
                     "required": [
-                      "command",
-                      "package"
+                      "duration"
                     ]
                   },
                   {
                     "type": "object",
                     "properties": {
+                      "location": {
+                        "type": "object",
+                        "properties": {
+                          "file": {
+                            "type": "string"
+                          },
+                          "line": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "file",
+                          "line"
+                        ]
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
                       "package": {
                         "type": "string"
                       }
                     },
                     "required": [
+                      "created_at",
                       "package"
                     ]
                   }
@@ -1185,6 +1094,9 @@
               "data": {
                 "type": "object",
                 "properties": {
+                  "command": {
+                    "type": "string"
+                  },
                   "to": {
                     "type": "array",
                     "items": {
@@ -1222,23 +1134,9 @@
                 "required": [
                   "bcc",
                   "cc",
+                  "command",
                   "from",
                   "to"
-                ]
-              },
-              "location": {
-                "type": "object",
-                "properties": {
-                  "file": {
-                    "type": "string"
-                  },
-                  "line": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "file",
-                  "line"
                 ]
               },
               "error": {
@@ -1261,9 +1159,6 @@
                   "message",
                   "name"
                 ]
-              },
-              "created_at": {
-                "type": "string"
               }
             },
             "required": [
@@ -1321,17 +1216,6 @@
           "content": {
             "type": "object",
             "properties": {
-              "status": {
-                "enum": [
-                  "completed",
-                  "failed",
-                  "released"
-                ],
-                "type": "string"
-              },
-              "duration": {
-                "type": "number"
-              },
               "metadata": {
                 "allOf": [
                   {
@@ -1363,11 +1247,30 @@
                   {
                     "type": "object",
                     "properties": {
+                      "location": {
+                        "type": "object",
+                        "properties": {
+                          "file": {
+                            "type": "string"
+                          },
+                          "line": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "file",
+                          "line"
+                        ]
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
                       "package": {
                         "type": "string"
                       }
                     },
                     "required": [
+                      "created_at",
                       "package"
                     ]
                   }
@@ -1380,21 +1283,6 @@
                 },
                 "required": [
                   "message"
-                ]
-              },
-              "location": {
-                "type": "object",
-                "properties": {
-                  "file": {
-                    "type": "string"
-                  },
-                  "line": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "file",
-                  "line"
                 ]
               },
               "error": {
@@ -1417,9 +1305,6 @@
                   "message",
                   "name"
                 ]
-              },
-              "created_at": {
-                "type": "string"
               }
             },
             "required": [
@@ -1477,60 +1362,115 @@
           "content": {
             "type": "object",
             "properties": {
-              "type": {
-                "type": "string",
-                "const": "exception"
-              },
-              "message": {
-                "type": "string"
-              },
-              "stack": {
-                "type": "string"
-              },
-              "file": {
-                "type": "string"
-              },
-              "line": {
-                "type": "string"
-              },
-              "title": {
-                "type": "string"
-              },
-              "fullError": {
-                "type": "string"
-              },
-              "codeContext": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "lineNumber": {
-                      "type": "number"
+              "metadata": {
+                "type": "object",
+                "properties": {
+                  "location": {
+                    "type": "object",
+                    "properties": {
+                      "file": {
+                        "type": "string"
+                      },
+                      "line": {
+                        "type": "string"
+                      }
                     },
-                    "content": {
-                      "type": "string"
-                    },
-                    "isErrorLine": {
-                      "type": "boolean"
-                    }
+                    "required": [
+                      "file",
+                      "line"
+                    ]
                   },
-                  "required": [
-                    "content",
-                    "isErrorLine",
-                    "lineNumber"
-                  ]
-                }
+                  "created_at": {
+                    "type": "string"
+                  },
+                  "package": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "created_at",
+                  "package"
+                ]
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "stack": {
+                    "type": "string"
+                  },
+                  "file": {
+                    "type": "string"
+                  },
+                  "line": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "fullError": {
+                    "type": "string"
+                  },
+                  "codeContext": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "lineNumber": {
+                          "type": "number"
+                        },
+                        "content": {
+                          "type": "string"
+                        },
+                        "isErrorLine": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "content",
+                        "isErrorLine",
+                        "lineNumber"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "codeContext",
+                  "file",
+                  "fullError",
+                  "line",
+                  "message",
+                  "stack",
+                  "title"
+                ]
+              },
+              "error": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "stack": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "message",
+                  "name"
+                ]
               }
             },
             "required": [
-              "codeContext",
-              "file",
-              "fullError",
-              "line",
-              "message",
-              "stack",
-              "title",
-              "type"
+              "data",
+              "metadata"
             ]
           },
           "uuid": {
@@ -1583,75 +1523,72 @@
           "content": {
             "type": "object",
             "properties": {
-              "status": {
-                "enum": [
-                  "completed",
-                  "failed",
-                  "released"
-                ],
-                "type": "string"
-              },
-              "duration": {
-                "type": "number"
-              },
               "metadata": {
                 "allOf": [
                   {
                     "type": "object",
                     "properties": {
-                      "package": {
-                        "enum": [
-                          "knex",
-                          "mongoose",
-                          "prisma",
-                          "sequelize",
-                          "sqlite3",
-                          "typeorm"
-                        ],
-                        "type": "string"
-                      },
-                      "method": {
-                        "type": "string"
-                      },
-                      "modelName": {
-                        "type": "string"
+                      "duration": {
+                        "type": "number"
                       }
                     },
                     "required": [
-                      "method",
-                      "modelName",
-                      "package"
+                      "duration"
                     ]
                   },
                   {
                     "type": "object",
                     "properties": {
+                      "location": {
+                        "type": "object",
+                        "properties": {
+                          "file": {
+                            "type": "string"
+                          },
+                          "line": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "file",
+                          "line"
+                        ]
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
                       "package": {
                         "type": "string"
                       }
                     },
                     "required": [
+                      "created_at",
                       "package"
                     ]
                   }
                 ]
               },
               "data": {
-                "type": "object"
-              },
-              "location": {
                 "type": "object",
                 "properties": {
-                  "file": {
+                  "status": {
+                    "enum": [
+                      "completed",
+                      "failed"
+                    ],
                     "type": "string"
                   },
-                  "line": {
+                  "method": {
+                    "type": "string"
+                  },
+                  "modelName": {
                     "type": "string"
                   }
                 },
                 "required": [
-                  "file",
-                  "line"
+                  "method",
+                  "modelName",
+                  "status"
                 ]
               },
               "error": {
@@ -1674,9 +1611,6 @@
                   "message",
                   "name"
                 ]
-              },
-              "created_at": {
-                "type": "string"
               }
             },
             "required": [
@@ -1734,43 +1668,50 @@
           "content": {
             "type": "object",
             "properties": {
-              "status": {
-                "enum": [
-                  "completed",
-                  "failed",
-                  "released"
-                ],
-                "type": "string"
-              },
-              "duration": {
-                "type": "number"
-              },
               "metadata": {
                 "allOf": [
                   {
                     "type": "object",
                     "properties": {
-                      "package": {
+                      "method": {
                         "type": "string"
                       },
-                      "method": {
-                        "type": "string",
-                        "const": "render"
+                      "duration": {
+                        "type": "number"
                       }
                     },
                     "required": [
-                      "method",
-                      "package"
+                      "duration",
+                      "method"
                     ]
                   },
                   {
                     "type": "object",
                     "properties": {
+                      "location": {
+                        "type": "object",
+                        "properties": {
+                          "file": {
+                            "type": "string"
+                          },
+                          "line": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "file",
+                          "line"
+                        ]
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
                       "package": {
                         "type": "string"
                       }
                     },
                     "required": [
+                      "created_at",
                       "package"
                     ]
                   }
@@ -1779,6 +1720,13 @@
               "data": {
                 "type": "object",
                 "properties": {
+                  "status": {
+                    "enum": [
+                      "completed",
+                      "failed"
+                    ],
+                    "type": "string"
+                  },
                   "view": {
                     "type": "string"
                   },
@@ -1807,21 +1755,6 @@
                   "view"
                 ]
               },
-              "location": {
-                "type": "object",
-                "properties": {
-                  "file": {
-                    "type": "string"
-                  },
-                  "line": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "file",
-                  "line"
-                ]
-              },
               "error": {
                 "type": "object",
                 "properties": {
@@ -1842,9 +1775,6 @@
                   "message",
                   "name"
                 ]
-              },
-              "created_at": {
-                "type": "string"
               }
             },
             "required": [
@@ -1902,91 +1832,50 @@
           "content": {
             "type": "object",
             "properties": {
-              "status": {
-                "enum": [
-                  "completed",
-                  "failed",
-                  "released"
-                ],
-                "type": "string"
-              },
-              "duration": {
-                "type": "number"
-              },
               "metadata": {
-                "anyOf": [
+                "allOf": [
                   {
-                    "allOf": [
-                      {
-                        "type": "object",
-                        "properties": {
-                          "package": {
-                            "type": "string",
-                            "const": "pusher"
-                          },
-                          "method": {
-                            "enum": [
-                              "trigger",
-                              "triggerBatch"
-                            ],
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "method",
-                          "package"
-                        ]
+                    "type": "object",
+                    "properties": {
+                      "mode": {
+                        "type": "string"
                       },
-                      {
-                        "type": "object",
-                        "properties": {
-                          "package": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "package"
-                        ]
+                      "duration": {
+                        "type": "number"
                       }
+                    },
+                    "required": [
+                      "duration"
                     ]
                   },
                   {
-                    "allOf": [
-                      {
+                    "type": "object",
+                    "properties": {
+                      "location": {
                         "type": "object",
                         "properties": {
-                          "package": {
-                            "type": "string",
-                            "const": "ably"
-                          },
-                          "method": {
+                          "file": {
                             "type": "string"
                           },
-                          "mode": {
-                            "enum": [
-                              "realtime",
-                              "rest"
-                            ],
+                          "line": {
                             "type": "string"
                           }
                         },
                         "required": [
-                          "method",
-                          "mode",
-                          "package"
+                          "file",
+                          "line"
                         ]
                       },
-                      {
-                        "type": "object",
-                        "properties": {
-                          "package": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "package"
-                        ]
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "package": {
+                        "type": "string"
                       }
+                    },
+                    "required": [
+                      "created_at",
+                      "package"
                     ]
                   }
                 ]
@@ -1994,6 +1883,9 @@
               "data": {
                 "type": "object",
                 "properties": {
+                  "method": {
+                    "type": "string"
+                  },
                   "channel": {
                     "type": "string"
                   },
@@ -2006,21 +1898,9 @@
                     "items": {}
                   },
                   "options": {}
-                }
-              },
-              "location": {
-                "type": "object",
-                "properties": {
-                  "file": {
-                    "type": "string"
-                  },
-                  "line": {
-                    "type": "string"
-                  }
                 },
                 "required": [
-                  "file",
-                  "line"
+                  "method"
                 ]
               },
               "error": {
@@ -2043,9 +1923,6 @@
                   "message",
                   "name"
                 ]
-              },
-              "created_at": {
-                "type": "string"
               }
             },
             "required": [
@@ -2679,43 +2556,50 @@
                 "content": {
                   "type": "object",
                   "properties": {
-                    "status": {
-                      "enum": [
-                        "completed",
-                        "failed",
-                        "released"
-                      ],
-                      "type": "string"
-                    },
-                    "duration": {
-                      "type": "number"
-                    },
                     "metadata": {
                       "allOf": [
                         {
                           "type": "object",
                           "properties": {
-                            "package": {
+                            "method": {
                               "type": "string"
                             },
-                            "method": {
-                              "type": "string",
-                              "const": "render"
+                            "duration": {
+                              "type": "number"
                             }
                           },
                           "required": [
-                            "method",
-                            "package"
+                            "duration",
+                            "method"
                           ]
                         },
                         {
                           "type": "object",
                           "properties": {
+                            "location": {
+                              "type": "object",
+                              "properties": {
+                                "file": {
+                                  "type": "string"
+                                },
+                                "line": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "file",
+                                "line"
+                              ]
+                            },
+                            "created_at": {
+                              "type": "string"
+                            },
                             "package": {
                               "type": "string"
                             }
                           },
                           "required": [
+                            "created_at",
                             "package"
                           ]
                         }
@@ -2724,6 +2608,13 @@
                     "data": {
                       "type": "object",
                       "properties": {
+                        "status": {
+                          "enum": [
+                            "completed",
+                            "failed"
+                          ],
+                          "type": "string"
+                        },
                         "view": {
                           "type": "string"
                         },
@@ -2752,21 +2643,6 @@
                         "view"
                       ]
                     },
-                    "location": {
-                      "type": "object",
-                      "properties": {
-                        "file": {
-                          "type": "string"
-                        },
-                        "line": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "file",
-                        "line"
-                      ]
-                    },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -2787,168 +2663,6 @@
                         "message",
                         "name"
                       ]
-                    },
-                    "created_at": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "data",
-                    "metadata"
-                  ]
-                },
-                "uuid": {
-                  "type": "string"
-                },
-                "request_id": {
-                  "type": "string"
-                },
-                "job_id": {
-                  "type": "string"
-                },
-                "schedule_id": {
-                  "type": "string"
-                },
-                "created_at": {
-                  "type": "string"
-                },
-                "updated_at": {
-                  "type": "string"
-                },
-                "type": {
-                  "enum": [
-                    "cache",
-                    "exception",
-                    "http",
-                    "job",
-                    "log",
-                    "mail",
-                    "model",
-                    "notification",
-                    "query",
-                    "request",
-                    "schedule",
-                    "view"
-                  ],
-                  "type": "string"
-                }
-              },
-              "required": [
-                "content",
-                "created_at",
-                "type",
-                "updated_at",
-                "uuid"
-              ]
-            }
-          },
-          "log": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "content": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "enum": [
-                        "completed",
-                        "failed",
-                        "released"
-                      ],
-                      "type": "string"
-                    },
-                    "duration": {
-                      "type": "number"
-                    },
-                    "metadata": {
-                      "allOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "package": {
-                              "enum": [
-                                "bunyan",
-                                "log4js",
-                                "loglevel",
-                                "pino",
-                                "signale",
-                                "winston"
-                              ],
-                              "type": "string"
-                            },
-                            "level": {
-                              "type": "string"
-                            },
-                            "logger": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "level",
-                            "package"
-                          ]
-                        },
-                        {
-                          "type": "object",
-                          "properties": {
-                            "package": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "package"
-                          ]
-                        }
-                      ]
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "message": {}
-                      },
-                      "required": [
-                        "message"
-                      ]
-                    },
-                    "location": {
-                      "type": "object",
-                      "properties": {
-                        "file": {
-                          "type": "string"
-                        },
-                        "line": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "file",
-                        "line"
-                      ]
-                    },
-                    "error": {
-                      "type": "object",
-                      "properties": {
-                        "name": {
-                          "type": "string"
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "stack": {
-                          "type": "string"
-                        },
-                        "code": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "message",
-                        "name"
-                      ]
-                    },
-                    "created_at": {
-                      "type": "string"
                     }
                   },
                   "required": [
@@ -3009,49 +2723,46 @@
                 "content": {
                   "type": "object",
                   "properties": {
-                    "status": {
-                      "enum": [
-                        "completed",
-                        "failed",
-                        "released"
-                      ],
-                      "type": "string"
-                    },
-                    "duration": {
-                      "type": "number"
-                    },
                     "metadata": {
                       "allOf": [
                         {
                           "type": "object",
                           "properties": {
-                            "package": {
-                              "enum": [
-                                "express",
-                                "http"
-                              ],
-                              "type": "string"
-                            },
-                            "method": {
-                              "type": "string"
-                            },
-                            "type": {
-                              "type": "string"
+                            "duration": {
+                              "type": "number"
                             }
                           },
                           "required": [
-                            "method",
-                            "package"
+                            "duration"
                           ]
                         },
                         {
                           "type": "object",
                           "properties": {
+                            "location": {
+                              "type": "object",
+                              "properties": {
+                                "file": {
+                                  "type": "string"
+                                },
+                                "line": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "file",
+                                "line"
+                              ]
+                            },
+                            "created_at": {
+                              "type": "string"
+                            },
                             "package": {
                               "type": "string"
                             }
                           },
                           "required": [
+                            "created_at",
                             "package"
                           ]
                         }
@@ -3061,6 +2772,9 @@
                       "type": "object",
                       "properties": {
                         "route": {
+                          "type": "string"
+                        },
+                        "method": {
                           "type": "string"
                         },
                         "statusCode": {
@@ -3126,22 +2840,8 @@
                         }
                       },
                       "required": [
+                        "method",
                         "statusCode"
-                      ]
-                    },
-                    "location": {
-                      "type": "object",
-                      "properties": {
-                        "file": {
-                          "type": "string"
-                        },
-                        "line": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "file",
-                        "line"
                       ]
                     },
                     "error": {
@@ -3164,9 +2864,6 @@
                         "message",
                         "name"
                       ]
-                    },
-                    "created_at": {
-                      "type": "string"
                     }
                   },
                   "required": [
@@ -3227,57 +2924,46 @@
                 "content": {
                   "type": "object",
                   "properties": {
-                    "status": {
-                      "enum": [
-                        "completed",
-                        "failed",
-                        "released"
-                      ],
-                      "type": "string"
-                    },
-                    "duration": {
-                      "type": "number"
-                    },
                     "metadata": {
                       "allOf": [
                         {
                           "type": "object",
                           "properties": {
-                            "package": {
-                              "enum": [
-                                "ioredis",
-                                "keyv",
-                                "level",
-                                "lru-cache",
-                                "memjs",
-                                "node-cache",
-                                "redis"
-                              ],
-                              "type": "string"
-                            },
-                            "command": {
-                              "type": "string"
-                            },
-                            "host": {
-                              "type": "string"
-                            },
-                            "port": {
+                            "duration": {
                               "type": "number"
                             }
                           },
                           "required": [
-                            "command",
-                            "package"
+                            "duration"
                           ]
                         },
                         {
                           "type": "object",
                           "properties": {
+                            "location": {
+                              "type": "object",
+                              "properties": {
+                                "file": {
+                                  "type": "string"
+                                },
+                                "line": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "file",
+                                "line"
+                              ]
+                            },
+                            "created_at": {
+                              "type": "string"
+                            },
                             "package": {
                               "type": "string"
                             }
                           },
                           "required": [
+                            "created_at",
                             "package"
                           ]
                         }
@@ -3286,6 +2972,22 @@
                     "data": {
                       "type": "object",
                       "properties": {
+                        "method": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "enum": [
+                            "completed",
+                            "failed"
+                          ],
+                          "type": "string"
+                        },
+                        "host": {
+                          "type": "string"
+                        },
+                        "port": {
+                          "type": "number"
+                        },
                         "key": {
                           "type": "string"
                         },
@@ -3298,21 +3000,9 @@
                         "writes": {
                           "type": "number"
                         }
-                      }
-                    },
-                    "location": {
-                      "type": "object",
-                      "properties": {
-                        "file": {
-                          "type": "string"
-                        },
-                        "line": {
-                          "type": "string"
-                        }
                       },
                       "required": [
-                        "file",
-                        "line"
+                        "method"
                       ]
                     },
                     "error": {
@@ -3335,9 +3025,155 @@
                         "message",
                         "name"
                       ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "metadata"
+                  ]
+                },
+                "uuid": {
+                  "type": "string"
+                },
+                "request_id": {
+                  "type": "string"
+                },
+                "job_id": {
+                  "type": "string"
+                },
+                "schedule_id": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "type": {
+                  "enum": [
+                    "cache",
+                    "exception",
+                    "http",
+                    "job",
+                    "log",
+                    "mail",
+                    "model",
+                    "notification",
+                    "query",
+                    "request",
+                    "schedule",
+                    "view"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "content",
+                "created_at",
+                "type",
+                "updated_at",
+                "uuid"
+              ]
+            }
+          },
+          "log": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "object",
+                  "properties": {
+                    "metadata": {
+                      "allOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "package": {
+                              "enum": [
+                                "bunyan",
+                                "log4js",
+                                "loglevel",
+                                "pino",
+                                "signale",
+                                "winston"
+                              ],
+                              "type": "string"
+                            },
+                            "level": {
+                              "type": "string"
+                            },
+                            "logger": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "level",
+                            "package"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "location": {
+                              "type": "object",
+                              "properties": {
+                                "file": {
+                                  "type": "string"
+                                },
+                                "line": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "file",
+                                "line"
+                              ]
+                            },
+                            "created_at": {
+                              "type": "string"
+                            },
+                            "package": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "created_at",
+                            "package"
+                          ]
+                        }
+                      ]
                     },
-                    "created_at": {
-                      "type": "string"
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "message": {}
+                      },
+                      "required": [
+                        "message"
+                      ]
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "stack": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message",
+                        "name"
+                      ]
                     }
                   },
                   "required": [
@@ -3398,49 +3234,46 @@
                 "content": {
                   "type": "object",
                   "properties": {
-                    "status": {
-                      "enum": [
-                        "completed",
-                        "failed",
-                        "released"
-                      ],
-                      "type": "string"
-                    },
-                    "duration": {
-                      "type": "number"
-                    },
                     "metadata": {
                       "allOf": [
                         {
                           "type": "object",
                           "properties": {
-                            "package": {
-                              "enum": [
-                                "@aws-sdk/client-ses",
-                                "@sendgrid/mail",
-                                "mailgun.js",
-                                "nodemailer",
-                                "postmark"
-                              ],
-                              "type": "string"
-                            },
-                            "command": {
-                              "type": "string"
+                            "duration": {
+                              "type": "number"
                             }
                           },
                           "required": [
-                            "command",
-                            "package"
+                            "duration"
                           ]
                         },
                         {
                           "type": "object",
                           "properties": {
+                            "location": {
+                              "type": "object",
+                              "properties": {
+                                "file": {
+                                  "type": "string"
+                                },
+                                "line": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "file",
+                                "line"
+                              ]
+                            },
+                            "created_at": {
+                              "type": "string"
+                            },
                             "package": {
                               "type": "string"
                             }
                           },
                           "required": [
+                            "created_at",
                             "package"
                           ]
                         }
@@ -3449,6 +3282,9 @@
                     "data": {
                       "type": "object",
                       "properties": {
+                        "command": {
+                          "type": "string"
+                        },
                         "to": {
                           "type": "array",
                           "items": {
@@ -3486,23 +3322,9 @@
                       "required": [
                         "bcc",
                         "cc",
+                        "command",
                         "from",
                         "to"
-                      ]
-                    },
-                    "location": {
-                      "type": "object",
-                      "properties": {
-                        "file": {
-                          "type": "string"
-                        },
-                        "line": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "file",
-                        "line"
                       ]
                     },
                     "error": {
@@ -3525,9 +3347,6 @@
                         "message",
                         "name"
                       ]
-                    },
-                    "created_at": {
-                      "type": "string"
                     }
                   },
                   "required": [
@@ -3588,41 +3407,46 @@
                 "content": {
                   "type": "object",
                   "properties": {
-                    "status": {
-                      "enum": [
-                        "completed",
-                        "failed",
-                        "released"
-                      ],
-                      "type": "string"
-                    },
-                    "duration": {
-                      "type": "number"
-                    },
                     "metadata": {
                       "allOf": [
                         {
                           "type": "object",
                           "properties": {
-                            "package": {
-                              "type": "string"
-                            },
-                            "method": {
-                              "type": "string"
+                            "duration": {
+                              "type": "number"
                             }
                           },
                           "required": [
-                            "package"
+                            "duration"
                           ]
                         },
                         {
                           "type": "object",
                           "properties": {
+                            "location": {
+                              "type": "object",
+                              "properties": {
+                                "file": {
+                                  "type": "string"
+                                },
+                                "line": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "file",
+                                "line"
+                              ]
+                            },
+                            "created_at": {
+                              "type": "string"
+                            },
                             "package": {
                               "type": "string"
                             }
                           },
                           "required": [
+                            "created_at",
                             "package"
                           ]
                         }
@@ -3687,21 +3511,6 @@
                         }
                       }
                     },
-                    "location": {
-                      "type": "object",
-                      "properties": {
-                        "file": {
-                          "type": "string"
-                        },
-                        "line": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "file",
-                        "line"
-                      ]
-                    },
                     "error": {
                       "type": "object",
                       "properties": {
@@ -3722,9 +3531,6 @@
                         "message",
                         "name"
                       ]
-                    },
-                    "created_at": {
-                      "type": "string"
                     }
                   },
                   "required": [
@@ -3785,91 +3591,50 @@
                 "content": {
                   "type": "object",
                   "properties": {
-                    "status": {
-                      "enum": [
-                        "completed",
-                        "failed",
-                        "released"
-                      ],
-                      "type": "string"
-                    },
-                    "duration": {
-                      "type": "number"
-                    },
                     "metadata": {
-                      "anyOf": [
+                      "allOf": [
                         {
-                          "allOf": [
-                            {
-                              "type": "object",
-                              "properties": {
-                                "package": {
-                                  "type": "string",
-                                  "const": "pusher"
-                                },
-                                "method": {
-                                  "enum": [
-                                    "trigger",
-                                    "triggerBatch"
-                                  ],
-                                  "type": "string"
-                                }
-                              },
-                              "required": [
-                                "method",
-                                "package"
-                              ]
+                          "type": "object",
+                          "properties": {
+                            "mode": {
+                              "type": "string"
                             },
-                            {
-                              "type": "object",
-                              "properties": {
-                                "package": {
-                                  "type": "string"
-                                }
-                              },
-                              "required": [
-                                "package"
-                              ]
+                            "duration": {
+                              "type": "number"
                             }
+                          },
+                          "required": [
+                            "duration"
                           ]
                         },
                         {
-                          "allOf": [
-                            {
+                          "type": "object",
+                          "properties": {
+                            "location": {
                               "type": "object",
                               "properties": {
-                                "package": {
-                                  "type": "string",
-                                  "const": "ably"
-                                },
-                                "method": {
+                                "file": {
                                   "type": "string"
                                 },
-                                "mode": {
-                                  "enum": [
-                                    "realtime",
-                                    "rest"
-                                  ],
+                                "line": {
                                   "type": "string"
                                 }
                               },
                               "required": [
-                                "method",
-                                "mode",
-                                "package"
+                                "file",
+                                "line"
                               ]
                             },
-                            {
-                              "type": "object",
-                              "properties": {
-                                "package": {
-                                  "type": "string"
-                                }
-                              },
-                              "required": [
-                                "package"
-                              ]
+                            "created_at": {
+                              "type": "string"
+                            },
+                            "package": {
+                              "type": "string"
                             }
+                          },
+                          "required": [
+                            "created_at",
+                            "package"
                           ]
                         }
                       ]
@@ -3877,6 +3642,9 @@
                     "data": {
                       "type": "object",
                       "properties": {
+                        "method": {
+                          "type": "string"
+                        },
                         "channel": {
                           "type": "string"
                         },
@@ -3889,21 +3657,9 @@
                           "items": {}
                         },
                         "options": {}
-                      }
-                    },
-                    "location": {
-                      "type": "object",
-                      "properties": {
-                        "file": {
-                          "type": "string"
-                        },
-                        "line": {
-                          "type": "string"
-                        }
                       },
                       "required": [
-                        "file",
-                        "line"
+                        "method"
                       ]
                     },
                     "error": {
@@ -3926,9 +3682,6 @@
                         "message",
                         "name"
                       ]
-                    },
-                    "created_at": {
-                      "type": "string"
                     }
                   },
                   "required": [
@@ -3989,57 +3742,46 @@
                 "content": {
                   "type": "object",
                   "properties": {
-                    "status": {
-                      "enum": [
-                        "completed",
-                        "failed",
-                        "released"
-                      ],
-                      "type": "string"
-                    },
-                    "duration": {
-                      "type": "number"
-                    },
                     "metadata": {
                       "allOf": [
                         {
                           "type": "object",
                           "properties": {
-                            "package": {
-                              "enum": [
-                                "bree",
-                                "node-cron",
-                                "node-schedule"
-                              ],
-                              "type": "string"
-                            },
-                            "type": {
-                              "type": "string"
-                            },
-                            "scheduleId": {
-                              "type": "string"
-                            },
-                            "breeId": {
-                              "type": "string"
-                            },
-                            "jobId": {
-                              "type": "string"
+                            "duration": {
+                              "type": "number"
                             }
                           },
                           "required": [
-                            "package",
-                            "scheduleId",
-                            "type"
+                            "duration"
                           ]
                         },
                         {
                           "type": "object",
                           "properties": {
+                            "location": {
+                              "type": "object",
+                              "properties": {
+                                "file": {
+                                  "type": "string"
+                                },
+                                "line": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "file",
+                                "line"
+                              ]
+                            },
+                            "created_at": {
+                              "type": "string"
+                            },
                             "package": {
                               "type": "string"
                             }
                           },
                           "required": [
+                            "created_at",
                             "package"
                           ]
                         }
@@ -4049,6 +3791,18 @@
                       "type": "object",
                       "properties": {
                         "cronExpression": {
+                          "type": "string"
+                        },
+                        "jobId": {
+                          "type": "string"
+                        },
+                        "scheduleId": {
+                          "type": "string"
+                        },
+                        "breeId": {
+                          "type": "string"
+                        },
+                        "type": {
                           "type": "string"
                         },
                         "name": {
@@ -4061,21 +3815,10 @@
                         "jobName": {
                           "type": "string"
                         }
-                      }
-                    },
-                    "location": {
-                      "type": "object",
-                      "properties": {
-                        "file": {
-                          "type": "string"
-                        },
-                        "line": {
-                          "type": "string"
-                        }
                       },
                       "required": [
-                        "file",
-                        "line"
+                        "scheduleId",
+                        "type"
                       ]
                     },
                     "error": {
@@ -4098,9 +3841,6 @@
                         "message",
                         "name"
                       ]
-                    },
-                    "created_at": {
-                      "type": "string"
                     }
                   },
                   "required": [
@@ -4161,75 +3901,72 @@
                 "content": {
                   "type": "object",
                   "properties": {
-                    "status": {
-                      "enum": [
-                        "completed",
-                        "failed",
-                        "released"
-                      ],
-                      "type": "string"
-                    },
-                    "duration": {
-                      "type": "number"
-                    },
                     "metadata": {
                       "allOf": [
                         {
                           "type": "object",
                           "properties": {
-                            "package": {
-                              "enum": [
-                                "knex",
-                                "mongoose",
-                                "prisma",
-                                "sequelize",
-                                "sqlite3",
-                                "typeorm"
-                              ],
-                              "type": "string"
-                            },
-                            "method": {
-                              "type": "string"
-                            },
-                            "modelName": {
-                              "type": "string"
+                            "duration": {
+                              "type": "number"
                             }
                           },
                           "required": [
-                            "method",
-                            "modelName",
-                            "package"
+                            "duration"
                           ]
                         },
                         {
                           "type": "object",
                           "properties": {
+                            "location": {
+                              "type": "object",
+                              "properties": {
+                                "file": {
+                                  "type": "string"
+                                },
+                                "line": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "file",
+                                "line"
+                              ]
+                            },
+                            "created_at": {
+                              "type": "string"
+                            },
                             "package": {
                               "type": "string"
                             }
                           },
                           "required": [
+                            "created_at",
                             "package"
                           ]
                         }
                       ]
                     },
                     "data": {
-                      "type": "object"
-                    },
-                    "location": {
                       "type": "object",
                       "properties": {
-                        "file": {
+                        "status": {
+                          "enum": [
+                            "completed",
+                            "failed"
+                          ],
                           "type": "string"
                         },
-                        "line": {
+                        "method": {
+                          "type": "string"
+                        },
+                        "modelName": {
                           "type": "string"
                         }
                       },
                       "required": [
-                        "file",
-                        "line"
+                        "method",
+                        "modelName",
+                        "status"
                       ]
                     },
                     "error": {
@@ -4252,9 +3989,6 @@
                         "message",
                         "name"
                       ]
-                    },
-                    "created_at": {
-                      "type": "string"
                     }
                   },
                   "required": [
@@ -4315,60 +4049,115 @@
                 "content": {
                   "type": "object",
                   "properties": {
-                    "type": {
-                      "type": "string",
-                      "const": "exception"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "stack": {
-                      "type": "string"
-                    },
-                    "file": {
-                      "type": "string"
-                    },
-                    "line": {
-                      "type": "string"
-                    },
-                    "title": {
-                      "type": "string"
-                    },
-                    "fullError": {
-                      "type": "string"
-                    },
-                    "codeContext": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "lineNumber": {
-                            "type": "number"
+                    "metadata": {
+                      "type": "object",
+                      "properties": {
+                        "location": {
+                          "type": "object",
+                          "properties": {
+                            "file": {
+                              "type": "string"
+                            },
+                            "line": {
+                              "type": "string"
+                            }
                           },
-                          "content": {
-                            "type": "string"
-                          },
-                          "isErrorLine": {
-                            "type": "boolean"
-                          }
+                          "required": [
+                            "file",
+                            "line"
+                          ]
                         },
-                        "required": [
-                          "content",
-                          "isErrorLine",
-                          "lineNumber"
-                        ]
-                      }
+                        "created_at": {
+                          "type": "string"
+                        },
+                        "package": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "created_at",
+                        "package"
+                      ]
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "stack": {
+                          "type": "string"
+                        },
+                        "file": {
+                          "type": "string"
+                        },
+                        "line": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "fullError": {
+                          "type": "string"
+                        },
+                        "codeContext": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "lineNumber": {
+                                "type": "number"
+                              },
+                              "content": {
+                                "type": "string"
+                              },
+                              "isErrorLine": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "content",
+                              "isErrorLine",
+                              "lineNumber"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "codeContext",
+                        "file",
+                        "fullError",
+                        "line",
+                        "message",
+                        "stack",
+                        "title"
+                      ]
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "stack": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message",
+                        "name"
+                      ]
                     }
                   },
                   "required": [
-                    "codeContext",
-                    "file",
-                    "fullError",
-                    "line",
-                    "message",
-                    "stack",
-                    "title",
-                    "type"
+                    "data",
+                    "metadata"
                   ]
                 },
                 "uuid": {
@@ -4424,52 +4213,46 @@
                 "content": {
                   "type": "object",
                   "properties": {
-                    "status": {
-                      "enum": [
-                        "completed",
-                        "failed",
-                        "released"
-                      ],
-                      "type": "string"
-                    },
-                    "duration": {
-                      "type": "number"
-                    },
                     "metadata": {
                       "allOf": [
                         {
                           "type": "object",
                           "properties": {
-                            "package": {
-                              "enum": [
-                                "agenda",
-                                "bull"
-                              ],
-                              "type": "string"
-                            },
-                            "method": {
-                              "type": "string"
-                            },
-                            "queue": {
-                              "type": "string"
-                            },
-                            "connectionName": {
-                              "type": "string"
+                            "duration": {
+                              "type": "number"
                             }
                           },
                           "required": [
-                            "method",
-                            "package"
+                            "duration"
                           ]
                         },
                         {
                           "type": "object",
                           "properties": {
+                            "location": {
+                              "type": "object",
+                              "properties": {
+                                "file": {
+                                  "type": "string"
+                                },
+                                "line": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "file",
+                                "line"
+                              ]
+                            },
+                            "created_at": {
+                              "type": "string"
+                            },
                             "package": {
                               "type": "string"
                             }
                           },
                           "required": [
+                            "created_at",
                             "package"
                           ]
                         }
@@ -4478,7 +4261,13 @@
                     "data": {
                       "type": "object",
                       "properties": {
+                        "method": {
+                          "type": "string"
+                        },
                         "queue": {
+                          "type": "string"
+                        },
+                        "status": {
                           "type": "string"
                         },
                         "connectionName": {
@@ -4493,21 +4282,10 @@
                         "failedReason": {
                           "type": "string"
                         }
-                      }
-                    },
-                    "location": {
-                      "type": "object",
-                      "properties": {
-                        "file": {
-                          "type": "string"
-                        },
-                        "line": {
-                          "type": "string"
-                        }
                       },
                       "required": [
-                        "file",
-                        "line"
+                        "method",
+                        "status"
                       ]
                     },
                     "error": {
@@ -4530,9 +4308,6 @@
                         "message",
                         "name"
                       ]
-                    },
-                    "created_at": {
-                      "type": "string"
                     }
                   },
                   "required": [
@@ -4593,58 +4368,46 @@
                 "content": {
                   "type": "object",
                   "properties": {
-                    "status": {
-                      "enum": [
-                        "completed",
-                        "failed",
-                        "released"
-                      ],
-                      "type": "string"
-                    },
-                    "duration": {
-                      "type": "number"
-                    },
                     "metadata": {
                       "allOf": [
                         {
                           "type": "object",
                           "properties": {
-                            "package": {
-                              "enum": [
-                                "knex",
-                                "mongodb",
-                                "mysql",
-                                "mysql2",
-                                "pg",
-                                "prisma",
-                                "sequelize",
-                                "sqlite3",
-                                "typeorm"
-                              ],
-                              "type": "string"
-                            },
-                            "context": {
-                              "type": "string"
-                            },
-                            "sqlType": {
-                              "type": "string"
-                            },
-                            "method": {
-                              "type": "string"
+                            "duration": {
+                              "type": "number"
                             }
                           },
                           "required": [
-                            "package"
+                            "duration"
                           ]
                         },
                         {
                           "type": "object",
                           "properties": {
+                            "location": {
+                              "type": "object",
+                              "properties": {
+                                "file": {
+                                  "type": "string"
+                                },
+                                "line": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "file",
+                                "line"
+                              ]
+                            },
+                            "created_at": {
+                              "type": "string"
+                            },
                             "package": {
                               "type": "string"
                             }
                           },
                           "required": [
+                            "created_at",
                             "package"
                           ]
                         }
@@ -4653,10 +4416,19 @@
                     "data": {
                       "type": "object",
                       "properties": {
+                        "sqlType": {
+                          "type": "string"
+                        },
+                        "method": {
+                          "type": "string"
+                        },
                         "sql": {
                           "type": "string"
                         },
                         "query": {
+                          "type": "string"
+                        },
+                        "context": {
                           "type": "string"
                         },
                         "hostname": {
@@ -4675,21 +4447,6 @@
                           "type": "number"
                         }
                       }
-                    },
-                    "location": {
-                      "type": "object",
-                      "properties": {
-                        "file": {
-                          "type": "string"
-                        },
-                        "line": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "file",
-                        "line"
-                      ]
                     },
                     "error": {
                       "type": "object",
@@ -4711,9 +4468,6 @@
                         "message",
                         "name"
                       ]
-                    },
-                    "created_at": {
-                      "type": "string"
                     }
                   },
                   "required": [

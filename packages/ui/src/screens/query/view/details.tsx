@@ -1,4 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/base/card";
+/** @format */
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/base/card";
 import { Badge } from "@/components/ui/base/badge";
 import { formatDuration, timeAgo } from "@/utils.js";
 import { QueryInstanceResponse } from "@/hooks/useApiTyped";
@@ -37,23 +44,21 @@ export const Details = ({ query }: { query: QueryInstanceResponse }) => {
             <div className="col-span-9">
               <Badge
                 variant={
-                  query.content.status === "failed"
-                    ? "destructive"
-                    : "secondary"
+                  query.content.error?.code ? "destructive" : "secondary"
                 }
               >
-                {(query.content.status ?? "").toUpperCase()}
+                {query.content.error?.code ? "Failed" : "Completed"}
               </Badge>
             </div>
           </div>
 
-          {query.content.duration !== undefined && (
+          {query.content.metadata.duration !== undefined && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-sm text-muted-foreground">
                 Duration
               </div>
               <div className="col-span-9 text-sm">
-                {formatDuration(query.content.duration)}
+                {formatDuration(query.content.metadata.duration)}
               </div>
             </div>
           )}
@@ -71,14 +76,14 @@ export const Details = ({ query }: { query: QueryInstanceResponse }) => {
             </div>
           )}
 
-          {query.content.metadata.sqlType && (
+          {query.content.data.sqlType && (
             <div className="grid items-center grid-cols-12">
               <div className="col-span-3 text-sm text-muted-foreground">
                 SQL Type
               </div>
               <div className="col-span-9">
                 <Badge variant="secondary" className="capitalize">
-                  {query.content.metadata.sqlType}
+                  {query.content.data.sqlType}
                 </Badge>
               </div>
             </div>
@@ -102,7 +107,9 @@ export const Details = ({ query }: { query: QueryInstanceResponse }) => {
               <div className="col-span-3 text-sm text-muted-foreground">
                 Host
               </div>
-              <div className="col-span-9 text-sm">{query.content.data.hostname}</div>
+              <div className="col-span-9 text-sm">
+                {query.content.data.hostname}
+              </div>
             </div>
           )}
 
@@ -122,11 +129,13 @@ export const Details = ({ query }: { query: QueryInstanceResponse }) => {
               <div className="col-span-3 text-sm text-muted-foreground">
                 Database
               </div>
-              <div className="col-span-9 text-sm">{query.content.data.database}</div>
+              <div className="col-span-9 text-sm">
+                {query.content.data.database}
+              </div>
             </div>
           )}
         </div>
       </CardContent>
     </Card>
   );
-}
+};

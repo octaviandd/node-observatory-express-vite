@@ -41,8 +41,8 @@ export const ViewCrumbs = React.memo(
             <Badge variant="secondary">
               {view.content.metadata.package.toUpperCase()}
             </Badge>
-            <Badge variant={getStatusColor(view.content.status as string)}>
-              {view.content.status?.toUpperCase()}
+            <Badge variant={getStatusColor(view.content.data.status as string)}>
+              {view.content.data.status?.toUpperCase()}
             </Badge>
           </div>
         </CardContent>

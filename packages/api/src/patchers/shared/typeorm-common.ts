@@ -4,37 +4,77 @@ import shimmer from "shimmer";
 import { watchers } from "../../core/index";
 import { getCallerInfo } from "../../core/helpers/helpers";
 
-type TypeOrmMetadata = { package: "typeorm"; method: string; modelName: string };
-type TypeOrmData = {};
+const timestamp = () =>
+  new Date().toISOString().replace("T", " ").substring(0, 19);
 
-export type TypeOrmLogEntry = BaseLogEntry<TypeOrmMetadata, TypeOrmData>;
-
-const timestamp = () => new Date().toISOString().replace("T", " ").substring(0, 19);
-
-function log(entry: TypeOrmLogEntry) { 
-    watchers.model.insertRedisStream({ ...entry, created_at: timestamp() })
+function log(entry: ModelContent) {
+  watchers.model.insertRedisStream({ ...entry });
 }
 
 const METHODS_TO_PATCH = [
-  "save", "find", "findOne", "findBy", "findAndCount",
-  "findOneBy", "findOneOrFail", "count", "countBy",
-  "remove", "update", "insert", "query",
+  "save",
+  "find",
+  "findOne",
+  "findBy",
+  "findAndCount",
+  "findOneBy",
+  "findOneOrFail",
+  "count",
+  "countBy",
+  "remove",
+  "update",
+  "insert",
+  "query",
 ] as const;
 
-function createPatchedMethod(method: string, getModelName: (ctx: any) => string, filename: string) {
+function createPatchedMethod(
+  method: string,
+  getModelName: (ctx: any) => string,
+  filename: string,
+) {
   return function (originalMethod: Function) {
     return async function patchedMethod(this: any, ...args: any[]) {
       const startTime = performance.now();
       const callerInfo = getCallerInfo(filename);
 
-      const base = { metadata: { package: "typeorm" as const, method, modelName: getModelName(this) }, data: {} };
-
       try {
         const result = await originalMethod.apply(this, args);
-        log({ status: "completed", duration: parseFloat((performance.now() - startTime).toFixed(2)), location: { file: callerInfo.file, line: callerInfo.line }, ...base });
+
+        log({
+          metadata: {
+            package: "typeorm",
+            duration: parseFloat((performance.now() - startTime).toFixed(2)),
+            location: { file: callerInfo.file, line: callerInfo.line },
+            created_at: timestamp(),
+          },
+          data: {
+            status: "completed",
+            method,
+            modelName: getModelName(this),
+          },
+        });
+
         return result;
       } catch (error: any) {
-        log({ status: "failed", duration: parseFloat((performance.now() - startTime).toFixed(2)), error: { name: "TypeOrmError", message: error?.message, stack: error?.stack }, ...base });
+        log({
+          metadata: {
+            package: "typeorm",
+            duration: parseFloat((performance.now() - startTime).toFixed(2)),
+            location: { file: callerInfo.file, line: callerInfo.line },
+            created_at: timestamp(),
+          },
+          data: {
+            status: "failed",
+            method,
+            modelName: getModelName(this),
+          },
+          error: {
+            name: "TypeOrmError",
+            message: error?.message,
+            stack: error?.stack,
+          },
+        });
+
         throw error;
       }
     };
@@ -52,7 +92,7 @@ export function patchTypeOrmExports(exports: any, filename: string): any {
       shimmer.wrap(
         typeormModule.Repository.prototype,
         method,
-        createPatchedMethod(method, (ctx) => ctx.target?.name, filename)
+        createPatchedMethod(method, (ctx) => ctx.target?.name, filename),
       );
     }
   }
@@ -62,7 +102,7 @@ export function patchTypeOrmExports(exports: any, filename: string): any {
     shimmer.wrap(
       typeormModule.BaseEntity.prototype,
       "save",
-      createPatchedMethod("save", (ctx) => ctx.constructor.name, filename)
+      createPatchedMethod("save", (ctx) => ctx.constructor.name, filename),
     );
   }
 

@@ -24,8 +24,8 @@ import {
  */
 class GenericWatcher<
   T extends WatcherType = WatcherType,
-  TFilters extends WatcherFilters = WatcherFilters,
-> extends BaseWatcher<T> {
+  TFilters extends FiltersByWatcherType[T] = FiltersByWatcherType[T],
+> extends BaseWatcher<T, TFilters> {
   /**
    * Watcher configuration:
    * - type: watcher type key ("request", "log", ...)
@@ -59,7 +59,7 @@ class GenericWatcher<
    * returns raw rows (each entry is a single event/record).
    */
   protected async getTableData(
-    filters: WatcherFilters & { index: "instance" },
+    filters: TFilters & { index: "instance" },
   ): Promise<TableDataResponse<T, "instance">>;
 
   /**
@@ -67,7 +67,7 @@ class GenericWatcher<
    * returns aggregated rows grouped by the watcher's group key (route, queue, etc).
    */
   protected async getTableData(
-    filters: WatcherFilters & { index: "group" },
+    filters: TFilters & { index: "group" },
   ): Promise<TableDataResponse<T, "group">>;
 
   /**
@@ -75,7 +75,7 @@ class GenericWatcher<
    * used by implementation to satisfy both overloads above.
    */
   protected async getTableData(
-    filters: WatcherFilters & { index: "instance" | "group" },
+    filters: TFilters & { index: "instance" | "group" },
   ): Promise<TableDataResponse<T, "instance" | "group">>;
 
   /**
@@ -83,9 +83,7 @@ class GenericWatcher<
    * Chooses between DBInstance.getByInstance and DBInstance.getByGroup based on index.
    * Always returns { results, count } with count formatted (string, human-readable).
    */
-  protected async getTableData(
-    filters: WatcherFilters & { index: "instance" | "group" },
-  ): Promise<{
+  protected async getTableData(filters: TFilters): Promise<{
     results: WatcherResults<T, "instance"> | WatcherResults<T, "group">;
     count: string;
   }> {
@@ -124,7 +122,7 @@ class GenericWatcher<
    * graphMetrics comes from config and determines which series are computed.
    */
   protected async getCountGraphData(
-    filters: FiltersByWatcherType[T],
+    filters: TFilters,
   ): Promise<CountGraphDataResponse> {
     return await this.DBInstance.getCountGraphData(
       filters,
@@ -139,12 +137,9 @@ class GenericWatcher<
    * graphMetrics comes from config and determines which series are computed.
    */
   protected async getDurationGraphData(
-    filters: FiltersByWatcherType[T],
+    filters: TFilters,
   ): Promise<DurationGraphDataResponse> {
-    return await this.DBInstance.getDurationGraphData(
-      filters,
-      this.type,
-    );
+    return await this.DBInstance.getDurationGraphData(filters, this.type);
   }
 
   // ---------------------------------------------------------------------------
@@ -240,20 +235,21 @@ class GenericWatcher<
     }
 
     const conditions = [
-      ...(requestId && requestId !== 'null' ? [`request_id = ?`] : []),
-      ...(jobId && jobId !== 'null' ? [`job_id = ?`] : []),
-      ...(scheduleId && scheduleId !== 'null' ? [`schedule_id = ?`] : []),
+      ...(requestId && requestId !== "null" ? [`request_id = ?`] : []),
+      ...(jobId && jobId !== "null" ? [`job_id = ?`] : []),
+      ...(scheduleId && scheduleId !== "null" ? [`schedule_id = ?`] : []),
     ];
 
     const params = [
-      ...(requestId && requestId !== 'null' ? [requestId] : []),
-      ...(jobId && jobId !== 'null' ? [jobId] : []),
-      ...(scheduleId && scheduleId !== 'null' ? [scheduleId] : []),
+      ...(requestId && requestId !== "null" ? [requestId] : []),
+      ...(jobId && jobId !== "null" ? [jobId] : []),
+      ...(scheduleId && scheduleId !== "null" ? [scheduleId] : []),
     ];
 
-    const jobCondition = jobId && jobId !== 'null'
-      ? "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')"
-      : "";
+    const jobCondition =
+      jobId && jobId !== "null"
+        ? "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' OR JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed')"
+        : "";
 
     const results = await this.DBInstance.getRelatedViewdata(
       conditions,
@@ -272,10 +268,8 @@ class GenericWatcher<
    * Extracts filters from the incoming HTTP request using config.filterExtractor.
    * This keeps GenericWatcher reusable: each watcher defines how to interpret query params.
    */
-  protected extractFiltersFromRequest(
-    req: ObservatoryBoardRequest,
-  ): TFilters & WatcherFilters {
-    return this.config.filterExtractor(req) as TFilters & WatcherFilters;
+  protected extractFiltersFromRequest(req: ObservatoryBoardRequest): TFilters {
+    return this.config.filterExtractor(req) as TFilters;
   }
 }
 

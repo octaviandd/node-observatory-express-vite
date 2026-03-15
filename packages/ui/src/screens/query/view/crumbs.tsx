@@ -43,8 +43,10 @@ export const QueryCrumbs = memo(
             <Badge variant="secondary">
               {query.content.metadata.package.toUpperCase()}
             </Badge>
-            <Badge variant={getStatusColor(query.content.metadata.sqlType as string)}>
-              {query.content.metadata.sqlType}
+            <Badge
+              variant={getStatusColor(query.content.data.sqlType as string)}
+            >
+              {query.content.data.sqlType}
             </Badge>
           </div>
         </CardContent>

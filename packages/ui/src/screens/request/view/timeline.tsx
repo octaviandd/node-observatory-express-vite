@@ -27,11 +27,11 @@ export const RequestPreviewTimeline = React.memo(({ events }: Props) => {
         <h3 className="text-xl font-medium">Timeline</h3>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[400px] pr-4">
+        <ScrollArea className="h-100 pr-4">
           <div className="space-y-8">
             {events.map((event, index) => (
               <div key={index} className="flex gap-4 relative">
-                <div className="w-[2px] bg-border absolute top-10 bottom-0 left-[7px]" />
+                <div className="w-0.5 bg-border absolute top-10 bottom-0 left-1.75" />
                 <div className="w-4 h-4 rounded-full bg-muted-foreground mt-2" />
                 <div className="flex-1 space-y-2">
                   <div className="flex items-center justify-between">

@@ -26,7 +26,11 @@ export const InstanceTable = memo((props: Props) => {
   const { data, children } = props;
   const { dispatch } = useContext(StoreContext);
 
-  const getStatusVariant = (hits?: number, writes?: number, misses?: number) => {
+  const getStatusVariant = (
+    hits?: number,
+    writes?: number,
+    misses?: number,
+  ) => {
     if (hits && hits > 0) {
       if (writes && writes > 0) return "secondary";
       return "secondary";
@@ -37,7 +41,7 @@ export const InstanceTable = memo((props: Props) => {
   };
 
   const getStatusText = (hits?: number, writes?: number, misses?: number) => {
-     if (hits && hits > 0) {
+    if (hits && hits > 0) {
       if (writes && writes > 0) return "HIT + WRITE";
       return "HIT";
     }
@@ -67,7 +71,7 @@ export const InstanceTable = memo((props: Props) => {
               <TableCell>
                 <span className="flex items-center gap-2">
                   <p className="text-muted-foreground">
-                    [{cache.content.metadata.command.toUpperCase()}]
+                    [{cache.content.data.method.toUpperCase()}]
                   </p>
                   <p className="text-black dark:text-white">
                     {cache.content.data.key as string}
@@ -92,12 +96,13 @@ export const InstanceTable = memo((props: Props) => {
               <TableCell>
                 <p
                   className={
-                    Number(cache.content.duration) > 999
+                    cache.content.metadata.duration > 999
                       ? "text-yellow-600"
                       : "text-black dark:text-white"
                   }
                 >
-                  {cache.content.duration && cache.content?.duration.toFixed(6)}
+                  {cache.content.metadata.duration &&
+                    cache.content?.metadata.duration.toFixed(6)}
                 </p>
               </TableCell>
               <TableCell>

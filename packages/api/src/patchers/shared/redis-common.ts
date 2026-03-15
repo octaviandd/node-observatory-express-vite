@@ -5,20 +5,17 @@ import { watchers } from "../../core/index";
 import { redisCommandArgs } from "../../core/helpers/constants";
 import { getCallerInfo } from "../../core/helpers/helpers";
 
-type RedisMetadata = { package: "redis"; command: string };
-type RedisData = { key?: string; hits?: number; misses?: number; writes?: number };
+const timestamp = () =>
+  new Date().toISOString().replace("T", " ").substring(0, 19);
 
-export type RedisCacheLogEntry = BaseLogEntry<RedisMetadata, RedisData>;
-
-const timestamp = () => new Date().toISOString().replace("T", " ").substring(0, 19);
-
-function log(entry: RedisCacheLogEntry) { 
-    watchers.cache.insertRedisStream({ ...entry, created_at: timestamp() })
+function log(entry: CacheContent) {
+  watchers.cache.insertRedisStream({ ...entry });
 }
 
 function isObservatoryKey(args: any[]): boolean {
   const key = args[0];
-  if (Array.isArray(key)) return key.some((k: string) => k?.includes?.("observatory_entries"));
+  if (Array.isArray(key))
+    return key.some((k: string) => k?.includes?.("observatory_entries"));
   return typeof key === "string" && key.includes("observatory_entries");
 }
 
@@ -30,9 +27,14 @@ function shouldLogCommand(command: string, args: any[]): boolean {
   return true;
 }
 
-function getCommandData(command: string, args: any[], result: any): RedisData {
+function getCommandData(
+  command: string,
+  args: any[],
+  result: any,
+  status: "completed" | "failed",
+): CacheData {
   const lowerCmd = command.toLowerCase();
-  const data: RedisData = { key: args[0] };
+  const data: CacheData = { key: args[0], method: command, status };
 
   if (lowerCmd === "get") {
     const isHit = result !== undefined && result !== null;
@@ -51,25 +53,54 @@ function getCommandData(command: string, args: any[], result: any): RedisData {
 function patchRedisClient(client: any, filename: string) {
   for (const command of Object.keys(redisCommandArgs)) {
     if (typeof client[command] === "function") {
-      shimmer.wrap(client, command, (originalFn: any) =>
-        async function patchedCommand(this: any, ...args: any[]) {
-          if (isObservatoryKey(args)) return originalFn.apply(this, args);
+      shimmer.wrap(
+        client,
+        command,
+        (originalFn: any) =>
+          async function patchedCommand(this: any, ...args: any[]) {
+            if (isObservatoryKey(args)) return originalFn.apply(this, args);
 
-          const callerInfo = getCallerInfo(filename);
-          const startTime = performance.now();
-          const base = { metadata: { package: "redis" as const, command } };
+            const callerInfo = getCallerInfo(filename);
+            const startTime = performance.now();
 
-          try {
-            const result = await originalFn.apply(this, args);
-            if (!shouldLogCommand(command, args)) return result;
+            try {
+              const result = await originalFn.apply(this, args);
+              if (!shouldLogCommand(command, args)) return result;
 
-            log({ status: "completed", duration: parseFloat((performance.now() - startTime).toFixed(2)), location: { file: callerInfo.file, line: callerInfo.line }, data: getCommandData(command, args, result), ...base });
-            return result;
-          } catch (error: any) {
-            log({ status: "failed", duration: parseFloat((performance.now() - startTime).toFixed(2)), data: { key: args[0] }, error: { name: "RedisError", message: error?.message ?? String(error), stack: error?.stack }, ...base });
-            throw error;
-          }
-        }
+              log({
+                metadata: {
+                  package: "redis",
+                  duration: parseFloat(
+                    (performance.now() - startTime).toFixed(2),
+                  ),
+                  location: { file: callerInfo.file, line: callerInfo.line },
+                  created_at: timestamp(),
+                },
+                data: getCommandData(command, args, result, "completed"),
+              });
+
+              return result;
+            } catch (error: any) {
+              log({
+                metadata: {
+                  package: "redis",
+                  duration: parseFloat(
+                    (performance.now() - startTime).toFixed(2),
+                  ),
+                  location: { file: callerInfo.file, line: callerInfo.line },
+                  created_at: timestamp(),
+                },
+                data: { key: args[0], method: command, status: "failed" },
+                error: {
+                  name: "RedisError",
+                  message: error?.message ?? String(error),
+                  stack: error?.stack,
+                },
+              });
+
+              throw error;
+            }
+          },
       );
     }
   }
@@ -78,14 +109,16 @@ function patchRedisClient(client: any, filename: string) {
 export function patchRedisExports(exports: any, filename: string): any {
   if (typeof exports?.createClient !== "function") return exports;
 
-  shimmer.wrap(exports, "createClient", (originalCreate) =>
-    function patchedCreateClient(this: any, ...args: any[]) {
-      const client = originalCreate.apply(this, args);
-      patchRedisClient(client, filename);
-      return client;
-    }
+  shimmer.wrap(
+    exports,
+    "createClient",
+    (originalCreate) =>
+      function patchedCreateClient(this: any, ...args: any[]) {
+        const client = originalCreate.apply(this, args);
+        patchRedisClient(client, filename);
+        return client;
+      },
   );
 
   return exports;
 }
-

@@ -1,6 +1,11 @@
 /** @format */
 
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/base/card";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardTitle,
+} from "@/components/ui/base/card";
 import { Badge } from "@/components/ui/base/badge";
 import { formatDuration, timeAgo } from "@/utils.js";
 import { CacheInstanceResponse } from "@/hooks/useApiTyped";
@@ -52,26 +57,10 @@ export const Details = ({ cache }: { cache: CacheInstanceResponse }) => {
 
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Duration</div>
-            <div className="col-span-9">{formatDuration(Number(cache.content.duration))}</div>
-          </div>
-
-          {/* <div className="grid items-center grid-cols-12">
-            <div className="col-span-3 text-muted-foreground">
-              Check Period
-            </div>
             <div className="col-span-9">
-              {cache.content.checkPeriod} seconds
+              {formatDuration(cache.content.metadata.duration)}
             </div>
           </div>
-
-          {cache.content.stdTTL && (
-            <div className="grid items-center grid-cols-12">
-              <div className="col-span-3 text-muted-foreground">
-                Time to Live
-              </div>
-              <div className="col-span-9">{cache.content.stdTTL}</div>
-            </div>
-          )} */}
 
           {cache.content.data.key && (
             <div className="grid items-center grid-cols-12">
@@ -85,4 +74,4 @@ export const Details = ({ cache }: { cache: CacheInstanceResponse }) => {
       </CardContent>
     </Card>
   );
-}
+};

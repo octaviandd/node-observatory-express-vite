@@ -10,11 +10,11 @@ export const ExceptionCard = ({
   return (
     <BaseCard
       date={item.created_at}
-      content={item.content.message}
-      file={item.content.file}
-      line={item.content.line}
-      package={item.content.type}
+      content={item.content.data.message}
+      file={item.content.data.file}
+      line={item.content.data.line}
+      package="Exception"
       linkPath={`/exception/${item.uuid}`}
     />
   );
-}
+};

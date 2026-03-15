@@ -1,8 +1,21 @@
 /** @format */
 import React from "react";
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/base/card";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardTitle,
+} from "@/components/ui/base/card";
 import { Separator } from "@/components/ui/base/separator";
-import { QueryInstanceResponse, CacheInstanceResponse, HttpClientInstanceResponse, NotificationInstanceResponse, MailInstanceResponse, LogInstanceResponse, ExceptionInstanceResponse } from "@/hooks/useApiTyped";
+import {
+  QueryInstanceResponse,
+  CacheInstanceResponse,
+  HttpClientInstanceResponse,
+  NotificationInstanceResponse,
+  MailInstanceResponse,
+  LogInstanceResponse,
+  ExceptionInstanceResponse,
+} from "@/hooks/useApiTyped";
 
 export const JobMetadata = React.memo(
   ({
@@ -38,7 +51,10 @@ export const JobMetadata = React.memo(
     const queryItems = filterByType(queries, "query");
     const stats = {
       queryCount: queryItems.length,
-      queryAverage: averageOf(queryItems, (item) => Number(item.content.duration)),
+      queryAverage: averageOf(
+        queryItems,
+        (item) => item.content.metadata.duration,
+      ),
       httpCount: filterByType(https, "http").length,
       notificationCount: filterByType(notifications, "notification").length,
       queryWrites: filterByType(queries, "write").length,

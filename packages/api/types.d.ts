@@ -12,27 +12,6 @@ declare global {
 // ============================================================================
 // Common Types
 // ============================================================================
-type Period = "1h" | "24h" | "7d" | "14d" | "30d";
-type CustomPeriod = {
-  startDate: string; // ISO string
-  endDate: string;   // ISO string
-  label: "custom";
-};
-
-type PeriodValue = Period | CustomPeriod;
-type IndexType = "instance" | "group";
-type StatusType = "all" | "completed" | "failed";
-type HttpStatusType = "all" | "2xx" | "4xx" | "5xx";
-type LogLevel =
-  | "info"
-  | "warn"
-  | "error"
-  | "debug"
-  | "verbose"
-  | "silly"
-  | "log"
-  | "trace"
-  | "fatal";
 type WatcherType =
   | "request"
   | "cache"
@@ -46,6 +25,32 @@ type WatcherType =
   | "exception"
   | "job"
   | "query";
+
+type Period = "1h" | "24h" | "7d" | "14d" | "30d";
+type CustomPeriod = {
+  startDate: string; // ISO string
+  endDate: string; // ISO string
+  label: "custom";
+};
+
+type StatusType = "all" | "completed" | "failed";
+type NotificationStatusType = "all" | "completed" | "failed";
+type QueryStatusType = "all" | "completed" | "failed";
+type RequestStatusType = "all" | "2xx" | "4xx" | "5xx";
+type HttpStatusType = "all" | "2xx" | "4xx" | "5xx";
+type CacheStatusType = "all" | "misses" | "hits" | "writes";
+type JobStatusType = "all" | "released" | "failed" | "completed";
+type ExceptionStatusType = "all" | "unhandled" | "uncaught";
+type LogStatusType =
+  | "info"
+  | "warn"
+  | "error"
+  | "debug"
+  | "verbose"
+  | "silly"
+  | "log"
+  | "trace"
+  | "fatal";
 
 interface WatcherEntry {
   uuid: string;
@@ -63,70 +68,29 @@ interface WatcherEntry {
 interface WatcherFilters {
   offset: number;
   limit: number;
-  period: PeriodValue;
-  query: string;
+  period: Period;
   isTable: boolean;
-  index: IndexType;
-  key?: string;
-  status?: string;
-}
-
-interface IndexedFilters extends WatcherFilters {
-  index: IndexType;
+  index: "instance" | "group";
+  query?: string;
   key?: string;
 }
 
-interface ViewFilters extends IndexedFilters {
-  path?: string;
-  status: StatusType;
+interface Filters<T> extends WatcherFilters {
+  status: T;
 }
-interface ScheduleFilters extends IndexedFilters {
-  status: StatusType;
-  groupFilter: "all" | "errors" | "slow";
-}
-interface RequestFilters extends IndexedFilters {
-  status: HttpStatusType;
-}
-interface QueryFilters extends IndexedFilters {
-  status: string;
-}
-interface NotificationFilters extends IndexedFilters {
-  type?: string;
-  channel?: string;
-  status: string;
-}
-interface CacheFilters extends IndexedFilters {
-  status: "all" | "misses" | "hits" | "writes";
-}
-interface HTTPClientFilters extends IndexedFilters {
-  status: HttpStatusType;
-}
-interface ModelFilters extends IndexedFilters {
-  model?: string;
-  status?: StatusType;
-}
-interface MailFilters extends IndexedFilters {
-  status: StatusType;
-}
-interface JobFilters extends IndexedFilters {
-  status: "all" | "released" | "failed" | "completed";
-  queue: "all" | "errors" | "slow";
-}
-interface LogFilters extends IndexedFilters {
-  logType:
-    | "All"
-    | "Info"
-    | "Warn"
-    | "Error"
-    | "Debug"
-    | "Trace"
-    | "Fatal"
-    | "Complete"
-    | "Log";
-}
-interface ExceptionFilters extends IndexedFilters {
-  status: "all" | "unhandled" | "uncaught";
-}
+
+type ViewFilters = Filters<StatusType>;
+type ScheduleFilters = Filters<StatusType>;
+type RequestFilters = Filters<HttpStatusType>;
+type QueryFilters = Filters<QueryStatusType>;
+type NotificationFilters = Filters<NotificationStatusType>;
+type CacheFilters = Filters<CacheStatusType>;
+type HTTPClientFilters = Filters<HttpStatusType>;
+type ModelFilters = Filters<StatusType>;
+type MailFilters = Filters<StatusType>;
+type JobFilters = Filters<JobStatusType>;
+type LogFilters = Filters<LogStatusType>;
+type ExceptionFilters = Filters<ExceptionStatusType>;
 
 type FiltersByWatcherType = {
   request: RequestFilters;
@@ -136,7 +100,7 @@ type FiltersByWatcherType = {
   log: LogFilters;
   mail: MailFilters;
   exception: ExceptionFilters;
-  http: RequestFilters;  
+  http: RequestFilters;
   schedule: ScheduleFilters;
   notification: NotificationFilters;
   model: ModelFilters;
@@ -187,7 +151,13 @@ type Queries =
   | "mysql"
   | "mongodb"
   | "pg";
-type Model = "typeorm" | "sequelize" | "prisma" | "knex" | "sqlite3" | "mongoose";
+type Model =
+  | "typeorm"
+  | "sequelize"
+  | "prisma"
+  | "knex"
+  | "sqlite3"
+  | "mongoose";
 type Views = "ejs" | "pug" | "handlebars";
 type StoreDriver = "mysql2";
 
@@ -206,16 +176,16 @@ interface LogError {
 }
 
 interface BaseLogEntry<
-  TMetadata = Record<string, any>,
-  TData = Record<string, any>,
+  TMetadata = Record<string, unknown>,
+  TData = Record<string, unknown>,
 > {
-  status?: "completed" | "failed" | "released";
-  duration?: number;
-  metadata: TMetadata & { package: string };
+  metadata: TMetadata & {
+    location?: LogLocation;
+    created_at: string;
+    package: string;
+  };
   data: TData;
-  location?: LogLocation;
   error?: LogError;
-  created_at?: string;
 }
 
 // ============================================================================
@@ -223,9 +193,13 @@ interface BaseLogEntry<
 // ============================================================================
 
 // -- Request (express-common, http-common server) --
-type RequestMetadata = { package: "express" | "http"; method: string; type?: string };
+type RequestMetadata = {
+  duration: number;
+};
+
 type RequestData = {
   route?: string;
+  method: string;
   statusCode: number;
   requestSize?: number;
   responseSize?: number;
@@ -241,8 +215,12 @@ type RequestData = {
 type RequestContent = BaseLogEntry<RequestMetadata, RequestData>;
 
 // -- View (express-common render) --
-type ViewMetadata = { package: string; method: "render" };
+type ViewMetadata = {
+  method: string;
+  duration: number;
+};
 type ViewData = {
+  status?: "completed" | "failed";
   view: string;
   options: Record<string, any>;
   size: number;
@@ -250,21 +228,21 @@ type ViewData = {
 };
 type ViewContent = BaseLogEntry<ViewMetadata, ViewData>;
 
-// -- Exception (not from a patcher – caught by the framework) --
-interface ExceptionContent {
-  type: "exception";
-  message: string;
-  stack: string;
-  file: string;
-  line: string;
-  title: string;
-  fullError: string;
-  codeContext: { lineNumber: number; content: string; isErrorLine: boolean }[];
-}
-
 // -- Cache (redis, ioredis, node-cache, lru-cache, memjs, level, keyv) --
-type CacheMetadata = { package: CachePackages; command: string; host?: string; port?: number };
-type CacheData = { key?: string; hits?: number; misses?: number; writes?: number };
+type CacheMetadata = {
+  duration: number;
+};
+
+type CacheData = {
+  method: string;
+  status?: "completed" | "failed";
+  host?: string;
+  port?: number;
+  key?: string;
+  hits?: number;
+  misses?: number;
+  writes?: number;
+};
 type CacheContent = BaseLogEntry<CacheMetadata, CacheData>;
 
 // -- Log (winston, pino, bunyan, log4js, signale, loglevel) --
@@ -273,10 +251,12 @@ type LogData = { message: any };
 type LogContent = BaseLogEntry<LogMetadata, LogData>;
 
 // -- Notification (pusher, ably) --
-type NotificationMetadata =
-  | { package: "pusher"; method: "trigger" | "triggerBatch" }
-  | { package: "ably"; method: string; mode: "realtime" | "rest" };
+type NotificationMetadata = {
+  mode?: string;
+  duration: number;
+};
 type NotificationData = {
+  method: string;
   channel?: string;
   event?: string;
   payload?: any;
@@ -286,8 +266,9 @@ type NotificationData = {
 type NotificationContent = BaseLogEntry<NotificationMetadata, NotificationData>;
 
 // -- Mail (nodemailer, sendgrid, mailgun, postmark, aws-ses) --
-type MailMetadata = { package: Mailer; command: string };
+type MailMetadata = { duration: number };
 type MailData = {
+  command: string;
   to: string[];
   cc: string[];
   bcc: string[];
@@ -300,10 +281,15 @@ type MailData = {
 type MailContent = BaseLogEntry<MailMetadata, MailData>;
 
 // -- Query (pg, mysql2, mysql, knex, sqlite3) --
-type QueryMetadata = { package: Queries; context?: string; sqlType?: string; method?: string };
+type QueryMetadata = {
+  duration: number;
+};
 type QueryData = {
+  sqlType?: string;
+  method?: string;
   sql?: string;
   query?: string;
+  context?: string;
   hostname?: string;
   port?: string | number;
   database?: string;
@@ -312,14 +298,22 @@ type QueryData = {
 type QueryContent = BaseLogEntry<QueryMetadata, QueryData>;
 
 // -- Model (prisma, sequelize, typeorm, mongoose) --
-type ModelMetadata = { package: Model; method: string; modelName: string };
-type ModelData = Record<string, any>;
+type ModelMetadata = { duration: number };
+type ModelData = {
+  status: "completed" | "failed";
+  method: string;
+  modelName: string;
+};
 type ModelContent = BaseLogEntry<ModelMetadata, ModelData>;
 
 // -- Job (bull, agenda) --
-type JobMetadata = { package: Jobs; method: string; queue?: string; connectionName?: string };
+type JobMetadata = {
+  duration: number;
+};
 type JobData = {
+  method: string;
   queue?: string;
+  status: string;
   connectionName?: string;
   jobId?: string;
   attemptsMade?: number;
@@ -328,7 +322,7 @@ type JobData = {
 type JobContent = BaseLogEntry<JobMetadata, JobData>;
 
 // -- HTTP Client (axios, fetch, http/https, undici) --
-type HttpClientMetadata = { package: string; method?: string };
+type HttpClientMetadata = { duration: number };
 type HttpClientData = {
   method?: string;
   hostname?: string;
@@ -352,19 +346,33 @@ type HttpClientContent = BaseLogEntry<HttpClientMetadata, HttpClientData>;
 
 // -- Schedule (node-schedule, node-cron, bree) --
 type ScheduleMetadata = {
-  package: Scheduler;
-  type: string;
-  scheduleId: string;
-  breeId?: string;
-  jobId?: string;
+  duration: number;
 };
 type ScheduleData = {
   cronExpression?: string;
+  jobId?: string;
+  scheduleId: string;
+  breeId?: string;
+  type: string;
   name?: string | null;
   rule?: any;
   jobName?: string;
 };
 type ScheduleContent = BaseLogEntry<ScheduleMetadata, ScheduleData>;
+
+// -- Exception (not from a patcher – caught by the framework) --
+type ExceptionMetadata = {};
+type ExceptionData = {
+  message: string;
+  stack: string;
+  file: string;
+  line: string;
+  title: string;
+  fullError: string;
+  codeContext: { lineNumber: number; content: string; isErrorLine: boolean }[];
+};
+
+type ExceptionContent = BaseLogEntry<ExceptionMetadata, ExceptionData>;
 
 // ============================================================================
 // Response Types
@@ -387,7 +395,7 @@ type AllContent =
   | ExceptionContent
   | RequestContent
   | ModelContent
-  | CacheContent 
+  | CacheContent
   | JobContent
   | QueryContent
   | LogContent
@@ -639,19 +647,24 @@ interface CountGraphDataResponse {
 }
 
 interface DurationGraphDataResponse {
-  durationFormattedData: Array<{
-    durations: number[];
-    avgDuration: number;
-    p95: number;
-    count: number;
-    label: string;
-  }> | Record<string, {
-    durations: number[];
-    avgDuration: number;
-    p95: number;
-    count: number;
-    label: string;
-  }>;
+  durationFormattedData:
+    | Array<{
+        durations: number[];
+        avgDuration: number;
+        p95: number;
+        count: number;
+        label: string;
+      }>
+    | Record<
+        string,
+        {
+          durations: number[];
+          avgDuration: number;
+          p95: number;
+          count: number;
+          label: string;
+        }
+      >;
   shortest: string;
   longest: string;
   average: string;

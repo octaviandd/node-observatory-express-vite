@@ -1,8 +1,14 @@
+/** @format */
+
 import { Card, CardContent } from "@/components/ui/base/card";
 import { NotificationInstanceResponse } from "@/hooks/useApiTyped";
 import { timeAgo } from "@/utils.js";
 
-export const Details = ({ notification }: { notification: NotificationInstanceResponse }) => {
+export const Details = ({
+  notification,
+}: {
+  notification: NotificationInstanceResponse;
+}) => {
   return (
     <Card className="rounded-sm">
       <CardContent className="p-6">
@@ -26,7 +32,9 @@ export const Details = ({ notification }: { notification: NotificationInstanceRe
           </div>
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Channel</div>
-            <div className="col-span-9">{notification.content.data.channel}</div>
+            <div className="col-span-9">
+              {notification.content.data.channel}
+            </div>
           </div>
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Event</div>
@@ -34,11 +42,13 @@ export const Details = ({ notification }: { notification: NotificationInstanceRe
           </div>
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Method</div>
-            <div className="col-span-9">{notification.content.metadata.method}</div>
+            <div className="col-span-9">{notification.content.data.method}</div>
           </div>
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Duration</div>
-            <div className="col-span-9">{notification.content.duration}</div>
+            <div className="col-span-9">
+              {notification.content.metadata.duration}
+            </div>
           </div>
           <div className="grid items-center grid-cols-12">
             <div className="col-span-3 text-muted-foreground">Package</div>
@@ -52,4 +62,4 @@ export const Details = ({ notification }: { notification: NotificationInstanceRe
       </CardContent>
     </Card>
   );
-}
+};

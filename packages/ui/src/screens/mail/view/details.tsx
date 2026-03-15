@@ -1,12 +1,17 @@
 /** @format */
 
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/base/card";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardTitle,
+} from "@/components/ui/base/card";
 import { timeAgo } from "@/utils.js";
 import { formatDuration } from "@/utils.js";
 import { Badge } from "@/components/ui/base/badge";
 import { MailInstanceResponse } from "@/hooks/useApiTyped";
 
-export const Details = ({ mail } : {mail: MailInstanceResponse}) => {
+export const Details = ({ mail }: { mail: MailInstanceResponse }) => {
   return (
     <Card className="rounded-none shadow-xs">
       <CardHeader>
@@ -36,13 +41,9 @@ export const Details = ({ mail } : {mail: MailInstanceResponse}) => {
           <div className="col-span-3 text-muted-foreground">Status</div>
           <div className="col-span-9">
             <Badge
-              variant={
-                mail.content.status === "completed"
-                  ? "secondary"
-                  : "destructive"
-              }
+              variant={!mail.content.error?.code ? "secondary" : "destructive"}
             >
-              {mail.content.status?.toUpperCase()}
+              {mail.content.error?.code ? "FAILED" : "COMPLETED"}
             </Badge>
           </div>
         </div>
@@ -50,8 +51,8 @@ export const Details = ({ mail } : {mail: MailInstanceResponse}) => {
         <div className="grid grid-cols-12 items-center">
           <div className="col-span-3 text-muted-foreground">Duration</div>
           <div className="col-span-9">
-            {mail.content.duration
-              ? formatDuration(mail.content.duration)
+            {mail.content.metadata.duration
+              ? formatDuration(mail.content.metadata.duration)
               : "N/A"}
           </div>
         </div>
@@ -83,4 +84,4 @@ export const Details = ({ mail } : {mail: MailInstanceResponse}) => {
       </CardContent>
     </Card>
   );
-}
+};

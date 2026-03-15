@@ -43,7 +43,7 @@ export const RequestCrumbs = React.memo(
           </Breadcrumb>
           <div className="flex items-center gap-x-4">
             <Badge variant="secondary">
-              {request.content.metadata.method.toUpperCase()}
+              {request.content.data.method.toUpperCase()}
             </Badge>
             <Badge variant={getStatusColor(request.content.data.statusCode)}>
               {request.content.data.statusCode}

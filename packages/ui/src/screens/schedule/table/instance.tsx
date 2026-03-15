@@ -40,29 +40,34 @@ export const InstanceTable = memo(({ data, children }: Props) => {
           {data.map((schedule: ScheduleInstanceResponse) => (
             <TableRow
               key={schedule.uuid}
-              className={!schedule.content.status ? "bg-red-800/20" : ""}
+              className={schedule.content.error?.code ? "bg-red-800/20" : ""}
             >
               <TableCell className="font-medium text-muted-foreground">
                 {formatDate(schedule.created_at)}
               </TableCell>
               <TableCell className="text-black dark:text-white">
-                {schedule.content.metadata.jobId}
+                {schedule.content.data.jobId}
               </TableCell>
               <TableCell>
-                <Badge variant={getStatusVariant(schedule.content.status ?? "")}>
-                  {(schedule.content.status ?? "").toUpperCase()}
+                <Badge
+                  variant={getStatusVariant(
+                    schedule.content.error?.code ? "failed" : "completed",
+                  )}
+                >
+                  {schedule.content.error?.code ? "FAILED" : "COMPLETED"}
                 </Badge>
               </TableCell>
               <TableCell>
                 <p
                   className={
-                    schedule.content.duration && schedule.content.duration > 999
+                    schedule.content.metadata.duration &&
+                    schedule.content.metadata.duration > 999
                       ? "text-yellow-600"
                       : "text-black dark:text-white"
                   }
                 >
-                  {schedule.content.duration
-                    ? formatDuration(schedule.content.duration)
+                  {schedule.content.metadata.duration
+                    ? formatDuration(schedule.content.metadata.duration)
                     : "N/A"}
                 </p>
               </TableCell>

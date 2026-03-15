@@ -14,18 +14,18 @@ import { useRequests } from "@/hooks/useApiTyped";
 
 export default function RequestPreview() {
   const { id } = useParams<{ id: string }>();
-  
+
   const { data, isLoading, isError } = useRequests.useGet(id!);
 
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-[200px] w-full" />
+        <Skeleton className="h-50 w-full" />
         <div className="grid grid-cols-2 gap-4">
-          <Skeleton className="h-[300px]" />
-          <Skeleton className="h-[300px]" />
-          <Skeleton className="h-[200px]" />
-          <Skeleton className="h-[200px]" />
+          <Skeleton className="h-75" />
+          <Skeleton className="h-75" />
+          <Skeleton className="h-50" />
+          <Skeleton className="h-50" />
         </div>
       </div>
     );
@@ -84,20 +84,20 @@ export default function RequestPreview() {
         </CardContent>
       </Card>
 
-      <RequestPreviewTabs 
-        data={{ 
-          request, 
-          notifications, 
-          mails, 
-          logs, 
-          queries, 
-          https, 
-          jobs, 
-          caches, 
-          exceptions, 
-          views, 
-          models 
-        }} 
+      <RequestPreviewTabs
+        data={{
+          request,
+          notifications,
+          mails,
+          logs,
+          queries,
+          https,
+          jobs,
+          caches,
+          exceptions,
+          views,
+          models,
+        }}
       />
     </div>
   );

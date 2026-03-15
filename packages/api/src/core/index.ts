@@ -19,7 +19,7 @@ import { dashboardController } from "./dashboard.js";
 export const patchedGlobal = global as typeof globalThis & {
   [key: symbol]: boolean | undefined;
 };
-export const watchers: Record<string, BaseWatcher<WatcherType>> = {};
+export const watchers: Record<string, BaseWatcher<WatcherType, WatcherFilters>> = {};
 
 const WATCHER_ROUTE_MAP = {
   requests: "request",
@@ -115,8 +115,8 @@ export async function createObserver(
           message: error.message,
           details:
             process.env.NODE_ENV === "development" ? error.stack : undefined,
-        }
-      }
+        },
+      };
     });
 
   console.log("Observatory setup complete");

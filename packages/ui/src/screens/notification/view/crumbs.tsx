@@ -44,8 +44,12 @@ export const NotificationCrumbs = memo(
             <Badge variant="secondary">
               {notification.content.metadata.package.toUpperCase()}
             </Badge>
-            <Badge variant={getStatusColor(notification.content.status as string)}>
-              {notification.content.status?.toUpperCase()}
+            <Badge
+              variant={getStatusColor(
+                notification.content.error?.code ? "failed" : "completed",
+              )}
+            >
+              {notification.content.error?.code ? "FAILED" : "COMPLETED"}
             </Badge>
           </div>
         </CardContent>

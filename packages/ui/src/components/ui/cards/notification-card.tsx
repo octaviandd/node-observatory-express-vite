@@ -10,11 +10,11 @@ export const NotificationCard = ({
   return (
     <BaseCard
       date={item.created_at}
-      metadata={item.content.metadata.method.toUpperCase()}
+      metadata={item.content.data.method.toUpperCase()}
       content={item.content.data.event as string}
-      file={item.content.location?.file as string}
-      line={item.content.location?.line as string}
+      file={item.content.metadata.location?.file as string}
+      line={item.content.metadata.location?.line as string}
       linkPath={`/notification/${item.uuid}`}
     />
   );
-}
+};

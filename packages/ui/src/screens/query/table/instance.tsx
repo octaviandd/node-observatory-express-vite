@@ -22,90 +22,86 @@ type Props = {
   children: ReactNode;
 };
 
-export const InstanceTable = memo(
-  ({ data, children }: Props) => {
-    const { dispatch } = useContext(StoreContext);
-    return (
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[200px]">Date</TableHead>
-              <TableHead>Details</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Duration</TableHead>
-              <TableHead className="w-[100px]"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.map((query: QueryInstanceResponse) => (
-              <TableRow
-                key={query.uuid}
-                className={
-                  query.content.status === "failed" ? "bg-red-800/20" : ""
-                }
-              >
-                <TableCell className="font-medium text-muted-foreground">
-                  {formatDate(query.created_at)}
-                </TableCell>
-                <TableCell className="flex items-center gap-2 h-[53px]">
-                  <Database className="h-4 w-4 text-muted-foreground" />
-                  <span className="truncate max-w-[400px] text-black dark:text-white">
-                    {query.content.data.sql}
+export const InstanceTable = memo(({ data, children }: Props) => {
+  const { dispatch } = useContext(StoreContext);
+  return (
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-50">Date</TableHead>
+            <TableHead>Details</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Duration</TableHead>
+            <TableHead className="w-25"></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data.map((query: QueryInstanceResponse) => (
+            <TableRow
+              key={query.uuid}
+              className={query.content.error?.code ? "bg-red-800/20" : ""}
+            >
+              <TableCell className="font-medium text-muted-foreground">
+                {formatDate(query.created_at)}
+              </TableCell>
+              <TableCell className="flex items-center gap-2 h-13.25">
+                <Database className="h-4 w-4 text-muted-foreground" />
+                <span className="truncate max-w-100 text-black dark:text-white">
+                  {query.content.data.sql}
+                </span>
+              </TableCell>
+              <TableCell>
+                <Badge
+                  variant={query.content.error?.code ? "error" : "secondary"}
+                >
+                  <span>
+                    {query.content.error?.code ? "FAILED" : "COMPLETED"}
                   </span>
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant={
-                      query.content.status === "failed" ? "error" : "secondary"
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <p
+                  className={
+                    Number(query.content.metadata.duration ?? 0) > 999
+                      ? "text-yellow-600"
+                      : "text-black dark:text-white"
+                  }
+                >
+                  {formatDuration(Number(query.content.metadata.duration ?? 0))}
+                </p>
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() =>
+                      dispatch({
+                        type: "openDrawer",
+                        payload: {
+                          modelId: query.uuid ?? "",
+                          requestId: query.request_id ?? "",
+                          jobId: query.job_id ?? "",
+                          scheduleId: query.schedule_id ?? "",
+                        },
+                      })
                     }
                   >
-                    <span>{query.content.status?.toUpperCase()}</span>
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <p
-                    className={
-                      Number(query.content.duration ?? 0) > 999
-                        ? "text-yellow-600"
-                        : "text-black dark:text-white"
-                    }
-                  >
-                    {formatDuration(Number(query.content.duration ?? 0))}
-                  </p>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() =>
-                        dispatch({
-                          type: "openDrawer",
-                          payload: {
-                            modelId: query.uuid ?? "",
-                            requestId: query.request_id ?? "",
-                            jobId: query.job_id ?? "",
-                            scheduleId: query.schedule_id ?? "",
-                          },
-                        })
-                      }
-                    >
-                      <Link2 className="h-4 w-4 text-muted-foreground" />
+                    <Link2 className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                  <Link to={`/query/${query.uuid}`}>
+                    <Button variant="outline" size="icon">
+                      <ExternalLink className="h-4 w-4 text-muted-foreground" />
                     </Button>
-                    <Link to={`/query/${query.uuid}`}>
-                      <Button variant="outline" size="icon">
-                        <ExternalLink className="h-4 w-4 text-muted-foreground" />
-                      </Button>
-                    </Link>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        {children}
-      </div>
-    );
-  },
-);
+                  </Link>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      {children}
+    </div>
+  );
+});
