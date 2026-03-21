@@ -29,7 +29,7 @@ export default function JobsIndexTable() {
   } = useTableData({ key: "jobs" });
 
   const count = index === "instance" ? instanceDataCount : groupDataCount;
-  const label = index === "group" ? "Queue" : "Attempts";
+  const label = index === "group" ? "Queue" : "Attempt";
 
   return (
     <TableLayout type="jobs">

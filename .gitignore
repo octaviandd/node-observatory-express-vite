@@ -23,6 +23,7 @@ client/stats.html
 
 # turbo
 .turbo
+**/.turbo
 
 # misc
 packages/api/.env
