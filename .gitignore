@@ -25,6 +25,9 @@ client/stats.html
 .turbo
 **/.turbo
 
+# vscode
+.vscode
+
 # misc
 packages/api/.env
 packages/api/package-lock.json
