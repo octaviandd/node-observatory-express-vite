@@ -6,13 +6,12 @@ import SchedulesIndexTable from "../table";
 import { Graphs } from "../graphs/graphs";
 
 export default function SchedulesIndex() {
-
   return (
-      <FilterProvider defaultInstanceStatusType="all">
-        <IndexLayout>
-          <Graphs />
-          <SchedulesIndexTable />
-        </IndexLayout>
-      </FilterProvider>
+    <FilterProvider defaultInstanceStatusType="all">
+      <IndexLayout>
+        <Graphs />
+        <SchedulesIndexTable />
+      </IndexLayout>
+    </FilterProvider>
   );
 }

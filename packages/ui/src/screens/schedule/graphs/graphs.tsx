@@ -29,7 +29,7 @@ const CountCard = memo(() => {
 
   return (
     <StatsCard
-      title="SCHEDULES"
+      title="RUNS"
       count={data.count}
       badges={[
         { label: "Completed", value: data.indexCountOne, variant: "secondary" },

@@ -176,14 +176,26 @@ class GenericWatcher<
      * params becomes:
      *   ["req-123", "job-456"]
      */
+    // If the entry has a job_id but no request_id, look up the request_id from
+    // a sibling entry (e.g. the queue.add() entry logged during the HTTP request).
+    let resolvedRequestId: string | null = null;
+    if (hasJobId && !hasRequestId) {
+      resolvedRequestId = await this.DBInstance.resolveRequestIdFromJobId(
+        entry.job_id!,
+      );
+    }
+    const effectiveRequestId = hasRequestId
+      ? entry.request_id
+      : resolvedRequestId;
+
     const conditions = [
-      ...(hasRequestId ? ["request_id = ?"] : []),
+      ...(effectiveRequestId ? ["request_id = ?"] : []),
       ...(hasScheduleId ? ["schedule_id = ?"] : []),
       ...(hasJobId ? ["job_id = ?"] : []),
     ];
 
     const params = [
-      ...(hasRequestId ? [entry.request_id!] : []),
+      ...(effectiveRequestId ? [effectiveRequestId] : []),
       ...(hasScheduleId ? [entry.schedule_id!] : []),
       ...(hasJobId ? [entry.job_id!] : []),
     ];
@@ -234,15 +246,24 @@ class GenericWatcher<
       return null;
     }
 
+    // If a jobId is present but no requestId, resolve it from a sibling entry
+    const hasJobId = jobId && jobId !== "null";
+    const hasRequestId = requestId && requestId !== "null";
+    let effectiveRequestId = hasRequestId ? requestId : null;
+    if (hasJobId && !hasRequestId) {
+      effectiveRequestId =
+        await this.DBInstance.resolveRequestIdFromJobId(jobId);
+    }
+
     const conditions = [
-      ...(requestId && requestId !== "null" ? [`request_id = ?`] : []),
-      ...(jobId && jobId !== "null" ? [`job_id = ?`] : []),
+      ...(effectiveRequestId ? [`request_id = ?`] : []),
+      ...(hasJobId ? [`job_id = ?`] : []),
       ...(scheduleId && scheduleId !== "null" ? [`schedule_id = ?`] : []),
     ];
 
     const params = [
-      ...(requestId && requestId !== "null" ? [requestId] : []),
-      ...(jobId && jobId !== "null" ? [jobId] : []),
+      ...(effectiveRequestId ? [effectiveRequestId] : []),
+      ...(hasJobId ? [jobId] : []),
       ...(scheduleId && scheduleId !== "null" ? [scheduleId] : []),
     ];
 

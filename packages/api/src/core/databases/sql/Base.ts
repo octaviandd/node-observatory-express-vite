@@ -348,6 +348,26 @@ class Base {
     }
   }
   /**
+   * For a given internal job_id, find the request_id recorded on any sibling entry
+   * (e.g. the queue.add() entry logged during the HTTP request). Returns null when
+   * no non-null request_id exists for that job_id.
+   */
+  async resolveRequestIdFromJobId(jobId: string): Promise<string | null> {
+    try {
+      const [rows] = (await this.storeConnection.query(
+        `SELECT request_id FROM observatory_entries
+         WHERE job_id = ? AND request_id != 'null'
+         LIMIT 1`,
+        [jobId],
+      )) as [any[], FieldPacket[]];
+
+      return rows.length > 0 ? rows[0].request_id : null;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
    * Fetch "related" view data by matching any of the given conditions (OR group).
    * - conditions: ["request_id = ?", "job_id = ?"]
    * - params: ["req-123", "job-456"]
