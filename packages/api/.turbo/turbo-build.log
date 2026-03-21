@@ -1,0 +1,22 @@
+
+
+> @node-observatory/api@1.3.6 build
+> npm run clean && npm run build:cjs && npm run build:esm && npm run build:pkg-files
+
+[1G[0K
+> @node-observatory/api@1.3.6 clean
+> rm -rf dist
+
+[1G[0K[1G[0K⠙[1G[0K
+> @node-observatory/api@1.3.6 build:cjs
+> tsc -p tsconfig.cjs.json
+
+[1G[0K[1G[0K⠙[1G[0K
+> @node-observatory/api@1.3.6 build:esm
+> tsc -p tsconfig.esm.json
+
+[1G[0K[1G[0K⠙[1G[0K
+> @node-observatory/api@1.3.6 build:pkg-files
+> echo '{"type":"commonjs"}' > dist/cjs/package.json && echo '{"type":"module"}' > dist/esm/package.json
+
+[1G[0K[1G[0K⠙[1G[0K[1G[0K⠙[1G[0K

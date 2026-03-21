@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
+    "composite": true,
     "outDir": "dist",
+    "rootDir": "src",
     "esModuleInterop": true,
     "lib": ["es2019"],
     "module": "CommonJS",
@@ -13,7 +15,11 @@
     "noUnusedLocals": true,
     "resolveJsonModule": true,
     "declaration": true,
+    "declarationMap": true,
     "skipLibCheck": true
   },
+  "references": [
+    { "path": "../api/tsconfig.cjs.json" }
+  ],
   "include": ["./src"]
 }

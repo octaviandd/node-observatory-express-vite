@@ -342,6 +342,7 @@ declare type ExceptionData = {
   line: string;
   title: string;
   fullError: string;
+  exceptionType: "uncaughtException" | "unhandledRejection";
   codeContext: { lineNumber: number; content: string; isErrorLine: boolean }[];
 };
 declare type ExceptionContent = BaseLogEntry<ExceptionMetadata, ExceptionData>;

@@ -77,7 +77,7 @@ function generateUIRoutes(): string[] {
 
 export async function createObserver(
   serverAdapter: IServerAdapter,
-  options: { uiBasePath?: string },
+  options: { uiBasePath?: string; devMode?: boolean },
   driver: StoreDriver,
   connection: Connection | PromiseConnection,
   redisClient: RedisClientType,
@@ -91,33 +91,37 @@ export async function createObserver(
   await setupMigrations(driver, promiseConnection);
   initializeWatchers(redisClient, new Database(promiseConnection));
 
-  const uiDistPath =
-    options.uiBasePath ||
-    path.dirname(resolvePackagePath("@node-observatory/ui/package.json"));
+  serverAdapter.setApiRoutes(apiRoutes);
 
-  serverAdapter
-    .setStaticPath("/", path.join(uiDistPath, "dist"))
-    .setStaticPath("/assets", path.join(uiDistPath, "dist/assets"))
-    .setApiRoutes(apiRoutes)
-    .setEntryRoute({
-      method: "get",
-      route: generateUIRoutes(),
-      handler: ({ basePath }) => ({
-        name: path.join(uiDistPath, "dist", "index.html"),
-        params: { basePath },
-      }),
-    })
-    .setErrorHandler((error: Error & { statusCode: HTTPStatus }) => {
-      return {
-        status: error.statusCode || 500,
-        body: {
-          error: "Internal server error",
-          message: error.message,
-          details:
-            process.env.NODE_ENV === "development" ? error.stack : undefined,
-        },
-      };
-    });
+  if (!options.devMode) {
+    const uiDistPath =
+      options.uiBasePath ||
+      path.dirname(resolvePackagePath("@node-observatory/ui/package.json"));
+
+    serverAdapter
+      .setStaticPath("/", path.join(uiDistPath, "dist"))
+      .setStaticPath("/assets", path.join(uiDistPath, "dist/assets"))
+      .setEntryRoute({
+        method: "get",
+        route: generateUIRoutes(),
+        handler: ({ basePath }) => ({
+          name: path.join(uiDistPath, "dist", "index.html"),
+          params: { basePath },
+        }),
+      });
+  }
+
+  serverAdapter.setErrorHandler((error: Error & { statusCode: HTTPStatus }) => {
+    return {
+      status: error.statusCode || 500,
+      body: {
+        error: "Internal server error",
+        message: error.message,
+        details:
+          process.env.NODE_ENV === "development" ? error.stack : undefined,
+      },
+    };
+  });
 
   console.log("Observatory setup complete");
 }

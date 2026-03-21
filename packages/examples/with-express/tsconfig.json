@@ -1,23 +1,14 @@
 {
   "compilerOptions": {
-    "target": "ES2016",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "node",
     "outDir": "./dist",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    // "paths": {
-    //   "@node-observatory/api": ["../../api/index.ts"],
-    //   "@node-observatory/api/*": ["../../api/*"],
-    //   "@node-observatory/express": ["../../express/src/index.ts"],
-    //   "@node-observatory/express/*": ["../../express/src/*"]
-    // }
+    "forceConsistentCasingInFileNames": true
   },
-  "include": ["*.ts"],
-  "exclude": ["node_modules"],
-  // "ts-node": {
-  //   "require": ["tsconfig-paths/register"]
-  // }
+  "include": ["*.ts", "tests/**/*.ts"],
+  "exclude": ["node_modules"]
 }

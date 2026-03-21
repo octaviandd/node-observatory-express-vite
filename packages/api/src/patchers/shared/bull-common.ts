@@ -13,7 +13,7 @@ function log(entry: JobContent) {
   watchers.jobs.insertRedisStream({ ...entry });
 }
 
-const METHODS_TO_PATCH = ["process", "add", "processJob"] as const;
+const METHODS_TO_PATCH = ["process", "add"] as const;
 
 export function patchBullExports(exports: any, filename: string): any {
   if (!exports?.prototype) return exports;
@@ -95,72 +95,78 @@ export function patchBullExports(exports: any, filename: string): any {
               }
             }
 
-            // Handle queue.processJob() - job execution
-            if (method === "processJob" && args[0]) {
-              const job = args[0];
-              const attemptStartTime = performance.now();
-
-              try {
-                const result = await originalFn.apply(this, args);
-
-                const { processedOn, finishedOn, attemptsMade } = job;
-                const duration =
-                  processedOn && finishedOn
-                    ? parseFloat((finishedOn - processedOn).toFixed(2))
-                    : parseFloat(
-                        (performance.now() - attemptStartTime).toFixed(2),
-                      );
-
-                log({
-                  metadata: {
-                    package: "bull",
-                    duration,
-                    location: { file: callerInfo.file, line: callerInfo.line },
-                    created_at: timestamp(),
-                  },
-                  data: {
-                    method,
-                    status: "completed",
-                    queue: queueName,
-                    connectionName,
-                    jobId: job.id,
-                    attemptsMade,
-                  },
-                });
-
-                return result;
-              } catch (err: any) {
-                log({
-                  metadata: {
-                    package: "bull",
-                    duration: parseFloat(
-                      (performance.now() - attemptStartTime).toFixed(2),
-                    ),
-                    location: { file: callerInfo.file, line: callerInfo.line },
-                    created_at: timestamp(),
-                  },
-                  data: {
-                    method,
-                    status: "failed",
-                    queue: queueName,
-                    connectionName,
-                    jobId: job.id,
-                    attemptsMade: job.attemptsMade,
-                    failedReason: err.message,
-                  },
-                  error: {
-                    name: err.name || "JobProcessingError",
-                    message: err.message || String(err),
-                    stack: err.stack,
-                  },
-                });
-
-                throw err;
-              }
-            }
-
-            // Handle queue.process() - processor registration
+            // Handle queue.process() - wrap the user's processor to capture success/failure
             if (method === "process") {
+              // Bull.process signatures:
+              //   process(processor)
+              //   process(name, processor)
+              //   process(concurrency, processor)
+              //   process(name, concurrency, processor)
+              const processorIndex = args.findIndex(
+                (a) => typeof a === "function",
+              );
+              if (processorIndex !== -1) {
+                const originalProcessor = args[processorIndex];
+                args[processorIndex] = async function wrappedBullProcessor(
+                  job: any,
+                ) {
+                  const startTime = performance.now();
+                  try {
+                    const result = await originalProcessor(job);
+                    log({
+                      metadata: {
+                        package: "bull",
+                        duration: parseFloat(
+                          (performance.now() - startTime).toFixed(2),
+                        ),
+                        location: {
+                          file: callerInfo.file,
+                          line: callerInfo.line,
+                        },
+                        created_at: timestamp(),
+                      },
+                      data: {
+                        method: "processJob",
+                        status: "completed",
+                        queue: queueName,
+                        connectionName,
+                        jobId: job.id,
+                        attemptsMade: job.attemptsMade,
+                      },
+                    });
+                    return result;
+                  } catch (err: any) {
+                    log({
+                      metadata: {
+                        package: "bull",
+                        duration: parseFloat(
+                          (performance.now() - startTime).toFixed(2),
+                        ),
+                        location: {
+                          file: callerInfo.file,
+                          line: callerInfo.line,
+                        },
+                        created_at: timestamp(),
+                      },
+                      data: {
+                        method: "processJob",
+                        status: "failed",
+                        queue: queueName,
+                        connectionName,
+                        jobId: job.id,
+                        attemptsMade: job.attemptsMade,
+                        failedReason: err.message,
+                      },
+                      error: {
+                        name: err.name || "JobProcessingError",
+                        message: err.message || String(err),
+                        stack: err.stack,
+                      },
+                    });
+                    throw err; // re-throw so Bull handles retries/moveToFailed
+                  }
+                };
+              }
               return originalFn.apply(this, args);
             }
 

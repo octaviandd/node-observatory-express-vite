@@ -1,10 +1,17 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "composite": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "outDir": "./dist/esm",
     "rootDir": "./src"
   },
-  "include": ["src/index.esm.ts", "src/core/**/*", "src/patchers/esm/**/*"]
+  "include": [
+    "src/index.esm.ts",
+    "src/logger.ts",
+    "src/core/**/*",
+    "src/patchers/esm/**/*",
+    "src/patchers/shared/**/*"
+  ]
 }

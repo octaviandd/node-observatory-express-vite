@@ -8,10 +8,8 @@ class QueryWatcherSQL extends BaseBuilder {
    */
   private getQueryStatusSQL(status: string | undefined): string {
     if (!status || status === "all") return "";
-
-    // Use metadata.sqlType instead of parsing the SQL string
-    const sqlType = status.toUpperCase();
-    return `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.sqlType')) = '${sqlType}'`;
+    if (status === "completed") return "AND JSON_EXTRACT(content, '$.error') IS NULL";
+    return "AND JSON_EXTRACT(content, '$.error') IS NOT NULL";
   }
 
   /**
@@ -21,7 +19,7 @@ class QueryWatcherSQL extends BaseBuilder {
     const { period, limit, offset, query, status, key } = filters;
 
     const periodSql = this.getPeriodSQL(period);
-    const querySql = query ? this.getInclusionSQL(query, "query") : "";
+    const querySql = query ? this.getInclusionSQL(query, "data.sql") : "";
     const keySql = key ? this.getEqualitySQL(key, "data.sql") : "";
     const statusSql = this.getQueryStatusSQL(status);
 
@@ -40,7 +38,7 @@ class QueryWatcherSQL extends BaseBuilder {
     const { period, limit, offset, query } = filters;
 
     const periodSql = this.getPeriodSQL(period);
-    const querySql = query ? this.getInclusionSQL(query, "endpoint") : "";
+    const querySql = query ? this.getInclusionSQL(query, "data.sql") : "";
 
     const whereClause = `WHERE type = 'query' ${periodSql} ${querySql}`;
 
@@ -48,8 +46,8 @@ class QueryWatcherSQL extends BaseBuilder {
       "JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.sql')) as endpoint",
       "COUNT(*) as total",
       "AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL)) as duration",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed",
+      "SUM(CASE WHEN JSON_EXTRACT(content, '$.error') IS NULL THEN 1 ELSE 0 END) as completed",
+      "SUM(CASE WHEN JSON_EXTRACT(content, '$.error') IS NOT NULL THEN 1 ELSE 0 END) as failed",
       "CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest",
       "CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest",
       "CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average",
@@ -82,8 +80,8 @@ class QueryWatcherSQL extends BaseBuilder {
       "CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest",
       "CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest",
       "CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed",
+      "SUM(CASE WHEN JSON_EXTRACT(content, '$.error') IS NULL THEN 1 ELSE 0 END) as completed",
+      "SUM(CASE WHEN JSON_EXTRACT(content, '$.error') IS NOT NULL THEN 1 ELSE 0 END) as failed",
       this.getP95SQL("query"),
       "NULL as created_at",
       "NULL as content",
