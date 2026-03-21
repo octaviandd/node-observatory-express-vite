@@ -8,9 +8,9 @@ class JobWatcherSQL extends BaseBuilder {
    */
   private getJobStatusFilterSQL(status: string | undefined): string {
     if (!status || status === "all") {
-      return "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) IN ('released', 'completed', 'failed'))";
+      return "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.status')) IN ('released', 'completed', 'failed'))";
     }
-    return this.getEqualitySQL(status, "status");
+    return this.getEqualitySQL(status, "data.status");
   }
 
   /**
@@ -21,21 +21,21 @@ class JobWatcherSQL extends BaseBuilder {
     const { period, limit, offset, status, key } = filters;
 
     const periodSql = this.getPeriodSQL(period);
-    const queueSql = key ? this.getEqualitySQL(key, "metadata.queue") : "";
+    const queueSql = key ? this.getEqualitySQL(key, "data.queue") : "";
     const statusSql = this.getJobStatusFilterSQL(status || "all");
 
     const whereClause = `
       WHERE type = 'job' 
-      AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.method')) = 'processJob'
+      AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.method')) = 'processJob'
       ${statusSql} ${periodSql} ${queueSql}
     `;
 
     const itemsQuery = `
       SELECT *, 
         CASE 
-          WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1
-          WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' THEN 2
-          WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 3
+          WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.status')) = 'failed' THEN 1
+          WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.status')) = 'released' THEN 2
+          WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.status')) = 'completed' THEN 3
           ELSE 4
         END AS status_priority
       FROM observatory_entries
@@ -56,7 +56,7 @@ class JobWatcherSQL extends BaseBuilder {
     const { period, query, limit, offset, status } = filters;
 
     const periodSql = this.getPeriodSQL(period);
-    const querySql = query ? this.getInclusionSQL(query, "metadata.queue") : "";
+    const querySql = query ? this.getInclusionSQL(query, "data.queue") : "";
 
     // Dynamic ordering based on UI selection
     const orderMapping: Record<string, string> = {
@@ -67,18 +67,18 @@ class JobWatcherSQL extends BaseBuilder {
     const orderBySql = orderMapping[status] || orderMapping.all;
 
     const columns = [
-      "JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.queue')) AS queue",
+      "JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.queue')) AS queue",
       "COUNT(*) AS total",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' THEN 1 ELSE 0 END) AS released",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) AS completed",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) AS failed",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.status')) = 'released' THEN 1 ELSE 0 END) AS released",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.status')) = 'completed' THEN 1 ELSE 0 END) AS completed",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.status')) = 'failed' THEN 1 ELSE 0 END) AS failed",
       "CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest",
       "CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest",
       "CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average",
       this.getP95SQL("job"),
     ];
 
-    const whereClause = `WHERE type = 'job' AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.method')) = 'processJob' ${periodSql} ${querySql}`;
+    const whereClause = `WHERE type = 'job' AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.method')) = 'processJob' ${periodSql} ${querySql}`;
 
     return {
       items: `
@@ -88,7 +88,7 @@ class JobWatcherSQL extends BaseBuilder {
         GROUP BY queue
         ${orderBySql}
         LIMIT ${limit} OFFSET ${offset};`,
-      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.queue'))) as total FROM observatory_entries ${whereClause};`,
+      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.queue'))) as total FROM observatory_entries ${whereClause};`,
     };
   }
 
@@ -98,14 +98,14 @@ class JobWatcherSQL extends BaseBuilder {
   public getIndexGraphDataSQL(filters: JobFilters) {
     const { period, key, status } = filters;
     const periodSql = this.getPeriodSQL(period);
-    const queueSql = key ? this.getEqualitySQL(key, "metadata.queue") : "";
+    const queueSql = key ? this.getEqualitySQL(key, "data.queue") : "";
     const statusSql = this.getJobStatusFilterSQL(status || "all");
 
     const aggregateColumns = [
       "COUNT(*) as total",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'released' THEN 1 ELSE 0 END) as released",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.status')) = 'completed' THEN 1 ELSE 0 END) as completed",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.status')) = 'failed' THEN 1 ELSE 0 END) as failed",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.status')) = 'released' THEN 1 ELSE 0 END) as released",
       "CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest",
       "CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest",
       "CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average",
@@ -129,7 +129,7 @@ class JobWatcherSQL extends BaseBuilder {
       "'row' as type",
     ];
 
-    const whereClause = `WHERE type = 'job' AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.method')) = 'processJob' ${periodSql} ${queueSql} ${statusSql}`;
+    const whereClause = `WHERE type = 'job' AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.method')) = 'processJob' ${periodSql} ${queueSql} ${statusSql}`;
 
     return `
       (SELECT ${aggregateColumns.join(", ")} FROM observatory_entries ${whereClause})

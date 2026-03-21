@@ -91,6 +91,7 @@ function buildEntry(
       title: details.title,
       codeContext: details.codeContext,
       fullError: details.fullError,
+      exceptionType: type,
     },
   };
 }

@@ -7,11 +7,14 @@ class ScheduleWatcherSQL extends BaseBuilder {
    * Helper for schedule-specific status filtering
    */
   private getStatusSQL(status: string | undefined): string {
+    // Schedule entries use data.type='job' for actual executions; success/failure is indicated by $.error presence
     if (!status || status === "all") {
-      return "AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) IN ('completed', 'failed'))";
+      return "AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.type')) = 'job'";
     }
-
-    return `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = '${status}'`;
+    if (status === "completed") {
+      return "AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.type')) = 'job' AND JSON_EXTRACT(content, '$.error') IS NULL";
+    }
+    return "AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.type')) = 'job' AND JSON_EXTRACT(content, '$.error') IS NOT NULL";
   }
 
   /**
@@ -22,11 +25,9 @@ class ScheduleWatcherSQL extends BaseBuilder {
 
     const periodSql = this.getPeriodSQL(period);
     const querySql = query
-      ? this.getInclusionSQL(query, "metadata.scheduleId")
+      ? this.getInclusionSQL(query, "data.scheduleId")
       : "";
-    const scheduleSql = key
-      ? this.getEqualitySQL(key, "metadata.scheduleId")
-      : "";
+    const scheduleSql = key ? this.getEqualitySQL(key, "data.scheduleId") : "";
     const statusSql = this.getStatusSQL(status);
 
     const whereClause = `WHERE type = 'schedule' ${statusSql} ${querySql} ${periodSql} ${scheduleSql}`;
@@ -49,11 +50,11 @@ class ScheduleWatcherSQL extends BaseBuilder {
       : "";
 
     const columns = [
-      "JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.scheduleId')) AS scheduleId",
+      "JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.scheduleId')) AS scheduleId",
       "COUNT(*) as total",
       "GROUP_CONCAT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.cronExpression'))) AS cronExpression",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed",
+      "SUM(CASE WHEN JSON_EXTRACT(content, '$.error') IS NULL THEN 1 ELSE 0 END) as completed",
+      "SUM(CASE WHEN JSON_EXTRACT(content, '$.error') IS NOT NULL THEN 1 ELSE 0 END) as failed",
       "CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest",
       "CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest",
       "CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average",
@@ -62,7 +63,7 @@ class ScheduleWatcherSQL extends BaseBuilder {
 
     const whereClause = `
       WHERE type = 'schedule' ${timeSql} ${querySql} 
-      AND (JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) IN ('completed', 'failed'))
+      AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.type')) = 'job'
     `;
 
     return {
@@ -72,7 +73,7 @@ class ScheduleWatcherSQL extends BaseBuilder {
         ${whereClause}
         GROUP BY scheduleId
         LIMIT ${limit} OFFSET ${offset};`,
-      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.scheduleId'))) as total FROM observatory_entries ${whereClause};`,
+      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.scheduleId'))) as total FROM observatory_entries ${whereClause};`,
     };
   }
 
@@ -89,8 +90,8 @@ class ScheduleWatcherSQL extends BaseBuilder {
 
     const aggregateColumns = [
       "COUNT(*) as total",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed",
+      "SUM(CASE WHEN JSON_EXTRACT(content, '$.error') IS NULL THEN 1 ELSE 0 END) as completed",
+      "SUM(CASE WHEN JSON_EXTRACT(content, '$.error') IS NOT NULL THEN 1 ELSE 0 END) as failed",
       "CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest",
       "CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest",
       "CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average",

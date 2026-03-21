@@ -8,9 +8,8 @@ class MailWatcherSQL extends BaseBuilder {
    */
   private getStatusSQL(status: string | undefined): string {
     if (!status || status === "all") return "";
-
-    const value = status === "completed" ? "completed" : "failed";
-    return `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = '${value}'`;
+    if (status === "completed") return "AND JSON_EXTRACT(content, '$.error') IS NULL";
+    return "AND JSON_EXTRACT(content, '$.error') IS NOT NULL";
   }
 
   /**
@@ -47,8 +46,8 @@ class MailWatcherSQL extends BaseBuilder {
       // Extract first email from the to array
       "JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.to[0]')) as mail_to",
       "COUNT(*) as total",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed_count",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as success_count",
+      "SUM(CASE WHEN JSON_EXTRACT(content, '$.error') IS NOT NULL THEN 1 ELSE 0 END) as failed_count",
+      "SUM(CASE WHEN JSON_EXTRACT(content, '$.error') IS NULL THEN 1 ELSE 0 END) as success_count",
       "CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest",
       "CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest",
       "CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average",
@@ -82,8 +81,8 @@ class MailWatcherSQL extends BaseBuilder {
 
     const aggregateColumns = [
       "COUNT(*) as total",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed",
+      "SUM(CASE WHEN JSON_EXTRACT(content, '$.error') IS NULL THEN 1 ELSE 0 END) as completed",
+      "SUM(CASE WHEN JSON_EXTRACT(content, '$.error') IS NOT NULL THEN 1 ELSE 0 END) as failed",
       "CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest",
       "CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest",
       "CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average",

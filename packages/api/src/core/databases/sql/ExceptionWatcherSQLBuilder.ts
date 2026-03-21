@@ -11,7 +11,7 @@ class ExceptionWatcherSQL extends BaseBuilder {
 
 		// Maps the UI filter to the internal JSON property value
 		const typeValue = type === "unhandled" ? "unhandledRejection" : "uncaughtException";
-		return `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.type')) = '${typeValue}'`;
+		return `AND JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.exceptionType')) = '${typeValue}'`;
 	}
 
 	/**
@@ -22,8 +22,8 @@ class ExceptionWatcherSQL extends BaseBuilder {
 
 		const periodSql = this.getPeriodSQL(period);
 		const typeSql = this.getExceptionTypeSQL(status);
-		const querySql = query ? this.getInclusionSQL(query, "message") : "";
-		const keySql = key ? this.getEqualitySQL(key, "message") : "";
+		const querySql = query ? this.getInclusionSQL(query, "data.message") : "";
+		const keySql = key ? this.getEqualitySQL(key, "data.message") : "";
 
 		const whereClause = `WHERE type = 'exception' ${periodSql} ${typeSql} ${querySql} ${keySql}`;
 
@@ -45,7 +45,7 @@ class ExceptionWatcherSQL extends BaseBuilder {
 		const whereClause = `WHERE type = 'exception' ${periodSql} ${querySql}`;
 
 		const columns = [
-			"JSON_UNQUOTE(JSON_EXTRACT(content, '$.message')) as header",
+			"JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.message')) as header",
 			"COUNT(*) as total",
 			"MIN(created_at) as first_seen",
 			"MAX(created_at) as last_seen",
@@ -59,7 +59,7 @@ class ExceptionWatcherSQL extends BaseBuilder {
         GROUP BY header
         ORDER BY total DESC
         LIMIT ${limit} OFFSET ${offset};`,
-			count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.message'))) as total FROM observatory_entries ${whereClause};`,
+			count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.message'))) as total FROM observatory_entries ${whereClause};`,
 		};
 	}
 
@@ -73,8 +73,8 @@ class ExceptionWatcherSQL extends BaseBuilder {
 
 		const aggregateColumns = [
 			"COUNT(*) as total",
-			"SUM(CASE WHEN JSON_EXTRACT(content, '$.type') = 'unhandledRejection' THEN 1 ELSE 0 END) as unhandledRejection",
-			"SUM(CASE WHEN JSON_EXTRACT(content, '$.type') = 'uncaughtException' THEN 1 ELSE 0 END) as uncaughtException",
+			"SUM(CASE WHEN JSON_EXTRACT(content, '$.data.exceptionType') = 'unhandledRejection' THEN 1 ELSE 0 END) as unhandledRejection",
+			"SUM(CASE WHEN JSON_EXTRACT(content, '$.data.exceptionType') = 'uncaughtException' THEN 1 ELSE 0 END) as uncaughtException",
 			"NULL as created_at",
 			"NULL as content",
 			"'aggregate' as type",

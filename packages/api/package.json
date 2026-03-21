@@ -30,6 +30,7 @@
 		"build:esm": "tsc -p tsconfig.esm.json",
 		"build:pkg-files": "echo '{\"type\":\"commonjs\"}' > dist/cjs/package.json && echo '{\"type\":\"module\"}' > dist/esm/package.json",
 		"clean": "rm -rf dist",
+		"dev": "npm run dev-cjs",
 		"dev-cjs": "tsc -p tsconfig.cjs.json --watch",
 		"dev-esm": "tsc -p tsconfig.esm.json --watch",
 		"test": "jest --config tests/jest.config.js",

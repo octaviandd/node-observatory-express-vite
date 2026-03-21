@@ -8,7 +8,7 @@ class ModelWatcherSQL extends BaseBuilder {
    */
   private getStatusSQL(status: string | undefined): string {
     if (!status || status === "all") return "";
-    return `AND JSON_EXTRACT(content, '$.status') = '${status}'`;
+    return `AND JSON_EXTRACT(content, '$.data.status') = '${status}'`;
   }
 
   /**
@@ -17,8 +17,8 @@ class ModelWatcherSQL extends BaseBuilder {
   public getIndexTableDataByInstanceSQL(filters: ModelFilters) {
     const { limit, offset, key, query, status } = filters;
 
-    const modelSQL = key ? this.getEqualitySQL(key, "modelName") : "";
-    const querySQL = query ? this.getInclusionSQL(query, "modelName") : "";
+    const modelSQL = key ? this.getEqualitySQL(key, "data.modelName") : "";
+    const querySQL = query ? this.getInclusionSQL(query, "data.modelName") : "";
     const statusSQL = this.getStatusSQL(status);
 
     const whereClause = `WHERE type = 'model' ${modelSQL} ${querySQL} ${statusSQL}`;
@@ -35,14 +35,14 @@ class ModelWatcherSQL extends BaseBuilder {
   public getIndexTableDataByGroupSQL(filters: ModelFilters) {
     const { limit, offset, key, query } = filters;
 
-    const modelSQL = key ? this.getEqualitySQL(key, "modelName") : "";
-    const querySQL = query ? this.getInclusionSQL(query, "modelName") : "";
+    const modelSQL = key ? this.getEqualitySQL(key, "data.modelName") : "";
+    const querySQL = query ? this.getInclusionSQL(query, "data.modelName") : "";
 
     const columns = [
-      "JSON_UNQUOTE(JSON_EXTRACT(content, '$.modelName')) as modelName",
+      "JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.modelName')) as modelName",
       "COUNT(*) as total",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'success' THEN 1 ELSE 0 END) as count_success",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'error' THEN 1 ELSE 0 END) as count_error",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.status')) = 'success' THEN 1 ELSE 0 END) as count_success",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.status')) = 'error' THEN 1 ELSE 0 END) as count_error",
       "CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest",
       "CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest",
       "CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average",
@@ -59,7 +59,7 @@ class ModelWatcherSQL extends BaseBuilder {
         GROUP BY modelName
         ORDER BY total DESC
         LIMIT ${limit} OFFSET ${offset};`,
-      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.modelName'))) as total FROM observatory_entries ${whereClause};`,
+      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.modelName'))) as total FROM observatory_entries ${whereClause};`,
     };
   }
 
@@ -75,8 +75,8 @@ class ModelWatcherSQL extends BaseBuilder {
       "CAST(MIN(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as shortest",
       "CAST(MAX(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as longest",
       "CAST(AVG(CAST(JSON_UNQUOTE(JSON_EXTRACT(content, '$.metadata.duration')) AS DECIMAL(10,2))) AS DECIMAL(10,2)) as average",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'completed' THEN 1 ELSE 0 END) as completed",
-      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.status')) = 'failed' THEN 1 ELSE 0 END) as failed",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.status')) = 'completed' THEN 1 ELSE 0 END) as completed",
+      "SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.status')) = 'failed' THEN 1 ELSE 0 END) as failed",
       this.getP95SQL("model"),
       "NULL as created_at",
       "NULL as content",

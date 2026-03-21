@@ -21,6 +21,10 @@ client/stats.html
 # testing
 /coverage
 
+# turbo
+.turbo
+**/.turbo
+
 # misc
 packages/api/.env
 packages/api/package-lock.json
