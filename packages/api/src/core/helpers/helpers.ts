@@ -223,6 +223,13 @@ function getMetricValue(content: any, key: string): number {
 
   // Status-based keys (query, notification, mail, schedule, view, model, job)
   if (key === "completed" || key === "failed" || key === "released") {
+    // Schedule entries don't store an explicit status — success is indicated
+    // by the absence of an error field, failure by its presence.
+    if (content.data?.type === "job" && content.status === undefined) {
+      if (key === "completed") return content.error == null ? 1 : 0;
+      if (key === "failed") return content.error != null ? 1 : 0;
+      return 0;
+    }
     return content.status === key ? 1 : 0;
   }
 
