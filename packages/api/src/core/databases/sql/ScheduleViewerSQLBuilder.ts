@@ -84,7 +84,7 @@ class ScheduleWatcherSQL extends BaseBuilder {
     const { period, key, status } = filters;
     const timeSql = period ? this.getPeriodSQL(period) : "";
     const scheduleKeySql = key
-      ? this.getEqualitySQL(key, "metadata.scheduleId")
+      ? this.getEqualitySQL(key, "data.scheduleId")
       : "";
     const statusSql = this.getStatusSQL(status);
 

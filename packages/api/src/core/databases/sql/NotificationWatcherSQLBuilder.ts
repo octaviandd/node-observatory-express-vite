@@ -9,8 +9,30 @@ class NotificationWatcherSQL extends BaseBuilder {
    */
   private getStatusSQL(status: string | undefined): string {
     if (!status || status === "all") return "";
-    if (status === "completed") return "AND JSON_EXTRACT(content, '$.error') IS NULL";
+    if (status === "completed")
+      return "AND JSON_EXTRACT(content, '$.error') IS NULL";
     return "AND JSON_EXTRACT(content, '$.error') IS NOT NULL";
+  }
+
+  /**
+   * Matches a channel against both trigger (data.channel) and
+   * triggerBatch (data.batch[*].channel) entries.
+   */
+  private getChannelSQL(channel: string): string {
+    return `AND (
+      JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.channel')) = '${channel}'
+      OR JSON_SEARCH(JSON_EXTRACT(content, '$.data.batch'), 'one', '${channel}', NULL, '$[*].channel') IS NOT NULL
+    )`;
+  }
+
+  /**
+   * Derived channel column: prefer data.channel, fall back to first batch channel.
+   */
+  private get channelColumn(): string {
+    return `COALESCE(
+      JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.channel')),
+      JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.batch[0].channel'))
+    )`;
   }
 
   /**
@@ -20,7 +42,7 @@ class NotificationWatcherSQL extends BaseBuilder {
     const { limit, offset, key, query, status, period } = filters;
 
     const periodSql = period ? this.getPeriodSQL(period) : "";
-    const channelSql = key ? this.getEqualitySQL(key, "data.channel") : "";
+    const channelSql = key ? this.getChannelSQL(key) : "";
     const querySql = query ? this.getInclusionSQL(query, "data.channel") : "";
     const statusSql = this.getStatusSQL(status);
 
@@ -39,12 +61,12 @@ class NotificationWatcherSQL extends BaseBuilder {
     const { period, key, query, limit, offset } = filters;
 
     const timeSql = period ? this.getPeriodSQL(period) : "";
-    const channelSql = key ? this.getEqualitySQL(key, "data.channel") : "";
+    const channelSql = key ? this.getChannelSQL(key) : "";
     const querySql = query ? this.getInclusionSQL(query, "data.channel") : "";
     const statusSql = this.getStatusSQL("all"); // Excludes pending
 
     const columns = [
-      "JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.channel')) AS channel",
+      `${this.channelColumn} AS channel`,
       "COUNT(*) as total",
       "SUM(CASE WHEN JSON_EXTRACT(content, '$.error') IS NULL THEN 1 ELSE 0 END) as completed",
       "SUM(CASE WHEN JSON_EXTRACT(content, '$.error') IS NOT NULL THEN 1 ELSE 0 END) as failed",
@@ -64,7 +86,7 @@ class NotificationWatcherSQL extends BaseBuilder {
         GROUP BY channel
         ORDER BY MAX(created_at) DESC
         LIMIT ${limit} OFFSET ${offset};`,
-      count: `SELECT COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(content, '$.data.channel'))) as total FROM observatory_entries ${whereClause};`,
+      count: `SELECT COUNT(DISTINCT ${this.channelColumn}) as total FROM observatory_entries ${whereClause};`,
     };
   }
 
@@ -74,7 +96,7 @@ class NotificationWatcherSQL extends BaseBuilder {
   public getIndexGraphDataSQL(filters: NotificationFilters) {
     const { period, key, status } = filters;
     const periodSql = period ? this.getPeriodSQL(period) : "";
-    const channelSql = key ? this.getEqualitySQL(key, "data.channel") : "";
+    const channelSql = key ? this.getChannelSQL(key) : "";
     const statusSql = this.getStatusSQL(status || "all"); // Excludes pending
 
     const aggregateColumns = [
