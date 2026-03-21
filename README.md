@@ -1,55 +1,49 @@
-# 🔍 Node Observatory
+<!-- @format -->
 
-A comprehensive observability and monitoring solution for Node.js applications that automatically instruments your server, database, APIs, and infrastructure without requiring code changes.
+# Node Observatory
 
-## 📋 Table of Contents
+Zero-config observability for Node.js apps. Drop it in, connect your database and Redis, and get a live dashboard for HTTP requests, database queries, jobs, cache operations, logs, emails, exceptions, and more — without changing your application code.
 
-- [Features](#features)
-- [Installation](#installation)
-- [Quick Start](#quick-start)
-- [Configuration](#configuration)
-- [Supported Integrations](#supported-integrations)
-- [Advanced Usage](#advanced-usage)
-- [Package Structure](#package-structure)
-- [License](#license)
+---
 
-## ✨ Features
+## How it works
 
-### Automatic Instrumentation
+Node Observatory monkey-patches the libraries you already use at startup. Events flow into Redis streams, get persisted to MySQL, and the built-in dashboard reads from that store. Nothing in your business logic changes.
 
-Node Observatory uses monkey patching to automatically instrument your application without requiring code changes. It intercepts and enhances the functionality of popular Node.js libraries and frameworks through our patching system.
-
-### Real-time Monitoring & Observability
-
-- 🌐 **HTTP Request Tracking**: Automatically captures request metrics including latency, status codes, payloads, and headers
-- 📊 **Database Observability**: Monitors queries across multiple database drivers with timing and performance metrics
-- ⏱️ **Job & Task Monitoring**: Tracks background jobs, cron tasks, and scheduled operations
-- 💾 **Cache Operations**: Watches Redis, Node-Cache, LRU and other caching mechanisms
-- 📝 **Logging Integration**: Connects with popular logging libraries to centralize and enhance logs
-- 🔔 **Notification Tracking**: Monitors messaging services like Pusher and Ably
-- 🚨 **Exception Handling**: Captures both handled and unhandled exceptions with stack traces and context
-- 🔍 **View Rendering**: Monitors template rendering performance
-- 📧 **Mail Operations**: Tracks email sending across multiple mail providers
-- 📦 **Model Operations**: Monitors ORM and database model interactions
-
-## 🚀 Installation
-
-You can install the full package or just the components you need:
-
-```bash
-# Install the complete package
-npm install node-observatory
-
-# Or install individual packages
-npm install @node-observatory/server
-npm install @node-observatory/client
+```
+Your app
+  └── Patchers (shimmer/require-in-the-middle)
+        └── Redis streams (per watcher type)
+              └── MySQL (observatory_entries)
+                    └── REST API + React dashboard
 ```
 
-## 🎯 Quick Start
+---
+
+## Requirements
+
+- Node.js 20+
+- MySQL 8+
+- Redis 6+
+- Express 4 or 5
+
+---
+
+## Installation
+
+```bash
+npm install @node-observatory/api @node-observatory/express
+```
+
+---
+
+## Quick Start
+
+This must go at the **top** of your entry file, before any other imports. The patchers instrument libraries at load time, so import order matters.
 
 ```typescript
-import { setupLogger } from "@node-observatory/server";
-// The import must be at the top of your entry file.
+import { createObserver } from "@node-observatory/api";
+import { ExpressAdapter } from "@node-observatory/express";
 import express from "express";
 import mysql2 from "mysql2/promise";
 import { createClient } from "redis";
@@ -57,146 +51,166 @@ import { createClient } from "redis";
 const app = express();
 app.use(express.json());
 
-// Set up database and Redis connections
-const mysql2Connection = await mysql2.createConnection({
-  host: "host",
-  user: "user",
-  password: "password",
-  database: "database",
+const db = await mysql2.createConnection({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
   timezone: "UTC",
 });
 
-const redisConnection = createClient({
-  url: "redis://localhost:6379",
-});
-await redisConnection.connect();
+const redis = createClient({ url: process.env.REDIS_URL });
+await redis.connect();
 
-// Initialize observatory with your connections
-await setupLogger(app, "mysql2", mysql2Connection, redisConnection);
+const adapter = new ExpressAdapter();
+adapter.setBasePath("/observatory");
+app.use("/observatory", adapter.getRouter());
 
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
-  console.log("Observatory dashboard available at: http://localhost:3000/observatory");
-});
+await createObserver(adapter, { uiBasePath: undefined }, "mysql2", db, redis);
+
+app.listen(3000);
+// Dashboard: http://localhost:3000/observatory
+// API:       http://localhost:3000/observatory/api/dashboard
 ```
 
-## ⚙️ Configuration
+---
 
-### Supported Integrations
+## Environment variables
 
-Node Observatory automatically instruments the following libraries:
-
-#### Web Frameworks
-- ✅ Express
-
-#### Database Drivers
-- ✅ MySQL / MySQL2
-- ✅ PostgreSQL
-- ✅ MongoDB / Mongoose
-- ✅ Knex
-- ✅ Prisma
-- ✅ TypeORM
-- ✅ Sequelize
-- ✅ SQLite3
-
-#### Logging
-- ✅ Winston
-- ✅ Pino
-- ✅ Bunyan
-- ✅ Log4js
-- ✅ Signale
-- ✅ Loglevel
-
-#### Job/Scheduler Processing
-- ✅ Bull
-- ✅ Agenda
-- ✅ Bree
-- ✅ Node-Schedule
-- ✅ Node-Cron
-
-#### Caching
-- ✅ Redis
-- ✅ IORedis
-- ✅ Node-Cache
-- ✅ LRU-Cache
-- ✅ Memjs
-- ✅ Level
-- ✅ Keyv
-
-#### HTTP Clients
-- ✅ Axios
-- ✅ Got
-- ✅ Superagent
-- ✅ Fetch
-- ✅ Undici
-- ✅ Node-HTTP(S)
-
-#### Messaging/Notifications
-- ✅ Pusher
-- ✅ Ably
-
-#### Email Services
-- ✅ Nodemailer
-- ✅ SendGrid
-- ✅ Mailgun
-- ✅ AWS SES
-- ✅ Postmark
-
-## 🔧 Advanced Usage
-
-Node Observatory can be configured to track specific aspects of your application using environment variables:
+Copy `.env.example` and set what you need. All `NODE_OBSERVATORY_*` variables are optional — they narrow which libraries get instrumented. Omitting them instruments everything.
 
 ```env
+# Infrastructure
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=observatory
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# Instrumentation scope (JSON arrays or true/false)
 NODE_OBSERVATORY_ERRORS=true
 NODE_OBSERVATORY_ERROR_TRACING=true
-NODE_OBSERVATORY_JOBS=["bull"]
-NODE_OBSERVATORY_MAILER=["nodemailer","@aws-sdk/client-ses","mailgun.js","postmark","sendgrid"]
-NODE_OBSERVATORY_CACHE=["node-cache","redis","ioredis","memjs","level","keyv"]
-NODE_OBSERVATORY_NOTIFICATIONS=["pusher","ably"]
 NODE_OBSERVATORY_QUERIES=["mysql2","typeorm","sequelize"]
 NODE_OBSERVATORY_MODELS=["typeorm","sequelize","mongoose"]
 NODE_OBSERVATORY_LOGGING=["winston","pino","bunyan","log4js","signale","loglevel"]
+NODE_OBSERVATORY_CACHE=["node-cache","redis","ioredis","memjs","level","keyv"]
 NODE_OBSERVATORY_HTTP=["http","axios","fetch","got","superagent","undici","ky","needle","phin","node-fetch"]
+NODE_OBSERVATORY_JOBS=["bull","agenda"]
 NODE_OBSERVATORY_SCHEDULER=["node-schedule","node-cron"]
+NODE_OBSERVATORY_MAILER=["nodemailer","@aws-sdk/client-ses","mailgun.js","postmark","sendgrid"]
+NODE_OBSERVATORY_NOTIFICATIONS=["pusher","ably"]
 NODE_OBSERVATORY_VIEWS=["handlebars","pug","ejs"]
+
+# Third-party credentials (only needed if you instrument those services)
+SENDGRID_API_KEY=
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+PUSHER_APP_ID=
+PUSHER_KEY=
+PUSHER_SECRET=
+PUSHER_CLUSTER=
+ABLY_API_KEY=
+POSTMARK_API_KEY=
+MAILGUN_API_KEY=
 ```
 
-## 📊 Client Dashboard
+---
 
-The NodeJS Observatory includes a modern React dashboard built with:
+## What gets instrumented
 
-- **React + TypeScript**: Type-safe component development
-- **Vite**: Lightning-fast frontend tooling
-- **Tailwind CSS**: Utility-first styling
-- **Shadcn/UI**: Beautiful, accessible UI components
+| Category         | Libraries                                                                |
+| ---------------- | ------------------------------------------------------------------------ |
+| Web framework    | Express                                                                  |
+| Database drivers | mysql2, pg, mongodb, mongoose, knex, prisma, typeorm, sequelize, sqlite3 |
+| Logging          | winston, pino, bunyan, log4js, loglevel, signale                         |
+| Job queues       | bull, agenda, bree                                                       |
+| Schedulers       | node-cron, node-schedule                                                 |
+| Caching          | redis, ioredis, node-cache, lru-cache, memjs, level, keyv                |
+| Outgoing HTTP    | node http/https, axios, undici, fetch, got, superagent, needle, phin     |
+| Notifications    | pusher, ably                                                             |
+| Email            | nodemailer, sendgrid, mailgun, aws ses, postmark                         |
+| Exceptions       | uncaughtException, unhandledRejection                                    |
+| Views            | handlebars, pug, ejs                                                     |
 
-### Dashboard Features
+---
 
-- **Real-time data visualization**: Monitor your application performance in real-time
-- **Detailed inspection views**: Drill down into specific requests, queries, jobs, and more
-- **Timeline analysis**: View application activity over time with interactive charts
-- **Filter and search**: Quickly find specific events and patterns
-- **Performance metrics**: Track response times, error rates, and throughput
-- **Dark/Light mode**: Choose your preferred theme
+## Dashboard
 
-### Accessing the Dashboard
+The dashboard is served at the base path you mount the adapter on. It includes:
 
-The dashboard is automatically served by the observatory when you initialize it with your application:
-http://your-app-host/observatory
+- **Overview** — request throughput, error rate, slow requests and queries, job activity.
+- **Requests** — per-route grouping, status code breakdown, P95/avg/min/max latency.
+- **Queries** — SQL grouped by statement, timing, and failure rates.
+- **Jobs** — queue-level grouping, completed/failed/released counts.
+- **Logs** — level-bucketed log volume, full log context.
+- **Exceptions** — uncaught and unhandled rejections with stack traces and inline code context.
+- **Cache** — hit/miss/write rates per key and library.
+- **HTTP client** — outgoing calls grouped by origin, status code breakdown.
+- **Mail** — send attempts, delivery outcomes.
+- **Schedules** — cron/schedule runs, pass/fail rates.
+- **Models** — ORM operation counts and timing.
+- **Notifications** — Pusher/Ably trigger volume and outcomes.
+- **Views** — template render timing.
 
+All screens support instance view (single event detail) and grouped view (aggregated by relevant key), with configurable time windows: 1h, 24h, 7d, 14d, 30d.
 
-The API for retrieving observability data is available at:
-http://your-app-host/ui
+---
 
-## 📦 Package Structure
+## API endpoints
 
-Node Observatory is organized as a monorepo with the following packages:
+Once mounted, the following REST endpoints are available under your base path:
 
-- **@node-observatory/server**: The core instrumentation engine that monitors your application
-- **@node-observatory/client**: The React dashboard for visualizing monitoring data
+```
+GET  /api/dashboard
+GET  /api/{resource}/table
+GET  /api/{resource}/count-graph
+GET  /api/{resource}/duration-graph
+GET  /api/{resource}/:id
+POST /api/{resource}/:id/related
+GET  /api/{resource}/refresh
+```
 
-You can install and use these packages separately depending on your needs.
+Resources: `requests`, `queries`, `logs`, `exceptions`, `jobs`, `schedules`, `https`, `cache`, `mails`, `notifications`, `models`, `views`.
 
-## 📄 License
+---
 
-Proprietary © 2023
+## Package structure
+
+| Package            | npm name                    | Purpose                                                            |
+| ------------------ | --------------------------- | ------------------------------------------------------------------ |
+| `packages/api`     | `@node-observatory/api`     | Core runtime, patchers, Redis streams, SQL persistence, API routes |
+| `packages/express` | `@node-observatory/express` | Express server adapter                                             |
+| `packages/ui`      | `@node-observatory/ui`      | Compiled React dashboard (shipped as static assets)                |
+
+---
+
+## Telemetry storage
+
+All events land in a single `observatory_entries` MySQL table with a JSON `content` column. The schema is intentionally flexible: adding a new patcher does not require a migration. The dashboard derives all aggregations at query time.
+
+| Column        | Type                  | Notes                                              |
+| ------------- | --------------------- | -------------------------------------------------- |
+| `id`          | BIGINT AUTO_INCREMENT | Internal row identity                              |
+| `uuid`        | CHAR(36)              | Stable public event ID                             |
+| `request_id`  | CHAR(36)              | Links event to parent HTTP request                 |
+| `job_id`      | CHAR(36)              | Links event to parent job execution                |
+| `schedule_id` | CHAR(36)              | Links event to parent schedule run                 |
+| `type`        | VARCHAR(20)           | Watcher type: request, query, log, exception, etc. |
+| `content`     | JSON                  | Full normalized payload                            |
+| `created_at`  | TIMESTAMP(6)          | Microsecond precision                              |
+
+Indexes exist on uuid, request_id, job_id, schedule_id, type, and created_at.
+
+---
+
+## Correlation
+
+Events are automatically correlated across watcher types within the same request or job lifecycle using `AsyncLocalStorage`. When you view a single HTTP request in the dashboard, related queries, logs, cache operations, and exceptions that occurred during that request are surfaced alongside it.
+
+---
+
+## License
+
+Proprietary © 2025 Octavian David. See [LICENSE.txt](LICENSE.txt).

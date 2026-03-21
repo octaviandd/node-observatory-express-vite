@@ -50,10 +50,12 @@ function DashboardContent() {
     );
   }
 
-  const { requests, exceptions, jobs, slowRequests, slowQueries } = dashboardData;
+  const { requests, exceptions, jobs, slowRequests, slowQueries } =
+    dashboardData;
   const hasSlowRequests = slowRequests && slowRequests.length > 0;
   const hasSlowQueries = slowQueries && slowQueries.length > 0;
-  const hasExceptions = exceptions?.count && parseInt(exceptions.count.count) > 0;
+  const hasExceptions =
+    exceptions?.count && parseInt(exceptions.count.count) > 0;
 
   return (
     <div className="flex flex-col gap-6">
@@ -107,9 +109,24 @@ function DashboardContent() {
                     <CountGraph
                       data={requests.count.countFormattedData}
                       barData={[
-                        { dataKey: "count_200", name: "1/2/3XX", stackId: "a", fill: "#22c55e" },
-                        { dataKey: "count_400", name: "4XX", stackId: "b", fill: "#ffc658" },
-                        { dataKey: "count_500", name: "5XX", stackId: "c", fill: "#ef4444" },
+                        {
+                          dataKey: "count_200",
+                          name: "1/2/3XX",
+                          stackId: "a",
+                          fill: "#f1f5f9",
+                        },
+                        {
+                          dataKey: "count_400",
+                          name: "4XX",
+                          stackId: "b",
+                          fill: "#ffc658",
+                        },
+                        {
+                          dataKey: "count_500",
+                          name: "5XX",
+                          stackId: "c",
+                          fill: "#ef4444",
+                        },
                       ]}
                     />
                   </div>
@@ -135,15 +152,15 @@ function DashboardContent() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-muted-foreground">P95</span>
-                      <Badge variant="warning">
-                        {requests.duration.p95}
-                      </Badge>
+                      <Badge variant="warning">{requests.duration.p95}</Badge>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <div className="h-auto">
-                    <DurationGraph data={requests.duration.durationFormattedData} />
+                    <DurationGraph
+                      data={requests.duration.durationFormattedData}
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -248,7 +265,8 @@ function DashboardContent() {
                     </CardTitle>
                   </div>
                   <CardSubtitle>
-                    {formatCount(slowRequests?.length || 0)} routes slower than 1000ms
+                    {formatCount(slowRequests?.length || 0)} routes slower than
+                    1000ms
                   </CardSubtitle>
                 </CardHeader>
                 <CardContent>
@@ -307,7 +325,8 @@ function DashboardContent() {
                     </CardTitle>
                   </div>
                   <CardSubtitle>
-                    {formatCount(slowQueries?.length || 0)} endpoints slower than 1000ms
+                    {formatCount(slowQueries?.length || 0)} endpoints slower
+                    than 1000ms
                   </CardSubtitle>
                 </CardHeader>
                 <CardContent>
@@ -364,7 +383,9 @@ function DashboardContent() {
                 <CardHeader>
                   <div className="flex text-xs">
                     <div className="flex items-center gap-2 w-full">
-                      <span className="text-muted-foreground">JOB ATTEMPTS</span>
+                      <span className="text-muted-foreground">
+                        JOB ATTEMPTS
+                      </span>
                       <span className="font-medium">{jobs.count.count}</span>
                     </div>
                   </div>
@@ -394,20 +415,39 @@ function DashboardContent() {
                     <CountGraph
                       data={jobs.count.countFormattedData}
                       barData={[
-                        { dataKey: "completed", name: "Completed", stackId: "a", fill: "#22c55e" },
-                        { dataKey: "released", name: "Released", stackId: "b", fill: "#ffc658" },
-                        { dataKey: "failed", name: "Failed", stackId: "c", fill: "#ef4444" },
+                        {
+                          dataKey: "completed",
+                          name: "Completed",
+                          stackId: "a",
+                          fill: "#22c55e",
+                        },
+                        {
+                          dataKey: "released",
+                          name: "Released",
+                          stackId: "b",
+                          fill: "#ffc658",
+                        },
+                        {
+                          dataKey: "failed",
+                          name: "Failed",
+                          stackId: "c",
+                          fill: "#ef4444",
+                        },
                       ]}
                     />
                   </div>
 
                   <div>
-                    <p className="text-sm text-muted-foreground mb-2">JOBS DURATION</p>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      JOBS DURATION
+                    </p>
                     <CardSubtitle>
                       {jobs.duration.shortest} – {jobs.duration.longest}
                     </CardSubtitle>
                     <div className="h-auto">
-                      <DurationGraph data={jobs.duration.durationFormattedData} />
+                      <DurationGraph
+                        data={jobs.duration.durationFormattedData}
+                      />
                     </div>
                   </div>
 

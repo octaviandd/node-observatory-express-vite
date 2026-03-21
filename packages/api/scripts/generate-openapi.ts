@@ -235,7 +235,9 @@ function generateOpenAPIPath(
             description: "Success",
             content: {
               "application/json": {
-                schema: { $ref: "#/components/schemas/DurationGraphDataResponse" },
+                schema: {
+                  $ref: "#/components/schemas/DurationGraphDataResponse",
+                },
               },
             },
           },
@@ -377,8 +379,6 @@ function generateBaseOpenAPISpec() {
           type: "string",
           enum: ["instance", "group"],
         },
-        // GraphDataResponse, ViewDataResponse, DashboardResponse
-        // are generated from TypeScript types below — no stubs here.
       },
     },
     paths,

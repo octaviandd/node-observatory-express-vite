@@ -26,6 +26,7 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
+    "@node-observatory/types": "*",
     "@node-observatory/api": "^1.3.4",
     "ejs": "^3.1.10",
     "express": "^4.21.1 || ^5.0.0",

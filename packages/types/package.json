@@ -1,0 +1,16 @@
+{
+  "name": "@node-observatory/types",
+  "version": "1.0.0",
+  "description": "Shared TypeScript type definitions for Node Observatory",
+  "license": "MIT",
+  "author": "Octavian David",
+  "private": false,
+  "main": "index.d.ts",
+  "types": "index.d.ts",
+  "files": [
+    "index.d.ts"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -53,6 +53,7 @@
 	},
 	"author": "Octavian David",
 	"dependencies": {
+		"@node-observatory/types": "*",
 		"@node-observatory/ui": "^1.2.6",
 		"cors": "^2.8.5",
 		"dotenv": "^16.4.5",
