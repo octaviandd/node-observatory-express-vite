@@ -110,6 +110,9 @@ export function patchBullExports(exports: any, filename: string): any {
                 args[processorIndex] = async function wrappedBullProcessor(
                   job: any,
                 ) {
+                  // Snapshot before Bull mutates the job on retry
+                  const attemptsMade = job.attemptsMade + 1;
+                  const totalAttempts = job.opts?.attempts ?? 1;
                   const startTime = performance.now();
                   try {
                     const result = await originalProcessor(job);
@@ -131,11 +134,15 @@ export function patchBullExports(exports: any, filename: string): any {
                         queue: queueName,
                         connectionName,
                         jobId: job.id,
-                        attemptsMade: job.attemptsMade,
+                        attemptsMade,
                       },
                     });
                     return result;
                   } catch (err: any) {
+                    // attemptsMade < totalAttempts means Bull will retry → released
+                    const status =
+                      attemptsMade < totalAttempts ? "released" : "failed";
+
                     log({
                       metadata: {
                         package: "bull",
@@ -150,11 +157,11 @@ export function patchBullExports(exports: any, filename: string): any {
                       },
                       data: {
                         method: "processJob",
-                        status: "failed",
+                        status,
                         queue: queueName,
                         connectionName,
                         jobId: job.id,
-                        attemptsMade: job.attemptsMade,
+                        attemptsMade,
                         failedReason: err.message,
                       },
                       error: {

@@ -45,14 +45,14 @@ async function main() {
    */
   app.get("/test", async (_req, res) => {
     // Immediate job
-    const j1 = await queue.add("simple", { payload: "immediate" });
+    // const j1 = await queue.add("simple", { payload: "immediate" });
 
-    // Delayed job (5 s)
-    const j2 = await queue.add(
-      "delayed",
-      { payload: "delayed" },
-      { delay: 5_000 },
-    );
+    // // Delayed job (5 s)
+    // const j2 = await queue.add(
+    //   "delayed",
+    //   { payload: "delayed" },
+    //   { delay: 5_000 },
+    // );
 
     // Job with retries
     const j3 = await queue.add(
@@ -64,8 +64,8 @@ async function main() {
     res.json({
       ok: true,
       jobs: [
-        { id: j1.id, name: j1.name, status: "queued" },
-        { id: j2.id, name: j2.name, status: "delayed 5s" },
+        // { id: j1.id, name: j1.name, status: "queued" },
+        // { id: j2.id, name: j2.name, status: "delayed 5s" },
         { id: j3.id, name: j3.name, status: "will-fail (3 attempts)" },
       ],
       message: "Jobs enqueued — check Observatory → Jobs",
@@ -75,10 +75,10 @@ async function main() {
   /**
    * GET /test/counts — show queue state counts
    */
-  app.get("/test/counts", async (_req, res) => {
-    const counts = await queue.getJobCounts();
-    res.json({ ok: true, counts });
-  });
+  // app.get("/test/counts", async (_req, res) => {
+  //   const counts = await queue.getJobCounts();
+  //   res.json({ ok: true, counts });
+  // });
 
   start();
 }

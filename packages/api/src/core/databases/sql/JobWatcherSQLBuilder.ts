@@ -40,7 +40,7 @@ class JobWatcherSQL extends BaseBuilder {
         END AS status_priority
       FROM observatory_entries
       ${whereClause}
-      ORDER BY created_at DESC, status_priority DESC
+      ORDER BY created_at DESC
       LIMIT ${limit} OFFSET ${offset};
     `;
 
